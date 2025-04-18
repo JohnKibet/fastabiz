@@ -23,3 +23,31 @@ go.work.sum
 
 # env file
 .env
+
+# .NET build directories
+bin/
+obj/
+
+# User-specific files
+.vs/
+.vscode/
+
+# .NET Core SDK-related files
+.project.json
+artifacts/
+
+# Windows Installer files
+*.vspscc
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# JetBrains Rider specific files
+.idea/
+
+# Mac OS-specific files
+.DS_Store
+
+# Thumbnails for images
+Thumbs.db
