@@ -1,0 +1,14 @@
+@page "/deliveryroute/{Id:int}"
+@code {
+    [Parameter]
+    public int Id {get; set;}
+
+    protected override void OnInitialized()
+    {
+        // Load delivery details based on the Id
+        Console.WriteLine($"Delivery ID: {Id}");
+    }
+}
+
+<h3>Delivery Route Details</h3>
+<p>Delivery ID: @Id</p>
