@@ -1,0 +1,48 @@
+@page "/deliveries"
+@using logistics_frontend.Models
+@inject NavigationManager Navigation 
+
+
+<h3>Deliveries</h3>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Customer</th>
+            <th>Product</th>
+            <th>Delivery Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in deliveries)
+        {
+            <tr @onclick="() => NavigateToRoute(item.Id)" style="cursor: pointer;">
+                <td>@item.CustomerName</td>
+                <td>@item.ProductName</td>
+                <td>@item.DeliveryDate.ToShortDateString()</td>
+                <td>@item.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<DeliveryItem> deliveries = new();
+
+    protected override void OnInitialized()
+    {
+        // This would eventually come from a database or API
+        deliveries = new List<DeliveryItem>
+        {
+            new DeliveryItem { Id = 1, CustomerName = "Alice", ProductName = "Laptop", DeliveryDate = DateTime.Today.AddDays(1), Status = "Out for Delivery" },
+            new DeliveryItem { Id = 2, CustomerName = "Bob", ProductName = "Phone", DeliveryDate = DateTime.Today.AddDays(2), Status = "Shipped" },
+            new DeliveryItem { Id = 3, CustomerName = "Charlie", ProductName = "Tablet", DeliveryDate = DateTime.Today.AddDays(3), Status = "Pending" }
+        };
+    }
+
+    private void NavigateToRoute(int id)
+    {
+        Navigation.NavigateTo($"/deliveryroute/{id}");
+    }
+}
