@@ -1,0 +1,122 @@
+@page "/payments"
+@inject NavigationManager Navigation
+
+<h3>💳 Accept a Payment</h3>
+
+<EditForm Model="@paymentModel" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <!-- Payment Method Dropdown -->
+    <div class="mb-3">
+        <label for="paymentMethod">Payment Method</label>
+        <InputSelect id="paymentMethod" @bind-Value="paymentModel.SelectedMethod" class="form-select">
+            <option value="">-- Select Payment Method --</option>
+            @foreach (var method in paymentMethods)
+            {
+                <option value="@method">@method</option>
+            }
+        </InputSelect>
+    </div>
+
+    <!-- Dynamic Fields Based on Selected Payment Method -->
+    @if (!string.IsNullOrEmpty(paymentModel.SelectedMethod))
+    {
+        <div class="mt-3">
+            @foreach (var field in paymentFields[paymentModel.SelectedMethod])
+            {
+                <div class="mb-3">
+                    <label for="@field">@field</label>
+                    @*Here we check the type of field and bind to the corresponding model property directly *@
+                    @if (field == "PhoneNumber")
+                    {
+                        <InputText id="PhoneNumber" @bind-Value="paymentModel.PhoneNumber" class="form-control"/>
+                    }
+                    else if (field == "Amount")
+                    {
+                        <InputNumber id="Amount" @bind-Value="paymentModel.Amount" class="form-control" />
+                    }
+                    else if (field == "CardNumber")
+                    {
+                        <InputText id="CardNumber" @bind-Value="paymentModel.CardNumber" class="form-control" />
+                    }
+                    else if (field == "ExpiryDate")
+                    {
+                        <InputText id="ExpiryDate" @bind-Value="paymentModel.ExpiryDate" class="form-control" />
+                    }
+                    else if (field == "CVV")
+                    {
+                        <InputText id="CVV" @bind-Value="paymentModel.CVV" class="form-control" />
+                    }
+                    else if (field == "AccountNumber")
+                    {
+                        <InputText id="AccountNumber" @bind-Value="paymentModel.AccountNumber" class="form-control" />
+                    }
+                    else if (field == "BankName")
+                    {
+                        <InputText id="BankName" @bind-Value="paymentModel.DeliveryAddress" class="form-control" />
+                    }
+                    else if (field == "DeliveryAddress")
+                    {
+                        <InputText id="DeliveryAddress" @bind-Value="paymentModel.DeliveryAddress" class="form-control" />
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+
+</EditForm>
+
+
+@code {
+    private PaymentModel paymentModel = new();
+    private List<string> paymentMethods = new()
+    {
+        "M-Pesa", "Credit/ Debit Card", "Bank Transfer", "Cash on Delivery"
+    };
+    private Dictionary<string, List<string>> paymentFields = new()
+    {
+        {"M-Pesa", new List<string> {"PhoneNumber", "Amount"} },
+        {"Credit/ Debit Card", new List<string> {"CardNumber", "ExpiryDate", "CVV"} },
+        {"Bank Transfer", new List<string> {"AccountNumber", "BankName"} },
+        {"Cash on Delivery", new List<string> {"DeliveryAddress"} }
+    };
+
+    private void HandleSubmit()
+    {
+        //Handle form submission logic here
+        Console.WriteLine($"Payment Method: {paymentModel.SelectedMethod}");
+
+        foreach (var field in paymentFields[paymentModel.SelectedMethod])
+        {
+            var value = paymentModel.GetType().GetProperty(field)?.GetValue(paymentModel);
+            Console.WriteLine($"{field}: {value}");
+        }
+
+         
+        paymentModel.PhoneNumber = null;
+        paymentModel.Amount = null;
+        paymentModel.CardNumber = null;
+        paymentModel.ExpiryDate = null;
+        paymentModel.CVV = null;
+        paymentModel.AccountNumber = null;
+        paymentModel.BankName = null;
+        paymentModel.DeliveryAddress = null;
+        @* paymentModel.SelectedMethod = null; *@
+    }
+
+    public class PaymentModel 
+    {
+        public string ?SelectedMethod { get; set; }
+        public string ?PhoneNumber { get; set; }
+        public decimal? Amount { get; set; }
+        public string ?CardNumber { get; set; }
+        public string ?ExpiryDate { get; set; }
+        public string ?CVV { get; set; }
+        public string ?AccountNumber { get; set; }
+        public string ?BankName { get; set; }
+        public string ?DeliveryAddress { get; set; }
+    }
+}
