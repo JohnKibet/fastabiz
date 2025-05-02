@@ -1,8 +1,10 @@
 package order
 
+import "github.com/google/uuid"
+
 type Repository interface {
 	Create(order *Order) error
-	GetByID(id int64) (*Order, error)
-	ListByCustomer(customerID int64) ([]*Order, error)
-	UpdateStatus(orderID int64, status OrderStatus) error
+	GetByID(id uuid.UUID) (*Order, error)
+	ListByCustomer(customerID uuid.UUID) ([]*Order, error)
+	UpdateStatus(orderID uuid.UUID, status OrderStatus) error
 }

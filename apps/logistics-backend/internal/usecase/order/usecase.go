@@ -2,7 +2,10 @@ package order
 
 import (
 	"context"
+
 	domain "logistics-backend/internal/domain/order"
+
+	"github.com/google/uuid"
 )
 
 type UseCase struct {
@@ -18,14 +21,14 @@ func (uc *UseCase) CreateOrder(ctx context.Context, o *domain.Order) error {
 	return uc.repo.Create(o)
 }
 
-func (uc *UseCase) GetOrder(ctx context.Context, id int64) (*domain.Order, error) {
+func (uc *UseCase) GetOrder(ctx context.Context, id uuid.UUID) (*domain.Order, error) {
 	return uc.repo.GetByID(id)
 }
 
-func (uc *UseCase) GetOrderByCustomer(ctx context.Context, customerID int64) ([]*domain.Order, error) {
+func (uc *UseCase) GetOrderByCustomer(ctx context.Context, customerID uuid.UUID) ([]*domain.Order, error) {
 	return uc.repo.ListByCustomer(customerID)
 }
 
-func (uc *UseCase) UpdateOrderStatus(ctx context.Context, orderID int64, status domain.OrderStatus) error {
+func (uc *UseCase) UpdateOrderStatus(ctx context.Context, orderID uuid.UUID, status domain.OrderStatus) error {
 	return uc.repo.UpdateStatus(orderID, status)
 }

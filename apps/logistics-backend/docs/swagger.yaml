@@ -1,0 +1,347 @@
+basePath: /
+definitions:
+  order.CreateOrderRequest:
+    properties:
+      customer_id:
+        type: string
+      delivery_location:
+        type: string
+      pickup_location:
+        type: string
+    required:
+    - customer_id
+    - delivery_location
+    - pickup_location
+    type: object
+  order.Order:
+    properties:
+      created_at:
+        type: string
+      customer_id:
+        type: string
+      delivery_location:
+        type: string
+      id:
+        type: string
+      order_status:
+        $ref: '#/definitions/order.OrderStatus'
+      pickup_location:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  order.OrderStatus:
+    enum:
+    - pending
+    - assigned
+    - in_transit
+    - delivered
+    - cancelled
+    type: string
+    x-enum-varnames:
+    - Pending
+    - Assigned
+    - InTransit
+    - Delivered
+    - Cancelled
+  order.UpdateOrderStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/order.OrderStatus'
+    required:
+    - status
+    type: object
+  user.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        description: raw password from client
+        type: string
+      phone:
+        type: string
+      role:
+        allOf:
+        - $ref: '#/definitions/user.Role'
+        enum:
+        - admin
+        - driver
+        - customer
+    required:
+    - email
+    - full_name
+    - password
+    - phone
+    - role
+    type: object
+  user.Role:
+    enum:
+    - admin
+    - driver
+    - customer
+    type: string
+    x-enum-varnames:
+    - Admin
+    - Driver
+    - Customer
+  user.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      role:
+        $ref: '#/definitions/user.Role'
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the API for logistics operations.
+  title: Logistics API
+  version: "1.0"
+paths:
+  /orders/{order_id}/status:
+    put:
+      consumes:
+      - application/json
+      description: Update the status of an existing order
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: New Order Status
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/order.UpdateOrderStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update Order Status
+      tags:
+      - orders
+  /orders/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates an order and returns the new object
+      parameters:
+      - description: Order input
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/order.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/order.Order'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Create a new order
+      tags:
+      - orders
+  /orders/customer_id/{customer_id}:
+    get:
+      description: Fetch order(s) using Customer ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/order.Order'
+            type: array
+        "400":
+          description: Invalid Customer ID
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Get order by Customer ID
+      tags:
+      - orders
+  /orders/id/{id}:
+    get:
+      description: Fetch a single order using UUID
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/order.Order'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Get order by ID
+      tags:
+      - orders
+  /users/all_users:
+    get:
+      description: Get a list of all registered users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.User'
+            type: array
+      summary: List all users
+      tags:
+      - users
+  /users/create:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with name, email, etc.
+      parameters:
+      - description: User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Failed to create user
+          schema:
+            type: string
+      summary: Create a new user
+      tags:
+      - users
+  /users/email/{email}:
+    get:
+      description: Retrieve a user by their Email
+      parameters:
+      - description: User Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Invalid Email
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Get user by Email
+      tags:
+      - users
+  /users/id/{id}:
+    get:
+      description: Retrieve a user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.User'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: User not found
+          schema:
+            type: string
+      summary: Get user by ID
+      tags:
+      - users
+schemes:
+- http
+swagger: "2.0"
