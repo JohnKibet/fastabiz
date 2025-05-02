@@ -3,6 +3,10 @@ package user
 import (
 	"context"
 	domain "logistics-backend/internal/domain/user"
+
+	"golang.org/x/crypto/bcrypt"
+
+	"github.com/google/uuid"
 )
 
 type UseCase struct {
@@ -14,11 +18,15 @@ func NewUseCase(repo domain.Repository) *UseCase {
 }
 
 func (uc *UseCase) RegisterUser(ctx context.Context, u *domain.User) error {
-	// hash password if needed
+	hashed, err := bcrypt.GenerateFromPassword([]byte(u.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	u.PasswordHash = string(hashed)
 	return uc.repo.Create(u)
 }
 
-func (uc *UseCase) GetUserByID(ctx context.Context, id int64) (*domain.User, error) {
+func (uc *UseCase) GetUserByID(ctx context.Context, id uuid.UUID) (*domain.User, error) {
 	return uc.repo.GetByID(id)
 }
 
