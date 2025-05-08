@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 
 	"logistics-backend/internal/domain/user"
 	usecase "logistics-backend/internal/usecase/user"
@@ -104,11 +105,16 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 // @Failure 404 {string} string "User not found"
 // @Router /users/email/{email} [get]
 func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
-	email := chi.URLParam(r, "email")
+	emailParam := chi.URLParam(r, "email")
+	email, err := url.PathUnescape(emailParam)
+	if err != nil {
+		http.Error(w, "invalid email format", http.StatusBadRequest)
+		return
+	}
 
 	u, err := h.UC.GetUserByEmail(r.Context(), email)
 	if err != nil {
-		http.Error(w, "invalid email", http.StatusBadRequest)
+		http.Error(w, "user not found", http.StatusInternalServerError)
 		return
 	}
 

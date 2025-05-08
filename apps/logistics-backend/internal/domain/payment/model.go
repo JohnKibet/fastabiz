@@ -1,5 +1,11 @@
 package payment
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type PaymentMethod string
 type PaymentStatus string
 
@@ -9,16 +15,16 @@ const (
 	MethodMobileMoney    PaymentMethod = "mobile_money"
 	MethodCashOnDelivery PaymentMethod = "cash_on_delivery"
 
-	StatusPending   PaymentStatus = " pending"
+	StatusPending   PaymentStatus = "pending"
 	StatusCompleted PaymentStatus = "completed"
 	StatusFailed    PaymentStatus = "failed"
 )
 
 type Payment struct {
-	ID      int64         `json:"id"`
-	OrderID int64         `json:"order_id"`
-	Amount  float64       `json:"amount"`
-	Method  PaymentMethod `json:"method"`
-	Status  PaymentStatus `json:"status"`
-	PaidAt  string        `json:"paid_at"`
+	ID      uuid.UUID     `db:"id" json:"id"`
+	OrderID uuid.UUID     `db:"order_id" json:"order_id"`
+	Amount  float64       `db:"amount" json:"amount"`
+	Method  PaymentMethod `db:"method" json:"method"`
+	Status  PaymentStatus `db:"status" json:"status"`
+	PaidAt  time.Time     `db:"paid_at" json:"paid_at"`
 }

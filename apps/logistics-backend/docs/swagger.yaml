@@ -1,5 +1,137 @@
 basePath: /
 definitions:
+  delivery.CreateDeliveryRequest:
+    properties:
+      driver_id:
+        type: string
+      order_id:
+        type: string
+      status:
+        $ref: '#/definitions/delivery.DeliveryStatus'
+    type: object
+  delivery.Delivery:
+    properties:
+      assigned_at:
+        type: string
+      delivered_at:
+        type: string
+      driver_id:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      picked_up_at:
+        type: string
+      status:
+        $ref: '#/definitions/delivery.DeliveryStatus'
+    type: object
+  delivery.DeliveryStatus:
+    enum:
+    - assigned
+    - picked_up
+    - delivered
+    - failed
+    type: string
+    x-enum-varnames:
+    - DeliveryAssigned
+    - DeliveryPickedUp
+    - DeliveryDelivered
+    - DeliveryFailed
+  driver.CreateDriverRequest:
+    properties:
+      available:
+        type: string
+      current_location:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      vehicle_info:
+        type: string
+    required:
+    - available
+    - current_location
+    - email
+    - full_name
+    - vehicle_info
+    type: object
+  driver.Driver:
+    properties:
+      available:
+        type: boolean
+      created_at:
+        type: string
+      current_location:
+        type: string
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
+      vehicle_info:
+        type: string
+    type: object
+  feedback.CreateFeedbackRequest:
+    properties:
+      comments:
+        type: string
+      customer_id:
+        type: string
+      order_id:
+        type: string
+      rating:
+        type: integer
+    type: object
+  feedback.Feedback:
+    properties:
+      comments:
+        type: string
+      customer_id:
+        type: string
+      id:
+        type: string
+      order_id:
+        type: string
+      rating:
+        type: integer
+      submitted_at:
+        type: string
+    type: object
+  notification.CreateNotificationRequest:
+    properties:
+      message:
+        type: string
+      type:
+        $ref: '#/definitions/notification.NotificationType'
+      user_id:
+        type: string
+    type: object
+  notification.Notification:
+    properties:
+      id:
+        type: string
+      message:
+        type: string
+      sent_at:
+        type: string
+      type:
+        $ref: '#/definitions/notification.NotificationType'
+      user_id:
+        type: string
+    type: object
+  notification.NotificationType:
+    enum:
+    - email
+    - sms
+    - push
+    type: string
+    x-enum-varnames:
+    - Email
+    - SMS
+    - Push
   order.CreateOrderRequest:
     properties:
       customer_id:
@@ -51,6 +183,54 @@ definitions:
     required:
     - status
     type: object
+  payment.CreatePaymentRequest:
+    properties:
+      amount:
+        type: number
+      method:
+        $ref: '#/definitions/payment.PaymentMethod'
+      order_id:
+        type: string
+      status:
+        $ref: '#/definitions/payment.PaymentStatus'
+    type: object
+  payment.Payment:
+    properties:
+      amount:
+        type: number
+      id:
+        type: string
+      method:
+        $ref: '#/definitions/payment.PaymentMethod'
+      order_id:
+        type: string
+      paid_at:
+        type: string
+      status:
+        $ref: '#/definitions/payment.PaymentStatus'
+    type: object
+  payment.PaymentMethod:
+    enum:
+    - stripe
+    - paypal
+    - mobile_money
+    - cash_on_delivery
+    type: string
+    x-enum-varnames:
+    - MethodStripe
+    - MethodPayPal
+    - MethodMobileMoney
+    - MethodCashOnDelivery
+  payment.PaymentStatus:
+    enum:
+    - pending
+    - completed
+    - failed
+    type: string
+    x-enum-varnames:
+    - StatusPending
+    - StatusCompleted
+    - StatusFailed
   user.CreateUserRequest:
     properties:
       email:
@@ -103,13 +283,328 @@ definitions:
       role:
         $ref: '#/definitions/user.Role'
     type: object
-host: localhost:8080
+host: 192.168.1.14:8080
 info:
   contact: {}
   description: This is the API for logistics operations.
   title: Logistics API
   version: "1.0"
 paths:
+  /deliveries/all_deliveries:
+    get:
+      description: Get a list of all deliveries
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/delivery.Delivery'
+            type: array
+      summary: List all deliveries
+      tags:
+      - deliveries
+  /deliveries/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new delivery with order_id, driver_id, etc.
+      parameters:
+      - description: User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/delivery.CreateDeliveryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/delivery.Delivery'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Failed to create delivery
+          schema:
+            type: string
+      summary: Create a new delivery
+      tags:
+      - deliveries
+  /deliveries/id/{id}:
+    get:
+      description: Retrieve a delivery by their ID
+      parameters:
+      - description: Delivery ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.Delivery'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Delivery not found
+          schema:
+            type: string
+      summary: Get delivery by ID
+      tags:
+      - deliveries
+  /drivers/all_drivers:
+    get:
+      description: Get a list of all registered drivers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/driver.Driver'
+            type: array
+      summary: List all drivers
+      tags:
+      - drivers
+  /drivers/create:
+    post:
+      consumes:
+      - application/json
+      description: Register a new driver with name, email, etc.
+      parameters:
+      - description: User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/driver.CreateDriverRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/driver.Driver'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Failed to create driver
+          schema:
+            type: string
+      summary: Create a new driver
+      tags:
+      - drivers
+  /drivers/email/{email}:
+    get:
+      description: Retrieve a driver by their Email
+      parameters:
+      - description: Driver Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/driver.Driver'
+        "400":
+          description: Invalid Email
+          schema:
+            type: string
+        "404":
+          description: Driver not found
+          schema:
+            type: string
+      summary: Get driver by Email
+      tags:
+      - drivers
+  /drivers/id/{id}:
+    get:
+      description: Retrieve a driver by their ID
+      parameters:
+      - description: Driver ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/driver.Driver'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Driver not found
+          schema:
+            type: string
+      summary: Get driver by ID
+      tags:
+      - drivers
+  /feedbacks/all_feedbacks:
+    get:
+      description: Get a list of all feedbacks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/feedback.Feedback'
+            type: array
+      summary: List all feedbacks
+      tags:
+      - feedbacks
+  /feedbacks/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new feedback with order_id, customer_id, etc.
+      parameters:
+      - description: User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/feedback.CreateFeedbackRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/feedback.Feedback'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Failed to create feedback
+          schema:
+            type: string
+      summary: Create a new feedback
+      tags:
+      - feedbacks
+  /feedbacks/id/{id}:
+    get:
+      description: Retrieve a feedback by their ID
+      parameters:
+      - description: Feedback ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/feedback.Feedback'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Feedback not found
+          schema:
+            type: string
+      summary: Get feedback by ID
+      tags:
+      - feedbacks
+  /notifications/all_notifications:
+    get:
+      description: Get a list of all notifications
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/notification.Notification'
+            type: array
+      summary: List all notifications
+      tags:
+      - notifications
+  /notifications/create:
+    post:
+      consumes:
+      - application/json
+      description: Create a new notification with user_id, message, etc.
+      parameters:
+      - description: User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/notification.CreateNotificationRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/notification.Notification'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Failed to create notification
+          schema:
+            type: string
+      summary: Create a new notification
+      tags:
+      - notifications
+  /notifications/id/{id}:
+    get:
+      description: Retrieve a notification by their ID
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/notification.Notification'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Notification not found
+          schema:
+            type: string
+      summary: Get notification by ID
+      tags:
+      - notifications
   /orders/{order_id}/status:
     put:
       consumes:
@@ -157,6 +652,21 @@ paths:
       summary: Update Order Status
       tags:
       - orders
+  /orders/all_orders:
+    get:
+      description: Get a list of all orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/order.Order'
+            type: array
+      summary: List all orders
+      tags:
+      - orders
   /orders/create:
     post:
       consumes:
@@ -193,7 +703,7 @@ paths:
       parameters:
       - description: Customer ID
         in: path
-        name: id
+        name: customer_id
         required: true
         type: string
       produces:
@@ -243,6 +753,107 @@ paths:
       summary: Get order by ID
       tags:
       - orders
+  /payments/all_payments:
+    get:
+      description: Get a list of all payments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment.Payment'
+            type: array
+      summary: List all payments
+      tags:
+      - payments
+  /payments/create:
+    post:
+      consumes:
+      - application/json
+      description: Register new payment with order_id, amount, etc.
+      parameters:
+      - description: User Input
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/payment.CreatePaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/payment.Payment'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "500":
+          description: Failed to create payment
+          schema:
+            type: string
+      summary: Create new payment
+      tags:
+      - payments
+  /payments/id/{id}:
+    get:
+      description: Fetch a single payment using payment ID
+      parameters:
+      - description: Payment ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/payment.Payment'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Get payment by ID
+      tags:
+      - payments
+  /payments/order_id/{order_id}:
+    get:
+      description: Fetch payment(s) using Order ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment.Payment'
+            type: array
+        "400":
+          description: Invalid Order ID
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      summary: Get payment by Order ID
+      tags:
+      - payments
   /users/all_users:
     get:
       description: Get a list of all registered users

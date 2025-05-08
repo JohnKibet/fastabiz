@@ -7,4 +7,5 @@ type Repository interface {
 	GetByID(id uuid.UUID) (*Order, error)
 	ListByCustomer(customerID uuid.UUID) ([]*Order, error)
 	UpdateStatus(orderID uuid.UUID, status OrderStatus) error
+	List() ([]*Order, error)
 }
