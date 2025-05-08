@@ -1,5 +1,11 @@
 package notification
 
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
 type NotificationType string
 
 const (
@@ -9,9 +15,9 @@ const (
 )
 
 type Notification struct {
-	ID      int64            `json:"id"`
-	UserID  int64            `json:"user_id"`
-	Message string           `json:"message"`
-	Type    NotificationType `json:"type"`
-	SentAt  string           `json:"sent_at"`
+	ID      uuid.UUID        `db:"id" json:"id"`
+	UserID  uuid.UUID        `db:"user_id" json:"user_id"`
+	Message string           `db:"message" json:"message"`
+	Type    NotificationType `db:"type" json:"type"`
+	SentAt  time.Time        `db:"sent_at" json:"sent_at"`
 }

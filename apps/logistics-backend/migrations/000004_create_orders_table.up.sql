@@ -5,8 +5,6 @@ CREATE TABLE orders (
     pickup_address TEXT NOT NULL,
     delivery_address TEXT NOT NULL,
     status TEXT NOT NULL CHECK (status IN ('pending', 'assigned', 'in-transit', 'delivered', 'cancelled')),
-    eta TIMESTAMPTZ,
-    delivery_proof TEXT,
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );

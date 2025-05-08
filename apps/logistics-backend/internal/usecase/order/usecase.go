@@ -32,3 +32,7 @@ func (uc *UseCase) GetOrderByCustomer(ctx context.Context, customerID uuid.UUID)
 func (uc *UseCase) UpdateOrderStatus(ctx context.Context, orderID uuid.UUID, status domain.OrderStatus) error {
 	return uc.repo.UpdateStatus(orderID, status)
 }
+
+func (uc *UseCase) ListOrders(ctx context.Context) ([]*domain.Order, error) {
+	return uc.repo.List()
+}

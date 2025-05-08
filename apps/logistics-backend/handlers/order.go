@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -47,7 +48,15 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(o)
+	json.NewEncoder(w).Encode(map[string]any{
+		"id":                o.ID,
+		"customer_id":       o.CustomerID,
+		"pickup_location":   o.PickupLocation,
+		"delivery_location": o.DeliveryLocation,
+		"order_status":      o.OrderStatus,
+		"created_at":        o.CreatedAt,
+		"updated_at":        o.UpdatedAt,
+	})
 }
 
 // GetOrderByID godoc
@@ -80,14 +89,16 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 // @Description Fetch order(s) using Customer ID
 // @Tags orders
 // @Produce json
-// @Param id path string true "Customer ID"
+// @Param customer_id path string true "Customer ID"
 // @Success 200 {object} []order.Order
 // @Failure 400 {string} string "Invalid Customer ID"
 // @Failure 404 {string} string "Not found"
 // @Router /orders/customer_id/{customer_id} [get]
 func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "customer_id")
+	fmt.Println("id:", idStr)
 	id, err := uuid.Parse(idStr)
+	fmt.Println("parsed id:", id)
 	if err != nil {
 		http.Error(w, "invalid customer ID", http.StatusBadRequest)
 		return
@@ -139,5 +150,20 @@ func (h *OrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "order status updated successfully",
 	})
+}
 
+// ListOrders godoc
+// @Summary List all orders
+// @Description Get a list of all orders
+// @Tags orders
+// @Produce  json
+// @Success 200 {array} order.Order
+// @Router /orders/all_orders [get]
+func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
+	orders, err := h.UC.ListOrders(r.Context())
+	if err != nil {
+		http.Error(w, "could not fetch orders", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(orders)
 }

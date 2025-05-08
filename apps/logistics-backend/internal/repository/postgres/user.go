@@ -44,7 +44,7 @@ func (r *UserRepository) GetByEmail(email string) (*user.User, error) {
 }
 
 func (r *UserRepository) List() ([]*user.User, error) {
-	query := `SELECT id, full_name, email FROM users`
+	query := `SELECT id, full_name, email, password_hash, role, phone FROM users`
 	var users []*user.User
 	err := r.db.Select(&users, query)
 	return users, err
