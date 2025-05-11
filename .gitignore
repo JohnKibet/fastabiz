@@ -28,8 +28,10 @@ go.work.sum
 .env
 
 # .NET build directories
-bin/
-obj/
+**bin/
+**obj/
+/apps/logistics-frontend/bin/
+/apps/logistics-frontend/obj/
 
 # User-specific files
 .vs/

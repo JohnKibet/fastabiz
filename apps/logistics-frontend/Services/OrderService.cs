@@ -1,17 +1,26 @@
-using logistics_frontend.Models;
-
+using System.Net.Http.Json;
+using logistics_frontend.Models.Order;
 public class OrderService 
 {
-    private List<OrderItem> _orders = new();
+    private readonly HttpClient _http;
 
-    public List<OrderItem> GetOrders()
+    public OrderService(HttpClient http)
     {
-        return _orders;
+        _http = http;
     }
 
-    public void AddOrder(OrderItem order) 
+    public async Task AddOrder(CreateOrderRequest order)
     {
-        order.Id = _orders.Count + 1;
-        _orders.Add(order);
+        var response = await _http.PostAsJsonAsync("http://192.168.1.18:8080/orders/create", order);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<List<Order>> GetAllOrders()
+    {
+        var orders = await _http.GetFromJsonAsync<List<Order>>("http://192.168.1.18:8080/orders/all_orders");
+        if (orders == null)
+            return new List<Order>(); // fallback in case of null
+
+        return orders;
     }
 }

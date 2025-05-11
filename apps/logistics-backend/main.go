@@ -26,7 +26,7 @@ import (
 // @title Logistics API
 // @version 1.0
 // @description This is the API for logistics operations.
-// @host 192.168.1.14:8080
+// @host 192.168.1.18:8080
 // @BasePath /
 // @schemes http
 func main() {

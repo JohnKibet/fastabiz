@@ -31,7 +31,7 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 
 	// Swagger documentation endpoint
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://192.168.1.14:8080/swagger/doc.json"),
+		httpSwagger.URL("http://192.168.1.18:8080/swagger/doc.json"),
 	))
 
 	// User routes

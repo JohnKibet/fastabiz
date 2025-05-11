@@ -283,7 +283,7 @@ definitions:
       role:
         $ref: '#/definitions/user.Role'
     type: object
-host: 192.168.1.14:8080
+host: 192.168.1.18:8080
 info:
   contact: {}
   description: This is the API for logistics operations.
