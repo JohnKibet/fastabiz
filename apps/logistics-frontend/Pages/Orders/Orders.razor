@@ -1,38 +1,51 @@
 @page "/orders"
-@using logistics_frontend.Models
+@using logistics_frontend.Models.Order
 @inject OrderService OrderService
 
-<h3>Orders List</h3>
+<h3>All Orders</h3>
 
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th>Customer</th>
-            <th>Product</th>
-            <th>Qty</th>
-            <th>Status</th>
-            <th>Order Date</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in orders) 
-        {
+@if (orders == null)
+{
+    <p><em>Loading orders...</em></p>
+}
+else if (orders.Count == 0)
+{
+    <p>No orders found.</p>
+}
+else 
+{
+    <table class="table table-striped">
+        <thead>
             <tr>
-                <td>@item.CustomerName</td>
-                <td>@item.ProductName</td>
-                <td>@item.Quantity</td>
-                <td>@item.Status</td>
-                <td>@item.OrderDate.ToShortDateString()</td>
+                <th>Orders ID</th>
+                <th>Customer ID</th>
+                <th>Pickup Location</th>
+                <th>Delivery Location</th>
+                <th>Status</th>
+                <th>Created At</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var o in orders)
+            {
+                <tr>
+                    <td>@o.ID</td>
+                    <td>@o.CustomerID</td>
+                    <td>@o.PickupLocation</td>
+                    <td>@o.DeliveryLocation</td>
+                    <td>@o.OrderStatus</td>
+                    <td>@o.CreatedAt.ToString("g")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private List<OrderItem> orders = new();
+    private List<Order>? orders;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        orders = OrderService.GetOrders();
+        orders = await OrderService.GetAllOrders();
     }
 }
