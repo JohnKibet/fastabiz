@@ -2,6 +2,7 @@
 @using logistics_frontend.Models.Order
 @inject OrderService OrderService
 @inject NavigationManager Navigation
+@attribute [Authorize(Roles = "admin")]
 
 <h3>Create New Order</h3>
 
@@ -65,19 +66,20 @@
                 errorMessage = $"Failed to create order:{ex.Message}";
                 await ClearMessageAfterDelay();
             }
-        }
+        } 
         else 
-        {
-            errorMessage = "Invalid Customer ID format.";
-            await ClearMessageAfterDelay();
+            {
+                errorMessage = "Invalid Customer ID format.";
+                await ClearMessageAfterDelay();
+            }
         }
-    }
 
-    private async Task ClearMessageAfterDelay()
-    {
-        await Task.Delay(4000);
-        successMessage = null;
-        errorMessage = null;
-        StateHasChanged(); // trigger UI update
+        private async Task ClearMessageAfterDelay()
+        {
+            await Task.Delay(4000);
+            successMessage = null;
+            errorMessage = null;
+            StateHasChanged(); // trigger UI update
+        }
     }
 }
