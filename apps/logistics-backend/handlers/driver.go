@@ -34,24 +34,25 @@ func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 	var req driver.CreateDriverRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	// Basic validation
 	if req.FullName == "" || req.VehicleInfo == "" || req.CurrentLocation == "" || req.Available == "" {
-		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
 	d := req.ToDriver()
 
 	if err := dh.DH.RegisterDriver(r.Context(), d); err != nil {
-		http.Error(w, "could not create driver", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not create driver")
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusAccepted)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":               d.ID,
 		"full_name":        d.FullName,
@@ -77,16 +78,17 @@ func (dh *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 	driverID := chi.URLParam(r, "id")
 	id, err := uuid.Parse(driverID)
 	if err != nil {
-		http.Error(w, "invalid driver ID", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
 		return
 	}
 
 	d, err := dh.DH.GetDriverByID(r.Context(), id)
 	if err != nil {
-		http.Error(w, "driver not found", http.StatusNotFound)
+		writeJSONError(w, http.StatusNotFound, "Driver not found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(d)
 }
 
@@ -104,16 +106,17 @@ func (dh *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request
 	emailParam := chi.URLParam(r, "email")
 	email, err := url.PathUnescape(emailParam)
 	if err != nil {
-		http.Error(w, "invalid email format", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	d, err := dh.DH.GetDriverByEmail(r.Context(), email)
 	if err != nil {
-		http.Error(w, "driver not found", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Driver not found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(d)
 }
 
@@ -127,8 +130,10 @@ func (dh *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request
 func (dh *DriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {
 	drivers, err := dh.DH.ListDrivers(r.Context())
 	if err != nil {
-		http.Error(w, "could not fetch drivers", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch drivers")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(drivers)
 }

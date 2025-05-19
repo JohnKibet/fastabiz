@@ -34,17 +34,19 @@ func (ph *PaymentHandler) CreatePayment(w http.ResponseWriter, r *http.Request) 
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	p := req.ToPayment()
 
 	if err := ph.PH.CreatePayment(r.Context(), p); err != nil {
-		http.Error(w, "could not create payment", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not create payment")
 		return
 	}
 
+	w.WriteHeader(http.StatusAccepted)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":       p.ID,
 		"order_id": p.OrderID,
@@ -69,16 +71,17 @@ func (ph *PaymentHandler) GetPaymentByID(w http.ResponseWriter, r *http.Request)
 	idStr := chi.URLParam(r, "id")
 	paymentID, err := uuid.Parse(idStr)
 	if err != nil {
-		http.Error(w, "invalid payment ID", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid payment ID")
 		return
 	}
 
 	p, err := ph.PH.GetPaymentByID(r.Context(), paymentID)
 	if err != nil {
-		http.Error(w, "no payment found", http.StatusNotFound)
+		writeJSONError(w, http.StatusNotFound, "No payment found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(p)
 }
 
@@ -96,15 +99,17 @@ func (ph *PaymentHandler) GetPaymentByOrderID(w http.ResponseWriter, r *http.Req
 	idStr := chi.URLParam(r, "order_id")
 	orderID, err := uuid.Parse(idStr)
 	if err != nil {
-		http.Error(w, "invalid order ID", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid order ID")
 		return
 	}
 
 	p, err := ph.PH.GetPaymentByOrderID(r.Context(), orderID)
 	if err != nil {
-		http.Error(w, "no payment found", http.StatusNotFound)
+		writeJSONError(w, http.StatusNotFound, "No payment found")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(p)
 }
 
@@ -118,8 +123,10 @@ func (ph *PaymentHandler) GetPaymentByOrderID(w http.ResponseWriter, r *http.Req
 func (ph *PaymentHandler) ListPayments(w http.ResponseWriter, r *http.Request) {
 	payments, err := ph.PH.ListPayments(r.Context())
 	if err != nil {
-		http.Error(w, "could not fetch payments", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch payments")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(payments)
 }

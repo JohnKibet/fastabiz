@@ -33,7 +33,7 @@ func (dh *DeliveryHandler) CreateDelivery(w http.ResponseWriter, r *http.Request
 	var req *delivery.CreateDeliveryRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
@@ -41,9 +41,12 @@ func (dh *DeliveryHandler) CreateDelivery(w http.ResponseWriter, r *http.Request
 
 	err := dh.DH.CreateDelivery(r.Context(), d)
 	if err != nil {
-		http.Error(w, "could not create delivery", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not create delivery")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":           d.ID,
 		"order_id":     d.OrderID,
@@ -69,16 +72,17 @@ func (dh *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Reques
 	idStr := chi.URLParam(r, "id")
 	deliveryID, err := uuid.Parse(idStr)
 	if err != nil {
-		http.Error(w, "invalid delivery ID", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid delivery ID")
 		return
 	}
 
 	d, err := dh.DH.GetDeliveryByID(r.Context(), deliveryID)
 	if err != nil {
-		http.Error(w, "no delivery found", http.StatusNotFound)
+		writeJSONError(w, http.StatusNotFound, "No delivery found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(d)
 }
 
@@ -92,8 +96,10 @@ func (dh *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Reques
 func (dh *DeliveryHandler) ListDeliveries(w http.ResponseWriter, r *http.Request) {
 	deliveries, err := dh.DH.ListDeliveries(r.Context())
 	if err != nil {
-		http.Error(w, "could not fetch deliveries", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch deliveries")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(deliveries)
 }
