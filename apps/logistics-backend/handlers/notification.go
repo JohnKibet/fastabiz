@@ -34,17 +34,19 @@ func (nh *NotificationHandler) CreateNotification(w http.ResponseWriter, r *http
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	n := req.ToNotification()
 
 	if err := nh.NH.CreateNotification(r.Context(), n); err != nil {
-		http.Error(w, "could not create notification", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not create notification")
 		return
 	}
 
+	w.WriteHeader(http.StatusAccepted)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":      n.ID,
 		"user_id": n.UserID,
@@ -68,16 +70,17 @@ func (nh *NotificationHandler) GetNotificationByID(w http.ResponseWriter, r *htt
 	idStr := chi.URLParam(r, "id")
 	notificationID, err := uuid.Parse(idStr)
 	if err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	n, err := nh.NH.GetNotification(r.Context(), notificationID)
 	if err != nil {
-		http.Error(w, "no notification found", http.StatusNotFound)
+		writeJSONError(w, http.StatusNotFound, "No notification found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(n)
 }
 
@@ -91,8 +94,10 @@ func (nh *NotificationHandler) GetNotificationByID(w http.ResponseWriter, r *htt
 func (nh *NotificationHandler) ListNotification(w http.ResponseWriter, r *http.Request) {
 	n, err := nh.NH.ListNotification(r.Context())
 	if err != nil {
-		http.Error(w, "could not fetch notifications", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch notifications")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(n)
 }

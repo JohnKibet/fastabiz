@@ -12,7 +12,7 @@ import (
 	"logistics-backend/handlers"
 )
 
-func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.DriverHandler, e *handlers.DeliveryHandler, p *handlers.PaymentHandler, f *handlers.FeedbackHandler, n *handlers.NotificationHandler) http.Handler {
+func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.DriverHandler, e *handlers.DeliveryHandler, p *handlers.PaymentHandler, f *handlers.FeedbackHandler, n *handlers.NotificationHandler, apiBaseURL string) http.Handler {
 	r := chi.NewRouter()
 
 	// Enable Cors
@@ -31,7 +31,7 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 
 	// Swagger documentation endpoint
 	r.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://192.168.1.18:8080/swagger/doc.json"),
+		httpSwagger.URL(apiBaseURL+"/swagger/doc.json"),
 	))
 
 	// User routes

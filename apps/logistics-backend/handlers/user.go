@@ -21,6 +21,12 @@ func NewUserHandler(uc *usecase.UseCase) *UserHandler {
 	return &UserHandler{UC: uc}
 }
 
+func writeJSONError(w http.ResponseWriter, status int, message string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(map[string]string{"error": message})
+}
+
 // CreateUser godoc
 // @Summary Create a new user
 // @Description Register a new user with name, email, etc.
@@ -36,13 +42,13 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req user.CreateUserRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
 	// Basic manual validation
 	if req.FullName == "" || req.Email == "" || req.Password == "" || req.Role == "" || req.Phone == "" {
-		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
 
@@ -50,10 +56,11 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.UC.RegisterUser(r.Context(), u); err != nil {
 		log.Printf("failed to create user: %v", err)
-		http.Error(w, "Failed to create user", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Failed to create user")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":         u.ID,
@@ -81,16 +88,17 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(idStr)
 
 	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid ID")
 		return
 	}
 
 	u, err := h.UC.GetUserByID(r.Context(), id)
 	if err != nil {
-		http.Error(w, "user not found", http.StatusNotFound)
+		writeJSONError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(u)
 }
 
@@ -108,16 +116,17 @@ func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	emailParam := chi.URLParam(r, "email")
 	email, err := url.PathUnescape(emailParam)
 	if err != nil {
-		http.Error(w, "invalid email format", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid email format")
 		return
 	}
 
 	u, err := h.UC.GetUserByEmail(r.Context(), email)
 	if err != nil {
-		http.Error(w, "user not found", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "User not found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(u)
 }
 
@@ -131,8 +140,10 @@ func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.UC.ListUsers(r.Context())
 	if err != nil {
-		http.Error(w, "could not fetch users", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch users")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }

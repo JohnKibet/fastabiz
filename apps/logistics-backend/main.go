@@ -26,7 +26,7 @@ import (
 // @title Logistics API
 // @version 1.0
 // @description This is the API for logistics operations.
-// @host 192.168.1.18:8080
+// @host 192.168.1.19:8080
 // @BasePath /
 // @schemes http
 func main() {
@@ -37,6 +37,11 @@ func main() {
 	dbUrl := os.Getenv("DATABASE_URL")
 	if dbUrl == "" {
 		log.Fatal("DATABASE_URL not set")
+	}
+
+	apiBaseUrl := os.Getenv("API_BASE_URL")
+	if apiBaseUrl == "" {
+		log.Fatal("API_BASE_URL not set")
 	}
 
 	db, err := sqlx.Connect("postgres", dbUrl)
@@ -72,7 +77,7 @@ func main() {
 	notificationHandler := handlers.NewNotificationHandler(nUsecase)
 
 	// Start server
-	r := router.NewRouter(userHandler, orderHandler, driverHandler, deliveryHandler, paymentHandler, feedbackHandler, notificationHandler)
+	r := router.NewRouter(userHandler, orderHandler, driverHandler, deliveryHandler, paymentHandler, feedbackHandler, notificationHandler, apiBaseUrl)
 
 	log.Println("Server starting at :8080")
 	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {

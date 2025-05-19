@@ -35,16 +35,19 @@ func (fh *FeedbackHandler) CreateFeedback(w http.ResponseWriter, r *http.Request
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "invalid request", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request")
 		return
 	}
 
 	f := req.ToFeedback()
 
 	if err := fh.FH.CreateFeedback(r.Context(), f); err != nil {
-		http.Error(w, "could not create feedback", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not create feedback")
 		return
 	}
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":           f.ID,
 		"order_id":     f.OrderID,
@@ -70,16 +73,17 @@ func (fh *FeedbackHandler) GetFeedbackByID(w http.ResponseWriter, r *http.Reques
 	feedbackID, err := uuid.Parse(idStr)
 	fmt.Println("parsed id:", feedbackID)
 	if err != nil {
-		http.Error(w, "invalid feedback ID", http.StatusBadRequest)
+		writeJSONError(w, http.StatusBadRequest, "Invalid feedback ID")
 		return
 	}
 
 	f, err := fh.FH.GetFeedbackByID(r.Context(), feedbackID)
 	if err != nil {
-		http.Error(w, "no feedback found", http.StatusNotFound)
+		writeJSONError(w, http.StatusNotFound, "No feedback found")
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(f)
 }
 
@@ -93,8 +97,10 @@ func (fh *FeedbackHandler) GetFeedbackByID(w http.ResponseWriter, r *http.Reques
 func (fh *FeedbackHandler) ListFeedback(w http.ResponseWriter, r *http.Request) {
 	feedbacks, err := fh.FH.ListFeedback(r.Context())
 	if err != nil {
-		http.Error(w, "could not fetch feedbacks", http.StatusInternalServerError)
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch feedbacks")
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(feedbacks)
 }
