@@ -1,6 +1,10 @@
-@page "/orders"
+@page "/admin/orders"
+@layout MainLayout
 @using logistics_frontend.Models.Order
 @inject OrderService OrderService
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+@attribute [Authorize(Roles = "admin")]
 
 <h3>All Orders</h3>
 

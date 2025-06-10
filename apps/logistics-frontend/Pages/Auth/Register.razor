@@ -1,0 +1,115 @@
+@page "/auth/register"
+@layout NullLayout
+@using System.ComponentModel.DataAnnotations
+@using System.Text.Json
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h3>📝 Register</h3>
+
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success">@successMessage</div>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label>Full Name</label>
+                <InputText @bind-Value="registerModel.FullName" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.FullName)" />
+
+                <label>Email</label>
+                <InputText @bind-Value="registerModel.Email" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.Email)" />
+
+                <label>Password</label>
+                <InputText @bind-Value="registerModel.Password" type="password" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.Password)" />
+
+                <label>Confirm Password</label>
+                <InputText @bind-Value="registerModel.ConfirmPassword" type="password" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+
+                <label>Role</label>
+                <InputText @bind-Value="registerModel.Role" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.Role)" />
+
+                <label>Phone</label>
+                <InputText @bind-Value="registerModel.Phone" class="form-control" />
+                <ValidationMessage For="@(() => registerModel.Phone)" />
+            </div>
+
+            <button class="btn btn-primary">Register</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private RegisterModel registerModel = new();
+    private string? successMessage { get; set; }
+    private string? errorMessage { get; set; }
+
+    private class ErrorResponse {
+        public string? Error { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthProvider.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            var role = state.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            Navigation.NavigateTo($"/{role}/dashboard", forceLoad: true);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("loadPageCss", "css/register.css");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PostAsJsonAsync("users/create", registerModel);
+        if (response.IsSuccessStatusCode)
+        {
+            successMessage = "User created successfully! Redirecting to login ...";
+            
+            await Task.Delay(1500);
+            registerModel = new RegisterModel(); 
+
+            Navigation.NavigateTo("/auth/login", forceLoad: true);
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            try
+            {
+                var errorObj = JsonSerializer.Deserialize<ErrorResponse>(errorContent, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+                errorMessage = errorObj?.Error ?? "An unknown error occured.";
+            }
+            catch
+            {
+                errorMessage = "Failed to parse error response.";
+            }
+        }
+    }
+}

@@ -1,0 +1,114 @@
+@page "/admin/dashboard"
+@layout MainLayout
+@inject NavigationManager Navigation
+@using logistics_frontend.Models.Notification
+@inject AuthenticationStateProvider AuthProvider
+@inject NotificationService NotificationService
+@attribute [Authorize(Roles = "admin")]
+
+<h3 class="mb-4">📦 Logistics Dashboard</h3>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Active Orders</h5>
+                <p class="card-text">@activeOrders Today</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Deliveries (This Week)</h5>
+                <p class="card-text">@deliveriesThisWeek</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-danger mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Delayed Shipments</h5>
+                <p class="card-text">@delayedShipments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Revenue (This Week)</h5>
+                <p class="card-text">@revenueThisWeek.ToString("C")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">📍 Real-Time Driver Locations</div>
+            <div class="card-body">
+                <!-- Replace this with a map component or placeholder -->
+                <div class="bg-light p-5 text-center">[Map Goes Here]</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">🔔 Notifications</div>
+            <div class="card-body">
+                <ul>
+                    @foreach (var note in notifications)
+                    {
+                        <li>@note</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col">
+        <div class="card-header">⚡ Quick Actions</div>
+        <div class="card-body">
+            <button class="btn btn-outline-primary me-2" @onclick="CreateOrder">Create Order</button>
+            <button class="btn btn-outline-secondary me-2" @onclick="AssignDriver">Assign Driver</button>
+            <button class="btn btn-outline-success" @onclick="GenerateInvoice">Generate Invoice</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int activeOrders = 12;
+    private int deliveriesThisWeek = 34;
+    private int delayedShipments = 3;
+    private decimal revenueThisWeek = 15700.50m;
+    private List<string> notifications = new();
+
+    private async Task LoadNotifications()
+    {
+        var allNotifications = await NotificationService.GetAllNotifications();
+        notifications = allNotifications.Select(n => n.Message).ToList();
+    }
+
+    private void CreateOrder() 
+    {
+        // TODO: Navigate to order creation page or show modal
+        Navigation.NavigateTo("/admin/createorder");
+    }
+
+    private void AssignDriver() 
+    {
+        // TODO: Show driver assignment modal
+    }
+
+    private void GenerateInvoice() 
+    {
+        // TODO: Trigger invoice generation
+    }
+}

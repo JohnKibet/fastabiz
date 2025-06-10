@@ -1,0 +1,22 @@
+@page "/admin/reports"
+@layout MainLayout
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+@attribute [Authorize(Roles = "admin")]
+
+<h3>📈 Delivery & Revenue Reports</h3>
+
+<div class="mt-4">
+    <h5>Delivery Performance</h5>
+    <ul>
+        <li>📦 Completed: 110</li>
+        <li>🚚 In-Transit: 7</li>
+        <li>⏱️ Delayed: 3</li>
+    </ul>
+
+    <h5 class="mt-4">Revenue Summary</h5>
+    <p>Total Revenue (this month): <strong>$4,200</strong></p>
+</div>
+
+@code {
+}

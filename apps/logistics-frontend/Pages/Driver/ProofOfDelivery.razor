@@ -1,0 +1,21 @@
+@page "/driver/proof"
+@layout MainLayout
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation 
+@attribute [Authorize(Roles = "driver")]
+
+<h3>Submit delivery Proof</h3>
+
+<p>Enter OTP or delivery code:</p>
+<input @bind="ProofCode" placeholder="Enter code" />
+<button @onclick="SubmitProof">Submit</button>
+
+@code {
+    private string? ProofCode;
+
+    private void SubmitProof()
+    {
+        // You'd normally send this to backend here
+        Console.WriteLine($"Proof submitted: {ProofCode}");
+    }
+}

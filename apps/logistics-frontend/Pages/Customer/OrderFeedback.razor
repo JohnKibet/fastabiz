@@ -1,0 +1,64 @@
+@page "/customer/feedback"
+@layout MainLayout
+@using logistics_frontend.Models.Feedback
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+@inject FeedbackService FeedbackService
+@attribute [Authorize(Roles = "customer")]
+
+
+<h3>⭐ Rate Your Delivery</h3>
+
+<EditForm Model="@feedback" OnInvalidSubmit="HandleValidSubmit">
+    <div class="mb-3">
+        <label>Order ID: @feedback.OrderID</label>
+        <input class="form-control" placeholder="e.g., ORD101" />
+    </div>
+
+    <div class="mb-3">
+        <label>Feedback:</label>
+        <textarea class="form-control" placeholder="Leave your comment here..."></textarea>
+    </div>
+
+    <button class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    private string OrderIdText { get; set; } = string.Empty;
+    private CreateFeedbackRequest feedback = new();
+    private string? successMessage { get; set; }
+    private string? errorMessage { get; set; }
+
+    public async Task HandleValidSubmit()
+    {
+        if (Guid.TryParse(OrderIdText, out var parsedId))
+        {
+            try
+            {
+                feedback.OrderID = parsedId;
+                await FeedbackService.CreateFeedback(feedback);
+                successMessage = "Feedback successfully sent!";
+                await ClearMessageAfterDelay();
+                Navigation.NavigateTo("/customer/myorders");
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to create feedback:{ex.Message}";
+                await ClearMessageAfterDelay();
+            }
+        }
+        else
+        {
+            errorMessage = "Invalid Order ID format.";
+            await ClearMessageAfterDelay();
+        }
+    }
+
+    private async Task ClearMessageAfterDelay()
+    {
+        await Task.Delay(4000);
+        successMessage = null;
+        errorMessage = null;
+        StateHasChanged(); // trigger UI update
+    }
+} 

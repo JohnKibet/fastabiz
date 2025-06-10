@@ -1,0 +1,39 @@
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.auth-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.auth-card {
+    background: white;
+    padding: 2rem 3rem;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-card h3 {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.auth-card .form-control {
+    margin-bottom: 1rem;
+}
+
+.auth-card .btn {
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.alert {
+    margin-top: 1rem;
+}

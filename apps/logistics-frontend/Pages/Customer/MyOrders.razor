@@ -1,0 +1,54 @@
+@page "/customer/myorders"
+@layout MainLayout
+@using logistics_frontend.Models.Order
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+@inject UserSessionService UserSession
+@inject OrderService OrderService
+@attribute [Authorize(Roles = "customer")]
+
+<h3>📦 My Orders</h3>
+
+@if (orders.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Status</th>
+                <th>Pickup Location</th>
+                <th>Delivery Location</th>
+                <th>Updated At</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in orders)
+            {
+                <tr>
+                    <td>@o.ID</td>
+                    <td>@o.OrderStatus</td>
+                    <td>@o.PickupLocation</td>
+                    <td>@o.DeliveryLocation</td>
+                    <td>@o.UpdatedAt.ToString("g")</td>
+                    <td>@o.CreatedAt.ToString("g")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Order> orders = new();
+    protected override async Task OnInitializedAsync()
+    {
+        var currentUser = await UserSession.GetUserAsync();
+        if (currentUser == null)
+        {
+            Console.WriteLine("No user found in local storage");
+            return;
+        }
+
+        orders = await OrderService.GetOrdersByCustomer(currentUser.ID);
+    }
+}

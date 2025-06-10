@@ -1,0 +1,163 @@
+@page "/auth/login"
+@layout NullLayout
+@using logistics_frontend.Models.User
+@using System.Text.Json
+@using logistics_frontend.Services.CustomAuthStateProvider
+@using System.Text.Json.Serialization
+@inject NavigationManager Navigation
+@inject CustomAuthStateProvider AuthProvider
+@inject HttpClient Http
+@inject IJSRuntime JS
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <h3>🔐 Login</h3>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <div class="mt-4">
+            <p>Enter your email and select a role:</p>
+
+            <div class="mb-3">
+                <label>Email</label>
+                <InputText class="form-control" @bind-Value="email" />
+            </div>
+
+            <div class="mb-3">
+                <label>Password</label>
+                <InputText type="password" class="form-control" @bind-Value="password" />
+            </div>
+
+            <div class="mb-1">
+                <button class="btn btn-primary" @onclick='() => LoginAsRole("admin")'>Login as Admin</button>
+                <button class="btn btn-secondary" @onclick='() => LoginAsRole("driver")'>Login as Driver</button>
+                <button class="btn btn-success" @onclick='() => LoginAsRole("customer")'>Login as Customer</button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <p>No Account ? Go to Register</p>
+            <div class="mb-2">
+                <button class="btn btn-danger" @onclick='() => Navigation.NavigateTo("/auth/register")'>Register</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string? errorMessage;
+    private string? returnUrl;
+    private bool hasNavigated;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (hasNavigated) return;
+
+        var state = await AuthProvider.GetAuthenticationStateAsync();
+        if (state.User.Identity?.IsAuthenticated == true)
+        {
+            var role = state.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+            hasNavigated = true;
+            Navigation.NavigateTo($"/{role}/dashboard", forceLoad: true);
+        }
+
+        // Only parse returnUrl if not already redirected
+        var uri = new Uri(Navigation.Uri);
+        var queryParams = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        if (queryParams.TryGetValue("returnUrl", out var url))
+        {
+            returnUrl = url;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("loadPageCss", "css/login.css");
+        }
+    }
+
+    private async Task LoginAsRole(string role)
+    {
+        errorMessage = null;
+
+        try
+        {
+            var loginPayload = new
+            {
+                Email = email,
+                Password = password
+            };
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(loginPayload),
+                System.Text.Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await Http.PostAsync("users/login", content);
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var tokenResponse = JsonSerializer.Deserialize<LoginTokenResponse>(json);
+                    
+                if (tokenResponse is null || string.IsNullOrEmpty(tokenResponse.Token))
+                {
+                    errorMessage = "Token not received from server.";
+                    return;
+                }
+
+                var claimsUser = AuthProvider.ParseToken(tokenResponse.Token);
+
+                if (claimsUser?.Role != role)
+                {
+                    errorMessage = $"User exists but is not assigned to role '{role}'";
+                    return; 
+                }
+
+                await AuthProvider.SignInAsync(tokenResponse.Token);
+
+                Navigation.NavigateTo($"/{claimsUser.Role}/dashboard", forceLoad: true);
+            }
+            else
+            {
+                var errObj = JsonSerializer.Deserialize<ErrorResponse>(json);
+                errorMessage = errObj?.Error ?? "Unexpected error occurred.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error connecting to server: {ex.Message}";
+        }
+    }
+
+    private class ErrorResponse
+    {
+        public string? Error { get; set; }
+    }
+
+    private class LoginTokenResponse
+    {
+        [JsonPropertyName("id")]
+        public string ID { get; set; } = string.Empty;
+
+        [JsonPropertyName("fullName")]
+        public string FullName { get; set; } = string.Empty;
+
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = string.Empty;
+
+        [JsonPropertyName("role")]
+        public string Role { get; set; } = string.Empty;
+
+        [JsonPropertyName("token")]
+        public string Token { get; set; } = string.Empty;
+    }
+}

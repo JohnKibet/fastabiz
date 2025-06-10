@@ -1,0 +1,51 @@
+@page "/driver/deliveries"
+@layout MainLayout
+@inject AuthenticationStateProvider AuthProvider 
+@using logistics_frontend.Models
+@inject NavigationManager Navigation
+@inject DeliveryService DeliveryService
+@attribute [Authorize(Roles = "driver")]
+
+<h3>Assigned Deliveries</h3>
+
+@if (assignedDeliveries.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <td>Assigned At: </td>
+                <td>Order Id: </td>
+                <td>Status: </td>
+                <td>Pickedup At: </td>
+                <td>Delivered: </td>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in assignedDeliveries)
+            {
+                <tr>
+                    <td>@a.AssignedAt</td>
+                    <td>@a.OrderID</td>
+                    <td>@a.Status</td>
+                    <td>@a.PickedUpAt</td>
+                    <td>@a.DeliveredAt</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+}
+else 
+{
+    <p>No deliveries assigned.</p>
+}
+
+
+@code {
+    private List<Delivery> assignedDeliveries = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        assignedDeliveries = await DeliveryService.GetDeliveries();
+    }
+}
