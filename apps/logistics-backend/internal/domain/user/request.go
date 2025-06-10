@@ -1,7 +1,7 @@
 package user
 
 type CreateUserRequest struct {
-	FullName string `json:"full_name" binding:"required"`
+	FullName string `json:"fullName" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"` //raw password from client
 	Role     Role   `json:"role" binding:"required,oneof=admin driver customer"`
@@ -16,4 +16,17 @@ func (r *CreateUserRequest) ToUser() *User {
 		Role:         r.Role,
 		Phone:        r.Phone,
 	}
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	ID       string `json:"id"`
+	FullName string `json:"fullName"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
+	Token    string `json:"token,omitempty"`
 }

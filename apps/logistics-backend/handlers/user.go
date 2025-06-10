@@ -5,11 +5,14 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"time"
 
 	"logistics-backend/internal/domain/user"
 	usecase "logistics-backend/internal/usecase/user"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
 
@@ -64,7 +67,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":         u.ID,
-		"full_name":  u.FullName,
+		"fullName":   u.FullName,
 		"password":   u.PasswordHash,
 		"email":      u.Email,
 		"role":       u.Role,
@@ -146,4 +149,55 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
+}
+
+func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
+	var req user.LoginRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request")
+		return
+	}
+
+	u, err := h.UC.GetUserByEmail(r.Context(), req.Email)
+	if err != nil || !u.ComparePassword(req.Password) {
+		writeJSONError(w, http.StatusUnauthorized, "Invalid credentials")
+		return
+	}
+
+	// Load the JWT secret from env
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		writeJSONError(w, http.StatusInternalServerError, "JWT secret not configured")
+		return
+	}
+
+	// Create the token
+	claims := jwt.MapClaims{
+		"sub":   u.ID.String(), // subject
+		"email": u.Email,
+		"role":  u.Role,                                // custom claim
+		"exp":   time.Now().Add(time.Hour * 24).Unix(), // expires in 24h
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Sign it using the secret
+	signedToken, err := token.SignedString([]byte(jwtSecret))
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to sign token")
+		return
+	}
+
+	// Return the token in the response
+	response := user.LoginResponse{
+		ID:       u.ID.String(),
+		FullName: u.FullName,
+		Email:    u.Email,
+		Role:     string(u.Role),
+		Token:    signedToken,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
