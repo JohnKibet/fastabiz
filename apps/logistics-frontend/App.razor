@@ -1,19 +1,14 @@
-﻿<CascadingAuthenticationState>
+﻿@namespace logistics_frontend
+@using logistics_frontend.Pages.Shared.Sidebars
+
+<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
-            <AuthorizeRouteView 
-                RouteData="@routeData" 
-                DefaultLayout="@typeof(MainLayout)">
-                <NotAuthorized>
-                    <LayoutView Layout="@typeof(MainLayout)">
-                        <h3>You are not authorized to view this page.</h3>
-                    </LayoutView>
-                </NotAuthorized>
-            </AuthorizeRouteView>
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
         </Found>
         <NotFound>
             <LayoutView Layout="@typeof(MainLayout)">
-                <h3>Page not found.</h3>
+                <h3>Sorry, the page you're looking for doesn't exist.</h3>
             </LayoutView>
         </NotFound>
     </Router>

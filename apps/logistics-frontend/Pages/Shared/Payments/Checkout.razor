@@ -1,16 +1,31 @@
-@page "/payments"
+@page "/payments/{OrderId:guid}"
+@using System.ComponentModel.DataAnnotations
+@using logistics_frontend.Models.Payment
+@inject PaymentService PaymentService
 @inject NavigationManager Navigation
 
 <h3>💳 Accept a Payment</h3>
 
-<EditForm Model="@paymentModel" OnValidSubmit="HandleSubmit">
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast align-items-center text-white @toastBgClass show" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                @toastMessage
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" @onclick="HideToast"></button>
+        </div>
+    </div>
+</div>
+
+
+<EditForm Model="@formModel" OnValidSubmit="HandleSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <!-- Payment Method Dropdown -->
+    <!-- Payment Method -->
     <div class="mb-3">
-        <label for="paymentMethod">Payment Method</label>
-        <InputSelect id="paymentMethod" @bind-Value="paymentModel.SelectedMethod" class="form-select">
+        <label for="method">Payment Method</label>
+        <InputSelect id="method" @bind-Value="formModel.Method" class="form-select">
             <option value="">-- Select Payment Method --</option>
             @foreach (var method in paymentMethods)
             {
@@ -19,104 +34,137 @@
         </InputSelect>
     </div>
 
-    <!-- Dynamic Fields Based on Selected Payment Method -->
-    @if (!string.IsNullOrEmpty(paymentModel.SelectedMethod))
+    <!-- Dynamic Extras -->
+    @if (fieldMappings.TryGetValue(formModel.Method, out var fields))
     {
-        <div class="mt-3">
-            @foreach (var field in paymentFields[paymentModel.SelectedMethod])
-            {
-                <div class="mb-3">
-                    <label for="@field">@field</label>
-                    @*Here we check the type of field and bind to the corresponding model property directly *@
-                    @if (field == "PhoneNumber")
-                    {
-                        <InputText id="PhoneNumber" @bind-Value="paymentModel.PhoneNumber" class="form-control"/>
-                    }
-                    else if (field == "Amount")
-                    {
-                        <InputNumber id="Amount" @bind-Value="paymentModel.Amount" class="form-control" />
-                    }
-                    else if (field == "CardNumber")
-                    {
-                        <InputText id="CardNumber" @bind-Value="paymentModel.CardNumber" class="form-control" />
-                    }
-                    else if (field == "ExpiryDate")
-                    {
-                        <InputText id="ExpiryDate" @bind-Value="paymentModel.ExpiryDate" class="form-control" />
-                    }
-                    else if (field == "CVV")
-                    {
-                        <InputText id="CVV" @bind-Value="paymentModel.CVV" class="form-control" />
-                    }
-                    else if (field == "AccountNumber")
-                    {
-                        <InputText id="AccountNumber" @bind-Value="paymentModel.AccountNumber" class="form-control" />
-                    }
-                    else if (field == "BankName")
-                    {
-                        <InputText id="BankName" @bind-Value="paymentModel.DeliveryAddress" class="form-control" />
-                    }
-                    else if (field == "DeliveryAddress")
-                    {
-                        <InputText id="DeliveryAddress" @bind-Value="paymentModel.DeliveryAddress" class="form-control" />
-                    }
-                </div>
-            }
-        </div>
+        foreach (var field in fields)
+        {
+            <div class="mb-3">
+                <label>@fieldLabels[field]</label>
+                <InputText class="form-control" @bind-Value="formExtras[field]" />
+                @if (validationErrors.TryGetValue(field, out var error))
+                {
+                    <div class="text-danger">@error</div>
+                }
+            </div>
+        }
     }
+
+    <!-- Amount -->
+    <div class="mb-3">
+        <label>Amount</label>
+        <InputNumber @bind-Value="formModel.Amount" class="form-control" />
+    </div>
 
     <button type="submit" class="btn btn-primary">Submit</button>
-
 </EditForm>
 
-
 @code {
-    private PaymentModel paymentModel = new();
+    [Parameter] public Guid OrderId { get; set; }
+
+    private PaymentFormModel formModel = new();
+    private Dictionary<string, string?> formExtras = new();
+    private Dictionary<string, string> validationErrors = new();
+    private string toastMessage = string.Empty;
+    private string toastBgClass = "bg-success"; // or "bg-danger"
+    private bool showToast = false;
+
     private List<string> paymentMethods = new()
     {
-        "M-Pesa", "Credit/ Debit Card", "Bank Transfer", "Cash on Delivery"
-    };
-    private Dictionary<string, List<string>> paymentFields = new()
-    {
-        {"M-Pesa", new List<string> {"PhoneNumber", "Amount"} },
-        {"Credit/ Debit Card", new List<string> {"CardNumber", "ExpiryDate", "CVV"} },
-        {"Bank Transfer", new List<string> {"AccountNumber", "BankName"} },
-        {"Cash on Delivery", new List<string> {"DeliveryAddress"} }
+        "mobile_money", "stripe", "paypal", "cash_on_delivery"
     };
 
-    private void HandleSubmit()
+    private Dictionary<string, List<string>> fieldMappings = new()
     {
-        //Handle form submission logic here
-        Console.WriteLine($"Payment Method: {paymentModel.SelectedMethod}");
+        { "mobile_money", new() { "PhoneNumber" } },
+        { "stripe", new() { "CardNumber", "ExpiryDate", "CVV" } },
+        { "paypal", new() { "Email" } },
+        { "cash_on_delivery", new() { "DeliveryNote" } }
+    };
 
-        foreach (var field in paymentFields[paymentModel.SelectedMethod])
-        {
-            var value = paymentModel.GetType().GetProperty(field)?.GetValue(paymentModel);
-            Console.WriteLine($"{field}: {value}");
-        }
+    private Dictionary<string, string> fieldLabels = new()
+    {
+        { "PhoneNumber", "Phone Number" },
+        { "CardNumber", "Card Number" },
+        { "ExpiryDate", "Expiry Date (MM/YY)" },
+        { "CVV", "CVV" },
+        { "Email", "PayPal Email" },
+        { "DeliveryNote", "Delivery Note" }
+    };
 
-         
-        paymentModel.PhoneNumber = null;
-        paymentModel.Amount = null;
-        paymentModel.CardNumber = null;
-        paymentModel.ExpiryDate = null;
-        paymentModel.CVV = null;
-        paymentModel.AccountNumber = null;
-        paymentModel.BankName = null;
-        paymentModel.DeliveryAddress = null;
-        @* paymentModel.SelectedMethod = null; *@
+    protected override void OnInitialized()
+    {
+        formModel.OrderID = OrderId;
     }
 
-    public class PaymentModel 
+    private bool ValidateExtras()
     {
-        public string ?SelectedMethod { get; set; }
-        public string ?PhoneNumber { get; set; }
-        public decimal? Amount { get; set; }
-        public string ?CardNumber { get; set; }
-        public string ?ExpiryDate { get; set; }
-        public string ?CVV { get; set; }
-        public string ?AccountNumber { get; set; }
-        public string ?BankName { get; set; }
-        public string ?DeliveryAddress { get; set; }
+        validationErrors.Clear();
+
+        if (fieldMappings.TryGetValue(formModel.Method, out var fields))
+        {
+            foreach (var field in fields)
+            {
+                if (string.IsNullOrWhiteSpace(formExtras.GetValueOrDefault(field)))
+                {
+                    validationErrors[field] = $"{fieldLabels[field]} is required.";
+                }
+            }
+        }
+
+        return validationErrors.Count == 0;
+    }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            var request = new PaymentRequest
+            {
+                OrderID = formModel.OrderID,
+                Amount = formModel.Amount,
+                Method = formModel.Method
+            };
+
+            await PaymentService.MakePayment(request);
+            ShowToast("✅ Payment successful!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Payment failed: {ex.Message}");
+            ShowToast("❌ Payment failed. Please try again.", true);
+        }
+    }
+
+    public class PaymentFormModel
+    {
+        public Guid OrderID { get; set; }
+
+        [Required(ErrorMessage = "Payment method is required.")]
+        public string Method { get; set; } = "";
+
+        [Required(ErrorMessage = "Amount is required.")]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than zero.")]
+        public double Amount { get; set; }
+    }
+
+    private void ShowToast(string message, bool isError = false)
+    {
+        toastMessage = message;
+        toastBgClass = isError ? "bg-danger" : "bg-success";
+        showToast = true;
+        StateHasChanged();
+
+        // Auto-hide after 3 seconds
+        _ = Task.Delay(3000).ContinueWith(_ =>
+        {
+            showToast = false;
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void HideToast()
+    {
+        showToast = false;
     }
 }

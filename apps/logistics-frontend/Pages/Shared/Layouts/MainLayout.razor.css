@@ -101,4 +101,16 @@ main {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
     }
+
+    .logout-link {
+        cursor: pointer;
+        color: #007bff;
+        text-decoration: underline;
+        transition: transform 0.1s ease-in-out;
+    }
+
+    .logout-link:hover {
+        color: #0056b3;
+        transform: scale(1.05);
+    }
 }

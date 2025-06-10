@@ -1,0 +1,91 @@
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+@using logistics_frontend.Services.CustomAuthStateProvider
+@inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
+
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            @if (IsReady)
+            {
+                <div class="page">
+                    <div class="sidebar">
+                        @if (Role == "admin")
+                        {
+                            <AdminSidebar />
+                        }
+                        else if (Role == "driver")
+                        {
+                            <DriverSidebar />
+                        }
+                        else if (Role == "customer")
+                        {
+                            <CustomerSidebar />
+                        }
+                        else
+                        {
+                            <p>No sidebar for role: @Role</p>
+                        }
+                    </div>
+
+                    <div class="main-wrapper">
+                        <div class="top-row px-4">
+                            <span>Hello, @Name</span>
+                            <a @onclick="HandleLogout" class="logout-link">Logout</a>
+                        </div>
+                        <main>@ChildContent</main>
+                        <footer class="footer">
+                            <div class="container">
+                                <p>&copy; @DateTime.Now.Year Logistics system. All rights reserved.</p>
+                            </div>
+                        </footer>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p>Loading...</p>
+            }
+        </Authorized>
+        <NotAuthorized>
+            @*prevent the layout from triggering another redirect if you're already on the /auth/login page *@
+            @if (RedirectToLogin && IsReady && !Navigation.Uri.Contains("/auth/login"))
+            {
+                Navigation.NavigateTo("/auth/login", forceLoad: true);
+            }
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool RedirectToLogin { get; set; } = true;
+
+    private string? Role;
+    private string? Name;
+    private bool IsReady;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            Role = user.FindFirst(ClaimTypes.Role)?.Value;
+            Name = user.FindFirst(ClaimTypes.Name)?.Value;
+        }
+
+        IsReady = true;
+        StateHasChanged();
+    }
+
+    private async Task HandleLogout()
+    {
+        if (AuthProvider is CustomAuthStateProvider customAuth)
+        {
+            await customAuth.SignOutAsync();
+        }
+    }
+}
