@@ -1,85 +1,67 @@
 @page "/admin/dashboard"
 @layout MainLayout
 @inject NavigationManager Navigation
-@using logistics_frontend.Models.Notification
+@using logistics_frontend.Pages.Shared.Dashboard
 @inject AuthenticationStateProvider AuthProvider
 @inject NotificationService NotificationService
 @attribute [Authorize(Roles = "admin")]
 
-<h3 class="mb-4">📦 Logistics Dashboard</h3>
+<h3 class="mb-4">
+    📦 Logistics Dashboard <small class="text-muted">Welcome back, Admin</small>
+</h3>
 
+<!-- Dashboard Metric Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Active Orders</h5>
-                <p class="card-text">@activeOrders Today</p>
-            </div>
-        </div>
+        <DashboardCard Title="📦 Active Orders" Value="@($"{activeOrders} Today")" Color="primary" />
     </div>
-
     <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Deliveries (This Week)</h5>
-                <p class="card-text">@deliveriesThisWeek</p>
-            </div>
-        </div>
+        <DashboardCard Title="🚚 Deliveries (This Week)" Value="@deliveriesThisWeek.ToString()" Color="success" />
     </div>
-
     <div class="col-md-3">
-        <div class="card text-white bg-danger mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Delayed Shipments</h5>
-                <p class="card-text">@delayedShipments</p>
-            </div>
-        </div>
+        <DashboardCard Title="⏱️ Delayed Shipments" Value="@delayedShipments.ToString()" Color="danger" />
     </div>
-
     <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-body">
-                <h5 class="card-title">Revenue (This Week)</h5>
-                <p class="card-text">@revenueThisWeek.ToString("C")</p>
-            </div>
-        </div>
+        <DashboardCard Title="💰 Revenue (This Week)" Value="@revenueThisWeek.ToString("C")" Color="warning" />
     </div>
 </div>
 
+<!-- Map and Notifications Section -->
 <div class="row mb-4">
     <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">📍 Real-Time Driver Locations</div>
-            <div class="card-body">
-                <!-- Replace this with a map component or placeholder -->
-                <div class="bg-light p-5 text-center">[Map Goes Here]</div>
-            </div>
-        </div>
+        <DashboardPanel Title="📍 Real-Time Driver Locations">
+            <div class="bg-light p-5 text-center rounded">[Map Component Goes Here]</div>
+        </DashboardPanel>
     </div>
-
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">🔔 Notifications</div>
-            <div class="card-body">
-                <ul>
+        <DashboardPanel Title="🔔 Notifications">
+            <ul class="list-unstyled overflow-y-auto" style="max-height: 220px;">
+                @if (notifications.Any())
+                {
                     @foreach (var note in notifications)
                     {
-                        <li>@note</li>
+                        <li class="mb-2">📢 @note</li>
                     }
-                </ul>
-            </div>
-        </div>
+                }
+                else
+                {
+                    <li>No notifications available.</li>
+                }
+            </ul>
+        </DashboardPanel>
     </div>
 </div>
 
+<!-- Quick Actions -->
 <div class="row mb-4">
     <div class="col">
-        <div class="card-header">⚡ Quick Actions</div>
-        <div class="card-body">
-            <button class="btn btn-outline-primary me-2" @onclick="CreateOrder">Create Order</button>
-            <button class="btn btn-outline-secondary me-2" @onclick="AssignDriver">Assign Driver</button>
-            <button class="btn btn-outline-success" @onclick="GenerateInvoice">Generate Invoice</button>
-        </div>
+        <DashboardPanel Title="⚡ Quick Actions">
+            <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-outline-primary" @onclick="CreateOrder">➕ Create Order</button>
+                <button class="btn btn-outline-secondary" @onclick="AssignDriver">👷 Assign Driver</button>
+                <button class="btn btn-outline-success" @onclick="GenerateInvoice">🧾 Generate Invoice</button>
+            </div>
+        </DashboardPanel>
     </div>
 </div>
 
@@ -90,25 +72,18 @@
     private decimal revenueThisWeek = 15700.50m;
     private List<string> notifications = new();
 
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNotifications();
+    }
+
     private async Task LoadNotifications()
     {
         var allNotifications = await NotificationService.GetAllNotifications();
         notifications = allNotifications.Select(n => n.Message).ToList();
     }
 
-    private void CreateOrder() 
-    {
-        // TODO: Navigate to order creation page or show modal
-        Navigation.NavigateTo("/admin/createorder");
-    }
-
-    private void AssignDriver() 
-    {
-        // TODO: Show driver assignment modal
-    }
-
-    private void GenerateInvoice() 
-    {
-        // TODO: Trigger invoice generation
-    }
+    private void CreateOrder() => Navigation.NavigateTo("/admin/createorder");
+    private void AssignDriver() => Console.WriteLine("TODO: Assign driver modal");
+    private void GenerateInvoice() => Console.WriteLine("TODO: Invoice generation logic");
 }

@@ -9,36 +9,21 @@
         <Authorized>
             @if (IsReady)
             {
-                <div class="page">
-                    <div class="sidebar">
-                        @if (Role == "admin")
-                        {
-                            <AdminSidebar />
-                        }
-                        else if (Role == "driver")
-                        {
-                            <DriverSidebar />
-                        }
-                        else if (Role == "customer")
-                        {
-                            <CustomerSidebar />
-                        }
-                        else
-                        {
-                            <p>No sidebar for role: @Role</p>
-                        }
-                    </div>
+                <div class="layout-container @(IsSidebarCollapsed ? "sidebar-collapsed" : "")">
+                    <SidebarComponent OnCollapseChanged="OnSidebarCollapseChanged"/>
 
-                    <div class="main-wrapper">
-                        <div class="top-row px-4">
+                    <div class="main-content">
+                        <header class="topbar">
                             <span>Hello, @Name</span>
                             <a @onclick="HandleLogout" class="logout-link">Logout</a>
-                        </div>
-                        <main>@ChildContent</main>
+                        </header>
+
+                        <main class="content">
+                            @ChildContent
+                        </main>
+
                         <footer class="footer">
-                            <div class="container">
-                                <p>&copy; @DateTime.Now.Year Logistics system. All rights reserved.</p>
-                            </div>
+                            <p>&copy; @DateTime.Now.Year Logistics System. All rights reserved.</p>
                         </footer>
                     </div>
                 </div>
@@ -58,6 +43,69 @@
     </AuthorizeView>
 </CascadingAuthenticationState>
 
+<style>
+    .layout-container {
+        display: grid;
+        grid-template-columns: var(--sidebar-width, 250px) 1fr;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100vh;
+        transition: grid-template-columns 0.3s ease;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .layout-container.sidebar-collapsed {
+        --sidebar-width: 60px;
+    }
+
+    .sidebar {
+        grid-row: 1 / span 3;
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-right: 1px solid #ddd;
+    }
+
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        background-color: #f4f6f8;
+    }
+
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffffff;
+        padding: 1rem 2rem;
+        border-bottom: 1px solid #ddd;
+        font-weight: bold;
+    }
+
+    .content {
+        flex: 1;
+        padding: 2rem;
+        overflow: auto;
+    }
+
+    .footer {
+        text-align: center;
+        padding: 1rem;
+        background-color: #ffffff;
+        border-top: 1px solid #ddd;
+    }
+
+    .logout-link {
+        cursor: pointer;
+        color: #dc3545;
+        text-decoration: none;
+        margin-left: 1rem;
+    }
+
+    .logout-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
 @code {
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public bool RedirectToLogin { get; set; } = true;
@@ -65,6 +113,11 @@
     private string? Role;
     private string? Name;
     private bool IsReady;
+    private bool IsSidebarCollapsed;
+    private void OnSidebarCollapseChanged(bool isCollapsed)
+    {
+        IsSidebarCollapsed = isCollapsed;
+    }
 
     protected override async Task OnInitializedAsync()
     {
