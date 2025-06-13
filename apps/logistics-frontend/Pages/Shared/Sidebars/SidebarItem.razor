@@ -1,0 +1,38 @@
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components
+@using logistics_frontend.Models
+@inject NavigationManager Nav
+
+<li class="sidebar-item @(IsActive ? "active" : "")" @onclick="HandleClick">
+    <NavLink href="@Item.Link" class="sidebar-link" Match="NavLinkMatch.All">
+        @Item.Title
+    </NavLink>
+
+    @if (Item.SubItems?.Any() == true)
+    {
+        <ul class="dropdown @(Expanded ? "open" : "")">
+            @foreach (var sub in Item.SubItems)
+            {
+                <li><NavLink href="@sub.Link">@sub.Title</NavLink></li>
+            }
+        </ul>
+    }
+</li>
+
+@code {
+    [Parameter] public SidebarMenuItem Item { get; set; } = default!;
+    private bool Expanded = false;
+
+    private bool IsActive => Nav.ToBaseRelativePath(Nav.Uri).Equals(Item.Link.Trim('/'), StringComparison.OrdinalIgnoreCase)
+    || Item.SubItems?.Any(sub => 
+        Nav.ToBaseRelativePath(Nav.Uri).Equals(Item.Link.Trim('/'), StringComparison.OrdinalIgnoreCase)
+    ) == true;
+
+    private void HandleClick()
+    {
+        if (Item.SubItems?.Any() == true)
+        {
+            Expanded = !Expanded;
+        }
+    }
+}

@@ -1,0 +1,77 @@
+@using System.Security.Claims
+@using logistics_frontend.Models
+@inject AuthenticationStateProvider AuthProvider
+
+<div class="sidebar-container @(IsCollapsed ? "collapsed" : "")">
+    <button class="collapse-toggle" @onclick="ToggleSidebar">
+        @(IsCollapsed ? "☰" : "×")
+    </button>
+
+    <nav class="sidebar content">
+        @if (Role == "admin")
+        {
+            @foreach (var item in AdminMenu)
+            {
+                <SidebarItem Item="item" />
+            }
+        }
+        else if (Role == "driver")
+        {
+            @foreach (var item in DriverMenu)
+            {
+                <SidebarItem Item="item"/>
+            }
+        }
+        else if (Role == "customer")
+        {
+            @foreach (var item in CustomerMenu)
+            {
+                <SidebarItem Item="item"/>
+            }
+        }
+        else
+        {
+            <p>No menu for your role.</p>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool IsCollapsed = false;
+    private string? Role;
+    [Parameter] public EventCallback<bool> OnCollapseChanged { get; set; }
+    
+     protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+        Role = user.FindFirst(ClaimTypes.Role)?.Value;
+    }
+    private void ToggleSidebar()  
+    {
+        IsCollapsed = !IsCollapsed;
+        OnCollapseChanged.InvokeAsync(IsCollapsed);
+    }
+    private List<SidebarMenuItem> AdminMenu => new()
+    {
+        new("Dashboard", "/admin/dashboard"),
+        new("Create Order", "/admin/createorder"),
+        new("Orders", "/admin/orders"),
+        new("Reports", "/admin/reports"),
+        new("Users", "/admin/users"),
+    };
+
+    private List<SidebarMenuItem> DriverMenu => new()
+    {
+        new("Deliveries", "/driver/deliveries"),
+        new("Route", "/driver/route"),
+        new("Proof", "/driver/proof"),
+    };
+
+    private List<SidebarMenuItem> CustomerMenu => new()
+    {
+        new("My Orders", "/customer/myorders"),
+        new("Rate Your Delivery", "/customer/feedback"),
+        new("Track Your Order", "/customer/trackorder"),
+    };
+}
