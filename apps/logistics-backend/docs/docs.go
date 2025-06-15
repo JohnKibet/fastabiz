@@ -17,6 +17,11 @@ const docTemplate = `{
     "paths": {
         "/deliveries/all_deliveries": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all deliveries",
                 "produces": [
                     "application/json"
@@ -40,6 +45,11 @@ const docTemplate = `{
         },
         "/deliveries/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new delivery with order_id, driver_id, etc.",
                 "consumes": [
                     "application/json"
@@ -86,6 +96,11 @@ const docTemplate = `{
         },
         "/deliveries/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a delivery by their ID",
                 "produces": [
                     "application/json"
@@ -127,6 +142,11 @@ const docTemplate = `{
         },
         "/drivers/all_drivers": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all registered drivers",
                 "produces": [
                     "application/json"
@@ -150,6 +170,11 @@ const docTemplate = `{
         },
         "/drivers/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Register a new driver with name, email, etc.",
                 "consumes": [
                     "application/json"
@@ -196,6 +221,11 @@ const docTemplate = `{
         },
         "/drivers/email/{email}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a driver by their Email",
                 "produces": [
                     "application/json"
@@ -237,6 +267,11 @@ const docTemplate = `{
         },
         "/drivers/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a driver by their ID",
                 "produces": [
                     "application/json"
@@ -278,6 +313,11 @@ const docTemplate = `{
         },
         "/feedbacks/all_feedbacks": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all feedbacks",
                 "produces": [
                     "application/json"
@@ -301,6 +341,11 @@ const docTemplate = `{
         },
         "/feedbacks/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new feedback with order_id, customer_id, etc.",
                 "consumes": [
                     "application/json"
@@ -347,6 +392,11 @@ const docTemplate = `{
         },
         "/feedbacks/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a feedback by their ID",
                 "produces": [
                     "application/json"
@@ -388,6 +438,11 @@ const docTemplate = `{
         },
         "/notifications/all_notifications": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all notifications",
                 "produces": [
                     "application/json"
@@ -411,6 +466,11 @@ const docTemplate = `{
         },
         "/notifications/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new notification with user_id, message, etc.",
                 "consumes": [
                     "application/json"
@@ -457,6 +517,11 @@ const docTemplate = `{
         },
         "/notifications/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a notification by their ID",
                 "produces": [
                     "application/json"
@@ -498,6 +563,11 @@ const docTemplate = `{
         },
         "/orders/all_orders": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all orders",
                 "produces": [
                     "application/json"
@@ -521,6 +591,11 @@ const docTemplate = `{
         },
         "/orders/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Creates an order and returns the new object",
                 "consumes": [
                     "application/json"
@@ -567,6 +642,11 @@ const docTemplate = `{
         },
         "/orders/customer_id/{customer_id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch order(s) using Customer ID",
                 "produces": [
                     "application/json"
@@ -611,6 +691,11 @@ const docTemplate = `{
         },
         "/orders/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch a single order using UUID",
                 "produces": [
                     "application/json"
@@ -652,6 +737,11 @@ const docTemplate = `{
         },
         "/orders/{order_id}/status": {
             "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Update the status of an existing order",
                 "consumes": [
                     "application/json"
@@ -723,6 +813,11 @@ const docTemplate = `{
         },
         "/payments/all_payments": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all payments",
                 "produces": [
                     "application/json"
@@ -746,6 +841,11 @@ const docTemplate = `{
         },
         "/payments/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Register new payment with order_id, amount, etc.",
                 "consumes": [
                     "application/json"
@@ -792,6 +892,11 @@ const docTemplate = `{
         },
         "/payments/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch a single payment using payment ID",
                 "produces": [
                     "application/json"
@@ -833,6 +938,11 @@ const docTemplate = `{
         },
         "/payments/order_id/{order_id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch payment(s) using Order ID",
                 "produces": [
                     "application/json"
@@ -877,6 +987,11 @@ const docTemplate = `{
         },
         "/users/all_users": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all registered users",
                 "produces": [
                     "application/json"
@@ -946,6 +1061,11 @@ const docTemplate = `{
         },
         "/users/email/{email}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a user by their Email",
                 "produces": [
                     "application/json"
@@ -987,6 +1107,11 @@ const docTemplate = `{
         },
         "/users/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a user by their ID",
                 "produces": [
                     "application/json"
@@ -1019,6 +1144,58 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "User not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/login": {
+            "post": {
+                "description": "Authenticates a user using email and password and returns a JWT token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "User login credentials",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "string"
                         }
@@ -1368,7 +1545,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
-                "full_name",
+                "fullName",
                 "password",
                 "phone",
                 "role"
@@ -1377,7 +1554,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "full_name": {
+                "fullName": {
                     "type": "string"
                 },
                 "password": {
@@ -1398,6 +1575,37 @@ const docTemplate = `{
                             "$ref": "#/definitions/user.Role"
                         }
                     ]
+                }
+            }
+        },
+        "user.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },
@@ -1423,7 +1631,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string"
                 },
-                "full_name": {
+                "fullName": {
                     "type": "string"
                 },
                 "id": {
@@ -1440,14 +1648,21 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "192.168.1.18:8080",
-	BasePath:         "/",
+	Host:             "192.168.100.11:8000",
+	BasePath:         "/api",
 	Schemes:          []string{"http"},
 	Title:            "Logistics API",
 	Description:      "This is the API for logistics operations.",

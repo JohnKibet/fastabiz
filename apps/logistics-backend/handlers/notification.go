@@ -20,6 +20,7 @@ func NewNotificationHandler(nh *usecase.UseCase) *NotificationHandler {
 
 // CreateNotification godoc
 // @Summary Create a new notification
+// @Security JWT
 // @Description Create a new notification with user_id, message, etc.
 // @Tags notifications
 // @Accept  json
@@ -58,6 +59,7 @@ func (nh *NotificationHandler) CreateNotification(w http.ResponseWriter, r *http
 
 // GetNotificationByID godoc
 // @Summary Get notification by ID
+// @Security JWT
 // @Description Retrieve a notification by their ID
 // @Tags notifications
 // @Produce  json
@@ -86,6 +88,7 @@ func (nh *NotificationHandler) GetNotificationByID(w http.ResponseWriter, r *htt
 
 // ListNotifications godoc
 // @Summary List all notifications
+// @Security JWT
 // @Description Get a list of all notifications
 // @Tags notifications
 // @Produce  json

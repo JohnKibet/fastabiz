@@ -23,6 +23,7 @@ func NewOrderHandler(uc *usecase.UseCase) *OrderHandler {
 
 // CreateOrder godoc
 // @Summary Create a new order
+// @Security JWT
 // @Description Creates an order and returns the new object
 // @Tags orders
 // @Accept json
@@ -62,6 +63,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 // GetOrderByID godoc
 // @Summary Get order by ID
+// @Security JWT
 // @Description Fetch a single order using UUID
 // @Tags orders
 // @Produce json
@@ -89,6 +91,7 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 
 // GetOrderByCustomer godoc
 // @Summary Get order by Customer ID
+// @Security JWT
 // @Description Fetch order(s) using Customer ID
 // @Tags orders
 // @Produce json
@@ -119,6 +122,7 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 
 // UpdateOrderStatus godoc
 // @Summary Update Order Status
+// @Security JWT
 // @Description Update the status of an existing order
 // @Tags orders
 // @Accept json
@@ -159,6 +163,7 @@ func (h *OrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Request)
 
 // ListOrders godoc
 // @Summary List all orders
+// @Security JWT
 // @Description Get a list of all orders
 // @Tags orders
 // @Produce  json

@@ -1,0 +1,32 @@
+_format_version: "3.0"
+
+services:
+  - name: backend
+    url: http://backend:8080
+    routes:
+      - name: swagger-route
+        paths:
+          - /api/swagger
+        strip_path: false
+        plugins: 
+          - name: rate-limiting
+            config:
+              minute: 10
+              policy: local
+
+      - name: backend-api-route
+        paths:
+          - /api
+        strip_path: false
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 5
+              policy: local
+          - name: jwt
+
+consumers:
+  - username: test-user
+    jwt_secrets:
+      - key: my-client
+        secret: EOMFIBdh90lpWGcuLQI2KbYWotc5nZBlFgB0FmbjyYM=
