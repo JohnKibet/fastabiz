@@ -9,11 +9,16 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "192.168.1.18:8080",
-    "basePath": "/",
+    "host": "192.168.100.11:8000",
+    "basePath": "/api",
     "paths": {
         "/deliveries/all_deliveries": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all deliveries",
                 "produces": [
                     "application/json"
@@ -37,6 +42,11 @@
         },
         "/deliveries/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new delivery with order_id, driver_id, etc.",
                 "consumes": [
                     "application/json"
@@ -83,6 +93,11 @@
         },
         "/deliveries/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a delivery by their ID",
                 "produces": [
                     "application/json"
@@ -124,6 +139,11 @@
         },
         "/drivers/all_drivers": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all registered drivers",
                 "produces": [
                     "application/json"
@@ -147,6 +167,11 @@
         },
         "/drivers/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Register a new driver with name, email, etc.",
                 "consumes": [
                     "application/json"
@@ -193,6 +218,11 @@
         },
         "/drivers/email/{email}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a driver by their Email",
                 "produces": [
                     "application/json"
@@ -234,6 +264,11 @@
         },
         "/drivers/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a driver by their ID",
                 "produces": [
                     "application/json"
@@ -275,6 +310,11 @@
         },
         "/feedbacks/all_feedbacks": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all feedbacks",
                 "produces": [
                     "application/json"
@@ -298,6 +338,11 @@
         },
         "/feedbacks/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new feedback with order_id, customer_id, etc.",
                 "consumes": [
                     "application/json"
@@ -344,6 +389,11 @@
         },
         "/feedbacks/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a feedback by their ID",
                 "produces": [
                     "application/json"
@@ -385,6 +435,11 @@
         },
         "/notifications/all_notifications": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all notifications",
                 "produces": [
                     "application/json"
@@ -408,6 +463,11 @@
         },
         "/notifications/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Create a new notification with user_id, message, etc.",
                 "consumes": [
                     "application/json"
@@ -454,6 +514,11 @@
         },
         "/notifications/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a notification by their ID",
                 "produces": [
                     "application/json"
@@ -495,6 +560,11 @@
         },
         "/orders/all_orders": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all orders",
                 "produces": [
                     "application/json"
@@ -518,6 +588,11 @@
         },
         "/orders/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Creates an order and returns the new object",
                 "consumes": [
                     "application/json"
@@ -564,6 +639,11 @@
         },
         "/orders/customer_id/{customer_id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch order(s) using Customer ID",
                 "produces": [
                     "application/json"
@@ -608,6 +688,11 @@
         },
         "/orders/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch a single order using UUID",
                 "produces": [
                     "application/json"
@@ -649,6 +734,11 @@
         },
         "/orders/{order_id}/status": {
             "put": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Update the status of an existing order",
                 "consumes": [
                     "application/json"
@@ -720,6 +810,11 @@
         },
         "/payments/all_payments": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all payments",
                 "produces": [
                     "application/json"
@@ -743,6 +838,11 @@
         },
         "/payments/create": {
             "post": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Register new payment with order_id, amount, etc.",
                 "consumes": [
                     "application/json"
@@ -789,6 +889,11 @@
         },
         "/payments/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch a single payment using payment ID",
                 "produces": [
                     "application/json"
@@ -830,6 +935,11 @@
         },
         "/payments/order_id/{order_id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Fetch payment(s) using Order ID",
                 "produces": [
                     "application/json"
@@ -874,6 +984,11 @@
         },
         "/users/all_users": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Get a list of all registered users",
                 "produces": [
                     "application/json"
@@ -943,6 +1058,11 @@
         },
         "/users/email/{email}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a user by their Email",
                 "produces": [
                     "application/json"
@@ -984,6 +1104,11 @@
         },
         "/users/id/{id}": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Retrieve a user by their ID",
                 "produces": [
                     "application/json"
@@ -1016,6 +1141,58 @@
                     },
                     "404": {
                         "description": "User not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/login": {
+            "post": {
+                "description": "Authenticates a user using email and password and returns a JWT token.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Login user",
+                "parameters": [
+                    {
+                        "description": "User login credentials",
+                        "name": "user",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/user.LoginResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid credentials",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "type": "string"
                         }
@@ -1365,7 +1542,7 @@
             "type": "object",
             "required": [
                 "email",
-                "full_name",
+                "fullName",
                 "password",
                 "phone",
                 "role"
@@ -1374,7 +1551,7 @@
                 "email": {
                     "type": "string"
                 },
-                "full_name": {
+                "fullName": {
                     "type": "string"
                 },
                 "password": {
@@ -1395,6 +1572,37 @@
                             "$ref": "#/definitions/user.Role"
                         }
                     ]
+                }
+            }
+        },
+        "user.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.LoginResponse": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
                 }
             }
         },
@@ -1420,7 +1628,7 @@
                 "email": {
                     "type": "string"
                 },
-                "full_name": {
+                "fullName": {
                     "type": "string"
                 },
                 "id": {
@@ -1436,6 +1644,13 @@
                     "$ref": "#/definitions/user.Role"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "JWT": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }

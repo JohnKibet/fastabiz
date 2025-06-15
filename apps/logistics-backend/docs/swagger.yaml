@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api
 definitions:
   delivery.CreateDeliveryRequest:
     properties:
@@ -235,7 +235,7 @@ definitions:
     properties:
       email:
         type: string
-      full_name:
+      fullName:
         type: string
       password:
         description: raw password from client
@@ -251,10 +251,30 @@ definitions:
         - customer
     required:
     - email
-    - full_name
+    - fullName
     - password
     - phone
     - role
+    type: object
+  user.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  user.LoginResponse:
+    properties:
+      email:
+        type: string
+      fullName:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      token:
+        type: string
     type: object
   user.Role:
     enum:
@@ -272,7 +292,7 @@ definitions:
         type: string
       email:
         type: string
-      full_name:
+      fullName:
         type: string
       id:
         type: string
@@ -283,7 +303,7 @@ definitions:
       role:
         $ref: '#/definitions/user.Role'
     type: object
-host: 192.168.1.18:8080
+host: 192.168.100.11:8000
 info:
   contact: {}
   description: This is the API for logistics operations.
@@ -302,6 +322,8 @@ paths:
             items:
               $ref: '#/definitions/delivery.Delivery'
             type: array
+      security:
+      - JWT: []
       summary: List all deliveries
       tags:
       - deliveries
@@ -332,6 +354,8 @@ paths:
           description: Failed to create delivery
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Create a new delivery
       tags:
       - deliveries
@@ -359,6 +383,8 @@ paths:
           description: Delivery not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get delivery by ID
       tags:
       - deliveries
@@ -374,6 +400,8 @@ paths:
             items:
               $ref: '#/definitions/driver.Driver'
             type: array
+      security:
+      - JWT: []
       summary: List all drivers
       tags:
       - drivers
@@ -404,6 +432,8 @@ paths:
           description: Failed to create driver
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Create a new driver
       tags:
       - drivers
@@ -431,6 +461,8 @@ paths:
           description: Driver not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get driver by Email
       tags:
       - drivers
@@ -458,6 +490,8 @@ paths:
           description: Driver not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get driver by ID
       tags:
       - drivers
@@ -473,6 +507,8 @@ paths:
             items:
               $ref: '#/definitions/feedback.Feedback'
             type: array
+      security:
+      - JWT: []
       summary: List all feedbacks
       tags:
       - feedbacks
@@ -503,6 +539,8 @@ paths:
           description: Failed to create feedback
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Create a new feedback
       tags:
       - feedbacks
@@ -530,6 +568,8 @@ paths:
           description: Feedback not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get feedback by ID
       tags:
       - feedbacks
@@ -545,6 +585,8 @@ paths:
             items:
               $ref: '#/definitions/notification.Notification'
             type: array
+      security:
+      - JWT: []
       summary: List all notifications
       tags:
       - notifications
@@ -575,6 +617,8 @@ paths:
           description: Failed to create notification
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Create a new notification
       tags:
       - notifications
@@ -602,6 +646,8 @@ paths:
           description: Notification not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get notification by ID
       tags:
       - notifications
@@ -649,6 +695,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - JWT: []
       summary: Update Order Status
       tags:
       - orders
@@ -664,6 +712,8 @@ paths:
             items:
               $ref: '#/definitions/order.Order'
             type: array
+      security:
+      - JWT: []
       summary: List all orders
       tags:
       - orders
@@ -694,6 +744,8 @@ paths:
           description: Internal server error
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Create a new order
       tags:
       - orders
@@ -723,6 +775,8 @@ paths:
           description: Not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get order by Customer ID
       tags:
       - orders
@@ -750,6 +804,8 @@ paths:
           description: Not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get order by ID
       tags:
       - orders
@@ -765,6 +821,8 @@ paths:
             items:
               $ref: '#/definitions/payment.Payment'
             type: array
+      security:
+      - JWT: []
       summary: List all payments
       tags:
       - payments
@@ -795,6 +853,8 @@ paths:
           description: Failed to create payment
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Create new payment
       tags:
       - payments
@@ -822,6 +882,8 @@ paths:
           description: Not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get payment by ID
       tags:
       - payments
@@ -851,6 +913,8 @@ paths:
           description: Not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get payment by Order ID
       tags:
       - payments
@@ -866,6 +930,8 @@ paths:
             items:
               $ref: '#/definitions/user.User'
             type: array
+      security:
+      - JWT: []
       summary: List all users
       tags:
       - users
@@ -923,6 +989,8 @@ paths:
           description: User not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get user by Email
       tags:
       - users
@@ -950,9 +1018,51 @@ paths:
           description: User not found
           schema:
             type: string
+      security:
+      - JWT: []
       summary: Get user by ID
+      tags:
+      - users
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user using email and password and returns a JWT
+        token.
+      parameters:
+      - description: User login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.LoginResponse'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "401":
+          description: Invalid credentials
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Login user
       tags:
       - users
 schemes:
 - http
+securityDefinitions:
+  JWT:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

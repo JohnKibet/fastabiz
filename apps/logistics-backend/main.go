@@ -19,29 +19,28 @@ import (
 	_ "logistics-backend/docs"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 // @title Logistics API
 // @version 1.0
 // @description This is the API for logistics operations.
-// @host 192.168.100.11:8080
-// @BasePath /
+// @host 192.168.100.11:8000
+// @BasePath /api
 // @schemes http
-func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found")
-	}
 
+// @securityDefinitions.apikey JWT
+// @in header
+// @name Authorization
+func main() {
 	dbUrl := os.Getenv("DATABASE_URL")
 	if dbUrl == "" {
 		log.Fatal("DATABASE_URL not set")
 	}
 
-	apiBaseUrl := os.Getenv("API_BASE_URL")
-	if apiBaseUrl == "" {
-		log.Fatal("API_BASE_URL not set")
+	publicApiBaseUrl := os.Getenv("PUBLIC_API_BASE_URL")
+	if publicApiBaseUrl == "" {
+		log.Fatal("PUBLIC_API_BASE_URL not set")
 	}
 
 	db, err := sqlx.Connect("postgres", dbUrl)
@@ -77,7 +76,7 @@ func main() {
 	notificationHandler := handlers.NewNotificationHandler(nUsecase)
 
 	// Start server
-	r := router.NewRouter(userHandler, orderHandler, driverHandler, deliveryHandler, paymentHandler, feedbackHandler, notificationHandler, apiBaseUrl)
+	r := router.NewRouter(userHandler, orderHandler, driverHandler, deliveryHandler, paymentHandler, feedbackHandler, notificationHandler, publicApiBaseUrl)
 
 	log.Println("Server starting at :8080")
 	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {

@@ -20,6 +20,7 @@ func NewDeliveryHandler(dh *usecase.UseCase) *DeliveryHandler {
 
 // CreateDelivery godoc
 // @Summary Create a new delivery
+// @Security JWT
 // @Description Create a new delivery with order_id, driver_id, etc.
 // @Tags deliveries
 // @Accept  json
@@ -60,6 +61,7 @@ func (dh *DeliveryHandler) CreateDelivery(w http.ResponseWriter, r *http.Request
 
 // GetDeliveryByID godoc
 // @Summary Get delivery by ID
+// @Security JWT
 // @Description Retrieve a delivery by their ID
 // @Tags deliveries
 // @Produce  json
@@ -88,6 +90,7 @@ func (dh *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Reques
 
 // ListDeliveries godoc
 // @Summary List all deliveries
+// @Security JWT
 // @Description Get a list of all deliveries
 // @Tags deliveries
 // @Produce  json

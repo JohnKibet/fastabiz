@@ -21,6 +21,7 @@ func NewDriverHandler(dh *usecase.UseCase) *DriverHandler {
 
 // CreateDriver godoc
 // @Summary Create a new driver
+// @Security JWT
 // @Description Register a new driver with name, email, etc.
 // @Tags drivers
 // @Accept  json
@@ -66,6 +67,7 @@ func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 
 // GetDriverByID godoc
 // @Summary Get driver by ID
+// @Security JWT
 // @Description Retrieve a driver by their ID
 // @Tags drivers
 // @Produce  json
@@ -94,6 +96,7 @@ func (dh *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 
 // GetUserByDriver godoc
 // @Summary Get driver by Email
+// @Security JWT
 // @Description Retrieve a driver by their Email
 // @Tags drivers
 // @Produce  json
@@ -122,6 +125,7 @@ func (dh *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request
 
 // ListDrivers godoc
 // @Summary List all drivers
+// @Security JWT
 // @Description Get a list of all registered drivers
 // @Tags drivers
 // @Produce  json

@@ -4,7 +4,7 @@
 	"values": [
 		{
 			"key": "base_url",
-			"value": "http://192.168.100.11:8080/",
+			"value": "http://192.168.100.11:8080/api/",
 			"type": "default",
 			"enabled": true
 		},
@@ -16,12 +16,12 @@
 		},
 		{
 			"key": "authToken",
-			"value": "",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6Im1pY2hhZWxAZ21haWwuY29tIiwiZXhwIjoxNzQ5OTg1MTUzLCJpc3MiOiJteS1jbGllbnQiLCJyb2xlIjoiZHJpdmVyIiwic3ViIjoiODI1MTRhMWEtMmZkNy00YjYwLTk1ODYtOWRjNWQ1ZjM0ZmRkIn0.AJnAt2YohvpDM5Edf0UyT4kLNAuD5d-wYb6AsiItGuQ",
 			"type": "any",
 			"enabled": true
 		}
 	],
 	"_postman_variable_scope": "environment",
-	"_postman_exported_at": "2025-06-13T09:47:25.880Z",
-	"_postman_exported_using": "Postman/11.49.3"
+	"_postman_exported_at": "2025-06-15T13:02:54.869Z",
+	"_postman_exported_using": "Postman/11.49.4"
 }

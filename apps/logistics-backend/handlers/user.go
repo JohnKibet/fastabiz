@@ -78,6 +78,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // GetUserByID godoc
 // @Summary Get user by ID
+// @Security JWT
 // @Description Retrieve a user by their ID
 // @Tags users
 // @Produce  json
@@ -107,6 +108,7 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 // GetUserByEmail godoc
 // @Summary Get user by Email
+// @Security JWT
 // @Description Retrieve a user by their Email
 // @Tags users
 // @Produce  json
@@ -135,6 +137,7 @@ func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 
 // ListUsers godoc
 // @Summary List all users
+// @Security JWT
 // @Description Get a list of all registered users
 // @Tags users
 // @Produce  json
@@ -151,6 +154,18 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(users)
 }
 
+// LoginUser godoc
+// @Summary Login user
+// @Description Authenticates a user using email and password and returns a JWT token.
+// @Tags users
+// @Accept  json
+// @Produce  json
+// @Param user body user.LoginRequest true "User login credentials"
+// @Success 200 {object} user.LoginResponse
+// @Failure 400 {string} string "Invalid request"
+// @Failure 401 {string} string "Invalid credentials"
+// @Failure 500 {string} string "Internal server error"
+// @Router /users/login [post]
 func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var req user.LoginRequest
 
@@ -174,6 +189,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	// Create the token
 	claims := jwt.MapClaims{
+		"iss":   "my-client",   // Kong
 		"sub":   u.ID.String(), // subject
 		"email": u.Email,
 		"role":  u.Role,                                // custom claim
