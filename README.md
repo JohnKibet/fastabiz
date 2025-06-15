@@ -1,178 +1,150 @@
-
 # 🚚 logistics-system
 
-A scalable logistics & operations management system built to support Admins, Drivers, and Customers with clean APIs, secure role-based access, and smooth delivery workflows.
+A scalable logistics & operations management system with clean APIs, Dockerized microservices, Kong API Gateway, JWT security, and automated API tests.
 
 ---
 
 ## 🚀 Features
 
 - 🔐 Role-based access control (Admin, Driver, Customer)
-- 📦 Order management: create, assign, and track orders
-- 🚚 Delivery and Driver management logic
-- 💳 Payment and feedback handling
-- 🧑‍💼 Token-based authentication (mocked for now)
-- 📄 Swagger/OpenAPI API documentation
-- 🐳 Dockerized backend and PostgreSQL setup
-- 🧪 Postman/Newman API testing
-- 📊 Planned: dashboard analytics, API gateway (Kong), CI/CD integration
+- 📦 Full CRUD for orders, deliveries, drivers, payments, feedbacks, notifications
+- 🐳 Dockerized backend + Postgres + Kong Gateway
+- 🌐 Swagger documentation, served via Kong proxy
+- 🧪 Postman + Newman API tests in GitHub Actions CI
+- 🔑 Kong plugins: rate limiting & JWT auth
+- 🔜 Planned: gRPC/Kafka communication, frontend, production deployment
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer       | Technologies                                |
-|-------------|---------------------------------------------|
-| Backend     | Go (Chi router, Clean Architecture)         |
-| Frontend    | ASP.NET Core Razor Pages (C#)               |
-| Database    | PostgreSQL                                  |
-| DevOps      | Docker, Docker Compose                      |
-| Auth        | Token-based (mocked; JWT planned)           |
-| Docs        | Swagger / OpenAPI                           |
+| Layer       | Technologies                                 |
+|-------------|----------------------------------------------|
+| Backend     | Go (Chi, Clean Architecture, Swagger)        |
+| Gateway     | Kong (JWT auth + rate limiting)              |
+| Database    | PostgreSQL                                   |
+| CI/CD       | GitHub Actions + Newman (Docker mode)        |
+| Containerization | Docker, Docker Compose                 |
 
 ---
 
-## 🗂️ Project Structure
+## 📁 Repository Structure
 
 ```
 logistics-system/
 ├── apps/
-│   ├── logistics-backend/  # Go API backend (modular by domain)
-│   └── frontend/           # Razor Pages frontend (C#)
-├── migrations/             # SQL migration scripts
-├── postman/                # Postman collections & environments
-├── docker-compose.yml      # Multi-service orchestration
+│   └── logistics-backend/       # Go APIs
+├── kong/
+│   └── kong.yml                 # Kong declarative config
+├── postman/
+│   ├── collection.json          # API test collection
+│   └── environment.json         # API test environment
+├── .github/
+│   └── workflows/
+│       └── api-tests.yml       # CI config
+├── .env.docker                  # Docker environment variables
+├── Dockerfile                   # Backend Dockerfile
+├── docker-compose.yml          # Compose services
 └── README.md
 ```
-
-Backend follows **Clean Architecture**:
-- Modular usecase/repository layering
-- Decoupled DTOs for input/output validation
-- Unit-testable services and handlers
 
 ---
 
 ## ⚙️ Getting Started
 
-### 🔧 Prerequisites
+### Prerequisites
 
-- [Docker](https://www.docker.com/)
-- [.NET SDK](https://dotnet.microsoft.com/en-us/download) (for frontend)
-- Go 1.22+ (only if running backend manually)
+- Docker & Docker Compose
+- Git
 
 ---
 
-### 🐳 Run Everything with Docker
+### 🚀 Running Locally with Docker
 
 ```bash
 git clone https://github.com/kibecodes/logistics-system.git
 cd logistics-system
 
-# Start backend + DB via Docker
-docker-compose up --build
+# Start all services: DB, backend, Kong
+docker compose up --build
 ```
 
-Backend available at: `http://localhost:8080`  
-PostgreSQL: `localhost:5432` (user: `admin`, password: `secret`, db: `logistics_db`)
+- **API & Swagger:** `http://localhost:8000/api/swagger/index.html`
+- **Backend logs:** `docker compose logs -f backend`
+- **Kong Admin:** `http://localhost:8001`
 
 ---
 
-### 🧪 Run Backend Manually (Optional)
+### 🧪 Running Postman Tests Locally
 
 ```bash
-cd apps/logistics-backend
-go run main.go
+docker run --rm   -v "${PWD}/postman:/etc/newman"   postman/newman:alpine run collection.json   --environment=environment.json   --reporters cli
 ```
 
-Ensure `.env` contains:
+---
+
+## 🧩 Environment Configuration
+
+**.env.docker**
 
 ```env
-DATABASE_URL=postgres://admin:secret@localhost:5432/logistics_db?sslmode=disable
-API_BASE_URL=http://localhost:8080
+PUBLIC_API_BASE_URL=http://localhost:8000/api
+INTERNAL_API_BASE_URL=http://backend:8080
+DATABASE_URL=postgres://admin:secret@db:5432/logistics_db?sslmode=disable
+PORT=8080
+JWT_SECRET=<your-secret>
 ```
 
----
-
-### 🌐 Run Frontend (Optional)
-
-```bash
-cd apps/frontend
-dotnet run
-```
-
-Available at: `https://localhost:<frontend-port>`
+Kong connects to the backend on `http://backend:8080` internally, while clients use `localhost:8000`.
 
 ---
 
-## 📄 API Documentation
+## 🛡️ Kong Configuration
 
-Swagger UI (if enabled):  
-`http://localhost:8080/swagger/index.html`
-
----
-
-## 🧪 API Testing with Postman & Newman
-
-- ✅ Full Postman collection available for all major API endpoints
-- ✅ Environment-based variables used for base URL flexibility
-- ✅ Newman CLI runs automated tests via CI or locally
-
-### 🔄 Switching Base URLs
-
-Ensure your Postman environment is set to match your active setup:
-
-| Environment | Base URL                        |
-|-------------|----------------------------------|
-| Docker      | `http://localhost:8080`         |
-| VM / LAN    | `http://192.168.100.11:8080`    |
-| Local Dev   | `http://localhost:8080` (same)  |
-
-> Use Postman's "Environments" feature with `base_url` variable.
-
-### ▶️ Run Newman tests locally
-
-```bash
-newman run postman/collection.json -e postman/environment.json
-```
+- `/api/swagger` route: public + rate-limiting
+- `/api/*` route: JWT-protected + rate-limiting
+- Consumer `test-user` with JWT secret in `kong.yml`
 
 ---
 
-## 📈 Project Status
+## 🔐 JWT & Swagger
 
-This project is under **active development**.
-
-✅ Dockerized backend + PostgreSQL  
-✅ Working Postman + Newman tests  
-🔄 Full CRUD in progress  
-🔌 Planning Kong API Gateway for onboarding  
-📊 Upcoming dashboards and analytics
+Swagger UI uses `@securityDefinitions.apikey JWT`, allowing you to authorize with a valid token (issue via `/api/users/login`) to test protected endpoints interactively.
 
 ---
 
-## 📦 Planned Enhancements
+## 📈 CI with GitHub Actions
 
-- Kong gateway config + onboarding docs
-- GitHub Actions for CI
-- Newman tests on PRs
-- Real JWT authentication
-- Driver route optimization
-- Admin reports dashboard
+The CI workflow (`.github/workflows/api-tests.yml`) uses:
+
+- Docker-based Newman to run Postman tests
+- Environment variables defined in `postman/environment.json`
+- Outputs test artifacts in JSON and HTML formats
+
+---
+
+## ⏭️ Next Steps
+
+- Implement business logic: orders, drivers, routes
+- Integrate gRPC / Kafka for inter-service communication
+- Add frontend (ASP.NET or other)
+- Enable production CI/CD, monitoring, and deployment
 
 ---
 
 ## 🤝 Contributing
 
-All contributions are welcome 🙌  
-You can help by:
+Your contributions are welcome! Suggested areas:
 
-- Improving APIs or adding endpoints
-- Fixing issues or bugs
-- Enhancing UI/UX in Razor Pages
-- Writing docs (README, onboarding, Postman collection)
+- Completing business logic and clean architecture layers
+- Adding frontend user interfaces or dashboards
+- Production-grade logging, monitoring, and gateway enhancements
+- Message bus integrations (Kafka / RabbitMQ)
 
 ---
 
 ## 📝 License
 
-This project is licensed under the **MIT License**.  
-See [`LICENSE`](LICENSE) for more information.
+MIT License – see [LICENSE](LICENSE)
+
+---
