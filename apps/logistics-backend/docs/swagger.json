@@ -9,7 +9,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "192.168.100.11:8000",
+    "host": "192.168.100.12:8000",
     "basePath": "/api",
     "paths": {
         "/deliveries/all_deliveries": {

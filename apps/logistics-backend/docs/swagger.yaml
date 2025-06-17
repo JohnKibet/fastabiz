@@ -303,7 +303,7 @@ definitions:
       role:
         $ref: '#/definitions/user.Role'
     type: object
-host: 192.168.100.11:8000
+host: 192.168.100.12:8000
 info:
   contact: {}
   description: This is the API for logistics operations.

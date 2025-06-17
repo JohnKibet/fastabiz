@@ -19,8 +19,8 @@ jobs:
           docker run --rm \
             -v "${{ github.workspace }}/postman:/etc/newman" \
             postman/newman:alpine \
-            run collection.json \
-            --environment=environment.json \
+            run Logistics System API.postman_collection.json \
+            --environment=dev_environment.json \
             --insecure \
             --reporters cli,json,html \
             --reporter-json-export=newman-report.json \

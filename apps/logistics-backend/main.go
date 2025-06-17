@@ -25,7 +25,7 @@ import (
 // @title Logistics API
 // @version 1.0
 // @description This is the API for logistics operations.
-// @host 192.168.100.11:8000
+// @host 192.168.100.12:8000
 // @BasePath /api
 // @schemes http
 
