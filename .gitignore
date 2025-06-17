@@ -56,3 +56,10 @@ artifacts/
 
 # Thumbnails for images
 Thumbs.db
+
+# Ignore future Newman reports generated during CI
+postman/newman-report.json
+newman/
+*.html
+*.xml
+*.json
