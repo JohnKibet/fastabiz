@@ -100,6 +100,110 @@ definitions:
       submitted_at:
         type: string
     type: object
+  inventory.CreateInventoryRequest:
+    properties:
+      admin_id:
+        description: Foreign key
+        type: string
+      category:
+        description: e.g. “Dairy”
+        type: string
+      description:
+        type: string
+      images:
+        description: could be JSON array or URLs
+        type: string
+      location:
+        description: optional
+        type: string
+      name:
+        description: e.g. “Fresh Milk”
+        type: string
+      packaging:
+        description: “Bucket/Single”
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+      unit:
+        description: '"per litre", "per bucket"'
+        type: string
+    required:
+    - category
+    - description
+    - images
+    - location
+    - name
+    - packaging
+    - price
+    - stock
+    - unit
+    type: object
+  inventory.Inventory:
+    properties:
+      admin_id:
+        description: Foreign key
+        type: string
+      category:
+        description: e.g. “Dairy”
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      images:
+        description: could be JSON array or URLs
+        type: string
+      location:
+        description: optional
+        type: string
+      name:
+        description: e.g. “Fresh Milk”
+        type: string
+      packaging:
+        description: “Bucket/Single”
+        type: string
+      price:
+        type: number
+      stock:
+        type: integer
+      unit:
+        description: '"per litre", "per bucket"'
+        type: string
+      updated_at:
+        type: string
+    type: object
+  inventory.InventorySummary:
+    properties:
+      image:
+        type: string
+      in_stock:
+        type: integer
+      name:
+        type: string
+      packaging:
+        type: string
+      price:
+        type: number
+      unit:
+        type: string
+    type: object
+  inventory.StorePublicView:
+    properties:
+      admin_name:
+        type: string
+      category:
+        type: string
+      location:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/inventory.InventorySummary'
+        type: array
+    type: object
   notification.CreateNotificationRequest:
     properties:
       message:
@@ -573,6 +677,140 @@ paths:
       summary: Get feedback by ID
       tags:
       - feedbacks
+  /inventories/all_inventories:
+    get:
+      description: List all inventories with optional pagination
+      parameters:
+      - description: Limit number of items
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/inventory.Inventory'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: List all inventories
+      tags:
+      - inventories
+  /inventories/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates an inventory and returns the created object
+      parameters:
+      - description: Inventory input
+        in: body
+        name: inventory
+        required: true
+        schema:
+          $ref: '#/definitions/inventory.CreateInventoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/inventory.Inventory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Create a new inventory
+      tags:
+      - inventories
+  /inventories/inventory_id/{inventory_id}:
+    get:
+      description: Get a specific inventory item by UUID
+      parameters:
+      - description: Inventory ID
+        in: path
+        name: inventory_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inventory.Inventory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Get inventory by ID
+      tags:
+      - inventories
+  /inventories/inventory_name/{name}:
+    get:
+      description: Search inventory by item name (exact match)
+      parameters:
+      - description: Inventory Name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inventory.Inventory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Get inventory by name
+      tags:
+      - inventories
   /notifications/all_notifications:
     get:
       description: Get a list of all notifications
@@ -918,24 +1156,7 @@ paths:
       summary: Get payment by Order ID
       tags:
       - payments
-  /users/all_users:
-    get:
-      description: Get a list of all registered users
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/user.User'
-            type: array
-      security:
-      - JWT: []
-      summary: List all users
-      tags:
-      - users
-  /users/create:
+  /public/create:
     post:
       consumes:
       - application/json
@@ -963,6 +1184,113 @@ paths:
           schema:
             type: string
       summary: Create a new user
+      tags:
+      - public
+  /public/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user using email and password and returns a JWT
+        token.
+      parameters:
+      - description: User login credentials
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user.LoginResponse'
+        "400":
+          description: Invalid request
+          schema:
+            type: string
+        "401":
+          description: Invalid credentials
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Login user
+      tags:
+      - public
+  /public/store/{adminSlug}:
+    get:
+      description: View all public products for an admin store by slug
+      parameters:
+      - description: Admin Slug
+        in: path
+        name: adminSlug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inventory.StorePublicView'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: View public store page
+      tags:
+      - public
+  /public/store/{adminSlug}/product/{productSlug}:
+    get:
+      description: View a specific product by admin slug and product slug
+      parameters:
+      - description: Admin Slug
+        in: path
+        name: adminSlug
+        required: true
+        type: string
+      - description: Product Slug
+        in: path
+        name: productSlug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inventory.Inventory'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: View public product page
+      tags:
+      - public
+  /users/all_users:
+    get:
+      description: Get a list of all registered users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.User'
+            type: array
+      security:
+      - JWT: []
+      summary: List all users
       tags:
       - users
   /users/email/{email}:
@@ -1021,41 +1349,6 @@ paths:
       security:
       - JWT: []
       summary: Get user by ID
-      tags:
-      - users
-  /users/login:
-    post:
-      consumes:
-      - application/json
-      description: Authenticates a user using email and password and returns a JWT
-        token.
-      parameters:
-      - description: User login credentials
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/user.LoginRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/user.LoginResponse'
-        "400":
-          description: Invalid request
-          schema:
-            type: string
-        "401":
-          description: Invalid credentials
-          schema:
-            type: string
-        "500":
-          description: Internal server error
-          schema:
-            type: string
-      summary: Login user
       tags:
       - users
 schemes:

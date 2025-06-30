@@ -17,6 +17,7 @@ func NewUseCase(repo domain.Repository) *UseCase {
 }
 
 func (uc *UseCase) CreateOrder(ctx context.Context, o *domain.Order) error {
+
 	o.OrderStatus = domain.Pending
 	return uc.repo.Create(o)
 }

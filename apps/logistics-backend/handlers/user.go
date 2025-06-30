@@ -33,14 +33,14 @@ func writeJSONError(w http.ResponseWriter, status int, message string) {
 // CreateUser godoc
 // @Summary Create a new user
 // @Description Register a new user with name, email, etc.
-// @Tags users
+// @Tags public
 // @Accept  json
 // @Produce  json
 // @Param user body user.CreateUserRequest true "User Input"
 // @Success 201 {object} user.User
 // @Failure 400 {string} string "Invalid request"
 // @Failure 500 {string} string "Failed to create user"
-// @Router /users/create [post]
+// @Router /public/create [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var req user.CreateUserRequest
 
@@ -157,7 +157,7 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 // LoginUser godoc
 // @Summary Login user
 // @Description Authenticates a user using email and password and returns a JWT token.
-// @Tags users
+// @Tags public
 // @Accept  json
 // @Produce  json
 // @Param user body user.LoginRequest true "User login credentials"
@@ -165,7 +165,7 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {string} string "Invalid request"
 // @Failure 401 {string} string "Invalid credentials"
 // @Failure 500 {string} string "Internal server error"
-// @Router /users/login [post]
+// @Router /public/login [post]
 func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var req user.LoginRequest
 
