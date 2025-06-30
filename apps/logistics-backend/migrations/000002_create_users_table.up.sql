@@ -9,3 +9,5 @@ CREATE TABLE users (
     created_at TIMESTAMPTZ DEFAULT now(),
     updated_at TIMESTAMPTZ DEFAULT now()
 );
+
+ALTER TABLE users ADD COLUMN slug TEXT UNIQUE;

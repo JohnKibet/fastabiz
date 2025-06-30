@@ -1,0 +1,40 @@
+package inventory
+
+import (
+	"context"
+	domain "logistics-backend/internal/domain/inventory"
+
+	"github.com/google/uuid"
+)
+
+type UseCase struct {
+	repo domain.Repository
+}
+
+func NewUseCase(repo domain.Repository) *UseCase {
+	return &UseCase{repo: repo}
+}
+
+func (uc *UseCase) CreateInventory(ctx context.Context, i *domain.Inventory) error {
+	return uc.repo.Create(i)
+}
+
+func (uc *UseCase) GetByID(ctx context.Context, id uuid.UUID) ([]*domain.Inventory, error) {
+	return uc.repo.GetByID(id)
+}
+
+func (uc *UseCase) GetByName(ctx context.Context, name string) ([]*domain.Inventory, error) {
+	return uc.repo.GetByName(name)
+}
+
+func (uc *UseCase) List(ctx context.Context, limit, offset int) ([]*domain.Inventory, error) {
+	return uc.repo.List(limit, offset)
+}
+
+func (uc *UseCase) GetBySlugs(ctx context.Context, adminSlug, productSlug string) (*domain.Inventory, error) {
+	return uc.repo.GetBySlugs(adminSlug, productSlug)
+}
+
+func (uc *UseCase) GetStorePublicView(ctx context.Context, adminSlug string) (*domain.StorePublicView, error) {
+	return uc.repo.GetStoreView(adminSlug)
+}

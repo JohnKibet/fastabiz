@@ -11,6 +11,7 @@ import (
 	deliveryUsecase "logistics-backend/internal/usecase/delivery"
 	driverUsecase "logistics-backend/internal/usecase/driver"
 	feedbackUsecase "logistics-backend/internal/usecase/feedback"
+	inventoryUsecase "logistics-backend/internal/usecase/inventory"
 	notificationUsecase "logistics-backend/internal/usecase/notification"
 	orderUsecase "logistics-backend/internal/usecase/order"
 	paymentUsecase "logistics-backend/internal/usecase/payment"
@@ -56,6 +57,7 @@ func main() {
 	paymentRepo := postgres.NewPaymentRepository(db)
 	feedbackRepo := postgres.NewFeedbackRepository(db)
 	notificationRepo := postgres.NewNotificationRepository(db)
+	inventoryRepo := postgres.NewInventoryRespository(db)
 
 	// Set up usecase
 	uUsecase := userUsecase.NewUseCase(userRepo)
@@ -65,6 +67,7 @@ func main() {
 	pUsecase := paymentUsecase.NewUseCase(paymentRepo)
 	fUsecase := feedbackUsecase.NewUseCase(feedbackRepo)
 	nUsecase := notificationUsecase.NewUseCase(notificationRepo)
+	iUsecase := inventoryUsecase.NewUseCase(inventoryRepo)
 
 	// Set up Handlers
 	userHandler := handlers.NewUserHandler(uUsecase)
@@ -74,9 +77,10 @@ func main() {
 	paymentHandler := handlers.NewPaymentHandler(pUsecase)
 	feedbackHandler := handlers.NewFeedbackHandler(fUsecase)
 	notificationHandler := handlers.NewNotificationHandler(nUsecase)
+	inventoryHandler := handlers.NewInventoryHandler(iUsecase)
 
 	// Start server
-	r := router.NewRouter(userHandler, orderHandler, driverHandler, deliveryHandler, paymentHandler, feedbackHandler, notificationHandler, publicApiBaseUrl)
+	r := router.NewRouter(userHandler, orderHandler, driverHandler, deliveryHandler, paymentHandler, feedbackHandler, notificationHandler, inventoryHandler, publicApiBaseUrl)
 
 	log.Println("Server starting at :8080")
 	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {

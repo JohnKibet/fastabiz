@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS inventories;
+ALTER TABLE inventories DROP COLUMN IF EXISTS slug;

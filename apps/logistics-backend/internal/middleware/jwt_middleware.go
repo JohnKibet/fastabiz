@@ -2,11 +2,13 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type contextKey string
@@ -64,4 +66,18 @@ func JWTAuthMiddleware(next http.Handler) http.Handler {
 		ctx = context.WithValue(ctx, ContextRole, role)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetAdminIDFromContext(ctx context.Context) (uuid.UUID, error) {
+	role, ok := ctx.Value(ContextRole).(string)
+	if !ok || role != "admin" {
+		return uuid.Nil, errors.New("not authorized as admin")
+	}
+
+	idStr, ok := ctx.Value(ContextUserID).(string)
+	if !ok {
+		return uuid.Nil, errors.New("missing user ID in context")
+	}
+
+	return uuid.Parse(idStr)
 }
