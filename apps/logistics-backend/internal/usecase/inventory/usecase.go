@@ -31,6 +31,14 @@ func (uc *UseCase) List(ctx context.Context, limit, offset int) ([]*domain.Inven
 	return uc.repo.List(limit, offset)
 }
 
+func (uc *UseCase) GetByCategory(ctx context.Context, category string) ([]domain.Inventory, error) {
+	return uc.repo.GetByCategory(ctx, category)
+}
+
+func (uc *UseCase) ListCategories(ctx context.Context) ([]string, error) {
+	return uc.repo.ListCategories(ctx)
+}
+
 func (uc *UseCase) GetBySlugs(ctx context.Context, adminSlug, productSlug string) (*domain.Inventory, error) {
 	return uc.repo.GetBySlugs(adminSlug, productSlug)
 }

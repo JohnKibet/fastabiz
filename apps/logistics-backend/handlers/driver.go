@@ -75,7 +75,7 @@ func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} driver.Driver
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Driver not found"
-// @Router /drivers/id/{id} [get]
+// @Router /drivers/{id} [get]
 func (dh *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 	driverID := chi.URLParam(r, "id")
 	id, err := uuid.Parse(driverID)
@@ -104,7 +104,7 @@ func (dh *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} driver.Driver
 // @Failure 400 {string} string "Invalid Email"
 // @Failure 404 {string} string "Driver not found"
-// @Router /drivers/email/{email} [get]
+// @Router /drivers/{email} [get]
 func (dh *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request) {
 	emailParam := chi.URLParam(r, "email")
 	email, err := url.PathUnescape(emailParam)

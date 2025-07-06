@@ -94,7 +94,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/deliveries/id/{id}": {
+        "/deliveries/{id}": {
             "get": {
                 "security": [
                     {
@@ -219,7 +219,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/drivers/email/{email}": {
+        "/drivers/{email}": {
             "get": {
                 "security": [
                     {
@@ -265,7 +265,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/drivers/id/{id}": {
+        "/drivers/{id}": {
             "get": {
                 "security": [
                     {
@@ -390,7 +390,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/feedbacks/id/{id}": {
+        "/feedbacks/{id}": {
             "get": {
                 "security": [
                     {
@@ -487,6 +487,150 @@ const docTemplate = `{
                 }
             }
         },
+        "/inventories/by-category": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get all inventory items in a specific category",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "inventories"
+                ],
+                "summary": "Get inventories by category",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Category Name",
+                        "name": "category",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/inventory.Inventory"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/by-name": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Search inventory by item name (exact match)",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "inventories"
+                ],
+                "summary": "Get inventory by name",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Inventory Name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/inventory.Inventory"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/inventories/categories": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Get all unique categories that belong to existing inventories",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "inventories"
+                ],
+                "summary": "List all categories",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/inventories/create": {
             "post": {
                 "security": [
@@ -544,7 +688,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/inventories/inventory_id/{inventory_id}": {
+        "/inventories/{id}": {
             "get": {
                 "security": [
                     {
@@ -563,60 +707,8 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Inventory ID",
-                        "name": "inventory_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/inventory.Inventory"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/inventory_name/{name}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Search inventory by item name (exact match)",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "Get inventory by name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Inventory Name",
-                        "name": "name",
-                        "in": "path",
+                        "name": "id",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -727,7 +819,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/notifications/id/{id}": {
+        "/notifications/{id}": {
             "get": {
                 "security": [
                     {
@@ -852,7 +944,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/customer_id/{customer_id}": {
+        "/orders/{customer_id}": {
             "get": {
                 "security": [
                     {
@@ -901,7 +993,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/id/{id}": {
+        "/orders/{id}": {
             "get": {
                 "security": [
                     {
@@ -1102,7 +1194,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/payments/id/{id}": {
+        "/payments/{id}": {
             "get": {
                 "security": [
                     {
@@ -1148,7 +1240,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/payments/order_id/{order_id}": {
+        "/payments/{order_id}": {
             "get": {
                 "security": [
                     {
@@ -1406,7 +1498,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/email/{email}": {
+        "/users/{email}": {
             "get": {
                 "security": [
                     {
@@ -1452,7 +1544,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/users/id/{id}": {
+        "/users/{id}": {
             "get": {
                 "security": [
                     {
@@ -1658,6 +1750,7 @@ const docTemplate = `{
                 "name",
                 "packaging",
                 "price",
+                "slug",
                 "stock",
                 "unit"
             ],
@@ -1691,6 +1784,9 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "slug": {
+                    "type": "string"
                 },
                 "stock": {
                     "type": "integer"
@@ -1739,6 +1835,10 @@ const docTemplate = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "slug": {
+                    "description": "product slug",
+                    "type": "string"
                 },
                 "stock": {
                     "type": "integer"
@@ -1990,7 +2090,8 @@ const docTemplate = `{
                 "fullName",
                 "password",
                 "phone",
-                "role"
+                "role",
+                "slug"
             ],
             "properties": {
                 "email": {
@@ -2017,6 +2118,9 @@ const docTemplate = `{
                             "$ref": "#/definitions/user.Role"
                         }
                     ]
+                },
+                "slug": {
+                    "type": "string"
                 }
             }
         },
@@ -2087,6 +2191,10 @@ const docTemplate = `{
                 },
                 "role": {
                     "$ref": "#/definitions/user.Role"
+                },
+                "slug": {
+                    "description": "adminSlug used in public route",
+                    "type": "string"
                 }
             }
         }
@@ -2103,7 +2211,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "192.168.100.12:8000",
+	Host:             "192.168.100.18:8000",
 	BasePath:         "/api",
 	Schemes:          []string{"http"},
 	Title:            "Logistics API",

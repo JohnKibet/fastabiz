@@ -1,6 +1,10 @@
 package inventory
 
-import "github.com/google/uuid"
+import (
+	generate "logistics-backend/internal/utils"
+
+	"github.com/google/uuid"
+)
 
 type CreateInventoryRequest struct {
 	AdminID     uuid.UUID `json:"admin_id"`                    // Foreign key
@@ -13,6 +17,7 @@ type CreateInventoryRequest struct {
 	Packaging   string    `json:"packaging" binding:"required"` // “Bucket/Single”
 	Description string    `json:"description" binding:"required"`
 	Location    string    `json:"location" binding:"required"` // optional
+	Slug        string    `json:"slug" binding:"required"`
 }
 
 func (r *CreateInventoryRequest) ToInventory() *Inventory {
@@ -27,5 +32,6 @@ func (r *CreateInventoryRequest) ToInventory() *Inventory {
 		Packaging:   r.Packaging,
 		Description: r.Description,
 		Location:    r.Location,
+		Slug:        generate.GenerateSlug(r.Name),
 	}
 }

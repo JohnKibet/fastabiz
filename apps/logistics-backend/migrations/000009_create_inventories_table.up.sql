@@ -14,5 +14,3 @@ CREATE TABLE inventories (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
-
-ALTER TABLE inventories ADD COLUMN slug TEXT UNIQUE;

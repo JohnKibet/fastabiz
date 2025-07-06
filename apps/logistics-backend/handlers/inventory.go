@@ -80,13 +80,13 @@ func (h *InventoryHandler) CreateInventory(w http.ResponseWriter, r *http.Reques
 // @Description Get a specific inventory item by UUID
 // @Tags inventories
 // @Produce json
-// @Param inventory_id path string true "Inventory ID"
+// @Param id query string true "Inventory ID"
 // @Success 200 {object} inventory.Inventory
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /inventories/inventory_id/{inventory_id} [get]
+// @Router /inventories/{id} [get]
 func (h *InventoryHandler) GetByInventoryID(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "inventory_id")
+	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, "Invalid inventory ID")
@@ -108,13 +108,17 @@ func (h *InventoryHandler) GetByInventoryID(w http.ResponseWriter, r *http.Reque
 // @Description Search inventory by item name (exact match)
 // @Tags inventories
 // @Produce json
-// @Param name path string true "Inventory Name"
+// @Param name query string true "Inventory Name"
 // @Success 200 {object} inventory.Inventory
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
-// @Router /inventories/inventory_name/{name} [get]
+// @Router /inventories/by-name [get]
 func (h *InventoryHandler) GetByInventoryName(w http.ResponseWriter, r *http.Request) {
-	nameStr := chi.URLParam(r, "name")
+	nameStr := r.URL.Query().Get("name")
+	if nameStr == "" {
+		writeJSONError(w, http.StatusBadRequest, "Name query parameter is required")
+		return
+	}
 
 	i, err := h.UC.GetByName(r.Context(), nameStr)
 	if err != nil {
@@ -122,7 +126,7 @@ func (h *InventoryHandler) GetByInventoryName(w http.ResponseWriter, r *http.Req
 			writeJSONError(w, http.StatusNotFound, fmt.Sprintf("No inventory found with name '%s'", nameStr))
 			return
 		}
-		writeJSONError(w, http.StatusNotFound, "Internal server error")
+		writeJSONError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
@@ -162,6 +166,52 @@ func (h *InventoryHandler) ListInventories(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(inventories)
+}
+
+// @Summary Get inventories by category
+// @Security JWT
+// @Description Get all inventory items in a specific category
+// @Tags inventories
+// @Produce json
+// @Param category query string true "Category Name"
+// @Success 200 {array} inventory.Inventory
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /inventories/by-category [get]
+func (h *InventoryHandler) GetInventoryByCategory(w http.ResponseWriter, r *http.Request) {
+	category := r.URL.Query().Get("category")
+	if category == "" {
+		writeJSONError(w, http.StatusBadRequest, "Category query parameter is required")
+		return
+	}
+
+	inventories, err := h.UC.GetByCategory(r.Context(), category)
+	if err != nil {
+		writeJSONError(w, http.StatusNotFound, "No Inventories found for this category")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(inventories)
+}
+
+// @Summary List all categories
+// @Security JWT
+// @Description Get all unique categories that belong to existing inventories
+// @Tags inventories
+// @Produce json
+// @Success 200 {array} string
+// @Failure 500 {object} map[string]string
+// @Router /inventories/categories [get]
+func (h *InventoryHandler) ListCategories(w http.ResponseWriter, r *http.Request) {
+	categories, err := h.UC.ListCategories(r.Context())
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to fetch categories")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(categories)
 }
 
 // @Summary View public product page

@@ -69,7 +69,7 @@ func (fh *FeedbackHandler) CreateFeedback(w http.ResponseWriter, r *http.Request
 // @Success 200 {object} feedback.Feedback
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Feedback not found"
-// @Router /feedbacks/id/{id} [get]
+// @Router /feedbacks/{id} [get]
 func (fh *FeedbackHandler) GetFeedbackByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	feedbackID, err := uuid.Parse(idStr)

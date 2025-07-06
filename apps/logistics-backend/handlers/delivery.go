@@ -69,7 +69,7 @@ func (dh *DeliveryHandler) CreateDelivery(w http.ResponseWriter, r *http.Request
 // @Success 200 {object} delivery.Delivery
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Delivery not found"
-// @Router /deliveries/id/{id} [get]
+// @Router /deliveries/{id} [get]
 func (dh *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	deliveryID, err := uuid.Parse(idStr)

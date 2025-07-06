@@ -124,6 +124,8 @@ definitions:
         type: string
       price:
         type: number
+      slug:
+        type: string
       stock:
         type: integer
       unit:
@@ -137,6 +139,7 @@ definitions:
     - name
     - packaging
     - price
+    - slug
     - stock
     - unit
     type: object
@@ -168,6 +171,9 @@ definitions:
         type: string
       price:
         type: number
+      slug:
+        description: product slug
+        type: string
       stock:
         type: integer
       unit:
@@ -353,12 +359,15 @@ definitions:
         - admin
         - driver
         - customer
+      slug:
+        type: string
     required:
     - email
     - fullName
     - password
     - phone
     - role
+    - slug
     type: object
   user.LoginRequest:
     properties:
@@ -406,14 +415,46 @@ definitions:
         type: string
       role:
         $ref: '#/definitions/user.Role'
+      slug:
+        description: adminSlug used in public route
+        type: string
     type: object
-host: 192.168.100.12:8000
+host: 192.168.100.18:8000
 info:
   contact: {}
   description: This is the API for logistics operations.
   title: Logistics API
   version: "1.0"
 paths:
+  /deliveries/{id}:
+    get:
+      description: Retrieve a delivery by their ID
+      parameters:
+      - description: Delivery ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.Delivery'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Delivery not found
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Get delivery by ID
+      tags:
+      - deliveries
   /deliveries/all_deliveries:
     get:
       description: Get a list of all deliveries
@@ -463,11 +504,40 @@ paths:
       summary: Create a new delivery
       tags:
       - deliveries
-  /deliveries/id/{id}:
+  /drivers/{email}:
     get:
-      description: Retrieve a delivery by their ID
+      description: Retrieve a driver by their Email
       parameters:
-      - description: Delivery ID
+      - description: Driver Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/driver.Driver'
+        "400":
+          description: Invalid Email
+          schema:
+            type: string
+        "404":
+          description: Driver not found
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Get driver by Email
+      tags:
+      - drivers
+  /drivers/{id}:
+    get:
+      description: Retrieve a driver by their ID
+      parameters:
+      - description: Driver ID
         in: path
         name: id
         required: true
@@ -478,20 +548,20 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/delivery.Delivery'
+            $ref: '#/definitions/driver.Driver'
         "400":
           description: Invalid ID
           schema:
             type: string
         "404":
-          description: Delivery not found
+          description: Driver not found
           schema:
             type: string
       security:
       - JWT: []
-      summary: Get delivery by ID
+      summary: Get driver by ID
       tags:
-      - deliveries
+      - drivers
   /drivers/all_drivers:
     get:
       description: Get a list of all registered drivers
@@ -541,40 +611,11 @@ paths:
       summary: Create a new driver
       tags:
       - drivers
-  /drivers/email/{email}:
+  /feedbacks/{id}:
     get:
-      description: Retrieve a driver by their Email
+      description: Retrieve a feedback by their ID
       parameters:
-      - description: Driver Email
-        in: path
-        name: email
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/driver.Driver'
-        "400":
-          description: Invalid Email
-          schema:
-            type: string
-        "404":
-          description: Driver not found
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: Get driver by Email
-      tags:
-      - drivers
-  /drivers/id/{id}:
-    get:
-      description: Retrieve a driver by their ID
-      parameters:
-      - description: Driver ID
+      - description: Feedback ID
         in: path
         name: id
         required: true
@@ -585,20 +626,20 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/driver.Driver'
+            $ref: '#/definitions/feedback.Feedback'
         "400":
           description: Invalid ID
           schema:
             type: string
         "404":
-          description: Driver not found
+          description: Feedback not found
           schema:
             type: string
       security:
       - JWT: []
-      summary: Get driver by ID
+      summary: Get feedback by ID
       tags:
-      - drivers
+      - feedbacks
   /feedbacks/all_feedbacks:
     get:
       description: Get a list of all feedbacks
@@ -648,12 +689,12 @@ paths:
       summary: Create a new feedback
       tags:
       - feedbacks
-  /feedbacks/id/{id}:
+  /inventories/{id}:
     get:
-      description: Retrieve a feedback by their ID
+      description: Get a specific inventory item by UUID
       parameters:
-      - description: Feedback ID
-        in: path
+      - description: Inventory ID
+        in: query
         name: id
         required: true
         type: string
@@ -663,20 +704,24 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/feedback.Feedback'
+            $ref: '#/definitions/inventory.Inventory'
         "400":
-          description: Invalid ID
+          description: Bad Request
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "404":
-          description: Feedback not found
+          description: Not Found
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
       security:
       - JWT: []
-      summary: Get feedback by ID
+      summary: Get inventory by ID
       tags:
-      - feedbacks
+      - inventories
   /inventories/all_inventories:
     get:
       description: List all inventories with optional pagination
@@ -707,6 +752,97 @@ paths:
       security:
       - JWT: []
       summary: List all inventories
+      tags:
+      - inventories
+  /inventories/by-category:
+    get:
+      description: Get all inventory items in a specific category
+      parameters:
+      - description: Category Name
+        in: query
+        name: category
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/inventory.Inventory'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Get inventories by category
+      tags:
+      - inventories
+  /inventories/by-name:
+    get:
+      description: Search inventory by item name (exact match)
+      parameters:
+      - description: Inventory Name
+        in: query
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inventory.Inventory'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: Get inventory by name
+      tags:
+      - inventories
+  /inventories/categories:
+    get:
+      description: Get all unique categories that belong to existing inventories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - JWT: []
+      summary: List all categories
       tags:
       - inventories
   /inventories/create:
@@ -745,13 +881,13 @@ paths:
       summary: Create a new inventory
       tags:
       - inventories
-  /inventories/inventory_id/{inventory_id}:
+  /notifications/{id}:
     get:
-      description: Get a specific inventory item by UUID
+      description: Retrieve a notification by their ID
       parameters:
-      - description: Inventory ID
+      - description: Notification ID
         in: path
-        name: inventory_id
+        name: id
         required: true
         type: string
       produces:
@@ -760,57 +896,20 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/inventory.Inventory'
+            $ref: '#/definitions/notification.Notification'
         "400":
-          description: Bad Request
+          description: Invalid ID
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            type: string
         "404":
-          description: Not Found
+          description: Notification not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            type: string
       security:
       - JWT: []
-      summary: Get inventory by ID
+      summary: Get notification by ID
       tags:
-      - inventories
-  /inventories/inventory_name/{name}:
-    get:
-      description: Search inventory by item name (exact match)
-      parameters:
-      - description: Inventory Name
-        in: path
-        name: name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - JWT: []
-      summary: Get inventory by name
-      tags:
-      - inventories
+      - notifications
   /notifications/all_notifications:
     get:
       description: Get a list of all notifications
@@ -860,11 +959,42 @@ paths:
       summary: Create a new notification
       tags:
       - notifications
-  /notifications/id/{id}:
+  /orders/{customer_id}:
     get:
-      description: Retrieve a notification by their ID
+      description: Fetch order(s) using Customer ID
       parameters:
-      - description: Notification ID
+      - description: Customer ID
+        in: path
+        name: customer_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/order.Order'
+            type: array
+        "400":
+          description: Invalid Customer ID
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Get order by Customer ID
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      description: Fetch a single order using UUID
+      parameters:
+      - description: Order ID
         in: path
         name: id
         required: true
@@ -875,20 +1005,20 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/notification.Notification'
+            $ref: '#/definitions/order.Order'
         "400":
           description: Invalid ID
           schema:
             type: string
         "404":
-          description: Notification not found
+          description: Not found
           schema:
             type: string
       security:
       - JWT: []
-      summary: Get notification by ID
+      summary: Get order by ID
       tags:
-      - notifications
+      - orders
   /orders/{order_id}/status:
     put:
       consumes:
@@ -987,42 +1117,11 @@ paths:
       summary: Create a new order
       tags:
       - orders
-  /orders/customer_id/{customer_id}:
+  /payments/{id}:
     get:
-      description: Fetch order(s) using Customer ID
+      description: Fetch a single payment using payment ID
       parameters:
-      - description: Customer ID
-        in: path
-        name: customer_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/order.Order'
-            type: array
-        "400":
-          description: Invalid Customer ID
-          schema:
-            type: string
-        "404":
-          description: Not found
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: Get order by Customer ID
-      tags:
-      - orders
-  /orders/id/{id}:
-    get:
-      description: Fetch a single order using UUID
-      parameters:
-      - description: Order ID
+      - description: Payment ID
         in: path
         name: id
         required: true
@@ -1033,7 +1132,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/order.Order'
+            $ref: '#/definitions/payment.Payment'
         "400":
           description: Invalid ID
           schema:
@@ -1044,9 +1143,40 @@ paths:
             type: string
       security:
       - JWT: []
-      summary: Get order by ID
+      summary: Get payment by ID
       tags:
-      - orders
+      - payments
+  /payments/{order_id}:
+    get:
+      description: Fetch payment(s) using Order ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/payment.Payment'
+            type: array
+        "400":
+          description: Invalid Order ID
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Get payment by Order ID
+      tags:
+      - payments
   /payments/all_payments:
     get:
       description: Get a list of all payments
@@ -1094,66 +1224,6 @@ paths:
       security:
       - JWT: []
       summary: Create new payment
-      tags:
-      - payments
-  /payments/id/{id}:
-    get:
-      description: Fetch a single payment using payment ID
-      parameters:
-      - description: Payment ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/payment.Payment'
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "404":
-          description: Not found
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: Get payment by ID
-      tags:
-      - payments
-  /payments/order_id/{order_id}:
-    get:
-      description: Fetch payment(s) using Order ID
-      parameters:
-      - description: Order ID
-        in: path
-        name: order_id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/payment.Payment'
-            type: array
-        "400":
-          description: Invalid Order ID
-          schema:
-            type: string
-        "404":
-          description: Not found
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: Get payment by Order ID
       tags:
       - payments
   /public/create:
@@ -1276,24 +1346,7 @@ paths:
       summary: View public product page
       tags:
       - public
-  /users/all_users:
-    get:
-      description: Get a list of all registered users
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/user.User'
-            type: array
-      security:
-      - JWT: []
-      summary: List all users
-      tags:
-      - users
-  /users/email/{email}:
+  /users/{email}:
     get:
       description: Retrieve a user by their Email
       parameters:
@@ -1322,7 +1375,7 @@ paths:
       summary: Get user by Email
       tags:
       - users
-  /users/id/{id}:
+  /users/{id}:
     get:
       description: Retrieve a user by their ID
       parameters:
@@ -1349,6 +1402,23 @@ paths:
       security:
       - JWT: []
       summary: Get user by ID
+      tags:
+      - users
+  /users/all_users:
+    get:
+      description: Get a list of all registered users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/user.User'
+            type: array
+      security:
+      - JWT: []
+      summary: List all users
       tags:
       - users
 schemes:

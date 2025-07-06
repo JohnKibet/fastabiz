@@ -46,8 +46,10 @@ services:
 
       - name: public-auth-route
         paths: 
-          - /api/users/create
-          - /api/users/login
+          - /api/public/create
+          - /api/public/login
+          - /api/public/store/{adminSlug}/product/{productSlug}
+          - /api/public/store/{adminSlug}
         strip_path: false
         plugins:
           - name: cors
