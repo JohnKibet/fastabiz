@@ -71,7 +71,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} order.Order
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Not found"
-// @Router /orders/id/{id} [get]
+// @Router /orders/{id} [get]
 func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -99,7 +99,7 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} []order.Order
 // @Failure 400 {string} string "Invalid Customer ID"
 // @Failure 404 {string} string "Not found"
-// @Router /orders/customer_id/{customer_id} [get]
+// @Router /orders/{customer_id} [get]
 func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "customer_id")
 	fmt.Println("id:", idStr)

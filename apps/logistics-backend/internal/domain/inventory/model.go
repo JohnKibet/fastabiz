@@ -18,6 +18,7 @@ type Inventory struct {
 	Packaging   string    `db:"packaging" json:"packaging"` // “Bucket/Single”
 	Description string    `db:"description" json:"description"`
 	Location    string    `db:"location" json:"location"` // optional
+	Slug        string    `db:"slug" json:"slug"`         // product slug
 	CreatedAt   time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
 }

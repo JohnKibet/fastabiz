@@ -1,11 +1,16 @@
 package user
 
+import (
+	generate "logistics-backend/internal/utils"
+)
+
 type CreateUserRequest struct {
 	FullName string `json:"fullName" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required"` //raw password from client
 	Role     Role   `json:"role" binding:"required,oneof=admin driver customer"`
 	Phone    string `json:"phone" binding:"required"`
+	Slug     string `json:"slug" binding:"required"`
 }
 
 func (r *CreateUserRequest) ToUser() *User {
@@ -15,6 +20,7 @@ func (r *CreateUserRequest) ToUser() *User {
 		PasswordHash: r.Password,
 		Role:         r.Role,
 		Phone:        r.Phone,
+		Slug:         generate.GenerateSlug(r.Slug),
 	}
 }
 

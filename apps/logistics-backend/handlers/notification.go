@@ -67,7 +67,7 @@ func (nh *NotificationHandler) CreateNotification(w http.ResponseWriter, r *http
 // @Success 200 {object} notification.Notification
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Notification not found"
-// @Router /notifications/id/{id} [get]
+// @Router /notifications/{id} [get]
 func (nh *NotificationHandler) GetNotificationByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	notificationID, err := uuid.Parse(idStr)

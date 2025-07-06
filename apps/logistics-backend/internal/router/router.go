@@ -56,62 +56,64 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 			// Users
 			r.Route("/users", func(r chi.Router) {
 				r.Get("/all_users", u.ListUsers)
-				r.Get("/id/{id}", u.GetUserByID)
-				r.Get("/email/{email}", u.GetUserByEmail)
+				r.Get("/{id}", u.GetUserByID)
+				r.Get("/{email}", u.GetUserByEmail)
 			})
 
 			// Orders
 			r.Route("/orders", func(r chi.Router) {
 				r.Post("/create", o.CreateOrder)
 				r.Get("/all_orders", o.ListOrders)
-				r.Get("/id/{id}", o.GetOrderByID)
-				r.Get("/customer_id/{customer_id}", o.GetOrderByCustomer)
+				r.Get("/{id}", o.GetOrderByID)
+				r.Get("/{customer_id}", o.GetOrderByCustomer)
 				r.Put("/{order_id}/status", o.UpdateOrderStatus)
 			})
 
 			// Inventories
 			r.Route("/inventories", func(r chi.Router) {
 				r.Post("/create", i.CreateInventory)
-				r.Get("/inventory_id/{inventory_id}", i.GetByInventoryID)
-				r.Get("/inventory_name/{inventory_name}", i.GetByInventoryName)
+				r.Get("/{id}", i.GetByInventoryID)
+				r.Get("/by-name", i.GetByInventoryName)
 				r.Get("/all_inventories", i.ListInventories)
+				r.Get("/by-category", i.GetInventoryByCategory)
+				r.Get("/categories", i.ListCategories)
 			})
 
 			// Drivers
 			r.Route("/drivers", func(r chi.Router) {
 				r.Post("/create", d.CreateDriver)
 				r.Get("/all_drivers", d.ListDrivers)
-				r.Get("/id/{id}", d.GetDriverByID)
-				r.Get("/email/{email}", d.GetDriverByEmail)
+				r.Get("/{id}", d.GetDriverByID)
+				r.Get("/{email}", d.GetDriverByEmail)
 			})
 
 			// Deliveries
 			r.Route("/deliveries", func(r chi.Router) {
 				r.Post("/create", e.CreateDelivery)
 				r.Get("/all_deliveries", e.ListDeliveries)
-				r.Get("/id/{id}", e.GetDeliveryByID)
+				r.Get("/{id}", e.GetDeliveryByID)
 			})
 
 			// Payments
 			r.Route("/payments", func(r chi.Router) {
 				r.Post("/create", p.CreatePayment)
 				r.Get("/all_payments", p.ListPayments)
-				r.Get("/id/{id}", p.GetPaymentByID)
-				r.Get("/order_id/{order_id}", p.GetPaymentByOrderID)
+				r.Get("/{id}", p.GetPaymentByID)
+				r.Get("/{order_id}", p.GetPaymentByOrderID)
 			})
 
 			// Feedbacks
 			r.Route("/feedbacks", func(r chi.Router) {
 				r.Post("/create", f.CreateFeedback)
 				r.Get("/all_feedbacks", f.ListFeedback)
-				r.Get("/id/{id}", f.GetFeedbackByID)
+				r.Get("/{id}", f.GetFeedbackByID)
 			})
 
 			// Notifications
 			r.Route("/notifications", func(r chi.Router) {
 				r.Post("/create", n.CreateNotification)
 				r.Get("/all_notifications", n.ListNotification)
-				r.Get("/id/{id}", n.GetNotificationByID)
+				r.Get("/{id}", n.GetNotificationByID)
 			})
 		})
 	})

@@ -86,7 +86,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} user.User
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "User not found"
-// @Router /users/id/{id} [get]
+// @Router /users/{id} [get]
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -116,7 +116,7 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} user.User
 // @Failure 400 {string} string "Invalid Email"
 // @Failure 404 {string} string "User not found"
-// @Router /users/email/{email} [get]
+// @Router /users/{email} [get]
 func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	emailParam := chi.URLParam(r, "email")
 	email, err := url.PathUnescape(emailParam)

@@ -68,7 +68,7 @@ func (ph *PaymentHandler) CreatePayment(w http.ResponseWriter, r *http.Request) 
 // @Success 200 {object} payment.Payment
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Not found"
-// @Router /payments/id/{id} [get]
+// @Router /payments/{id} [get]
 func (ph *PaymentHandler) GetPaymentByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	paymentID, err := uuid.Parse(idStr)
@@ -97,7 +97,7 @@ func (ph *PaymentHandler) GetPaymentByID(w http.ResponseWriter, r *http.Request)
 // @Success 200 {object} []payment.Payment
 // @Failure 400 {string} string "Invalid Order ID"
 // @Failure 404 {string} string "Not found"
-// @Router /payments/order_id/{order_id} [get]
+// @Router /payments/{order_id} [get]
 func (ph *PaymentHandler) GetPaymentByOrderID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "order_id")
 	orderID, err := uuid.Parse(idStr)

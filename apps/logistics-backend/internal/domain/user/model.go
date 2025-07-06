@@ -22,6 +22,7 @@ type User struct {
 	PasswordHash string    `db:"password_hash" json:"password"`
 	Role         Role      `db:"role" json:"role"`
 	Phone        string    `db:"phone" json:"phone"`
+	Slug         string    `db:"slug" json:"slug"` // adminSlug used in public route
 	CreatedAt    time.Time `db:"created_at" json:"created_at"`
 }
 
