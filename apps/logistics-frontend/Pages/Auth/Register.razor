@@ -2,10 +2,10 @@
 @layout NullLayout
 @using System.ComponentModel.DataAnnotations
 @using System.Text.Json
-@inject HttpClient Http
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="auth-wrapper">
     <div class="auth-card">
@@ -85,7 +85,8 @@
 
     private async Task HandleValidSubmit()
     {
-        var response = await Http.PostAsJsonAsync("users/create", registerModel);
+        var http = HttpClientFactory.CreateClient("AnonymousApi");
+        var response = await http.PostAsJsonAsync("public/create", registerModel);
         if (response.IsSuccessStatusCode)
         {
             successMessage = "User created successfully! Redirecting to login ...";

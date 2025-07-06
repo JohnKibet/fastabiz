@@ -3,10 +3,9 @@ using logistics_frontend.Models.Order;
 public class OrderService
 {
     private readonly HttpClient _http;
-
-    public OrderService(HttpClient http)
+    public OrderService(IHttpClientFactory httpClientFactory)
     {
-        _http = http;
+        _http = httpClientFactory.CreateClient("AuthenticatedApi");
     }
 
     public async Task AddOrder(CreateOrderRequest order)
@@ -15,9 +14,16 @@ public class OrderService
         response.EnsureSuccessStatusCode();
     }
 
+    public async Task<List<Order>> GetOrderByID(Guid id)
+    {
+        var order = await _http.GetFromJsonAsync<List<Order>>($"orders/{id}");
+        return order ?? new List<Order>();
+    }
+
+
     public async Task<List<Order>> GetOrdersByCustomer(Guid customerId)
     {
-        var orders = await _http.GetFromJsonAsync<List<Order>>($"orders/customer_id/{customerId}");
+        var orders = await _http.GetFromJsonAsync<List<Order>>($"orders/{customerId}");
         return orders ?? new List<Order>();
     }
 

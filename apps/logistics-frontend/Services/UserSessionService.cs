@@ -16,7 +16,8 @@ public class UserSessionService
         var json = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "auth_user");
         if (string.IsNullOrWhiteSpace(json)) return null;
 
-        var user = JsonSerializer.Deserialize<User>(json, new JsonSerializerOptions{
+        var user = JsonSerializer.Deserialize<User>(json, new JsonSerializerOptions
+        {
             PropertyNameCaseInsensitive = true
         });
 
@@ -27,10 +28,17 @@ public class UserSessionService
     {
         var json = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "auth_user");
 
-        return string.IsNullOrWhiteSpace(json) 
-        ? null 
-        : JsonSerializer.Deserialize<User>(json, new JsonSerializerOptions{
+        return string.IsNullOrWhiteSpace(json)
+        ? null
+        : JsonSerializer.Deserialize<User>(json, new JsonSerializerOptions
+        {
             PropertyNameCaseInsensitive = true
         });
+    }
+
+    public async Task<string?> GetTokenAsync()
+    {
+        var token = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "auth_token");
+        return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 }

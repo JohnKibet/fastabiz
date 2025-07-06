@@ -4,9 +4,9 @@ using logistics_frontend.Models.Feedback;
 public class FeedbackService
 {
     private readonly HttpClient _http;
-    public FeedbackService(HttpClient http)
+    public FeedbackService(IHttpClientFactory httpClientFactory)
     {
-        _http = http;
+        _http = httpClientFactory.CreateClient("AuthenticatedApi");
     }
 
     public async Task CreateFeedback(CreateFeedbackRequest feedback)
@@ -17,7 +17,7 @@ public class FeedbackService
 
     public async Task<Feedback> GetFeedbackById(Guid feedbackId)
     {
-        var feedback = await _http.GetFromJsonAsync<Feedback>($"feedbacks/id/{feedbackId}");
+        var feedback = await _http.GetFromJsonAsync<Feedback>($"feedbacks/{feedbackId}");
         return feedback ?? throw new Exception("Payment not found");
     }
 

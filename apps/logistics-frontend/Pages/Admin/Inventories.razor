@@ -1,0 +1,124 @@
+@page "/admin/inventories"
+@layout MainLayout
+@inject InventoryService InventoryService
+@inject NavigationManager Navigation
+
+<h3>Inventories</h3>
+
+@if (!string.IsNullOrEmpty(PublicStoreUri))
+{
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <span>🔗 Your public store link: 
+            <a href="@PublicStoreUri" target="_blank">@PublicStoreUri</a>
+        </span>
+        <button class="btn btn-sm btn-outline-primary" @onclick="CopyStoreLink">Copy</button>
+    </div>
+}
+
+<!-- Category Filter -->
+<div class="mb-3">
+    <label for="categoryFilter">Filter by Category:</label>
+    <select id="categoryFilter" class="form-select w-auto d-inline-block ms-2"
+            @onchange="HandleCategoryFilter">
+        <option value="">All Categories</option>
+        @foreach (var category in Categories)
+        {
+            <option value="@category" selected="@(SelectedCategory == category)">
+                @category
+            </option>
+        }
+    </select>
+</div>
+
+<!-- Inventory Cards -->
+@if (IsLoading)
+{
+    <p>Loading inventories ...</p>
+}
+else if (InventoryContents == null || InventoryContents.Count == 0)
+{
+    <p>No inventories found @(string.IsNullOrEmpty(SelectedCategory) ? "" : $"for category: {SelectedCategory}")</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var item in InventoryContents)
+        {
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <img 
+                        src="@item.Images.Split(',')[0]" 
+                        class="card-img-top" alt="@item.Name" 
+                        style="height: 180px; object-fit: cover;" 
+                    />
+                    <div class="card-body">
+                        <h5 class="card-title">@item.Name</h5>
+                        <p class="card-text">@item.Description</p>
+                        <p class="text-muted"><strong>Price:</strong> @item.Price.ToString("C") / @item.Unit</p>
+                        <p class="text-muted"><strong>Stock:</strong> @item.Stock</p>
+                        <p><span class="badge bg-secondary">@item.Category</span></p>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<string> Categories = new();
+    private List<Inventory> InventoryContents = new();
+    private string SelectedCategory { get; set; } = string.Empty;
+    private bool IsLoading = false;
+
+    [Inject] private UserSessionService SessionService { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    private string? PublicStoreUri;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Categories = await InventoryService.GetCategories();
+        await LoadAllInventories();
+
+        var user = await SessionService.GetUserAsync();
+        if (user != null && string.IsNullOrWhiteSpace(user.Slug))
+        {
+            PublicStoreUri = $"http://192.168.100.12:8080/api/public/store/{user.Slug}";
+        }
+    }
+
+    private async Task CopyStoreLink()
+    {
+        if (string.IsNullOrWhiteSpace(PublicStoreUri))
+        {
+            Console.WriteLine("No AdminSlug found. Cannot copy link.");
+            return;
+        }
+
+        await JS.InvokeVoidAsync("navigator.clipboard.writeText", PublicStoreUri);
+        Console.WriteLine("Store link copied to clipboard!");
+    }
+
+    private async Task LoadAllInventories()
+    {
+        IsLoading = true;
+        InventoryContents = await InventoryService.GetAllInventories();
+        IsLoading = false;
+    } 
+
+    private async Task HandleCategoryFilter(ChangeEventArgs e)
+    {
+        SelectedCategory = e.Value?.ToString() ?? string.Empty;
+        IsLoading = true;
+
+        if (string.IsNullOrWhiteSpace(SelectedCategory))
+        {
+            InventoryContents = await InventoryService.GetAllInventories();
+        }
+        else
+        {
+            InventoryContents = await InventoryService.GetInventoriesByCategory(SelectedCategory);
+        }
+
+        IsLoading = false;
+    }
+}

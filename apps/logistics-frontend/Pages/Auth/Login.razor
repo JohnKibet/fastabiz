@@ -6,8 +6,8 @@
 @using System.Text.Json.Serialization
 @inject NavigationManager Navigation
 @inject CustomAuthStateProvider AuthProvider
-@inject HttpClient Http
 @inject IJSRuntime JS
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="auth-wrapper">
     <div class="auth-card">
@@ -101,7 +101,8 @@
                 "application/json"
             );
 
-            var response = await Http.PostAsync("users/login", content);
+            var http = HttpClientFactory.CreateClient("AnonymousApi");
+            var response = await http.PostAsync("public/login", content);
             var json = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)

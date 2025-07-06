@@ -12,6 +12,7 @@ public class User
 {
     public Guid ID { get; set; }
     public string FullName { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
     public string? Token { get; set; }
