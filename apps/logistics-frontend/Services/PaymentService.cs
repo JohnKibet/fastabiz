@@ -4,9 +4,9 @@ using logistics_frontend.Models.Payment;
 public class PaymentService
 {
     private readonly HttpClient _http;
-    public PaymentService(HttpClient http)
+    public PaymentService(IHttpClientFactory httpClientFactory)
     {
-        _http = http;
+        _http = httpClientFactory.CreateClient("AuthenticatedApi");
     }
 
     public async Task MakePayment(PaymentRequest payment)
@@ -17,13 +17,13 @@ public class PaymentService
 
     public async Task<Payment> GetPaymentById(Guid paymentId)
     {
-        var payment = await _http.GetFromJsonAsync<Payment>($"payments/id/{paymentId}");
+        var payment = await _http.GetFromJsonAsync<Payment>($"payments/{paymentId}");
         return payment ?? throw new Exception("Payment not found");
     }
 
     public async Task<List<Payment>> GetPaymentsByOrderId(Guid orderId)
     {
-        var payments = await _http.GetFromJsonAsync<List<Payment>>($"payments/order_id/{orderId}");
+        var payments = await _http.GetFromJsonAsync<List<Payment>>($"payments/{orderId}");
         return payments ?? new List<Payment>();
     }
 

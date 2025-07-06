@@ -1,0 +1,50 @@
+@page "/store/{adminSlug}/product/{productSlug}"
+@layout PublicLayout
+@inject HttpClient Http
+@using logistics_frontend.Models.Inventory
+
+<h2>@Product?.Name</h2>
+
+@if (IsLoading)
+{
+    <p>Loading product ...</p>
+}
+else if (Product == null)
+{
+    <p>Product not found.</p>
+}
+else 
+{
+    <div class="row">
+        <div class="col-md-6">
+            <img src="@Product.Images.Split(',')[0]" class="img-fluid" />
+        </div>
+        <div class="col-md-6">
+            <p><strong>Category:</strong> @Product.Category</p>
+            <p><strong>Description:</strong> @Product.Description</p>
+            <p><strong>Price:</strong> @Product.Price.ToString("C") per @Product.Unit</p>
+            <p><strong>Packaging:</strong> @Product.Packaging</p>
+            <p><strong>Stock:</strong> @Product.Stock</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string? adminSlug { get; set; }
+    [Parameter] public string? productSlug { get; set; }
+    private Inventory? Product;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Product = await Http.GetFromJsonAsync<Inventory>($"public/store/{adminSlug}/product/{productSlug}");
+        }
+        catch
+        {
+            Product = null;
+        }
+        IsLoading = false;
+    }
+}

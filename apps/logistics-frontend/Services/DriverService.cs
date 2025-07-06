@@ -4,10 +4,9 @@ using logistics_frontend.Models.Driver;
 public class DriverService
 {
     private readonly HttpClient _http;
-
-    public DriverService(HttpClient http)
+    public DriverService(IHttpClientFactory httpClientFactory)
     {
-        _http = http;
+        _http = httpClientFactory.CreateClient("AuthenticatedApi");
     }
 
     public async Task RegisterDriver(CreateDriverRequest driver)
@@ -18,7 +17,13 @@ public class DriverService
 
     public async Task<Driver> GetDriverById(Guid driverId)
     {
-        var driver = await _http.GetFromJsonAsync<Driver>($"drivers/id/{driverId}");
+        var driver = await _http.GetFromJsonAsync<Driver>($"drivers/{driverId}");
+        return driver ?? throw new Exception("No driver found");
+    }
+
+    public async Task<Driver> GetDriverByEmail(string email)
+    {
+        var driver = await _http.GetFromJsonAsync<Driver>($"drivers/{email}");
         return driver ?? throw new Exception("No driver found");
     }
 

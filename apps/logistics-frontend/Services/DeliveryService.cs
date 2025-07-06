@@ -4,10 +4,9 @@ using logistics_frontend.Models.Delivery;
 public class DeliveryService
 {
     private readonly HttpClient _http;
-
-    public DeliveryService(HttpClient http)
+    public DeliveryService(IHttpClientFactory httpClientFactory)
     {
-        _http = http;
+        _http = httpClientFactory.CreateClient("AuthenticatedApi");
     }
 
     public async Task CreateDelivery(CreateDelivery delivery)
@@ -18,7 +17,7 @@ public class DeliveryService
 
     public async Task<Delivery> GetDeliveryById(Guid Id)
     {
-        var delivery = await _http.GetFromJsonAsync<Delivery>($"deliveries/id/{Id}");
+        var delivery = await _http.GetFromJsonAsync<Delivery>($"deliveries/{Id}");
         return delivery ?? throw new Exception("No delivery found");
     }
     public async Task<List<Delivery>> GetDeliveries()

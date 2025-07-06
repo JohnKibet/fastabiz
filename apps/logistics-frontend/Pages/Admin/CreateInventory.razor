@@ -1,0 +1,135 @@
+@page "/admin/createinventory"
+@layout MainLayout
+@using logistics_frontend.Models.Inventory
+@inject InventoryService InventoryService
+@inject NavigationManager Navigation
+@attribute [Authorize(Roles = "admin")]
+
+<h3>Create New Inventory</h3>
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">
+        @successMessage
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
+<EditForm Model="@inventory" OnSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <!-- Left Column-->
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label>Name</label>
+                <InputText class="form-control" @bind-Value="@inventory.Name" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Category</label>
+                <InputText class="form-control" @bind-Value="@inventory.Category" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Stock</label>
+                <InputNumber class="form-control" @bind-Value="@inventory.Stock" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Price</label>
+                <InputNumber class="form-control" @bind-Value="@inventory.Price" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Unit</label>
+                <InputText class="form-control" @bind-Value="@inventory.Unit" />
+            </div>
+        </div>
+
+        <!-- Right Column-->
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                <label>Packaging</label>
+                <InputText class="form-control" @bind-Value="@inventory.Packaging" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Location</label>
+                <InputText class="form-control" @bind-Value="@inventory.Location" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Admin ID</label>
+                <InputText class="form-control" @bind-Value="AdminIdText" />
+            </div>
+
+            <div class="form-group mb-3">
+                <label>Images</label>
+                <InputText class="form-control" @bind-Value="@inventory.Images" />
+                <small class="form-text text-muted">Image URLs (comma-separated for now)</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Description (full width) -->
+    <div class="form-group mb-3">
+        <label>Description</label>
+        <InputTextArea class="form-control" @bind-Value="inventory.Description" rows="3" />
+    </div>
+
+    <!-- Image Breakdown Placeholder -->
+    <div class="form-group mb-3">
+        <label>Image Variants (Angles, Zoomed, etc.)</label>
+        <p class="text-muted">This section can later accept multiple file uploads or preview thumbnails</p>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    private string AdminIdText { get; set; } = string.Empty;
+    private CreateInventoryRequest inventory = new();
+    private string? successMessage { get; set; }
+    private string? errorMessage { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Guid.TryParse(AdminIdText, out Guid parsedId))
+        {
+            try
+            {
+                inventory.AdminID = parsedId;
+                await InventoryService.AddInventory(inventory);
+                successMessage = "Inventory created successfully.";
+                await ClearMessageAfterDelay();
+                Navigation.NavigateTo("/inventories");
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to create inventory: {ex.Message}";
+                await ClearMessageAfterDelay();
+            }
+        }
+        else
+        {
+            errorMessage = "Invalid Admin ID format.";
+        }
+    }
+
+    private async Task ClearMessageAfterDelay()
+    {
+        await Task.Delay(4000);
+        successMessage = null;
+        errorMessage = null;
+        StateHasChanged();
+    }
+}
+

@@ -4,10 +4,9 @@ using logistics_frontend.Models.Notification;
 public class NotificationService
 {
     private readonly HttpClient _http;
-
-    public NotificationService(HttpClient http)
+    public NotificationService(IHttpClientFactory httpClientFactory)
     {
-        _http = http;
+        _http = httpClientFactory.CreateClient("AuthenticatedApi");
     }
 
     public async Task CreateNotification(CreateNotificationRequest notification)
