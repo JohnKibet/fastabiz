@@ -111,18 +111,16 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} []order.Order
 // @Failure 400 {string} string "Invalid Customer ID"
 // @Failure 404 {string} string "Not found"
-// @Router /orders/{customer_id} [get]
+// @Router /orders/by-customer/{customer_id} [get]
 func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "customer_id")
-	fmt.Println("id:", idStr)
-	id, err := uuid.Parse(idStr)
-	fmt.Println("parsed id:", id)
+	customerID, err := uuid.Parse(idStr)
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, "Invalid customer ID")
 		return
 	}
 
-	o, err := h.UC.GetOrderByCustomer(r.Context(), id)
+	o, err := h.UC.GetOrderByCustomer(r.Context(), customerID)
 	if err != nil {
 		writeJSONError(w, http.StatusNotFound, "No orders found")
 		return
@@ -145,7 +143,7 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /orders/{order_id}/ [put]
+// @Router /orders/{order_id} [put]
 func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "order_id")
 	orderID, err := uuid.Parse(idStr)
