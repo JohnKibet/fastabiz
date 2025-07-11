@@ -2,6 +2,8 @@ package user
 
 import (
 	generate "logistics-backend/internal/utils"
+
+	"github.com/google/uuid"
 )
 
 type CreateUserRequest struct {
@@ -14,13 +16,16 @@ type CreateUserRequest struct {
 }
 
 func (r *CreateUserRequest) ToUser() *User {
+	baseSlug := generate.GenerateSlug(r.FullName)
+	uniqueSuffix := uuid.New().String()[:8]
+
 	return &User{
 		FullName:     r.FullName,
 		Email:        r.Email,
 		PasswordHash: r.Password,
 		Role:         r.Role,
 		Phone:        r.Phone,
-		Slug:         generate.GenerateSlug(r.Slug),
+		Slug:         baseSlug + "-" + uniqueSuffix,
 	}
 }
 

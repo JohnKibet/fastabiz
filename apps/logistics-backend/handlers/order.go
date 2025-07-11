@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"logistics-backend/internal/domain/order"
 	usecase "logistics-backend/internal/usecase/order"
@@ -44,8 +45,17 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.UC.CreateOrder(r.Context(), o); err != nil {
 		log.Printf("create order failed: %v", err)
-		writeJSONError(w, http.StatusInternalServerError, "Could not create order")
-		return
+
+		switch err {
+		case order.ErrorOutOfStock:
+			writeJSONError(w, http.StatusConflict, "Product is out of stock")
+			return
+		case order.ErrorInvalidQuantity:
+			writeJSONError(w, http.StatusConflict, "Invalid Product Quantity")
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Could not create order")
+			return
+		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -53,6 +63,8 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":                o.ID,
 		"customer_id":       o.CustomerID,
+		"inventory_id":      o.InventoryID,
+		"quantity":          o.Quantity,
 		"pickup_location":   o.PickupLocation,
 		"delivery_location": o.DeliveryLocation,
 		"order_status":      o.OrderStatus,
@@ -120,21 +132,21 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(o)
 }
 
-// UpdateOrderStatus godoc
-// @Summary Update Order Status
+// UpdateOrder godoc
+// @Summary Update Order
 // @Security JWT
-// @Description Update the status of an existing order
+// @Description Update any order struct field of an existing order
 // @Tags orders
 // @Accept json
 // @Produce json
 // @Param order_id path string true "Order ID"
-// @Param status body order.UpdateOrderStatusRequest true "New Order Status"
+// @Param update body order.UpdateOrderRequest true "Field and value to update"
 // @Success 200 {object} map[string]string
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /orders/{order_id}/status [put]
-func (h *OrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Request) {
+// @Router /orders/{order_id}/ [put]
+func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "order_id")
 	orderID, err := uuid.Parse(idStr)
 	if err != nil {
@@ -142,22 +154,27 @@ func (h *OrderHandler) UpdateOrderStatus(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var req order.UpdateOrderStatusRequest
+	var req order.UpdateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	newStatus := order.OrderStatus(req.Status)
+	column := strings.TrimSpace(strings.ToLower(req.Column))
+	if column == "" {
+		writeJSONError(w, http.StatusBadRequest, "Missing or invalid column name")
+		return
+	}
 
-	if err := h.UC.UpdateOrderStatus(r.Context(), orderID, newStatus); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not update order status")
+	if err := h.UC.UpdateOrder(r.Context(), orderID, column, req.Value); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "order status updated successfully",
+		"message": fmt.Sprintf("order %s updated successfully", column),
 	})
 }
 

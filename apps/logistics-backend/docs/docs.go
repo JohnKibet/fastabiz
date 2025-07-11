@@ -1039,14 +1039,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/{order_id}/status": {
+        "/orders/{order_id}/": {
             "put": {
                 "security": [
                     {
                         "JWT": []
                     }
                 ],
-                "description": "Update the status of an existing order",
+                "description": "Update any order struct field of an existing order",
                 "consumes": [
                     "application/json"
                 ],
@@ -1056,7 +1056,7 @@ const docTemplate = `{
                 "tags": [
                     "orders"
                 ],
-                "summary": "Update Order Status",
+                "summary": "Update Order",
                 "parameters": [
                     {
                         "type": "string",
@@ -1066,12 +1066,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "New Order Status",
-                        "name": "status",
+                        "description": "Field and value to update",
+                        "name": "update",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/order.UpdateOrderStatusRequest"
+                            "$ref": "#/definitions/order.UpdateOrderRequest"
                         }
                     }
                 ],
@@ -1947,7 +1947,9 @@ const docTemplate = `{
             "required": [
                 "customer_id",
                 "delivery_location",
-                "pickup_location"
+                "inventory_id",
+                "pickup_location",
+                "quantity"
             ],
             "properties": {
                 "customer_id": {
@@ -1956,8 +1958,14 @@ const docTemplate = `{
                 "delivery_location": {
                     "type": "string"
                 },
+                "inventory_id": {
+                    "type": "string"
+                },
                 "pickup_location": {
                     "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
                 }
             }
         },
@@ -1976,11 +1984,17 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "inventory_id": {
+                    "type": "string"
+                },
                 "order_status": {
                     "$ref": "#/definitions/order.OrderStatus"
                 },
                 "pickup_location": {
                     "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
                 },
                 "updated_at": {
                     "type": "string"
@@ -2004,14 +2018,19 @@ const docTemplate = `{
                 "Cancelled"
             ]
         },
-        "order.UpdateOrderStatusRequest": {
+        "order.UpdateOrderRequest": {
             "type": "object",
             "required": [
-                "status"
+                "column",
+                "value"
             ],
             "properties": {
-                "status": {
-                    "$ref": "#/definitions/order.OrderStatus"
+                "column": {
+                    "description": "e.g. \"status\", \"quantity\"",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "Accepts string, int, etc."
                 }
             }
         },

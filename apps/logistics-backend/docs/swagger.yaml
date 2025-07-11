@@ -248,12 +248,18 @@ definitions:
         type: string
       delivery_location:
         type: string
+      inventory_id:
+        type: string
       pickup_location:
         type: string
+      quantity:
+        type: integer
     required:
     - customer_id
     - delivery_location
+    - inventory_id
     - pickup_location
+    - quantity
     type: object
   order.Order:
     properties:
@@ -265,10 +271,14 @@ definitions:
         type: string
       id:
         type: string
+      inventory_id:
+        type: string
       order_status:
         $ref: '#/definitions/order.OrderStatus'
       pickup_location:
         type: string
+      quantity:
+        type: integer
       updated_at:
         type: string
     type: object
@@ -286,12 +296,16 @@ definitions:
     - InTransit
     - Delivered
     - Cancelled
-  order.UpdateOrderStatusRequest:
+  order.UpdateOrderRequest:
     properties:
-      status:
-        $ref: '#/definitions/order.OrderStatus'
+      column:
+        description: e.g. "status", "quantity"
+        type: string
+      value:
+        description: Accepts string, int, etc.
     required:
-    - status
+    - column
+    - value
     type: object
   payment.CreatePaymentRequest:
     properties:
@@ -1019,23 +1033,23 @@ paths:
       summary: Get order by ID
       tags:
       - orders
-  /orders/{order_id}/status:
+  /orders/{order_id}/:
     put:
       consumes:
       - application/json
-      description: Update the status of an existing order
+      description: Update any order struct field of an existing order
       parameters:
       - description: Order ID
         in: path
         name: order_id
         required: true
         type: string
-      - description: New Order Status
+      - description: Field and value to update
         in: body
-        name: status
+        name: update
         required: true
         schema:
-          $ref: '#/definitions/order.UpdateOrderStatusRequest'
+          $ref: '#/definitions/order.UpdateOrderRequest'
       produces:
       - application/json
       responses:
@@ -1065,7 +1079,7 @@ paths:
             type: object
       security:
       - JWT: []
-      summary: Update Order Status
+      summary: Update Order
       tags:
       - orders
   /orders/all_orders:

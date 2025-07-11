@@ -72,6 +72,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		"email":      u.Email,
 		"role":       u.Role,
 		"phone":      u.Phone,
+		"slug":       u.Slug,
 		"created_at": u.CreatedAt,
 	})
 }
