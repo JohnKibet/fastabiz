@@ -61,13 +61,13 @@ func main() {
 
 	// Set up usecase
 	uUsecase := userUsecase.NewUseCase(userRepo)
-	oUsecase := orderUsecase.NewUseCase(orderRepo)
 	dUsecase := driverUsecase.NewUseCase(driverRepo)
 	eUsecase := deliveryUsecase.NewUseCase(deliveryRepo)
 	pUsecase := paymentUsecase.NewUseCase(paymentRepo)
 	fUsecase := feedbackUsecase.NewUseCase(feedbackRepo)
 	nUsecase := notificationUsecase.NewUseCase(notificationRepo)
 	iUsecase := inventoryUsecase.NewUseCase(inventoryRepo)
+	oUsecase := orderUsecase.NewUseCase(orderRepo, iUsecase)
 
 	// Set up Handlers
 	userHandler := handlers.NewUserHandler(uUsecase)
