@@ -32,14 +32,14 @@ func (r *OrderRepository) Create(o *order.Order) error {
 }
 
 func (r *OrderRepository) GetByID(id uuid.UUID) (*order.Order, error) {
-	query := `SELECT id, user_id, status FROM orders WHERE id = $1`
+	query := `SELECT id, user_id, inventory_id, quantity, pickup_address, delivery_address, status, created_at, updated_at FROM orders WHERE id = $1`
 	var o order.Order
 	err := r.db.Get(&o, query, id)
 	return &o, err
 }
 
 func (r *OrderRepository) ListByCustomer(customerID uuid.UUID) ([]*order.Order, error) {
-	query := `SELECT id, user_id, status FROM orders WHERE user_id = $1`
+	query := `SELECT id, user_id, inventory_id, quantity, pickup_address, delivery_address, status, created_at, updated_at FROM orders WHERE user_id = $1`
 	var orders []*order.Order
 	err := r.db.Select(&orders, query, customerID)
 	return orders, err
@@ -89,7 +89,7 @@ func (r *OrderRepository) UpdateColumn(ctx context.Context, orderID uuid.UUID, c
 // }
 
 func (r *OrderRepository) List() ([]*order.Order, error) {
-	query := `SELECT id, user_id, inventory_id, quantity, pickup_address, delivery_address, status FROM orders`
+	query := `SELECT id, user_id, inventory_id, quantity, pickup_address, delivery_address, status, created_at, updated_at FROM orders`
 	var orders []*order.Order
 	err := r.db.Select(&orders, query)
 	return orders, err

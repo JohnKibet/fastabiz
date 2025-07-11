@@ -893,6 +893,55 @@ const docTemplate = `{
                 }
             }
         },
+        "/orders/by-customer/{customer_id}": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Fetch order(s) using Customer ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get order by Customer ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Customer ID",
+                        "name": "customer_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/order.Order"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Customer ID",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/orders/create": {
             "post": {
                 "security": [
@@ -937,55 +986,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/orders/{customer_id}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Fetch order(s) using Customer ID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Get order by Customer ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Customer ID",
-                        "name": "customer_id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/order.Order"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Customer ID",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
                         "schema": {
                             "type": "string"
                         }
@@ -1039,7 +1039,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/orders/{order_id}/": {
+        "/orders/{order_id}": {
             "put": {
                 "security": [
                     {

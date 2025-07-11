@@ -65,8 +65,8 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 				r.Post("/create", o.CreateOrder)
 				r.Get("/all_orders", o.ListOrders)
 				r.Get("/{id}", o.GetOrderByID)
-				r.Get("/{customer_id}", o.GetOrderByCustomer)
-				r.Put("/{order_id}/", o.UpdateOrder)
+				r.Get("/by-customer/{customer_id}", o.GetOrderByCustomer)
+				r.Put("/{order_id}", o.UpdateOrder)
 			})
 
 			// Inventories
