@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -77,6 +78,84 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// UpdateUserProfile godoc
+// @Summary Update user phone number
+// @Description Updates the phone number of a user (commonly used by a driver after initial registration)
+// @Tags users
+// @Security JWT
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Param body body user.UpdateDriverUserProfileRequest true "User phone update payload"
+// @Success 200 {object} map[string]string "Profile updated successfully"
+// @Failure 400 {object} map[string]string "Bad request"
+// @Failure 404 {object} map[string]string "User not found"
+// @Failure 500 {object} map[string]string "Server error"
+// @Router /users/{id}/profile [put]
+func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	userID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	var req user.UpdateDriverUserProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if err := h.UC.UpdateDriverProfile(r.Context(), userID, &req); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User profile updated"})
+
+}
+
+// UpdateUser godoc
+// @Summary Update a specific user field
+// @Description Updates a user's specific field (e.g., FullName, Email) based on user ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security JWT
+// @Param id path string true "User ID"
+// @Param data body user.UpdateUserRequest true "Field and value to update"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} string "Invalid user ID or request body"
+// @Failure 500 {object} string "Internal server error"
+// @Router /users/{id}/update [put]
+func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	userID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	var req user.UpdateUserRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if err := h.UC.UpdateUser(r.Context(), userID, &req); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("user %s updated successfully", req.Column),
+	})
+}
+
 // GetUserByID godoc
 // @Summary Get user by ID
 // @Security JWT
@@ -87,7 +166,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} user.User
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "User not found"
-// @Router /users/{id} [get]
+// @Router /users/by-id/{id} [get]
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -117,7 +196,7 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} user.User
 // @Failure 400 {string} string "Invalid Email"
 // @Failure 404 {string} string "User not found"
-// @Router /users/{email} [get]
+// @Router /users/by-email/{email} [get]
 func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	emailParam := chi.URLParam(r, "email")
 	email, err := url.PathUnescape(emailParam)
@@ -217,4 +296,35 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+// DeleteUser godoc
+// @Summary Delete a user
+// @Description Permanently deletes a user by their ID
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security JWT
+// @Param id path string true "User ID"
+// @Success 200 {object} map[string]string "User profile deleted"
+// @Failure 400 {object} string "Invalid user ID"
+// @Failure 500 {object} string "Internal server error"
+// @Router /users/{id} [delete]
+func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	userID, err := uuid.Parse(idStr)
+
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid ID")
+		return
+	}
+
+	if err := h.UC.DeleteUser(r.Context(), userID); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User profile deleted"})
 }

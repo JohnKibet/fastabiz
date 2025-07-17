@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"logistics-backend/internal/domain/delivery"
 	usecase "logistics-backend/internal/usecase/delivery"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -40,9 +43,15 @@ func (dh *DeliveryHandler) CreateDelivery(w http.ResponseWriter, r *http.Request
 
 	d := req.ToDelivery()
 
-	err := dh.DH.CreateDelivery(r.Context(), d)
-	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not create delivery")
+	if err := dh.DH.CreateDelivery(r.Context(), d); err != nil {
+		log.Printf("create delivery failed: %v", err)
+
+		switch err {
+		case delivery.ErrorNoPendingOrder:
+			writeJSONError(w, http.StatusConflict, "No pending orders")
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "could not create delivery")
+		}
 		return
 	}
 
@@ -69,7 +78,7 @@ func (dh *DeliveryHandler) CreateDelivery(w http.ResponseWriter, r *http.Request
 // @Success 200 {object} delivery.Delivery
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Delivery not found"
-// @Router /deliveries/{id} [get]
+// @Router /deliveries/by-id/{id} [get]
 func (dh *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	deliveryID, err := uuid.Parse(idStr)
@@ -86,6 +95,53 @@ func (dh *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(d)
+}
+
+// UpdateDelivery godoc
+// @Summary Update Delivery
+// @Security JWT
+// @Description Update any delivery struct field of an existing delivery
+// @Tags deliveries
+// @Accept json
+// @Produce json
+// @Param delivery_id path string true "Delivery ID"
+// @Param update body delivery.UpdateDeliveryRequest true "Field and value to update"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /deliveries/{id}/update [put]
+func (dh *DeliveryHandler) UpdateDelivery(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	deliveryID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid delivery ID")
+		return
+	}
+
+	var req delivery.UpdateDeliveryRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	column := strings.TrimSpace(strings.ToLower(req.Column))
+	if column == "" {
+		writeJSONError(w, http.StatusBadRequest, "Missing or invalid column name")
+		return
+	}
+
+	if err := dh.DH.UpdateDelivery(r.Context(), deliveryID, column, req.Value); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("delivery %s updated successfully", column),
+	})
+
 }
 
 // ListDeliveries godoc
@@ -105,4 +161,36 @@ func (dh *DeliveryHandler) ListDeliveries(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(deliveries)
+}
+
+// DeleteDelivery godoc
+// @Summary Delete a delivery
+// @Description Permanently deletes a delivery by their ID
+// @Tags deliveries
+// @Accept json
+// @Produce json
+// @Security JWT
+// @Param id path string true "Delivery ID"
+// @Success 200 {object} map[string]string "Delivery deleted"
+// @Failure 400 {object} string "Invalid Delivery ID"
+// @Failure 500 {object} string "Internal server error"
+// @Router /deliveries/{id} [delete]
+func (dh *DeliveryHandler) DeleteDelivery(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	deliveryID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid delivery ID")
+		return
+	}
+
+	if err := dh.DH.DeleteDelivery(r.Context(), deliveryID); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("delivery %s deleted", deliveryID),
+	})
 }

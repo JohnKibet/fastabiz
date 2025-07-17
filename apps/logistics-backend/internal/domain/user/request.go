@@ -15,6 +15,15 @@ type CreateUserRequest struct {
 	Slug     string `json:"slug" binding:"required"`
 }
 
+type UpdateDriverUserProfileRequest struct {
+	Phone string `json:"phone" binding:"required"`
+}
+
+type UpdateUserRequest struct {
+	Column string      `json:"column" binding:"required"`
+	Value  interface{} `json:"value" binding:"required"`
+}
+
 func (r *CreateUserRequest) ToUser() *User {
 	baseSlug := generate.GenerateSlug(r.FullName)
 	uniqueSuffix := uuid.New().String()[:8]

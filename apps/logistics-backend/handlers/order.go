@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -44,7 +43,6 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	o := req.ToOrder()
 
 	if err := h.UC.CreateOrder(r.Context(), o); err != nil {
-		log.Printf("create order failed: %v", err)
 
 		switch err {
 		case order.ErrorOutOfStock:
@@ -83,7 +81,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 // @Success 200 {object} order.Order
 // @Failure 400 {string} string "Invalid ID"
 // @Failure 404 {string} string "Not found"
-// @Router /orders/{id} [get]
+// @Router /orders/by-id/{id} [get]
 func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -143,9 +141,9 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /orders/{order_id} [put]
+// @Router /orders/{id}/update [put]
 func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "order_id")
+	idStr := chi.URLParam(r, "id")
 	orderID, err := uuid.Parse(idStr)
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, "Invalid order ID")
@@ -193,4 +191,36 @@ func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(orders)
+}
+
+// DeleteOrder godoc
+// @Summary Delete a order
+// @Description Permanently deletes an order by their ID
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Security JWT
+// @Param id path string true "Order ID"
+// @Success 200 {object} map[string]string "Order deleted"
+// @Failure 400 {object} string "Invalid order ID"
+// @Failure 500 {object} string "Internal server error"
+// @Router /orders/{id} [delete]
+func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	orderID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid order ID")
+		return
+	}
+
+	if err := h.UC.DeleteOrder(r.Context(), orderID); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("order %s deleted", orderID),
+	})
 }
