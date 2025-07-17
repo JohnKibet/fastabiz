@@ -56,27 +56,31 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 			// Users
 			r.Route("/users", func(r chi.Router) {
 				r.Get("/all_users", u.ListUsers)
-				r.Get("/{id}", u.GetUserByID)
-				r.Get("/{email}", u.GetUserByEmail)
+				r.Get("/by-id/{id}", u.GetUserByID)
+				r.Get("/by-email/{email}", u.GetUserByEmail)
+				r.Patch("/{id}/profile", u.UpdateUserProfile)
+				r.Put("/{id}/update", u.UpdateUser)
+				r.Delete("/{id}", u.DeleteUser)
 			})
 
 			// Orders
 			r.Route("/orders", func(r chi.Router) {
 				r.Post("/create", o.CreateOrder)
 				r.Get("/all_orders", o.ListOrders)
-				r.Get("/{id}", o.GetOrderByID)
+				r.Get("/by-id/{id}", o.GetOrderByID)
 				r.Get("/by-customer/{customer_id}", o.GetOrderByCustomer)
-				r.Put("/{order_id}", o.UpdateOrder)
+				r.Put("/{id}/update", o.UpdateOrder)
+				r.Delete("/{id}", o.DeleteOrder)
 			})
 
 			// Inventories
 			r.Route("/inventories", func(r chi.Router) {
 				r.Post("/create", i.CreateInventory)
-				r.Get("/{id}", i.GetByInventoryID)
 				r.Get("/by-name", i.GetByInventoryName)
 				r.Get("/all_inventories", i.ListInventories)
 				r.Get("/by-category", i.GetInventoryByCategory)
 				r.Get("/categories", i.ListCategories)
+				r.Get("/{id}", i.GetByInventoryID)
 			})
 
 			// Drivers
@@ -85,13 +89,18 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 				r.Get("/all_drivers", d.ListDrivers)
 				r.Get("/{id}", d.GetDriverByID)
 				r.Get("/{email}", d.GetDriverByEmail)
+				r.Patch("/{id}/profile", d.UpdateDriverProfile)
+				r.Put("/{id}/update", d.UpdateDriver)
+				r.Delete("/{id}", d.DeleteDriver)
 			})
 
 			// Deliveries
 			r.Route("/deliveries", func(r chi.Router) {
 				r.Post("/create", e.CreateDelivery)
 				r.Get("/all_deliveries", e.ListDeliveries)
-				r.Get("/{id}", e.GetDeliveryByID)
+				r.Get("/by-id/{id}", e.GetDeliveryByID)
+				r.Put("/{id}/update", e.UpdateDelivery)
+				r.Delete("/{id}", e.DeleteDelivery)
 			})
 
 			// Payments

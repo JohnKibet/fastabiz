@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"logistics-backend/internal/domain/driver"
 	usecase "logistics-backend/internal/usecase/driver"
 	"net/http"
@@ -40,7 +41,7 @@ func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Basic validation
-	if req.FullName == "" || req.VehicleInfo == "" || req.CurrentLocation == "" || req.Available == "" {
+	if req.FullName == "" || req.VehicleInfo == "" || req.CurrentLocation == "" {
 		writeJSONError(w, http.StatusBadRequest, "Missing required fields")
 		return
 	}
@@ -54,6 +55,7 @@ func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusAccepted)
 	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Driver profile created"})
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":               d.ID,
 		"full_name":        d.FullName,
@@ -62,6 +64,84 @@ func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 		"current_location": d.CurrentLocation,
 		"available":        d.Available,
 		"created_at":       d.CreatedAt,
+	})
+}
+
+// UpdateDriverProfile godoc
+// @Summary Update driver profile
+// @Description Updates the vehicle information and current location of a driver
+// @Tags drivers
+// @Security JWT
+// @Accept json
+// @Produce json
+// @Param driver_id path string true "Driver ID"
+// @Param body body driver.UpdateDriverRequest true "Driver profile fields to update"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /drivers/{id}/profile [put]
+func (dh *DriverHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	driverID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
+		return
+	}
+
+	var req driver.UpdateDriverProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if err := dh.DH.UpdateDriverProfile(r.Context(), driverID, &req); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "Driver profile updated"})
+
+}
+
+// UpdateDriver godoc
+// @Summary Update a specific driver field
+// @Description Updates a driver's specific field (e.g., VehicleInfo, CurrentLocation) based on driver ID
+// @Tags drivers
+// @Accept json
+// @Produce json
+// @Security JWT
+// @Param id path string true "Driver ID"
+// @Param data body driver.UpdateDriverRequest true "Field and value to update"
+// @Success 200 {object} map[string]string
+// @Failure 400 {object} string "Invalid driver ID or request body"
+// @Failure 500 {object} string "Internal server error"
+// @Router /drivers/{id}/update [put]
+func (dh *DriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	driverID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
+		return
+	}
+
+	var req driver.UpdateDriverRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if err := dh.DH.UpdateDriver(r.Context(), driverID, &req); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("driver %s updated successfully", req.Column),
 	})
 }
 
@@ -140,4 +220,36 @@ func (dh *DriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(drivers)
+}
+
+// DeleteDriver godoc
+// @Summary Delete a driver
+// @Description Permanently deletes a driver by their ID
+// @Tags drivers
+// @Accept json
+// @Produce json
+// @Security JWT
+// @Param id path string true "Driver ID"
+// @Success 200 {object} map[string]string "Driver deleted"
+// @Failure 400 {object} string "Invalid driver ID"
+// @Failure 500 {object} string "Internal server error"
+// @Router /drivers/{id} [delete]
+func (h *DriverHandler) DeleteDriver(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	driverID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
+		return
+	}
+
+	if err := h.DH.DeleteDriver(r.Context(), driverID); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": fmt.Sprintf("driver %s deleted", driverID),
+	})
 }

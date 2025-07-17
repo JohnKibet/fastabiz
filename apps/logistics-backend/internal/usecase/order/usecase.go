@@ -6,6 +6,7 @@ import (
 	"logistics-backend/internal/domain/order"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 type UseCase struct {
@@ -53,10 +54,20 @@ func (uc *UseCase) GetOrderByCustomer(ctx context.Context, customerID uuid.UUID)
 	return uc.repo.ListByCustomer(customerID)
 }
 
+// put method for simple update operation
 func (uc *UseCase) UpdateOrder(ctx context.Context, orderID uuid.UUID, column string, value any) error {
 	return uc.repo.UpdateColumn(ctx, orderID, column, value)
 }
 
+// put method for multiple operations - create + update
+func (uc *UseCase) UpdateOrderTx(ctx context.Context, tx *sqlx.Tx, orderID uuid.UUID, column string, value any) error {
+	return uc.repo.UpdateColumnTx(ctx, tx, orderID, column, value)
+}
+
 func (uc *UseCase) ListOrders(ctx context.Context) ([]*order.Order, error) {
 	return uc.repo.List()
+}
+
+func (uc *UseCase) DeleteOrder(ctx context.Context, id uuid.UUID) error {
+	return uc.repo.Delete(ctx, id)
 }

@@ -45,6 +45,7 @@ func (r *OrderRepository) ListByCustomer(customerID uuid.UUID) ([]*order.Order, 
 	return orders, err
 }
 
+// non transaction - simple update method
 func (r *OrderRepository) UpdateColumn(ctx context.Context, orderID uuid.UUID, column string, value any) error {
 	// Validate column name to avoid SQL injection
 	allowed := map[string]bool{
@@ -60,6 +61,36 @@ func (r *OrderRepository) UpdateColumn(ctx context.Context, orderID uuid.UUID, c
 
 	query := fmt.Sprintf(`UPDATE orders SET %s = $1, updated_at = NOW() WHERE id = $2`, column)
 	res, err := r.db.ExecContext(ctx, query, value, orderID)
+	if err != nil {
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("no order found with id %s", orderID)
+	}
+	return nil
+}
+
+func (r *OrderRepository) UpdateColumnTx(ctx context.Context, tx *sqlx.Tx, orderID uuid.UUID, column string, value any) error {
+	// Validate column name to avoid SQL injection
+	allowed := map[string]bool{
+		"status":           true,
+		"quantity":         true,
+		"pickup_address":   true,
+		"delivery_address": true,
+	}
+
+	if !allowed[column] {
+		return fmt.Errorf("attempted to update disallowed column: %s", column)
+	}
+
+	query := fmt.Sprintf(`UPDATE orders SET %s = $1, updated_at = NOW() WHERE id = $2`, column)
+	res, err := tx.ExecContext(ctx, query, value, orderID)
 	if err != nil {
 		return err
 	}
@@ -93,4 +124,10 @@ func (r *OrderRepository) List() ([]*order.Order, error) {
 	var orders []*order.Order
 	err := r.db.Select(&orders, query)
 	return orders, err
+}
+
+func (r *OrderRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	query := `DELETE FROM orders WHERE id = $1 `
+	_, err := r.db.ExecContext(ctx, query, id)
+	return err
 }
