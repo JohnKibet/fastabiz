@@ -30,13 +30,13 @@ func NewOrderHandler(uc *usecase.UseCase) *OrderHandler {
 // @Produce json
 // @Param order body order.CreateOrderRequest true "Order input"
 // @Success 201 {object} order.Order
-// @Failure 400 {string} string "Bad request"
-// @Failure 500 {string} string "Internal server error"
+// @Failure 400 {string} handlers.ErrorResponse "Bad request"
+// @Failure 500 {string} handlers.ErrorResponse "Internal server error"
 // @Router /orders/create [post]
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	var req order.CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid request")
+		writeJSONError(w, http.StatusBadRequest, "Invalid request", nil)
 		return
 	}
 
@@ -46,12 +46,12 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 		switch err {
 		case order.ErrorOutOfStock:
-			writeJSONError(w, http.StatusConflict, "Product is out of stock")
+			writeJSONError(w, http.StatusConflict, "Product is out of stock", err)
 			return
 		case order.ErrorInvalidQuantity:
-			writeJSONError(w, http.StatusConflict, "Invalid Product Quantity")
+			writeJSONError(w, http.StatusConflict, "Invalid Product Quantity", err)
 		default:
-			writeJSONError(w, http.StatusInternalServerError, "Could not create order")
+			writeJSONError(w, http.StatusInternalServerError, "Could not create order", err)
 			return
 		}
 	}
@@ -79,19 +79,19 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param id path string true "Order ID"
 // @Success 200 {object} order.Order
-// @Failure 400 {string} string "Invalid ID"
-// @Failure 404 {string} string "Not found"
+// @Failure 400 {string} handlers.ErrorResponse "Invalid ID"
+// @Failure 404 {string} handlers.ErrorResponse "Not found"
 // @Router /orders/by-id/{id} [get]
 func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid order ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid order ID", nil)
 		return
 	}
 	o, err := h.UC.GetOrder(r.Context(), id)
 	if err != nil {
-		writeJSONError(w, http.StatusNotFound, "Order not found")
+		writeJSONError(w, http.StatusNotFound, "Order not found", err)
 		return
 	}
 
@@ -107,20 +107,20 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param customer_id path string true "Customer ID"
 // @Success 200 {object} []order.Order
-// @Failure 400 {string} string "Invalid Customer ID"
-// @Failure 404 {string} string "Not found"
+// @Failure 400 {string} handlers.ErrorResponse "Invalid Customer ID"
+// @Failure 404 {string} handlers.ErrorResponse "Not found"
 // @Router /orders/by-customer/{customer_id} [get]
 func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "customer_id")
 	customerID, err := uuid.Parse(idStr)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid customer ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid customer ID", nil)
 		return
 	}
 
 	o, err := h.UC.GetOrderByCustomer(r.Context(), customerID)
 	if err != nil {
-		writeJSONError(w, http.StatusNotFound, "No orders found")
+		writeJSONError(w, http.StatusNotFound, "No orders found", err)
 		return
 	}
 
@@ -138,32 +138,32 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 // @Param order_id path string true "Order ID"
 // @Param update body order.UpdateOrderRequest true "Field and value to update"
 // @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Failure 400 {object} handlers.ErrorResponse "Invalid order ID or request body"
+// @Failure 404 {object} handlers.ErrorResponse "Not found"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /orders/{id}/update [put]
 func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	orderID, err := uuid.Parse(idStr)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid order ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid order ID", nil)
 		return
 	}
 
 	var req order.UpdateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", err)
 		return
 	}
 
 	column := strings.TrimSpace(strings.ToLower(req.Column))
 	if column == "" {
-		writeJSONError(w, http.StatusBadRequest, "Missing or invalid column name")
+		writeJSONError(w, http.StatusBadRequest, "Missing or invalid column name", err)
 		return
 	}
 
 	if err := h.UC.UpdateOrder(r.Context(), orderID, column, req.Value); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		writeJSONError(w, http.StatusInternalServerError, "Failed to update order", err)
 		return
 	}
 
@@ -185,7 +185,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 	orders, err := h.UC.ListOrders(r.Context())
 	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not fetch orders")
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch orders", err)
 		return
 	}
 
@@ -202,19 +202,19 @@ func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 // @Security JWT
 // @Param id path string true "Order ID"
 // @Success 200 {object} map[string]string "Order deleted"
-// @Failure 400 {object} string "Invalid order ID"
-// @Failure 500 {object} string "Internal server error"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid order ID"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /orders/{id} [delete]
 func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	orderID, err := uuid.Parse(idStr)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid order ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid order ID", nil)
 		return
 	}
 
 	if err := h.UC.DeleteOrder(r.Context(), orderID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		writeJSONError(w, http.StatusInternalServerError, "Failed to delete order", err)
 		return
 	}
 

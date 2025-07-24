@@ -22,6 +22,10 @@ func (r *CreateDeliveryRequest) ToDelivery() *Delivery {
 		OrderID:    r.OrderID,
 		DriverID:   r.DriverID,
 		Status:     DeliveryAssigned,
-		AssignedAt: time.Now(),
+		AssignedAt: ptrTime(time.Now()),
 	}
+}
+
+func ptrTime(t time.Time) *time.Time {
+	return &t
 }

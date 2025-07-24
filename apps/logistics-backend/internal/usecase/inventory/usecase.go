@@ -55,3 +55,7 @@ func (uc *UseCase) GetBySlugs(ctx context.Context, adminSlug, productSlug string
 func (uc *UseCase) GetStorePublicView(ctx context.Context, adminSlug string) (*domain.StorePublicView, error) {
 	return uc.repo.GetStoreView(adminSlug)
 }
+
+func (uc *UseCase) DeleteByID(ctx context.Context, id uuid.UUID) error {
+	return uc.repo.Delete(ctx, id)
+}

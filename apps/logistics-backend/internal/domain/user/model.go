@@ -19,7 +19,7 @@ type User struct {
 	ID                   uuid.UUID `db:"id" json:"id"`
 	FullName             string    `db:"full_name" json:"fullName"`
 	Email                string    `db:"email" json:"email"`
-	PasswordHash         string    `db:"password_hash" json:"password"`
+	PasswordHash         string    `db:"password_hash" json:"-"`
 	Role                 Role      `db:"role" json:"role"`
 	Phone                string    `db:"phone" json:"phone"`
 	Slug                 string    `db:"slug" json:"slug"` // adminSlug used in public route
