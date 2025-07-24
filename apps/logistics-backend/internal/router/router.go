@@ -77,18 +77,19 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 			r.Route("/inventories", func(r chi.Router) {
 				r.Post("/create", i.CreateInventory)
 				r.Get("/by-name", i.GetByInventoryName)
+				r.Get("/by-id", i.GetByInventoryID)
 				r.Get("/all_inventories", i.ListInventories)
 				r.Get("/by-category", i.GetInventoryByCategory)
 				r.Get("/categories", i.ListCategories)
-				r.Get("/{id}", i.GetByInventoryID)
+				r.Delete("/{id}", i.DeleteInventory)
 			})
 
 			// Drivers
 			r.Route("/drivers", func(r chi.Router) {
 				r.Post("/create", d.CreateDriver)
 				r.Get("/all_drivers", d.ListDrivers)
-				r.Get("/{id}", d.GetDriverByID)
-				r.Get("/{email}", d.GetDriverByEmail)
+				r.Get("/by-id/{id}", d.GetDriverByID)
+				r.Get("/by-email/{email}", d.GetDriverByEmail)
 				r.Patch("/{id}/profile", d.UpdateDriverProfile)
 				r.Put("/{id}/update", d.UpdateDriver)
 				r.Delete("/{id}", d.DeleteDriver)
@@ -100,6 +101,7 @@ func NewRouter(u *handlers.UserHandler, o *handlers.OrderHandler, d *handlers.Dr
 				r.Get("/all_deliveries", e.ListDeliveries)
 				r.Get("/by-id/{id}", e.GetDeliveryByID)
 				r.Put("/{id}/update", e.UpdateDelivery)
+				r.Put("/{id}/accept", e.AcceptDelivery)
 				r.Delete("/{id}", e.DeleteDelivery)
 			})
 

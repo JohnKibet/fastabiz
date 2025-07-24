@@ -59,6 +59,7 @@ func (r *UserRepository) UpdateColum(ctx context.Context, userID uuid.UUID, colu
 		"full_name": true,
 		"email":     true,
 		"phone":     true,
+		"role":      true,
 	}
 
 	if !allowed[column] {

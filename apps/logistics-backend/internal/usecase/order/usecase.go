@@ -23,7 +23,7 @@ func (uc *UseCase) CreateOrder(ctx context.Context, o *order.Order) error {
 		return order.ErrorInvalidQuantity
 	}
 
-	inv, err := uc.invLogic.GetByID(ctx, o.InventoryID)
+	inv, err := uc.invLogic.GetInventoryByID(ctx, o.InventoryID)
 	if err != nil {
 		return fmt.Errorf("could not fetch inventory: %w", err)
 	}

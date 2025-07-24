@@ -3,6 +3,7 @@ package driver
 import (
 	"context"
 	"fmt"
+	"log"
 	domain "logistics-backend/internal/domain/driver"
 
 	"github.com/google/uuid"
@@ -42,8 +43,19 @@ func (uc *UseCase) UpdateDriver(ctx context.Context, id uuid.UUID, req *domain.U
 	return uc.repo.UpdateColumn(ctx, id, req.Column, req.Value)
 }
 
-func (uc *UseCase) GetDriverByID(ctx context.Context, id uuid.UUID) (*domain.Driver, error) {
-	return uc.repo.GetByID(id)
+func (uc *UseCase) UpdateDriverAvailability(ctx context.Context, driverID uuid.UUID, column string, available bool) error {
+	return uc.repo.UpdateColumn(ctx, driverID, column, available)
+}
+
+func (uc *UseCase) GetDriver(ctx context.Context, id uuid.UUID) (*domain.Driver, error) {
+	log.Printf("driver usecase driver id: %+v", id)
+	driver, err := uc.repo.GetByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("driver from db: %+v", driver)
+	return driver, nil
 }
 
 func (uc *UseCase) GetDriverByEmail(ctx context.Context, email string) (*domain.Driver, error) {

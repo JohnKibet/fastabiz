@@ -29,27 +29,27 @@ func NewDriverHandler(dh *usecase.UseCase) *DriverHandler {
 // @Produce  json
 // @Param user body driver.CreateDriverRequest true "User Input"
 // @Success 201 {object} driver.Driver
-// @Failure 400 {string} string "Invalid request"
-// @Failure 500 {string} string "Failed to create driver"
+// @Failure 400 {string} handlers.ErrorResponse "Invalid request"
+// @Failure 500 {string} handlers.ErrorResponse "Failed to create driver"
 // @Router /drivers/create [post]
 func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 	var req driver.CreateDriverRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid request")
+		writeJSONError(w, http.StatusBadRequest, "Invalid request", nil)
 		return
 	}
 
 	// Basic validation
 	if req.FullName == "" || req.VehicleInfo == "" || req.CurrentLocation == "" {
-		writeJSONError(w, http.StatusBadRequest, "Missing required fields")
+		writeJSONError(w, http.StatusBadRequest, "Missing required fields", nil)
 		return
 	}
 
 	d := req.ToDriver()
 
 	if err := dh.DH.RegisterDriver(r.Context(), d); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not create driver")
+		writeJSONError(w, http.StatusInternalServerError, "Could not create driver", err)
 		return
 	}
 
@@ -77,26 +77,26 @@ func (dh *DriverHandler) CreateDriver(w http.ResponseWriter, r *http.Request) {
 // @Param driver_id path string true "Driver ID"
 // @Param body body driver.UpdateDriverRequest true "Driver profile fields to update"
 // @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 404 {object} map[string]string
-// @Failure 500 {object} map[string]string
-// @Router /drivers/{id}/profile [put]
+// @Failure 400 {object} handlers.ErrorResponse
+// @Failure 404 {object} handlers.ErrorResponse
+// @Failure 500 {object} handlers.ErrorResponse
+// @Router /drivers/{id}/profile [patch]
 func (dh *DriverHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	driverID, err := uuid.Parse(idStr)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID", nil)
 		return
 	}
 
 	var req driver.UpdateDriverProfileRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", err)
 		return
 	}
 
 	if err := dh.DH.UpdateDriverProfile(r.Context(), driverID, &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		writeJSONError(w, http.StatusInternalServerError, "Failed to update driver profile", err)
 		return
 	}
 
@@ -116,25 +116,25 @@ func (dh *DriverHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Requ
 // @Param id path string true "Driver ID"
 // @Param data body driver.UpdateDriverRequest true "Field and value to update"
 // @Success 200 {object} map[string]string
-// @Failure 400 {object} string "Invalid driver ID or request body"
-// @Failure 500 {object} string "Internal server error"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid driver ID or request body"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /drivers/{id}/update [put]
 func (dh *DriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	driverID, err := uuid.Parse(idStr)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID", nil)
 		return
 	}
 
 	var req driver.UpdateDriverRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid request body")
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", err)
 		return
 	}
 
 	if err := dh.DH.UpdateDriver(r.Context(), driverID, &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		writeJSONError(w, http.StatusInternalServerError, "Failed to update driver", err)
 		return
 	}
 
@@ -153,20 +153,20 @@ func (dh *DriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param id path string true "Driver ID"
 // @Success 200 {object} driver.Driver
-// @Failure 400 {string} string "Invalid ID"
-// @Failure 404 {string} string "Driver not found"
-// @Router /drivers/{id} [get]
+// @Failure 400 {string} handlers.ErrorResponse "Invalid ID"
+// @Failure 404 {string} handlers.ErrorResponse "Driver not found"
+// @Router /drivers/by-id/{id} [get]
 func (dh *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 	driverID := chi.URLParam(r, "id")
 	id, err := uuid.Parse(driverID)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID", nil)
 		return
 	}
 
-	d, err := dh.DH.GetDriverByID(r.Context(), id)
+	d, err := dh.DH.GetDriver(r.Context(), id)
 	if err != nil {
-		writeJSONError(w, http.StatusNotFound, "Driver not found")
+		writeJSONError(w, http.StatusNotFound, "Driver not found", err)
 		return
 	}
 
@@ -182,20 +182,20 @@ func (dh *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param email path string true "Driver Email"
 // @Success 200 {object} driver.Driver
-// @Failure 400 {string} string "Invalid Email"
-// @Failure 404 {string} string "Driver not found"
-// @Router /drivers/{email} [get]
+// @Failure 400 {string} handlers.ErrorResponse "Invalid Email"
+// @Failure 404 {string} handlers.ErrorResponse "Driver not found"
+// @Router /drivers/by-email/{email} [get]
 func (dh *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request) {
 	emailParam := chi.URLParam(r, "email")
 	email, err := url.PathUnescape(emailParam)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid email format")
+		writeJSONError(w, http.StatusBadRequest, "Invalid email format", nil)
 		return
 	}
 
 	d, err := dh.DH.GetDriverByEmail(r.Context(), email)
 	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Driver not found")
+		writeJSONError(w, http.StatusInternalServerError, "Driver not found", err)
 		return
 	}
 
@@ -214,7 +214,7 @@ func (dh *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request
 func (dh *DriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {
 	drivers, err := dh.DH.ListDrivers(r.Context())
 	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not fetch drivers")
+		writeJSONError(w, http.StatusInternalServerError, "Could not fetch drivers", err)
 		return
 	}
 
@@ -231,19 +231,19 @@ func (dh *DriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {
 // @Security JWT
 // @Param id path string true "Driver ID"
 // @Success 200 {object} map[string]string "Driver deleted"
-// @Failure 400 {object} string "Invalid driver ID"
-// @Failure 500 {object} string "Internal server error"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid driver ID"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /drivers/{id} [delete]
 func (h *DriverHandler) DeleteDriver(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	driverID, err := uuid.Parse(idStr)
 	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID")
+		writeJSONError(w, http.StatusBadRequest, "Invalid driver ID", nil)
 		return
 	}
 
 	if err := h.DH.DeleteDriver(r.Context(), driverID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, err.Error())
+		writeJSONError(w, http.StatusInternalServerError, "Failed to delete user", err)
 		return
 	}
 

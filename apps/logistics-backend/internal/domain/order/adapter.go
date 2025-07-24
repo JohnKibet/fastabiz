@@ -10,6 +10,7 @@ import (
 // cross-domain DI using necessary interface
 
 type InventoryReader interface {
-	GetByID(ctx context.Context, id uuid.UUID) (*inventory.Inventory, error)
+	// inventory
+	GetInventoryByID(ctx context.Context, id uuid.UUID) (*inventory.Inventory, error)
 	UpdateInventory(ctx context.Context, inventoryId uuid.UUID, column string, value any) error
 }

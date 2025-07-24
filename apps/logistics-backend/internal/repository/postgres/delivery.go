@@ -87,6 +87,32 @@ func (r *DeliveryRepository) Update(ctx context.Context, deliveryID uuid.UUID, c
 	return nil
 }
 
+func (r *DeliveryRepository) Accept(ctx context.Context, d *delivery.Delivery) error {
+	query := `
+		UPDATE deliveries
+		SET status = 'picked_up',
+			picked_up_at = $1,
+			driver_id = $2,
+			updated_at = NOW()
+		WHERE id = $3 AND status = 'assigned'
+	`
+	res, err := r.db.ExecContext(ctx, query, d.PickedUpAt, d.DriverID, d.ID)
+	if err != nil {
+		return fmt.Errorf("failed to accept delivery: %w", err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("could not verify delivery update: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("delivery already picked or invalid")
+	}
+
+	return nil
+}
+
 func (r *DeliveryRepository) List() ([]*delivery.Delivery, error) {
 	query := `SELECT id, order_id, driver_id, assigned_at, picked_up_at, delivered_at, status FROM deliveries`
 	var deliveries []*delivery.Delivery

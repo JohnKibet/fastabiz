@@ -12,7 +12,7 @@ type InventoryUseCaseAdapter struct {
 	UseCase *inventoryusecase.UseCase
 }
 
-func (a *InventoryUseCaseAdapter) GetByID(ctx context.Context, id uuid.UUID) (*inventory.Inventory, error) {
+func (a *InventoryUseCaseAdapter) GetInventoryByID(ctx context.Context, id uuid.UUID) (*inventory.Inventory, error) {
 	return a.UseCase.GetByID(ctx, id)
 }
 

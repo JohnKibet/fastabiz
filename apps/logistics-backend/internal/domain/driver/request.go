@@ -23,5 +23,6 @@ func (r *CreateDriverRequest) ToDriver() *Driver {
 		Email:           r.Email,
 		VehicleInfo:     r.VehicleInfo,
 		CurrentLocation: r.CurrentLocation,
+		Available:       true,
 	}
 }

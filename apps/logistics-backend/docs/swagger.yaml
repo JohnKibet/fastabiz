@@ -115,6 +115,17 @@ definitions:
       submitted_at:
         type: string
     type: object
+  handlers.ErrorResponse:
+    properties:
+      detail:
+        description: optional internal error
+        example: validation failed on field 'email'
+        type: string
+      error:
+        description: user-friendly message
+        example: Invalid request
+        type: string
+    type: object
   inventory.CreateInventoryRequest:
     properties:
       admin_id:
@@ -456,8 +467,6 @@ definitions:
         type: string
       must_change_password:
         type: boolean
-      password:
-        type: string
       phone:
         type: string
       role:
@@ -498,14 +507,48 @@ paths:
         "400":
           description: Invalid Delivery ID
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Delete a delivery
+      tags:
+      - deliveries
+  /deliveries/{id}/accept:
+    put:
+      description: Updates delivery status to 'picked up' and sets the pickup timestamp.
+        Only callable by authenticated drivers.
+      parameters:
+      - description: Delivery ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/delivery.Delivery'
+        "400":
+          description: Missing or invalid delivery ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Failed to accept delivery
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Accept and mark delivery as picked up
       tags:
       - deliveries
   /deliveries/{id}/update:
@@ -535,23 +578,17 @@ paths:
               type: string
             type: object
         "400":
-          description: Bad Request
+          description: Invalid delivery ID or request body
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
-          description: Not Found
+          description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Update Delivery
@@ -635,35 +672,6 @@ paths:
       summary: Create a new delivery
       tags:
       - deliveries
-  /drivers/{email}:
-    get:
-      description: Retrieve a driver by their Email
-      parameters:
-      - description: Driver Email
-        in: path
-        name: email
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/driver.Driver'
-        "400":
-          description: Invalid Email
-          schema:
-            type: string
-        "404":
-          description: Driver not found
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: Get driver by Email
-      tags:
-      - drivers
   /drivers/{id}:
     delete:
       consumes:
@@ -687,46 +695,18 @@ paths:
         "400":
           description: Invalid driver ID
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Delete a driver
       tags:
       - drivers
-    get:
-      description: Retrieve a driver by their ID
-      parameters:
-      - description: Driver ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/driver.Driver'
-        "400":
-          description: Invalid ID
-          schema:
-            type: string
-        "404":
-          description: Driver not found
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: Get driver by ID
-      tags:
-      - drivers
   /drivers/{id}/profile:
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates the vehicle information and current location of a driver
@@ -754,21 +734,15 @@ paths:
         "400":
           description: Bad Request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Update driver profile
@@ -804,11 +778,11 @@ paths:
         "400":
           description: Invalid driver ID or request body
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Update a specific driver field
@@ -829,6 +803,64 @@ paths:
       security:
       - JWT: []
       summary: List all drivers
+      tags:
+      - drivers
+  /drivers/by-email/{email}:
+    get:
+      description: Retrieve a driver by their Email
+      parameters:
+      - description: Driver Email
+        in: path
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/driver.Driver'
+        "400":
+          description: Invalid Email
+          schema:
+            type: string
+        "404":
+          description: Driver not found
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Get driver by Email
+      tags:
+      - drivers
+  /drivers/by-id/{id}:
+    get:
+      description: Retrieve a driver by their ID
+      parameters:
+      - description: Driver ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/driver.Driver'
+        "400":
+          description: Invalid ID
+          schema:
+            type: string
+        "404":
+          description: Driver not found
+          schema:
+            type: string
+      security:
+      - JWT: []
+      summary: Get driver by ID
       tags:
       - drivers
   /drivers/create:
@@ -942,11 +974,13 @@ paths:
       tags:
       - feedbacks
   /inventories/{id}:
-    get:
-      description: Get a specific inventory item by UUID
+    delete:
+      consumes:
+      - application/json
+      description: Permanently deletes an inventory by their ID
       parameters:
       - description: Inventory ID
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -954,24 +988,22 @@ paths:
       - application/json
       responses:
         "200":
-          description: OK
+          description: Inventory deleted
           schema:
-            $ref: '#/definitions/inventory.Inventory'
+            additionalProperties:
+              type: string
+            type: object
         "400":
-          description: Bad Request
+          description: Invalid inventory ID
           schema:
-            additionalProperties:
-              type: string
-            type: object
-        "404":
-          description: Not Found
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
-      summary: Get inventory by ID
+      summary: Delete an inventory
       tags:
       - inventories
   /inventories/all_inventories:
@@ -996,11 +1028,9 @@ paths:
               $ref: '#/definitions/inventory.Inventory'
             type: array
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: List all inventories
@@ -1025,20 +1055,45 @@ paths:
               $ref: '#/definitions/inventory.Inventory'
             type: array
         "400":
-          description: Bad Request
+          description: Invalid Category
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
-          description: Not Found
+          description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Get inventories by category
+      tags:
+      - inventories
+  /inventories/by-id:
+    get:
+      description: Get a specific inventory item by UUID
+      parameters:
+      - description: Inventory ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/inventory.Inventory'
+        "400":
+          description: Invalid inventory ID or request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get inventory by ID
       tags:
       - inventories
   /inventories/by-name:
@@ -1058,17 +1113,13 @@ paths:
           schema:
             $ref: '#/definitions/inventory.Inventory'
         "400":
-          description: Bad Request
+          description: Invalid inventory ID or request body
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
-          description: Not Found
+          description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Get inventory by name
@@ -1087,11 +1138,9 @@ paths:
               type: string
             type: array
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: List all categories
@@ -1117,17 +1166,13 @@ paths:
           schema:
             $ref: '#/definitions/inventory.Inventory'
         "400":
-          description: Bad Request
+          description: Invalid inventory ID or request body
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Create a new inventory
@@ -1234,11 +1279,11 @@ paths:
         "400":
           description: Invalid order ID
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Delete a order
@@ -1271,23 +1316,17 @@ paths:
               type: string
             type: object
         "400":
-          description: Bad Request
+          description: Invalid order ID or request body
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
-          description: Not Found
+          description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Update Order
@@ -1531,13 +1570,13 @@ paths:
           schema:
             $ref: '#/definitions/user.User'
         "400":
-          description: Invalid request
+          description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
-          description: Failed to create user
+          description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       summary: Create a new user
       tags:
       - public
@@ -1593,11 +1632,9 @@ paths:
           schema:
             $ref: '#/definitions/inventory.StorePublicView'
         "404":
-          description: Not Found
+          description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       summary: View public store page
       tags:
       - public
@@ -1623,11 +1660,9 @@ paths:
           schema:
             $ref: '#/definitions/inventory.Inventory'
         "404":
-          description: Not Found
+          description: Not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       summary: View public product page
       tags:
       - public
@@ -1654,18 +1689,18 @@ paths:
         "400":
           description: Invalid user ID
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Delete a user
       tags:
       - users
   /users/{id}/profile:
-    put:
+    patch:
       consumes:
       - application/json
       description: Updates the phone number of a user (commonly used by a driver after
@@ -1694,21 +1729,15 @@ paths:
         "400":
           description: Bad request
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
           description: User not found
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Server error
           schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Update user phone number
@@ -1744,11 +1773,11 @@ paths:
         "400":
           description: Invalid user ID or request body
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
       summary: Update a specific user field

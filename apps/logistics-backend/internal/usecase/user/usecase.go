@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UseCase struct {
@@ -20,27 +21,34 @@ func NewUseCase(repo domain.Repository, dRepo domain.CreateDriver) *UseCase {
 }
 
 func (uc *UseCase) RegisterUser(ctx context.Context, u *domain.User) error {
-	user, err := uc.repo.GetByID(u.ID)
+	// hash password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.PasswordHash), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to hash password: %w", err)
 	}
-	if user.Role == "driver" {
+	u.PasswordHash = string(hashedPassword)
+
+	// insert user to DB
+	if err := uc.repo.Create(u); err != nil {
+		return fmt.Errorf("could not create user: %w", err)
+	}
+
+	// if role is driver, insert into drivers table
+	if u.Role == "driver" {
 		driver := &driver.Driver{
-			ID:              user.ID,
-			FullName:        user.FullName,
-			Email:           user.Email,
+			ID:              u.ID,
+			FullName:        u.FullName,
+			Email:           u.Email,
 			VehicleInfo:     "not set",
 			CurrentLocation: "not set",
 			Available:       true,
-			CreatedAt:       time.Now().String(),
+			CreatedAt:       time.Now(),
 		}
-		err := uc.dRepo.RegisterDriver(ctx, driver)
-		if err != nil {
+		if err := uc.dRepo.RegisterDriver(ctx, driver); err != nil {
 			return fmt.Errorf("could not register driver: %w", err)
 		}
 	}
-
-	return uc.repo.Create(u)
+	return nil
 }
 
 // PATCH method for drivers users to update details

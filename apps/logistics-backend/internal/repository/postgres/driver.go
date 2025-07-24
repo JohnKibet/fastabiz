@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"fmt"
 	"logistics-backend/internal/domain/driver"
 
@@ -71,6 +73,12 @@ func (r *DriverRepository) GetByID(id uuid.UUID) (*driver.Driver, error) {
 	query := `SELECT id, full_name, email, vehicle_info, current_location, available, created_at FROM drivers WHERE id = $1`
 	var d driver.Driver
 	err := r.db.Get(&d, query, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("driver with id %s not found", id)
+		}
+		return nil, fmt.Errorf("query error: %w", err)
+	}
 	return &d, err
 }
 

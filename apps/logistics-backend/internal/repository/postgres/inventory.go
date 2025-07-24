@@ -193,6 +193,12 @@ func (r *InventoryRepository) GetStoreView(adminSlug string) (*inventory.StorePu
 	return &store, nil
 }
 
+func (r *InventoryRepository) Delete(ctx context.Context, id uuid.UUID) error {
+	query := `DELETE FROM inventories WHERE id = $1`
+	_, err := r.db.ExecContext(ctx, query, id)
+	return err
+}
+
 // func GetColumnValues[T any](ctx context.Context, db *sqlx.DB, column string) ([]T, error) {
 // 	// Optional: whitelist
 // 	allowed := map[string]bool{
