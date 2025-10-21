@@ -54,7 +54,6 @@ builder.Services.AddHttpClient("AuthenticatedApi", client =>
 // Register app services
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<DropdownDataService>();
 builder.Services.AddScoped<DriverService>();
 builder.Services.AddScoped<PaymentService>();
@@ -64,6 +63,7 @@ builder.Services.AddScoped<InventoryService>();
 builder.Services.AddScoped<UserSessionService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ToastService>();
+builder.Services.AddScoped<StoreService>();
 
 // Authentication & Authorization
 builder.Services.AddOptions();

@@ -63,7 +63,8 @@
 
     <!-- Continue Button -->
     <div class="text-center mt-10">
-        <button disabled="@string.IsNullOrEmpty(selectedRole)"
+        <button type="button"
+                disabled="@string.IsNullOrEmpty(selectedRole)"
                 class="px-8 py-3 rounded font-semibold transition-colors
                        @(string.IsNullOrEmpty(selectedRole) 
                          ? "bg-gray-300 text-gray-600 cursor-not-allowed" 

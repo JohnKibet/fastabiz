@@ -4,73 +4,28 @@
 @using logistics_frontend.Models.Notification
 @inject NavigationManager Navigation
 
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md px-6 py-3 flex items-center justify-between max-w-7xl mx-auto">
-  <!-- Left section (Title or Logo) -->
-  <div class="text-xl font-semibold font-poppins text-gray-800">
-    FastaBiz
-  </div>
+<nav class="w-full bg-white shadow-md px-6 py-3 flex items-center justify-between max-w-7xl mx-auto">
+  <!-- Global Search -->
+<div class="relative w-72">
+    <input
+        type="text"
+        placeholder="Search tools, pages, or settings..."
+        class="w-full pl-10 pr-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-stoneblue/50 focus:border-stoneblue text-gray-700 placeholder-gray-400"
+        @bind="SearchQuery"
+        @bind:event="oninput"
+        @onfocus="ShowResults"
+        @onblur="HideResults"
+    />
+    <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1 0 9.75 17.25a7.5 7.5 0 0 0 6.9-3.9z" />
+    </svg>
+
+</div>
 
   <!-- Right section (User + Actions) -->
   <div class="flex items-center space-x-4">
-      <!-- Notifications -->
-      <button class="relative text-gray-600 hover:text-orange-600" @onclick="ToggleNotifications">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
-          class="lucide lucide-bell">
-          <path d="M10.268 21a2 2 0 0 0 3.464 0"/>
-          <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"/>
-        </svg>
-
-        @if (UnreadCount > 0)
-        {
-          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-md">
-            @UnreadCount
-          </span>
-        }
-      </button>
-
       <!-- Notifications Dropdown -->
-      @if (showNotifications)
-      {
-        <div class="absolute right-0 top-12 w-80 bg-white shadow-lg rounded-2xl border p-4 space-y-3 z-50">
-            <div class="flex justify-between items-center">
-              <h3 class="font-semibold text-gray-700">Notifications</h3>
-              <div class="flex items-center space-x-3">
-                <button class="text-xs text-orange-600 hover:underline" @onclick="MarkAllAsRead">
-                  Mark all as read
-                </button>
-                <button class="text-gray-400 hover:text-gray-600" @onclick="CloseDropdown">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" 
-                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-          @if (notifications.Any())
-          {
-            @foreach (var note in notifications.Take(5))
-            {
-              <div class="p-3 bg-gray-50 rounded-lg shadow-sm hover:bg-gray-100 cursor-pointer">
-                  <p class="text-sm text-gray-800">@note.Message</p>
-                  <span class="text-xs text-gray-500">@note.SentAt.ToShortTimeString()</span>
-              </div>
-            }
-          }
-          else
-          {
-            <p class="text-sm text-gray-500 text-center">No new notifications</p>
-          }
-
-          <!-- Footer link -->
-          <div class="border-t pt-2 text-center">
-              <NavLink href="/admin/notifications" class="text-sm text-blue-600 hover:underline">
-                  View all notifications
-              </NavLink>
-          </div>
-        </div>
-      }
+      <NotificationDropdown />
 
       <!-- User avatar & name -->
       <div class="relative">
@@ -113,49 +68,58 @@
 @code {
   [Parameter] 
   public string? UserName { get; set; }
-  private bool showNotifications = false;
   private bool showUserDropdown = false;
-  private int UnreadCount = 3; // example, bind this to your notifications list
-  private List<Notification> notifications = new()
-  {
-    new Notification { Message = "Driver A started a trip", SentAt = DateTime.Now.AddMinutes(-5) },
-    new Notification { Message = "Order #123 delivered successfully", SentAt = DateTime.Now.AddMinutes(-20) },
-    new Notification { Message = "New driver registered", SentAt = DateTime.Now.AddHours(-1) }
-  };
+  private string SearchQuery { get; set; } = string.Empty;
+  private bool ShowDropdown { get; set; } = false;
 
   protected override void OnInitialized()
   {
     Navigation.LocationChanged += HandleLocationChanged;
   }
 
+  // Combine quick actions + sidebar-like items
+  private List<SearchItem> SearchItems = new()
+  {
+    new("Dashboard", "/admin/dashboard", "layout-dashboard"),
+    new("Orders", "/admin/orders", "file-stack"),
+    new("Create Order", "/admin/createorder", "file-plus"),
+    new("Inventories", "/admin/inventories", "box-open"),
+    new("Create Inventory", "/admin/createinventory", "folder-plus"),
+    new("Users", "/admin/users", "users"),
+    new("Settings", "/admin/settings", "settings"),
+    new("Notifications", "/admin/notifications", "bell"),
+    new("Profile", "/admin/profile", "user"),
+    new("Map", "/admin/map", "map")
+  };
+
+  private IEnumerable<SearchItem> FilteredResults =>
+    string.IsNullOrWhiteSpace(SearchQuery)
+      ? Enumerable.Empty<SearchItem>()
+      : SearchItems
+        .Where(x => x.Title.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase))
+        .Take(8);
+
+  private void ShowResults() => ShowDropdown = true;
+  private async void HideResults()
+  {
+    await Task.Delay(150);
+    ShowDropdown = false;
+  }
+
+  private void NavigateTo(string url)
+  {
+    Navigation.NavigateTo(url);
+    SearchQuery = "";
+    ShowDropdown = false;
+  }
+
+  private void ToggleUserDropdown() => showUserDropdown = !showUserDropdown;
+
   private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
   {
-    showNotifications = false;
     showUserDropdown = false;
+    ShowDropdown = false;
     StateHasChanged();
-  }
-  private void ToggleNotifications()
-  {
-    showNotifications = !showNotifications;
-  }
-
-  private void ToggleUserDropdown()
-  {
-    showUserDropdown = !showUserDropdown;
-  }
-
-  private void MarkAllAsRead()
-  {
-    UnreadCount = 0;
-    // also update your notifications list state
-
-    // Example: could update backend later
-    notifications.Clear();
-  }
-
-  private void CloseDropdown()
-  {
-    showNotifications = false;
   }
 
   private async Task Logout()
@@ -163,4 +127,6 @@
     await AuthProvider.SignOutAsync();
     Navigation.NavigateTo("/auth/login");
   }
+
+  private record SearchItem(string Title, string Link, string Icon);
 }

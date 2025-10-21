@@ -17,29 +17,29 @@
 </div>
 
 @code {
-    private List<ToastMessage> toasts = new();
+    private List<ToastService.ToastMessage> toasts = new();
 
     protected override void OnInitialized()
     {
         ToastService.OnShow += ShowToast;
     }
 
-    private void ShowToast(string message, ToastService.ToastLevel level)
+    private void ShowToast(ToastService.ToastMessage toast)
     {
-        var toast = new ToastMessage { Message = message, Level = level };
         toasts.Add(toast);
-        StateHasChanged();
+        InvokeAsync(StateHasChanged);
 
-        Task.Delay(2000).ContinueWith(_ =>
+        _ = Task.Delay(toast.DurationMs).ContinueWith(_ =>
         {
             toasts.Remove(toast);
             InvokeAsync(StateHasChanged);
         });
     }
 
-    private void RemoveToast(ToastMessage toast)
+    private void RemoveToast(ToastService.ToastMessage toast)
     {
         toasts.Remove(toast);
+        StateHasChanged();
     }
 
     private string GetToastCss(ToastService.ToastLevel level)
@@ -51,11 +51,5 @@
             ToastService.ToastLevel.Warning => "bg-yellow-100 text-yellow-800 p-4 rounded shadow",
             _ => "bg-blue-100 text-blue-800 p-4 rounded shadow",
         };
-    }
-
-    private class ToastMessage
-    {
-        public string Message { get; set; } = string.Empty;
-        public ToastService.ToastLevel Level { get; set; }
     }
 }

@@ -55,7 +55,7 @@ public class OrderService
         return await GetFromJsonSafe<DropdownData>("orders/form-data");
     }
     
-    public async Task<Order> UpdateOrder(Guid orderId, string column, object value)
+    public async Task<Order?> UpdateOrder(Guid orderId, string column, object value)
     {
         var requestBody = new
         {

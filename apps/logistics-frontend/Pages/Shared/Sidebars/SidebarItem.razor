@@ -1,38 +1,35 @@
-@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.AspNetCore.Components
 @using logistics_frontend.Models
+@using logistics_frontend.Pages.Shared.Icons
 @inject NavigationManager Nav
 
-<li class="mb-2 group">
+<li class="relative group">
     <NavLink href="@Item.Link" Match="NavLinkMatch.All"
-             class='flex items-center px-4 py-2 rounded-md transition-colors duration-200
-                   ${(IsActive ? "bg-orange-500 text-white" : "text-gray-700 hover:bg-orange-100")}'
-             title="@Item.Title">
-        
-        <!-- Lucide Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-             class="lucide-@Item.Icon">
-        </svg>
+            class="@($"""flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors duration-150 {(IsActive ? "bg-stoneblue-light text-stoneblue font-semibold border-l-4 border-stoneblue" : "text-gray-700 hover:bg-stoneblue-hover hover:text-stoneblue")} """)"
+            title="@Item.Title">
 
-        @if (!IsCollapsed)
+        <div class="flex items-center gap-3">
+            <LucideIcon Name="@Item.Icon" Size="4" />
+
+            @if (!IsCollapsed)
+            {
+                <span class="truncate">@Item.Title</span>
+            }
+        </div>
+
+        @if (!IsCollapsed && Item.BadgeCount.HasValue)
         {
-            <span class="ml-3">@Item.Title</span>
+            <span class="bg-orange-500 text-white text-xs font-semibold rounded-full px-2 py-0.5 ml-2">
+                @Item.BadgeCount
+            </span>
         }
     </NavLink>
 
-    @if (Item.SubItems?.Any() == true && !IsCollapsed)
+    @if (IsCollapsed)
     {
-        <ul class="ml-8 mt-2 space-y-1">
-            @foreach (var sub in Item.SubItems)
-            {
-                <li>
-                    <NavLink href="@sub.Link" class="text-sm text-gray-600 hover:text-orange-600">
-                        @sub.Title
-                    </NavLink>
-                </li>
-            }
-        </ul>
+        <div class="absolute left-full top-1/2 -translate-y-1/2 ml-2 opacity-0 group-hover:opacity-100
+                    bg-gray-900 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap shadow-lg transition-opacity duration-150 pointer-events-none">
+            @Item.Title
+        </div>
     }
 </li>
 
@@ -40,16 +37,7 @@
     [Parameter] public SidebarMenuItem Item { get; set; } = default!;
     [Parameter] public bool IsCollapsed { get; set; }
 
-    private bool IsActive => Nav.ToBaseRelativePath(Nav.Uri).Equals(Item.Link.Trim('/'), StringComparison.OrdinalIgnoreCase)
-    || Item.SubItems?.Any(sub => 
-        Nav.ToBaseRelativePath(Nav.Uri).Equals(Item.Link.Trim('/'), StringComparison.OrdinalIgnoreCase)
-    ) == true;
-
-    @* private void HandleClick()
-    {
-        if (Item.SubItems?.Any() == true)
-        {
-            Expanded = !Expanded;
-        }
-    } *@
+    private bool IsActive =>
+        Nav.Uri.TrimEnd('/').EndsWith(Item.Link.TrimEnd('/'), StringComparison.OrdinalIgnoreCase)
+        || (Item.SubItems?.Any(sub => Nav.Uri.Contains(sub.Link, StringComparison.OrdinalIgnoreCase)) ?? false);
 }

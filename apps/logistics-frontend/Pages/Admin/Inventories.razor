@@ -348,7 +348,7 @@ else
 
             inventoryNames = allInventories.ToDictionary(
                 i => i.ID,
-                i => i.Name
+                i => i.Category
             );
         }
         else
@@ -372,7 +372,7 @@ else
         // Search filter
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
-            filtered = filtered.Where(i => i.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            filtered = filtered.Where(i => i.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
         }
 
         // Pagination

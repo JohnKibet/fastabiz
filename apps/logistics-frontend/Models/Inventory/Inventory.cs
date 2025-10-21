@@ -8,14 +8,8 @@ namespace logistics_frontend.Models.Inventory
         [JsonPropertyName("id")]
         public Guid ID { get; set; }
 
-        [JsonPropertyName("admin_id")]
-        public Guid AdminID { get; set; }
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonPropertyName("slug")]
-        public string? Slug { get; set; }
+        [JsonPropertyName("store_id")]
+        public Guid StoreID { get; set; }
 
         [JsonPropertyName("category")]
         public string Category { get; set; } = string.Empty;
@@ -41,33 +35,26 @@ namespace logistics_frontend.Models.Inventory
         [JsonPropertyName("description")]
         public string Description { get; set; } = string.Empty;
 
-        [JsonPropertyName("location")]
-        public string Location { get; set; } = string.Empty;
-
         [JsonPropertyName("created_at")]
         public DateTime CreatedAt { get; set; }
 
         [JsonPropertyName("updated_at")]
         public DateTime UpdatedAt { get; set; }
 
+        // Optional: include nested store info (if backend returns store details)
+        [JsonPropertyName("store")]
+        public StoreSummary? Store { get; set; }
     }
 
     public class CreateInventoryRequest
     {
-        [Required(ErrorMessage = "AdminID is required")]
-        [JsonPropertyName("admin_id")]
-        public Guid AdminID { get; set; }
-
-        [Required(ErrorMessage = "Name is required")]
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
+        [Required(ErrorMessage = "StoreID is required")]
+        [JsonPropertyName("store_id")]
+        public Guid StoreID { get; set; }
 
         [Required(ErrorMessage = "Category is required")]
         [JsonPropertyName("category")]
         public string Category { get; set; } = string.Empty;
-
-        [JsonPropertyName("slug")]
-        public string? Slug { get; set; }
 
         [Required(ErrorMessage = "Stock is required")]
         [JsonPropertyName("stock")]
@@ -77,7 +64,6 @@ namespace logistics_frontend.Models.Inventory
         [JsonPropertyName("price_amount")]
         public long PriceAmount { get; set; }
 
-        // Default to KES
         [JsonPropertyName("price_currency")]
         public string PriceCurrency { get; set; } = "KES";
 
@@ -93,19 +79,29 @@ namespace logistics_frontend.Models.Inventory
         [JsonPropertyName("description")]
         public string Description { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Location is required")]
-        [JsonPropertyName("location")]
-        public string Location { get; set; } = string.Empty;
-
         [Required(ErrorMessage = "Min of 3 images is required")]
         [JsonPropertyName("images")]
         public string Images { get; set; } = string.Empty;
-
     }
 
+    // Optional view if you want to show store + its products
     public class StorePublicView
     {
-        public string AdminName { get; set; } = string.Empty;
+        public string StoreName { get; set; } = string.Empty;
+        public string Slug { get; set; } = string.Empty;
         public List<Inventory> Products { get; set; } = new();
+    }
+
+    // Optional summary class for embedded store info
+    public class StoreSummary
+    {
+        [JsonPropertyName("id")]
+        public Guid ID { get; set; }
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("slug")]
+        public string Slug { get; set; } = string.Empty;
     }
 }

@@ -55,6 +55,11 @@ public class InventoryService
         return await GetFromJsonSafe<List<Inventory>>($"inventories/by-name?name={encodedName}");
     }
 
+    public async Task<ServiceResult<List<Inventory>>> GetInventoriesByStore(Guid id)
+    {
+        return await GetFromJsonSafe<List<Inventory>>($"inventories/by-store/{id}");
+    }
+
     public async Task<ServiceResult<List<Inventory>>> GetAllInventories()
     {
         return await GetFromJsonSafe<List<Inventory>>("inventories/all_inventories?limit=10&offset=0");
