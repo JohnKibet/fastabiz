@@ -1,0 +1,20 @@
+@using logistics_frontend.Models.Notification
+@namespace logistics_frontend.Pages.Shared.Components.NotificationItem
+
+<div class="flex justify-between items-center p-3 border rounded-lg @(Notification.Status == NotificationStatus.Read ? "bg-gray-50" : "bg-orange-50")">
+    <div>
+        <p class="text-sm text-gray-800">@Notification.Message</p>
+        <span class="text-xs text-gray-500">@Notification.SentAt.ToString("g")</span>
+    </div>
+    @if (Notification.Status != NotificationStatus.Read)
+    {
+        <button class="text-xs text-blue-600 hover:underline" @onclick="()=>OnRead.InvokeAsync(Notification.ID)">
+            Mark as read
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter] public Notification Notification { get; set; } = default!;
+    [Parameter] public EventCallback<Guid> OnRead { get; set; }
+}

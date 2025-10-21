@@ -10,6 +10,11 @@ module.exports = {
         bgSoft: "#F9FAFB",    // Background
         textDark: "#111827",  // Headings
         textLight: "#6B7280", // Subtext
+        stoneblue: {
+          DEFAULT: '#59788E',  // your main shade
+          light: '#E5EEF3',    // soft background tint
+          hover: '#F5F8FA'     // subtle hover background
+        },
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui'],

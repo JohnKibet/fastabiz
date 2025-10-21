@@ -2,6 +2,7 @@
 @using logistics_frontend.Pages.Shared.Components.InputField
 @using System.Text.Json
 @inject InventoryService InventoryService
+@inject StoreService StoreService
 @inject ToastService ToastService
 @inject NavigationManager Navigation
 @inject UserSessionService SessionService
@@ -14,16 +15,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <InputField 
-                Label="Name" 
-                Value="@inventory.Name" 
-                ValueChanged="((string v) => inventory.Name = v)"
-                ValueExpression="@(() => inventory.Name)"
-                Placeholder="e.g., Fresh Milk" 
-            />
-
-            <InputField 
-                Label="Category"
-                Value="@inventory.Category"
+                Label="Category" 
+                Value="@inventory.Category" 
                 ValueChanged="((string v) => inventory.Category = v)"
                 ValueExpression="@(() => inventory.Category)"
                 Placeholder="e.g., Dairy" 
@@ -95,15 +88,6 @@
                     </div>
                 }
             </div>
-            
-            <InputField 
-                Label="Location"
-                Value="@inventory.Location"
-                ValueChanged="((string v) => inventory.Location = v)"
-                ValueExpression="@(() => inventory.Location)"
-                Placeholder="e.g., Longnet" 
-            />
-
         </div>
 
         <!-- Description -->
@@ -159,6 +143,7 @@
 
 @code {
     [CascadingParameter] public Guid? UserId { get; set; }
+    private Store? store { get; set; }
     private CreateInventoryRequest inventory = new();
     private bool isSubmitting = false;
     private List<string> imagePreviews = new();
@@ -205,15 +190,30 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (UserId.HasValue)
+        if (!UserId.HasValue)
         {
-            inventory.AdminID = UserId.Value;
-        }
-        else
-        {
-            ToastService.ShowToast("Please login to create an inventory.", ToastService.ToastLevel.Error);
+            ToastService.ShowToast(
+                "Cannot create inventory without a valid user ID.",
+                ToastService.ToastLevel.Error
+            );
             return;
         }
+
+        store = await StoreService.GetStoreByOwner(UserId.Value);
+
+        if (store != null)
+        {
+            inventory.StoreID = store.ID;
+            return;
+        }
+
+        // No store found – show enhanced toast
+        string message = @"
+            No store found to create inventory for. 
+            <a href='/stores/create' style='text-decoration:underline;color:#3b82f6;font-weight:500;'>Create one now</a>.
+        ";
+
+        ToastService.ShowToast(message, ToastService.ToastLevel.Warning, durationMs: 8000, allowHtml: true);
     }
 
     private async Task HandleValidSubmit()
