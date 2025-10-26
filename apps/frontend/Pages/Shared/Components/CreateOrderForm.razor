@@ -1,0 +1,167 @@
+@using frontend.Models.Order
+@using frontend.Pages.Shared.Components.InputField
+@inject OrderService OrderService
+@inject NavigationManager Navigation
+@inject ToastService ToastService
+
+<EditForm Model="@order" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="bg-white rounded-xl shadow p-6 max-w-xl mx-auto space-y-6">
+        <h3 class="text-2xl font-semibold text-gray-800">Create New Order</h3>
+
+        <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField 
+                    Label="Pickup Location"
+                    Value="@order.PickupAddress"
+                    ValueChanged="((string v) => order.PickupAddress = v)"
+                    ValueExpression="@(() => order.PickupAddress)"
+                    Placeholder="e.g., Warehouse A" 
+                />
+
+                <InputField 
+                    Label="Delivery Location" 
+                    Value="@order.DeliveryAddress"
+                    ValueChanged="((string v) => order.DeliveryAddress = v)"
+                    ValueExpression="@(() => order.DeliveryAddress)"
+                    Placeholder="e.g., Customer Address" 
+                />
+
+                <InputField
+                    Label="Quantity"
+                    Value="@order.Quantity"
+                    ValueChanged="((int v) => order.Quantity = v)"
+                    ValueExpression="@(() => order.Quantity)"
+                    Placeholder="e.g., Quantity" 
+                />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Customers</label>
+                <GenericDropdown TItem="Customer"
+                    Items="@customers"
+                    GetValue="c => c.ID"
+                    GetLabel="c => c.Name"
+                    SelectedId="order.CustomerID"
+                    SelectedIdChanged="v => order.CustomerID = v"
+                    SelectedIdExpression="@(() => order.CustomerID)"
+                    Placeholder="Select Customer" 
+                />
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Inventories</label>
+                <GenericDropdown TItem="AllInventory"
+                    Items="@inventories"
+                    GetValue="i => i.ID"
+                    GetLabel="i => i.Name"
+                    SelectedId="order.InventoryID"
+                    SelectedIdChanged="OnInventoryChanged"
+                    SelectedIdExpression="@(() => order.InventoryID)"
+                    Placeholder="Select Inventory" 
+                />
+            </div>
+
+        </div>
+
+        <div class="flex flex-row space-x-12">
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200" disabled="@isSubmitting">
+                @(isSubmitting ? "Creating..." : "Create Order")
+            </button>
+
+            <button 
+                class="w-full bg-gray-500 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                @onclick="ClearForm"
+            >
+                Cancel
+            </button>
+        </div>
+    </div>
+</EditForm>
+
+
+@code {
+    private CreateOrderRequest order = new();
+    private List<Customer> customers = new();
+    private List<AllInventory> inventories = new();
+    [Inject] private DropdownDataService DropdownService { get; set; } = default!;
+
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await DropdownService.LoadCachedDropdownData();
+        customers = DropdownService.Customers;
+        inventories = DropdownService.Inventories;
+    }
+    private void OnInventoryChanged(Guid inventoryId)
+    {
+        order.InventoryID = inventoryId;
+
+        var selectedInventory = inventories.FirstOrDefault(i => i.ID == inventoryId);
+        if  (selectedInventory != null)
+        {
+            order.AdminID = selectedInventory.AdminID;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Basic null/empty validation
+        if (order.CustomerID == Guid.Empty)
+        {
+            ToastService.ShowToast("Please select a customer.", ToastService.ToastLevel.Warning);
+            return;
+        }
+
+        if (order.InventoryID == Guid.Empty)
+        {
+            ToastService.ShowToast("Please select an inventory item.", ToastService.ToastLevel.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(order.PickupAddress) ||
+            string.IsNullOrWhiteSpace(order.DeliveryAddress))
+        {
+            ToastService.ShowToast("Pickup and delivery locations are required.", ToastService.ToastLevel.Warning);
+            return;
+        }
+
+        if (order.Quantity <= 0)
+        {
+            ToastService.ShowToast("Quantity must be at least 1.", ToastService.ToastLevel.Warning);
+            return;
+        }
+
+        try
+        {
+            isSubmitting = true;
+            var result = await OrderService.AddOrder(order);
+            if (result.Success)
+            {
+                ClearForm();
+                ToastService.ShowToast("Order successfully created!", ToastService.ToastLevel.Success);
+                Navigation.NavigateTo("admin/orders");
+            }
+            else
+            {
+                ToastService.ShowToast("Failed to create order!", ToastService.ToastLevel.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast($"Failed to create order: {ex.Message}", ToastService.ToastLevel.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void ClearForm()
+    {
+        order = new();
+    }
+
+}

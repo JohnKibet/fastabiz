@@ -1,0 +1,17 @@
+﻿@namespace frontend
+@using frontend.Pages.Shared.Sidebars
+@using frontend.Pages.Shared.Components
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(PublicLayout)">
+                <h3>Sorry, the page you're looking for doesn't exist.</h3>
+            </LayoutView>
+        </NotFound>
+    </Router>
+    <Toast />
+</CascadingAuthenticationState>

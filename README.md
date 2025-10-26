@@ -48,9 +48,9 @@ Many small and medium businesses struggle with:
 ## 📁 Repository Structure
 
 ```
-logistics-system/
+fastabiz/
 ├── apps/
-│   ├── logistics-backend/        # Backend (Go APIs, infra & configs)
+│   ├── backend/        # Backend (Go APIs, infra & configs)
 │   │   ├── kong/                 # Kong declarative config
 │   │   │   └── kong.yml
 │   │   ├── postman/              # API test collections
@@ -62,7 +62,7 @@ logistics-system/
 │   │   ├── .env.docker           # Docker environment variables
 │   │   ├── Dockerfile            # Backend Dockerfile
 │   │   └── docker-compose.yml    # Compose services
-│   └── logistics-frontend/       # Frontend (Blazor app)
+│   └── frontend/       # Frontend (Blazor app)
 ├── .gitignore
 ├── README.md
 └── LICENSE
@@ -93,8 +93,8 @@ logistics-system/
 ### 🚀 Running Locally with Docker
 
 ```bash
-git clone https://github.com/kibecodes/logistics-system.git
-cd logistics-system
+git clone https://github.com/JohnKibet/fastabiz.git
+cd fastabiz
 
 # Start all services: DB, backend, Kong
 docker compose up --build
