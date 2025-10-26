@@ -1,0 +1,145 @@
+@using frontend.Models.Store
+@using frontend.Pages.Shared.Components.InputField
+
+@inject StoreService StoreService
+@inject ToastService ToastService
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthProvider
+
+<EditForm Model="@store" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="bg-white rounded-xl shadow p-6 max-w-2xl mx-auto space-y-6">
+        <h3 class="text-2xl font-semibold text-gray-800">Create New Store</h3>
+
+        <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputField
+                    Label="Name"
+                    Value="@store.Name"
+                    ValueChanged="((string v) => store.Name = v)"
+                    ValueExpression="@(() => store.Name)"
+                    Placeholder="e.g., Wallace Logistics"
+                />
+
+                <InputField
+                    Label="Slug"
+                    Value="@store.Slug"
+                    ValueChanged="((string v) => store.Slug = v)"
+                    ValueExpression="@(() => store.Slug)"
+                    Placeholder="e.g., wallace-logistics"
+                />
+
+                <InputField
+                    Label="Location"
+                    Value="@store.Location"
+                    ValueChanged="((string v) => store.Location = v)"
+                    ValueExpression="@(() => store.Location)"
+                    Placeholder="e.g., Nairobi, Kenya"
+                />
+
+                <InputField
+                    Label="Logo URL"
+                    Value="@store.LogoURL"
+                    ValueChanged="((string v) => store.LogoURL = v)"
+                    ValueExpression="@(() => store.LogoURL)"
+                    Placeholder="Optional: https://example.com/logo.png"
+                />
+            </div>
+
+            <InputField
+                Label="Description"
+                Value="@store.Description"
+                ValueChanged="((string v) => store.Description = v)"
+                ValueExpression="@(() => store.Description)"
+                Placeholder="Briefly describe your store..."
+            />
+
+            <div class="flex items-center space-x-2">
+                <input 
+                    type="checkbox" 
+                    id="isPublic" 
+                    class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                    @bind="store.IsPublic" 
+                />
+                <label for="isPublic" class="text-gray-700">Public Store</label>
+            </div>
+
+            <div class="flex flex-row space-x-6">
+                <button 
+                    type="submit" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200" 
+                    disabled="@isSubmitting"
+                >
+                    @(isSubmitting ? "Creating..." : "Create Store")
+                </button>
+
+                <button 
+                    type="button"
+                    class="w-full bg-gray-500 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                    @onclick="ClearForm"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private CreateStoreRequest store = new();
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Try to auto-assign OwnerID from logged-in user
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var idClaim = user.FindFirst("id") ?? user.FindFirst("sub");
+        if (idClaim != null && Guid.TryParse(idClaim.Value, out var ownerId))
+        {
+            store.OwnerID = ownerId;
+        }
+        else
+        {
+            ToastService.ShowToast("Unable to determine your user ID. Please re-login.", ToastService.ToastLevel.Error);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            isSubmitting = true;
+            var result = await StoreService.CreateStore(store);
+
+            if (result.Success)
+            {
+                ClearForm();
+                ToastService.ShowToast("Store successfully created!", ToastService.ToastLevel.Success);
+                Navigation.NavigateTo("/stores");
+            }
+            else
+            {
+                ToastService.ShowToast(result.ErrorMessage ?? "Failed to create store!", ToastService.ToastLevel.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowToast($"Failed to create store: {ex.Message}", ToastService.ToastLevel.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void ClearForm()
+    {
+        store = new CreateStoreRequest
+        {
+            OwnerID = store.OwnerID // preserve logged-in user ID
+        };
+    }
+}

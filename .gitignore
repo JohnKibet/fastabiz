@@ -30,8 +30,8 @@ go.work.sum
 # .NET build directories
 **bin/
 **obj/
-/apps/logistics-frontend/bin/
-/apps/logistics-frontend/obj/
+/apps/frontend/bin/
+/apps/frontend/obj/
 
 # User-specific files
 .vs/
@@ -70,4 +70,4 @@ newman/
 *.log
 node_modules/
 dist/
-apps/logistics-frontend/wwwroot/css/site.css
+apps/frontend/wwwroot/css/site.css
