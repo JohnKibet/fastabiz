@@ -11,6 +11,7 @@ import (
 
 	"backend/handlers"
 	authMiddleware "backend/internal/middleware"
+	"github.com/jmoiron/sqlx"
 )
 
 func NewRouter(
@@ -24,6 +25,7 @@ func NewRouter(
 	publicApiBaseUrl string,
 	c *handlers.InviteHandler,
 	s *handlers.StoreHandler,
+	db *sqlx.DB,
 ) http.Handler {
 	r := chi.NewRouter()
 
@@ -160,6 +162,18 @@ func NewRouter(
 			})
 
 		})
+
+	})
+
+
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		if err := db.Ping(); err != nil {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			w.Write([]byte("db unreachable"))
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("ok"))
 	})
 
 	return r

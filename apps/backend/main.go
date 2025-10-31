@@ -31,6 +31,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"time"
 )
 
 // @title FastaBiz API
@@ -54,7 +55,7 @@ func main() {
 		log.Fatal("PUBLIC_API_BASE_URL not set")
 	}
 
-	db := sqlx.MustConnect("postgres", dbUrl)
+	db := waitForPostgres(dbUrl, 10, 5*time.Second)
 
 	txm := application.NewTxManager(db)
 
@@ -120,10 +121,34 @@ func main() {
 		publicApiBaseUrl,
 		inviteHandler,
 		storeHandler,
+		db,
 	)
 
 	log.Println("Server starting at :8080")
 	if err := http.ListenAndServe("0.0.0.0:8080", r); err != nil {
-		log.Fatal("could not start server at: %v", err)
+		log.Printf("could not start server at: %v", err)
 	}
+}
+
+// helper to wait for postgres
+func waitForPostgres(dsn string, maxRetries int, delay time.Duration) *sqlx.DB {
+	var db *sqlx.DB
+	var err error
+
+	for i := 0; i < maxRetries; i++ {
+		db, err = sqlx.Connect("postgres", dsn)
+		if err == nil {
+			// ping to confirm
+			if pingErr := db.Ping(); pingErr == nil {
+				log.Println("✅ Connected to Postgres successfully")
+				return db
+			}
+		}
+
+		log.Printf("⏳ Waiting for Postgres... (%d/%d)", i+1, maxRetries)
+		time.Sleep(delay)
+	}
+
+	log.Fatalf("❌ Could not connect to Postgres after %d attempts: %v", maxRetries, err)
+	return nil
 }
