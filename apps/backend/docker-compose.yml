@@ -31,8 +31,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      # test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
-      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      test: ["CMD-SHELL", "wget --spider -q http://localhost:8080/health || exit 1"]
       interval: 1m30s
       timeout: 30s
       retries: 5
