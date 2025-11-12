@@ -1,0 +1,55 @@
+@namespace frontend.Pages.Shared.Components.PaymentMethods
+@using Microsoft.AspNetCore.Components
+
+<div class="grid grid-cols-2 gap-3">
+    <button
+        class="@GetButtonClass(method: "mpesa")"
+        @onclick='() => Select("mpesa")'>
+        <div class="font-medium">M-Pesa</div>
+        <div class="text-xs text-gray-500">Pay with STK Push or paybill</div>
+    </button>
+
+    <button
+        class="@GetButtonClass(method: "card")"
+        @onclick='() => Select("card")'>
+        <div class="font-medium">Card</div>
+        <div class="text-xs text-gray-500">Visa / Mastercard</div>
+    </button>
+
+    <button
+        class="@GetButtonClass(method: "paypal")"
+        @onclick='() => Select("paypal")'>
+        <div class="font-medium">PayPal</div>
+        <div class="text-xs text-gray-500">International payments</div>
+    </button>
+
+    <button
+        class="@GetButtonClass(method: "wallet")"
+        @onclick='() => Select("wallet")'>
+        <div class="font-medium">Wallet</div>
+        <div class="text-xs text-gray-500">In-app wallet</div>
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public string? SelectedMethod { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnMethodChanged { get; set; }
+
+    private async Task Select(string method)
+    {
+        SelectedMethod = method;
+        await OnMethodChanged.InvokeAsync(method);
+    }
+
+    private string GetButtonClass(string method)
+    {
+        bool isSelected = string.Equals(SelectedMethod, method, StringComparison.OrdinalIgnoreCase);
+
+        return isSelected
+            ? "p-3 border-2 border-blue-600 rounded text-left bg-blue-50"
+            : "p-3 border rounded text-left hover:bg-gray-50";
+    }
+}

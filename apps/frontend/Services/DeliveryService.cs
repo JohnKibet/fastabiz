@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using frontend.Models.Delivery;
-using frontend.Models.Errors;
+using frontend.Models;
 
 
 public class DeliveryService

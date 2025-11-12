@@ -1,4 +1,4 @@
-namespace frontend.Models.Feedback
+namespace frontend.Models
 {
     public class Feedback
     {

@@ -1,4 +1,4 @@
-namespace frontend.Models.Errors
+namespace frontend.Models
 {
     public class ErrorResponse
     {

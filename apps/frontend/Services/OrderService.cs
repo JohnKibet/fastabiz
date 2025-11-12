@@ -1,7 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using frontend.Models.Order;
-using frontend.Models.Errors;
+using frontend.Models;
 public class OrderService
 {
     private readonly HttpClient _http;

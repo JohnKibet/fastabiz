@@ -1,5 +1,5 @@
 using System.Net.Http.Json;
-using frontend.Models.Feedback;
+using frontend.Models;
 
 public class FeedbackService
 {

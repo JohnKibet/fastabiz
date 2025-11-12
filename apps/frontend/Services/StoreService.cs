@@ -1,6 +1,5 @@
 using System.Net.Http.Json;
-using frontend.Models.Store;
-using frontend.Models.Errors;
+using frontend.Models;
 using System.Text.Json;
 
 public class StoreService

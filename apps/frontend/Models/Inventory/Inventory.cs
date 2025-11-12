@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace frontend.Models.Inventory
+namespace frontend.Models
 {
     public class Inventory
     {
@@ -41,9 +41,6 @@ namespace frontend.Models.Inventory
         [JsonPropertyName("updated_at")]
         public DateTime UpdatedAt { get; set; }
 
-        // Optional: include nested store info (if backend returns store details)
-        [JsonPropertyName("store")]
-        public StoreSummary? Store { get; set; }
     }
 
     public class CreateInventoryRequest
@@ -92,16 +89,4 @@ namespace frontend.Models.Inventory
         public List<Inventory> Products { get; set; } = new();
     }
 
-    // Optional summary class for embedded store info
-    public class StoreSummary
-    {
-        [JsonPropertyName("id")]
-        public Guid ID { get; set; }
-
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
-
-        [JsonPropertyName("slug")]
-        public string Slug { get; set; } = string.Empty;
-    }
 }

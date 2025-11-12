@@ -3,7 +3,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace frontend.Services.AuthHeaderHandler;
+namespace frontend.Services;
 
 public class AuthHeaderHandler : DelegatingHandler
 {

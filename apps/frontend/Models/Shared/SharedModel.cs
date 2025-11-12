@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace frontend.Models.Shared
+namespace frontend.Models
 {
     // Base for storing diff field value types together
     public interface IFieldDefinitionBase

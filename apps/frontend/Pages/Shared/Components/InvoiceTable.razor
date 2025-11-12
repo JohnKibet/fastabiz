@@ -1,0 +1,58 @@
+@using frontend.Pages.Shared.Components
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components
+
+
+<table class="w-full text-sm border rounded-lg">
+    <thead class="bg-gray-50 text-left text-xs font-semibold">
+        <tr>
+            <th class="p-3">#</th>
+            <th class="p-3">Customer</th>
+            <th class="p-3">Amount</th>
+            <th class="p-3">Status</th>
+            <th class="p-3">Date</th>
+            <th class="p-3">Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Invoices is not null && Invoices.Any())
+        {
+            @foreach (var invoice in Invoices)
+            {
+                <tr class="border-t hover:bg-gray-50">
+                    <td class="p-3">@invoice.ID</td>
+                    <td class="p-3">@invoice.CustomerName</td>
+                    <td class="p-3">@($"{invoice.Amount:N2} KES")</td>
+                    <td class="p-3">
+                        <PaymentStatus Status="@invoice.Status" />
+                    </td>
+                    <td class="p-3">@invoice.CreatedAt.ToShortDateString()</td>
+                    <td class="p-3">
+                        <button
+                            class="text-blue-600 hover:underline"
+                            @onclick="() => OnViewClicked.InvokeAsync(invoice)">
+                            View
+                        </button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="p-3 text-center text-gray-500">
+                    No invoices found.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] 
+    public List<Invoice> Invoices { get; set; } = new List<Invoice>();
+
+    [Parameter] 
+    public EventCallback<Invoice> OnViewClicked { get; set; }
+}

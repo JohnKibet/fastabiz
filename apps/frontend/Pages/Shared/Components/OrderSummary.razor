@@ -1,0 +1,40 @@
+@namespace frontend.Pages.Shared.Components.OrderSummary
+@using Microsoft.AspNetCore.Components
+@using frontend.Models
+
+<div class="border rounded p-4 bg-white shadow-sm">
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="text-sm text-gray-500">Order</div>
+            <div class="font-semibold">@Invoice.InvoiceNumber</div>
+            <div class="text-xs text-gray-400">@Invoice.CustomerName</div>
+        </div>
+
+        <div class="text-xl font-bold">
+            @Invoice.Amount.ToString("N2") KES
+        </div>
+    </div>
+
+    <ul class="mt-4 divide-y">
+        @foreach (var item in Invoice.Items)
+        {
+            <li class="py-3 flex justify-between">
+                <div>
+                    <div class="font-medium">@item.ItemName</div>
+                    <div class="text-xs text-gray-400">
+                        @item.Quantity x @item.UnitPrice.ToString("N2")
+                    </div>
+                </div>
+
+                <div class="font-semibold">
+                    @item.Total.ToString("N2") KES
+                </div>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public Invoice Invoice { get; set; } = default!;
+}
