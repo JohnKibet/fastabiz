@@ -1,12 +1,12 @@
 @page "/auth/login"
 @layout PublicLayout
-@using frontend.Models.User
+@using Microsoft.AspNetCore.WebUtilities
 @using System.Text.Json
 @using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
-@using frontend.Services.CustomAuthStateProvider
 @using System.Text.Json.Serialization
-@using Microsoft.AspNetCore.WebUtilities
+@using frontend.Services
+@using frontend.Models
 @inject NavigationManager Navigation
 @inject CustomAuthStateProvider AuthProvider
 @inject IJSRuntime JS

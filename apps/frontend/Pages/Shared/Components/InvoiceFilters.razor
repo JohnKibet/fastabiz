@@ -1,0 +1,79 @@
+@namespace frontend.Pages.Shared.Components.InvoiceFilters
+@using Microsoft.AspNetCore.Components
+@using System
+
+<div class="flex flex-wrap gap-3 items-center">
+    <select class="px-3 py-2 border rounded" @bind="SelectedStatus">
+        <option value="">All status</option>
+        <option value="Pending">Pending</option>
+        <option value="Paid">Paid</option>
+        <option value="Overdue">Overdue</option>
+    </select>
+
+    <input
+        class="px-3 py-2 border rounded"
+        placeholder="Search customer or invoice"
+        @bind="Search" />
+
+    <input
+        type="date"
+        class="px-3 py-2 border rounded"
+        @bind="From" />
+
+    <input
+        type="date"
+        class="px-3 py-2 border rounded"
+        @bind="To" />
+
+    <button
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        @onclick="Apply">
+        Apply
+    </button>
+
+    <button
+        class="px-4 py-2 border rounded hover:bg-gray-100"
+        @onclick="Clear">
+        Clear
+    </button>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<FilterArgs> OnFilterChanged { get; set; }
+
+    private string? SelectedStatus { get; set; }
+    private string? Search { get; set; }
+    private DateTime? From { get; set; }
+    private DateTime? To { get; set; }
+
+    private async Task Apply()
+    {
+        var args = new FilterArgs
+        {
+            Status = SelectedStatus,
+            Search = Search,
+            From = From,
+            To = To
+        };
+
+        await OnFilterChanged.InvokeAsync(args);
+    }
+
+    private async Task Clear()
+    {
+        SelectedStatus = null;
+        Search = null;
+        From = null;
+        To = null;
+        await Apply();
+    }
+
+    public class FilterArgs
+    {
+        public string? Status { get; set; }
+        public string? Search { get; set; }
+        public DateTime? From { get; set; }
+        public DateTime? To { get; set; }
+    }
+}

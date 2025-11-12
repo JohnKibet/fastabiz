@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace frontend.Models.User
+namespace frontend.Models
 {
     public static class UserRoles
     {

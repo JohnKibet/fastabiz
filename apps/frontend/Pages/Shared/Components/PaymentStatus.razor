@@ -1,0 +1,29 @@
+@namespace frontend.Pages.Shared.Components
+@using Microsoft.AspNetCore.Components
+
+<span
+    class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
+    style="background-color:@BgColor; color:@TextColor">
+    @Status
+</span>
+
+@code {
+    [Parameter]
+    public string Status { get; set; } = "Pending";
+
+    private string BgColor => Status switch
+    {
+        "Paid" => "#E6FFFA",      // light green
+        "Pending" => "#FEF3C7",   // light yellow
+        "Overdue" => "#FEE2E2",   // light red
+        _ => "#E5E7EB"            // gray
+    };
+
+    private string TextColor => Status switch
+    {
+        "Paid" => "#065F46",      // dark green
+        "Pending" => "#92400E",   // dark yellow
+        "Overdue" => "#991B1B",   // dark red
+        _ => "#374151"            // gray
+    };
+}

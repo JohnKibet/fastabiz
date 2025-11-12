@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using InvModel = frontend.Models.Inventory.Inventory;
+using InvModel = frontend.Models.Inventory;
 
-namespace frontend.Models.Store
+namespace frontend.Models
 {
     public class Store
     {

@@ -1,4 +1,4 @@
-namespace frontend.Models.Driver
+namespace frontend.Models
 {
     public class Driver
     {

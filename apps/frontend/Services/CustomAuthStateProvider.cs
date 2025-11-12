@@ -1,11 +1,11 @@
 using System.Security.Claims;
 using System.Text.Json;
-using frontend.Models.User;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
+using frontend.Models;
 
-namespace frontend.Services.CustomAuthStateProvider;
+namespace frontend.Services;
 
 public class CustomAuthStateProvider : AuthenticationStateProvider
 {

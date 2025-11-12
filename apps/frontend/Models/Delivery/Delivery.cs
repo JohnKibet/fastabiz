@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace frontend.Models.Delivery;
+namespace frontend.Models;
 
 public class Delivery
 {

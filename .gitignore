@@ -57,12 +57,12 @@ artifacts/
 # Thumbnails for images
 Thumbs.db
 
-# Ignore future Newman reports generated during CI
-postman/newman-report.json
+# Ignore only Postman/Newman output files
+postman/**/*.html
+postman/**/*.xml
+postman/**/*.json
 newman/
-*.html
-*.xml
-*.json
+
 
 # Tailwind, Docker & node_modules
 .npm/

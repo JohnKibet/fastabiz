@@ -1,0 +1,92 @@
+@namespace frontend.Pages.Shared.Components.InvoiceDetails
+
+<div class="flex justify-between items-start">
+    <div>
+        <h3 class="text-xl font-semibold">Invoice @Invoice.InvoiceNumber</h3>
+        <div class="text-sm text-gray-500">
+            @Invoice.CustomerName • @Invoice.CreatedAt.ToString("yyyy-MM-dd")
+        </div>
+    </div>
+
+    <button class="text-gray-600 hover:text-gray-800" @onclick="Close">✕</button>
+</div>
+
+<div class="mt-4">
+    <h4 class="font-medium">Items</h4>
+
+    <ul class="mt-2 divide-y">
+        @foreach (var item in Invoice.Items)
+        {
+            <li class="py-2 flex justify-between">
+                <div>
+                    <div class="font-semibold">@item.ItemName</div>
+                    <div class="text-sm text-gray-500">
+                        @item.Quantity x @item.UnitPrice.ToString("N2")
+                    </div>
+                </div>
+                <div class="font-medium">@item.Total.ToString("N2") KES</div>
+            </li>
+        }
+    </ul>
+
+    <div class="mt-4 border-t pt-4">
+        <div class="flex justify-between">
+            <div class="text-gray-600">Subtotal</div>
+            <div>@Invoice.Items.Sum(i => i.Total).ToString("N2") KES</div>
+        </div>
+
+        <div class="flex justify-between mt-2 text-lg font-semibold">
+            <div>Total</div>
+            <div>@Invoice.Amount.ToString("N2") KES</div>
+        </div>
+    </div>
+
+    <div class="mt-6 flex gap-2">
+        <button
+            class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            @onclick="MarkAsPaid">
+            Mark as Paid
+        </button>
+
+        <button
+            class="px-4 py-2 border rounded hover:bg-gray-100"
+            @onclick="Resend">
+            Resend Invoice
+        </button>
+
+        <button
+            class="px-4 py-2 border rounded text-red-600 hover:bg-red-50"
+            @onclick="Cancel">
+            Cancel
+        </button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Invoice Invoice { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback<Invoice> OnMarkedPaid { get; set; }
+
+    [Parameter]
+    public EventCallback<Invoice> OnResent { get; set; }
+
+    [Parameter]
+    public EventCallback<Invoice> OnCancelled { get; set; }
+
+    private async Task Close() =>
+        await OnClose.InvokeAsync(null);
+
+    private async Task MarkAsPaid() =>
+        await OnMarkedPaid.InvokeAsync(Invoice);
+
+    private async Task Resend() =>
+        await OnResent.InvokeAsync(Invoice);
+
+    private async Task Cancel() =>
+        await OnCancelled.InvokeAsync(Invoice);
+}

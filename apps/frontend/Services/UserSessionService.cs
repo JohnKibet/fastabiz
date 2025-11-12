@@ -1,5 +1,5 @@
 using System.Text.Json;
-using frontend.Models.User;
+using frontend.Models;
 using Microsoft.JSInterop;
 
 public class UserSessionService
