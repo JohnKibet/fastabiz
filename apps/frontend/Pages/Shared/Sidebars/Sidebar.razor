@@ -57,6 +57,7 @@
         else if (Role == "driver")
         {
             <SidebarSection Title="Driver Panel" Icon="truck"
+                            SectionKey="DriverMenu"
                             IsCollapsed="IsCollapsed" Items="DriverMenu"
                             IsOpen="@IsSectionOpen(nameof(DriverMenu))"
                             OnToggle="@ToggleSection" />
@@ -64,6 +65,7 @@
         else if (Role == "customer")
         {
             <SidebarSection Title="Customer Panel" Icon="shopping-bag"
+                            SectionKey="CustomerMenu"
                             IsCollapsed="IsCollapsed" Items="CustomerMenu"
                             IsOpen="@IsSectionOpen(nameof(CustomerMenu))"
                             OnToggle="@ToggleSection" />

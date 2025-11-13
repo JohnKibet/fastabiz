@@ -16,15 +16,17 @@
     }
     else
     {
-        <OrderSummary Invoice="Invoice" />
-        <PaymentMethods 
-            SelectedMethod="SelectedMethod" 
-            OnMethodChanged="method => SelectedMethod = method" />
-        <PaymentForm 
-            Method="SelectedMethod" 
-            OnSubmit="HandlePayment" 
-            IsLoading="@IsProcessing" />
-        <PaymentStatusBadge Status="@PaymentResult" />
+        <div class="divide-y divide-gray-200">
+            <OrderSummary Invoice="Invoice" />
+            <PaymentMethods 
+                SelectedMethod="SelectedMethod" 
+                OnMethodChanged="method => SelectedMethod = method" />
+            <PaymentForm 
+                Method="SelectedMethod" 
+                OnSubmit="HandlePayment" 
+                IsLoading="@IsProcessing" />
+            <PaymentStatusBadge Status="@PaymentResult" />
+        </div>
     }
 </div>
 

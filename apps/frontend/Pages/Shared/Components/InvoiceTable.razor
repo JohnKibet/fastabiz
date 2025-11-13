@@ -20,7 +20,7 @@
         {
             @foreach (var invoice in Invoices)
             {
-                <tr class="border-t hover:bg-gray-50">
+                <tr class="border-t hover:bg-gray-50 transition-colors duration-200">
                     <td class="p-3">@invoice.ID</td>
                     <td class="p-3">@invoice.CustomerName</td>
                     <td class="p-3">@($"{invoice.Amount:N2} KES")</td>

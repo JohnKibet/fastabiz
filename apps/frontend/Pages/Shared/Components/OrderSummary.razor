@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Components
 @using frontend.Models
 
-<div class="border rounded p-4 bg-white shadow-sm">
+<div class="border rounded-lg p-4 bg-white shadow-sm">
     <div class="flex justify-between items-center">
         <div>
             <div class="text-sm text-gray-500">Order</div>
@@ -10,7 +10,7 @@
             <div class="text-xs text-gray-400">@Invoice.CustomerName</div>
         </div>
 
-        <div class="text-xl font-bold">
+        <div class="text-xl font-bold text-green-700">
             @Invoice.Amount.ToString("N2") KES
         </div>
     </div>
