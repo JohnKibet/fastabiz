@@ -59,7 +59,7 @@
     [Parameter] public string Title { get; set; } = string.Empty;
     [Parameter] public string SectionKey { get; set; } = string.Empty;
     [Parameter] public string Icon { get; set; } = string.Empty;
-    [Parameter] public List<SidebarMenuItem> Items { get; set; } = new();
+    [Parameter] public List<SidebarMenuItem> Items { get; set; } = new List<SidebarMenuItem>();
     [Parameter] public bool IsCollapsed { get; set; }
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback<string> OnToggle { get; set; }
