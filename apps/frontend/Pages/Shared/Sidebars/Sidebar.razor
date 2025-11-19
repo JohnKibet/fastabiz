@@ -1,6 +1,6 @@
 @using System.Security.Claims
 @using frontend.Models
-@using frontend.Pages.Shared.Icons
+@using frontend.Pages.Shared.Components.Icons
 @inject AuthenticationStateProvider AuthProvider
 
 <div class="flex flex-col min-h-screen bg-white border-r border-gray-200 shadow-sm
@@ -24,6 +24,12 @@
     <nav class="flex-1 overflow-y-auto mt-3 px-1 space-y-3">
         @if (Role == "admin")
         {
+            <SidebarSection Title="Dashboard" Icon="todo" 
+                            SectionKey="AdminDashboard"
+                            IsCollapsed="IsCollapsed" Items="AdminDashboard"
+                            IsOpen="@IsSectionOpen(nameof(AdminDashboard))"
+                            OnToggle="@ToggleSection" />
+
             <SidebarSection Title="Operations" Icon="todo" 
                             SectionKey="AdminOperations"
                             IsCollapsed="IsCollapsed" Items="AdminOperations"
@@ -64,10 +70,28 @@
         }
         else if (Role == "customer")
         {
-            <SidebarSection Title="Customer Panel" Icon="shopping-bag"
+            <SidebarSection Title="Dashboard" Icon="shopping-bag"
                             SectionKey="CustomerMenu"
-                            IsCollapsed="IsCollapsed" Items="CustomerMenu"
-                            IsOpen="@IsSectionOpen(nameof(CustomerMenu))"
+                            IsCollapsed="IsCollapsed" Items="CustomerDashboard"
+                            IsOpen="@IsSectionOpen(nameof(CustomerDashboard))"
+                            OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Operations" Icon="todo"
+                            SectionKey="CustomerOperations"
+                            IsCollapsed="IsCollapsed" Items="CustomerOperations"
+                            IsOpen="@IsSectionOpen(nameof(CustomerOperations))"
+                            OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Feedback" Icon="shopping-bag"
+                            SectionKey="CustomerFeedback"
+                            IsCollapsed="IsCollapsed" Items="CustomerFeedback"
+                            IsOpen="@IsSectionOpen(nameof(CustomerFeedback))"
+                            OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="History" Icon=""
+                            SectionKey="CustomerHistory"
+                            IsCollapsed="IsCollapsed" Items="CustomerHistory"
+                            IsOpen="@IsSectionOpen(nameof(CustomerHistory))"
                             OnToggle="@ToggleSection" />
         }
         else
@@ -127,9 +151,12 @@
     private bool IsSectionOpen(string sectionKey) => openSections.Contains(sectionKey);
 
     #region menu definitions
-    private List<SidebarMenuItem> AdminOperations => new()
+    private List<SidebarMenuItem> AdminDashboard => new()
     {
         new("Dashboard", "/admin/dashboard", "house"),
+    };
+    private List<SidebarMenuItem> AdminOperations => new()
+    {
         new("Orders", "/admin/orders", "file-stack"),
         new("Create Order", "/admin/createorder", "file-plus")
     };
@@ -155,7 +182,8 @@
 
     private List<SidebarMenuItem> AdminReports => new()
     {
-        new("Reports", "/admin/reports", "chart-up")
+        new("Reports", "/admin/reports", "chart-up"),
+        new("Invoices", "/admin/invoices", "")
     };
 
     private List<SidebarMenuItem> DriverMenu => new()
@@ -166,14 +194,26 @@
         new("Proof", "/driver/proof", "package-check")
     };
 
-    private List<SidebarMenuItem> CustomerMenu => new()
+    private List<SidebarMenuItem> CustomerDashboard => new()
     {
         new("Dashboard", "/customer/dashboard", "layout-dashboard"),
+    };
+
+    private List<SidebarMenuItem> CustomerOperations => new()
+    {
         new("New Order", "/customer/neworder", "file-plus"),
-        new("My Orders", "/customer/myorders", "files"),
-        new("Rate Delivery", "/customer/feedback", "star"),
         new("Track Order", "/customer/trackorder", "route"),
+    }; 
+    private List<SidebarMenuItem> CustomerFeedback => new()
+    {
+        new("Rate Delivery", "/customer/feedback", "star"),
+    }; 
+
+    private List<SidebarMenuItem> CustomerHistory => new()
+    {
+        new("My Orders", "/customer/myorders", "files"),
         new("Payments", "/customer/payments", "credit-card")
     };
+
     #endregion
 }

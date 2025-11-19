@@ -22,14 +22,21 @@
 
     @if (ShowDropdown)
     {
-        <div class="absolute right-0 top-10 w-80 bg-white border shadow-lg rounded-2xl p-3 z-50">
+         <div class="absolute right-0 top-10 w-80 bg-white border shadow-lg rounded-2xl p-3 z-50">
+
+            <!-- Header -->
             <div class="flex justify-between items-center mb-2">
                 <h3 class="font-semibold text-gray-700">Notifications</h3>
-                <button class="text-xs text-orange-600 hover:underline" @onclick="MarkAllAsRead">
-                    Mark all as read
-                </button>
+
+                @if (notifications.Any())
+                {
+                    <button class="text-xs text-orange-600 hover:underline" @onclick="MarkAllAsRead">
+                        Mark all as read
+                    </button>
+                }
             </div>
 
+            <!-- Notifications List -->
             @if (notifications.Any())
             {
                 @foreach (var note in notifications.Take(5))
@@ -39,17 +46,21 @@
                         <span class="text-xs text-gray-400">@note.SentAt.ToShortTimeString()</span>
                     </div>
                 }
-
-                <div class="border-t mt-2 pt-2 text-center">
-                    <button class="text-sm text-blue-600 hover:underline" @onclick='()=>Navigation.NavigateTo("/admin/notifications")'>
-                        View all
-                    </button>
-                </div>
             }
             else
             {
-                <p class="text-sm text-gray-500 text-center">No notifications</p>
+                <div class="text-center py-3">
+                    <p class="text-sm text-gray-500">No notifications yet</p>
+                </div>
             }
+
+            <!-- Footer -->
+            <div class="border-t mt-2 pt-2 text-center">
+                <button class="text-sm text-blue-600 hover:underline"
+                        @onclick='()=>Navigation.NavigateTo("/admin/notifications")'>
+                    View History
+                </button>
+            </div>
         </div>
     }
 </div>

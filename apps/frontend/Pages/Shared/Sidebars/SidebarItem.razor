@@ -1,5 +1,5 @@
 @using frontend.Models
-@using frontend.Pages.Shared.Icons
+@using frontend.Pages.Shared.Components.Icons
 @inject NavigationManager Nav
 
 <li class="relative group">
@@ -34,6 +34,7 @@
 </li>
 
 @code {
+    [Parameter] public bool HighlightSectionTitle { get; set; } = false;
     [Parameter] public SidebarMenuItem Item { get; set; } = default!;
     [Parameter] public bool IsCollapsed { get; set; }
 

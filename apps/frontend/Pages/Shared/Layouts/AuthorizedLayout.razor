@@ -8,31 +8,31 @@
 <CascadingAuthenticationState>
     <AuthorizeView>
         <Authorized>
-    @if (IsReady)
-    {
-        <div class="flex min-h-screen bg-gray-50 text-gray-800 mt-0">
-            <!-- Sidebar -->
-            <Sidebar OnCollapseChanged="OnSidebarCollapseChanged" />
+            @if (IsReady)
+            {
+                <div class="flex min-h-screen bg-gray-50 text-gray-800 mt-0">
+                    <!-- Sidebar -->
+                    <Sidebar OnCollapseChanged="OnSidebarCollapseChanged" />
 
-            <!-- Main Section -->
-            <div class="flex flex-col flex-1 min-h-screen">
-                <!-- Navbar -->
-                <Navbar UserName="@UserName" />
+                    <!-- Main Section -->
+                    <div class="flex flex-col flex-1 min-h-screen">
+                        <!-- Navbar -->
+                        <Navbar UserName="@UserName" />
 
-                <!-- Scrollable Page Content -->
-                <main class="flex-1 overflow-auto p-6 md:p-8 max-w-7xl mx-auto w-full">
-                    <CascadingValue Value="UserId">
-                        @ChildContent
-                    </CascadingValue>
-                </main>
-            </div>
-        </div>
-    }
-    else
-    {
-        <p class="p-6 text-center text-gray-600">Loading...</p>
-    }
-</Authorized>
+                        <!-- Scrollable Page Content -->
+                        <main class="flex-1 overflow-auto p-6 md:p-8 max-w-7xl mx-auto w-full">
+                            <CascadingValue Value="UserId">
+                                @ChildContent
+                            </CascadingValue>
+                        </main>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="p-6 text-center text-gray-600">Loading...</p>
+            }
+        </Authorized>
         <NotAuthorized>
             @if (RedirectToLogin && IsReady && !Navigation.Uri.Contains("/auth/login"))
             {
