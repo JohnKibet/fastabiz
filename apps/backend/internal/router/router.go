@@ -11,6 +11,7 @@ import (
 
 	"backend/handlers"
 	authMiddleware "backend/internal/middleware"
+
 	"github.com/jmoiron/sqlx"
 )
 
@@ -72,6 +73,7 @@ func NewRouter(
 				r.Get("/by-email/{email}", u.GetUserByEmail)
 				r.Patch("/{id}/profile", u.UpdateUserProfile)
 				r.Put("/{id}/update", u.UpdateUser)
+				r.Put("/{id}/password", u.ChangePassword)
 				r.Delete("/{id}", u.DeleteUser)
 			})
 
@@ -164,7 +166,6 @@ func NewRouter(
 		})
 
 	})
-
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		if err := db.Ping(); err != nil {

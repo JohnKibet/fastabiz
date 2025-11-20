@@ -176,6 +176,48 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// ChangePassword godoc
+// @Summary Change a user's password
+// @Description Verifies the user's current password and updates it to a new password
+// @Tags users
+// @Accept json
+// @Produce json
+// @Security JWT
+// @Param id path string true "User ID"
+// @Param data body user.ChangePasswordRequest true "Current and new passwords"
+// @Success 200 {object} map[string]string "Password updated successfully"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid user ID or request body"
+// @Failure 401 {object} handlers.ErrorResponse "Current password incorrect"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
+// @Router /users/{id}/password [put]
+func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	userID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid user ID", nil)
+		return
+	}
+
+	var req user.ChangePasswordRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", err)
+		return
+	}
+
+	if err := h.UC.Users.UseCase.ChangePassword(r.Context(), userID, &req); err != nil {
+		// you can optionally inspect errors here:
+		// if errors.Is(err, domain.ErrInvalidPassword) ...
+		writeJSONError(w, http.StatusInternalServerError, "Failed to update password", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "password updated successfully",
+	})
+}
+
 // GetUserByID godoc
 // @Summary Get user by ID
 // @Security JWT

@@ -1,4 +1,5 @@
 @namespace frontend.Pages.Shared.Components.Modals
+@using frontend.Models
 @using System.ComponentModel.DataAnnotations
 
 @if (Show)
@@ -13,46 +14,42 @@
                 <p class="text-red-500 text-sm mb-2">@ErrorMessage</p>
             }
 
-            @if (!string.IsNullOrEmpty(SuccessMessage))
-            {
-                <p class="text-green-600 text-sm mb-2">@SuccessMessage</p>
-            }
-
-            <EditForm Model="@Model" OnValidSubmit="Submit">
+            <EditForm Model="@Model" OnValidSubmit="@Submit">
                 <DataAnnotationsValidator />
 
+                <!-- Hidden Slug (required for backend updates) -->
+                @* <InputHidden @bind-Value="Model.Slug" /> *@
+
                 <div class="mb-3">
-                    <label class="text-sm text-gray-700">Full Name</label>
-                    <InputText class="border w-full p-2 rounded"
-                               @bind-Value="Model.FullName" />
+                    <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                    <InputText @bind-Value="Model.FullName"
+                               class="mt-1 w-full p-2 border rounded-lg" />
+                    <ValidationMessage For="@(() => Model.FullName)" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="text-sm text-gray-700">Email</label>
-                    <InputText type="email" class="border w-full p-2 rounded"
-                               @bind-Value="Model.Email" />
+                    <label class="block text-sm font-medium text-gray-700">Email</label>
+                    <InputText @bind-Value="Model.Email"
+                               class="mt-1 w-full p-2 border rounded-lg" />
+                    <ValidationMessage For="@(() => Model.Email)" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="text-sm text-gray-700">Phone Number</label>
-                    <InputText class="border w-full p-2 rounded"
-                               @bind-Value="Model.Phone" />
+                    <label class="block text-sm font-medium text-gray-700">Phone</label>
+                    <InputText @bind-Value="Model.Phone"
+                               class="mt-1 w-full p-2 border rounded-lg" />
+                    <ValidationMessage For="@(() => Model.Phone)" />
                 </div>
 
-                <div class="mb-3">
-                    <label class="text-sm text-gray-700">Slug</label>
-                    <InputText class="border w-full p-2 rounded"
-                               @bind-Value="Model.Slug" />
-                </div>
-
-                <div class="flex justify-between space-x-3 mt-4">
+                <div class="flex justify-end mt-4 space-x-2">
                     <button type="button"
-                            class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                            class="px-4 py-2 bg-gray-200 rounded-lg"
                             @onclick="Close">
                         Cancel
                     </button>
 
-                    <button class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg">
                         Save Changes
                     </button>
                 </div>
@@ -66,20 +63,39 @@
     [Parameter] public bool Show { get; set; }
     [Parameter] public EventCallback<bool> ShowChanged { get; set; }
 
-    [Parameter] public EditUserModel Model { get; set; } = new();
+    public EditUserModel Model { get; set; } = new();
 
-    [Parameter] public EventCallback OnSubmit { get; set; }
+    public string? ErrorMessage { get; set; }
 
-    private string? ErrorMessage;
-    private string? SuccessMessage;
-
-    private async Task Submit()
+    public void Load(EditUserModel user)
     {
-        await OnSubmit.InvokeAsync();
+        // preload user data before opening modal
+        Model = new EditUserModel
+        {
+            FullName = user.FullName,
+            Email = user.Email,
+            Phone = user.Phone,
+            Slug = user.Slug
+        };
     }
 
-    private async Task Close()
+    async Task Submit()
     {
-        await ShowChanged.InvokeAsync(false);
+        ErrorMessage = null;
+
+        // TODO: Replace with real API call
+        var result = true;
+
+        if (result)
+        {
+            await ShowChanged.InvokeAsync(false);
+        }
+        else
+        {
+            ErrorMessage = "Failed to update profile.";
+        }
     }
+
+    void Close() => ShowChanged.InvokeAsync(false);
 }
+

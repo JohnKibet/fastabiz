@@ -24,6 +24,11 @@ type UpdateUserRequest struct {
 	Value  interface{} `json:"value" binding:"required"`
 }
 
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"currentPassword"`
+	NewPassword     string `json:"newPassword"`
+}
+
 func (r *CreateUserRequest) ToUser() *User {
 	baseSlug := generate.GenerateSlug(r.FullName)
 	uniqueSuffix := uuid.New().String()[:8]
