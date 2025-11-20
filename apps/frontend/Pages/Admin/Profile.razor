@@ -2,6 +2,8 @@
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
+@using frontend.Pages.Shared.Components.Modals
+@using frontend.Models
 
 <PageTitle>User Profile</PageTitle>
 
@@ -34,7 +36,7 @@
     </div>
 
     <!-- DETAILS CARD -->
-    <div class="grid grid-cols-1 gap-4">
+    <div class="grid grid-cols-2 gap-4">
 
         <div class="p-4 border rounded-xl bg-gray-50">
             <p class="text-xs text-gray-500 uppercase">Email</p>
@@ -68,27 +70,38 @@
     <!-- ACTION BUTTONS -->
     <div class="flex flex-wrap gap-3 pt-3">
 
-        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow">
+        <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow"
+                @onclick="() => ShowEditProfileModal = true">
             Edit Profile
         </button>
 
-        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow">
+        <EditProfile
+            Show="@ShowEditProfileModal"
+            ShowChanged="@(value => ShowEditProfileModal = value)"
+            Model="@EditModel"
+            OnSubmit="SaveProfileChanges">
+        </EditProfile>
+
+        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
+                @onclick="() => ShowManageSessions = true">
             Manage Sessions
         </button>
 
-        <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow">
-            Change Password
-        </button>
+        <ManageSessions Show="@ShowManageSessions"
+            ShowChanged="@((v) => ShowManageSessions = v)"
+            Sessions="@UserSessions"
+            EndSession="EndSpecificSession"
+            EndAllSessions="EndOtherSessions" />
 
-        <button class="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded-lg shadow"
-                @onclick="@(() => Navigation.NavigateTo("/logout"))">
-            Logout
-        </button>
     </div>
 
 </div>
 
 @code {
+    private bool ShowManageSessions = false;
+    private List<SessionModel> UserSessions = new();
+    private bool ShowEditProfileModal = false;
+    private EditUserModel EditModel = new();
     private string UserFullName { get; set; } = "Unknown User";
     private string UserEmail { get; set; } = "N/A";
     private string UserRole { get; set; } = "Guest";
@@ -122,4 +135,36 @@
                 CreatedAt = created;
         }
     }
+
+    private async Task SaveProfileChanges()
+    {
+        Console.WriteLine("Saving profile changes...");
+        Console.WriteLine(EditModel.FullName);
+        Console.WriteLine(EditModel.Email);
+
+        // TODO: call API endpoint e.g. UserService.Update(UserId, EditModel)
+
+        ShowEditProfileModal = false;
+
+        // Update UI
+        UserFullName = EditModel.FullName;
+        UserEmail = EditModel.Email;
+        UserPhone = EditModel.Phone ?? "Not Provided";
+        UserSlug = EditModel.Slug;
+
+        StateHasChanged();
+    }
+
+    private Task EndSpecificSession(Guid id)
+    {
+        // TODO: call your backend session-delete endpoint
+        return Task.CompletedTask;
+    }
+
+    private Task EndOtherSessions()
+    {
+        // TODO: call backend "delete all except current" endpoint
+        return Task.CompletedTask;
+    }
+
 }
