@@ -1,0 +1,85 @@
+@namespace frontend.Pages.Shared.Components.Modals
+@using System.ComponentModel.DataAnnotations
+
+@if (Show)
+{
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 shadow-xl w-96">
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">Edit Profile</h3>
+
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <p class="text-red-500 text-sm mb-2">@ErrorMessage</p>
+            }
+
+            @if (!string.IsNullOrEmpty(SuccessMessage))
+            {
+                <p class="text-green-600 text-sm mb-2">@SuccessMessage</p>
+            }
+
+            <EditForm Model="@Model" OnValidSubmit="Submit">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="text-sm text-gray-700">Full Name</label>
+                    <InputText class="border w-full p-2 rounded"
+                               @bind-Value="Model.FullName" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-sm text-gray-700">Email</label>
+                    <InputText type="email" class="border w-full p-2 rounded"
+                               @bind-Value="Model.Email" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-sm text-gray-700">Phone Number</label>
+                    <InputText class="border w-full p-2 rounded"
+                               @bind-Value="Model.Phone" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="text-sm text-gray-700">Slug</label>
+                    <InputText class="border w-full p-2 rounded"
+                               @bind-Value="Model.Slug" />
+                </div>
+
+                <div class="flex justify-between space-x-3 mt-4">
+                    <button type="button"
+                            class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                            @onclick="Close">
+                        Cancel
+                    </button>
+
+                    <button class="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">
+                        Save Changes
+                    </button>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public EventCallback<bool> ShowChanged { get; set; }
+
+    [Parameter] public EditUserModel Model { get; set; } = new();
+
+    [Parameter] public EventCallback OnSubmit { get; set; }
+
+    private string? ErrorMessage;
+    private string? SuccessMessage;
+
+    private async Task Submit()
+    {
+        await OnSubmit.InvokeAsync();
+    }
+
+    private async Task Close()
+    {
+        await ShowChanged.InvokeAsync(false);
+    }
+}

@@ -1,0 +1,134 @@
+@namespace frontend.Pages.Shared.Components.Modals
+
+@if (Show)
+{
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 shadow-xl w-[500px] max-h-[80vh] overflow-y-auto">
+
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">
+                    Manage Sessions
+                </h3>
+
+                <button @onclick="Close"
+                        class="text-gray-400 hover:text-gray-600 text-xl font-bold">
+                    ×
+                </button>
+            </div>
+
+            <p class="text-gray-600 text-sm mb-4">
+                These are the devices currently signed in to your account.
+                You can end any session you don’t recognize.
+            </p>
+
+            <!-- STATUS MESSAGES -->
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="text-red-600 text-sm mb-3">@ErrorMessage</div>
+            }
+
+            @if (!string.IsNullOrEmpty(SuccessMessage))
+            {
+                <div class="text-green-600 text-sm mb-3">@SuccessMessage</div>
+            }
+
+            <!-- SESSIONS LIST -->
+            <div class="space-y-4">
+
+                @if (Sessions is null || Sessions.Count == 0)
+                {
+                    <div class="p-4 bg-gray-50 border rounded-lg">
+                        <p class="text-gray-600 text-sm">
+                            No active sessions found.
+                        </p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var session in Sessions)
+                    {
+                        <div class="p-4 border rounded-xl bg-gray-50 flex justify-between items-start">
+
+                            <div>
+                                <p class="font-medium text-gray-800">@session.Device</p>
+                                <p class="text-xs text-gray-600">@session.Browser</p>
+
+                                <p class="text-xs text-gray-500 mt-1">
+                                    IP: @session.IP  
+                                    <br />
+                                    Last Active: @session.LastActive.ToLocalTime().ToString("MMM d, yyyy h:mm tt")
+                                </p>
+
+                                @if (session.IsCurrent)
+                                {
+                                    <span class="text-green-600 text-xs font-semibold mt-2 inline-block">
+                                        Current Session
+                                    </span>
+                                }
+                            </div>
+
+                            @if (!session.IsCurrent)
+                            {
+                                <button @onclick="() => EndSession.InvokeAsync(session.ID)"
+                                        class="text-red-500 hover:text-red-700 text-sm font-semibold">
+                                    End Session
+                                </button>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- FOOTER ACTIONS -->
+            @if (Sessions?.Count > 1)
+            {
+                <div class="mt-5 flex justify-between">
+
+                    <button class="px-4 py-2 rounded bg-red-500 text-white hover:bg-red-600"
+                            @onclick="EndOtherSessions">
+                        End All Other Sessions
+                    </button>
+
+                    <button class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                            @onclick="Close">
+                        Close
+                    </button>
+                </div>
+            }
+            else
+            {
+                <div class="mt-5 flex justify-end">
+                    <button class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
+                            @onclick="Close">
+                        Close
+                    </button>
+                </div>
+            }
+
+        </div>
+    </div>
+}
+
+@code {
+    // STATE CONTROL
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public EventCallback<bool> ShowChanged { get; set; }
+
+    // DATA INPUT
+    [Parameter] public List<SessionModel> Sessions { get; set; } = new();
+
+    // ACTION CALLBACKS
+    [Parameter] public EventCallback<Guid> EndSession { get; set; }
+    [Parameter] public EventCallback EndAllSessions { get; set; }
+
+    private string? ErrorMessage;
+    private string? SuccessMessage;
+
+    private Task Close() => ShowChanged.InvokeAsync(false);
+
+    private async Task EndOtherSessions()
+    {
+        await EndAllSessions.InvokeAsync();
+    }
+}
