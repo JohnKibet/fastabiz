@@ -71,15 +71,14 @@
     <div class="flex flex-wrap gap-3 pt-3">
 
         <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow"
-                @onclick="() => ShowEditProfileModal = true">
+            @onclick="OpenEditProfileModal">
             Edit Profile
         </button>
 
         <EditProfile
+            @ref="EditProfileRef"
             Show="@ShowEditProfileModal"
-            ShowChanged="@(value => ShowEditProfileModal = value)"
-            Model="@EditModel"
-            OnSubmit="SaveProfileChanges">
+            ShowChanged="@(value => ShowEditProfileModal = value)">
         </EditProfile>
 
         <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
@@ -98,6 +97,7 @@
 </div>
 
 @code {
+    private EditProfile? EditProfileRef;
     private bool ShowManageSessions = false;
     private List<SessionModel> UserSessions = new();
     private bool ShowEditProfileModal = false;
@@ -135,23 +135,27 @@
                 CreatedAt = created;
         }
     }
-
-    private async Task SaveProfileChanges()
+    private void OpenEditProfileModal()
     {
-        Console.WriteLine("Saving profile changes...");
-        Console.WriteLine(EditModel.FullName);
-        Console.WriteLine(EditModel.Email);
+        EditModel = new EditUserModel
+        {
+            FullName = UserFullName,
+            Email = UserEmail,
+            Phone = UserPhone,
+            Slug = UserSlug
+        };
 
-        // TODO: call API endpoint e.g. UserService.Update(UserId, EditModel)
+        EditProfileRef?.Load(EditModel);
+        ShowEditProfileModal = true;
+    }
 
-        ShowEditProfileModal = false;
-
-        // Update UI
+    // After modal closes, update UI
+    private void OnEditProfileClosed()
+    {
         UserFullName = EditModel.FullName;
         UserEmail = EditModel.Email;
         UserPhone = EditModel.Phone ?? "Not Provided";
         UserSlug = EditModel.Slug;
-
         StateHasChanged();
     }
 

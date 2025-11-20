@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"context"
-	"fmt"
 	"backend/internal/application"
 	"backend/internal/domain/user"
+	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -79,12 +79,13 @@ func (r *UserRepository) UpdateProfile(ctx context.Context, userID uuid.UUID, ph
 
 func (r *UserRepository) UpdateColum(ctx context.Context, userID uuid.UUID, column string, value any) error {
 	allowed := map[string]bool{
-		"full_name":  true,
-		"email":      true,
-		"phone":      true,
-		"role":       true,
-		"status":     true,
-		"last_login": true,
+		"full_name":     true,
+		"email":         true,
+		"phone":         true,
+		"role":          true,
+		"status":        true,
+		"last_login":    true,
+		"password_hash": true,
 	}
 
 	if !allowed[column] {

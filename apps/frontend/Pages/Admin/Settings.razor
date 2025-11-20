@@ -2,6 +2,7 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Http.Json
 @using frontend.Pages.Shared.Components.Modals
+@inject UserService UserService
 
 <PageTitle>Settings</PageTitle>
 
@@ -71,11 +72,11 @@
 </div>
 
 @code {
+    [CascadingParameter] public Guid? UserId { get; set; }
     private bool ShowChangePasswordModal = false;
     private ChangePasswordModel PasswordModel = new(); 
     private string? ErrorMessage; 
     private string? SuccessMessage;
-    private readonly HttpClient _http;
 
     private async Task SubmitPasswordChange()
     {
@@ -87,9 +88,15 @@
             return;
         }
 
-        var response = await _http.PostAsJsonAsync("auth/change-password", PasswordModel);
+        if (!UserId.HasValue)
+        {
+            ErrorMessage = "User not logged in or session expired.";
+            return;
+        }
 
-        if (response.IsSuccessStatusCode)
+        var response = await UserService.ChangePassword(UserId.Value, PasswordModel.CurrentPassword, PasswordModel.NewPassword);
+
+        if (response.Success)
         {
             SuccessMessage = "Password updated.";
             PasswordModel = new();

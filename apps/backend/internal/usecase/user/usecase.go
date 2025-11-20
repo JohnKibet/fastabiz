@@ -1,12 +1,12 @@
 package user
 
 import (
-	"context"
-	"fmt"
 	"backend/internal/domain/driver"
 	"backend/internal/domain/notification"
 	domain "backend/internal/domain/user"
 	"backend/internal/usecase/common"
+	"context"
+	"fmt"
 	"time"
 
 	"github.com/cridenour/go-postgis"
@@ -109,6 +109,33 @@ func (uc *UseCase) UpdateUser(ctx context.Context, userID uuid.UUID, req *domain
 			msg := fmt.Sprintf("ℹ️ Your account column '%s' was updated.", req.Column)
 			_ = uc.notify(ctx, user.ID, msg)
 		}()
+
+		return nil
+	})
+}
+
+func (uc *UseCase) ChangePassword(ctx context.Context, userID uuid.UUID, req *domain.ChangePasswordRequest) error {
+	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
+		user, err := uc.repo.GetByID(txCtx, userID)
+		if err != nil {
+			return fmt.Errorf("user not found: %w", err)
+		}
+
+		// 1. verify old password
+		if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.CurrentPassword)) != nil {
+			return fmt.Errorf("current password incorrect")
+		}
+
+		// 2. hash new password
+		hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
+		if err != nil {
+			return fmt.Errorf("hashing failed: %w", err)
+		}
+
+		// 3. save
+		if err := uc.repo.UpdateColum(txCtx, userID, "password_hash", string(hashed)); err != nil {
+			return fmt.Errorf("failed to update password: %w", err)
+		}
 
 		return nil
 	})

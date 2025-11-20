@@ -51,23 +51,52 @@ public class UserService
         return await GetFromJsonSafe<List<User>>("users/all_users");
     }
 
-    public async Task<User> UpdateUser(Guid userId, string column, object value)
+    public async Task<ServiceResult<HttpResponseMessage>> UpdateUser(Guid userId, string column, object value)
     {
-        var requestBody = new
+        try
         {
-            column,
-            value
+            var requestBody = new
+            {
+                column,
+                value
+            };
+
+            var response = await _http.PutAsJsonAsync($"users/{userId}/update", requestBody);
+            if (response.IsSuccessStatusCode)
+            {
+                InvalidateCache();
+                return ServiceResult<HttpResponseMessage>.Ok(response);
+            }
+
+            var error = await ParseError(response);
+            return ServiceResult<HttpResponseMessage>.Fail(error);
+            
+        }
+        catch (HttpRequestException ex)
+        {
+            return ServiceResult<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+        }
+    }
+
+    public async Task<ServiceResult<HttpResponseMessage>> ChangePassword(Guid userId, string currentPassword, string newPassword)
+    {
+        var body = new ChangePasswordDto
+        {
+            CurrentPassword = currentPassword,
+            NewPassword = newPassword
         };
 
-        var response = await _http.PutAsJsonAsync($"users/{userId}/update", requestBody);
+        var response = await _http.PutAsJsonAsync($"users/{userId}/password", body);
+
         if (response.IsSuccessStatusCode)
-        {
-            InvalidateCache();
-            return await response.Content.ReadFromJsonAsync<User>() ?? new User();
-        }
+            return ServiceResult<HttpResponseMessage>.Ok(response);
 
-        return null;
-
+        var error = await ParseError(response);
+        return ServiceResult<HttpResponseMessage>.Fail(error);
     }
 
     public async Task<ServiceResult<List<User>>> GetAllCachedUsers(bool forceRefresh = false)
