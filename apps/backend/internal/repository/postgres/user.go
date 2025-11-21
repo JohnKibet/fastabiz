@@ -133,7 +133,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id uuid.UUID) (*user.User,
 
 func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*user.User, error) {
 	query := `
-		SELECT id, full_name, email, password_hash, role, status, last_login, phone, slug 
+		SELECT id, full_name, email, password_hash, role, status, last_login, created_at, phone, slug
 		FROM users 
 		WHERE email = $1
 	`

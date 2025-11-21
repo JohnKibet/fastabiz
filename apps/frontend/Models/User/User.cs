@@ -37,7 +37,7 @@ namespace frontend.Models
         public string Role { get; set; } = string.Empty;
 
         [JsonPropertyName("phone")]
-        public string? Phone { get; set; }
+        public string Phone { get; set; } = string.Empty;
 
         [JsonPropertyName("token")]
         public string? Token { get; set; }
@@ -48,6 +48,9 @@ namespace frontend.Models
 
         [JsonPropertyName("last_login")]
         public DateTime? LastLogin { get; set; }
+
+        [JsonPropertyName("created_at")]
+        public DateTime? CreatedAt { get; set; }
     }
 
     public class CreateUserRequest

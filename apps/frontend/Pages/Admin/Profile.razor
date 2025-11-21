@@ -62,7 +62,9 @@
 
         <div class="p-4 border rounded-xl bg-gray-50">
             <p class="text-xs text-gray-500 uppercase">Joined</p>
-            <p class="text-gray-800 font-medium">@CreatedAt.ToString("MMM d, yyyy")</p>
+            <p class="text-gray-800 font-medium">
+                @(CreatedAt is not null ? CreatedAt.Value.ToString("MMM d, yyyy h:mm tt") : "Never")
+            </p>
         </div>
 
     </div>
@@ -109,7 +111,7 @@
     private string UserPhone { get; set; } = "Not Provided";
     private string UserSlug { get; set; } = "n/a";
     private DateTime? LastLogin { get; set; }
-    private DateTime CreatedAt { get; set; } = DateTime.Now;
+    private DateTime? CreatedAt { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

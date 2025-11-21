@@ -3,6 +3,7 @@
 @using System.Net.Http.Json
 @using frontend.Pages.Shared.Components.Modals
 @inject UserService UserService
+@inject ToastService ToastService
 
 <PageTitle>Settings</PageTitle>
 
@@ -75,22 +76,17 @@
     [CascadingParameter] public Guid? UserId { get; set; }
     private bool ShowChangePasswordModal = false;
     private ChangePasswordModel PasswordModel = new(); 
-    private string? ErrorMessage; 
-    private string? SuccessMessage;
-
     private async Task SubmitPasswordChange()
     {
-        ErrorMessage = SuccessMessage = null;
-
         if (PasswordModel.NewPassword != PasswordModel.ConfirmPassword)
         {
-            ErrorMessage = "New passwords do not match.";
+            ToastService.ShowToast("New passwords do not match.", ToastService.ToastLevel.Error);
             return;
         }
 
         if (!UserId.HasValue)
         {
-            ErrorMessage = "User not logged in or session expired.";
+            ToastService.ShowToast("User not logged in or session expired.", ToastService.ToastLevel.Error);
             return;
         }
 
@@ -98,13 +94,14 @@
 
         if (response.Success)
         {
-            SuccessMessage = "Password updated.";
+            ToastService.ShowToast("Password updated.", ToastService.ToastLevel.Success);
             PasswordModel = new();
             ShowChangePasswordModal = false;
         }
         else
         {
-            ErrorMessage = "Password update failed.";
+            var message = response.ErrorMessage ?? response.ErrorMessage ?? "Password update failed.";
+            ToastService.ShowToast(message, ToastService.ToastLevel.Error);
         }
     }
     private bool notificationsEnabled = true;
