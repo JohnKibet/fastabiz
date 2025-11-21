@@ -146,7 +146,8 @@
             }
             else
             {
-                ToastService.ShowToast("Failed to create order!", ToastService.ToastLevel.Error);
+                var message = result.ErrorMessage ?? result.ErrorMessage ?? "Failed to create order!";
+                ToastService.ShowToast(message, ToastService.ToastLevel.Error);
             }
         }
         catch (Exception ex)

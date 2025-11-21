@@ -190,14 +190,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!UserId.HasValue)
-        {
-            ToastService.ShowToast(
-                "Cannot create inventory without a valid user ID.",
-                ToastService.ToastLevel.Error
-            );
-            return;
-        }
+        if (!UserId.HasValue) return;
 
         store = await StoreService.GetStoreByOwner(UserId.Value);
 

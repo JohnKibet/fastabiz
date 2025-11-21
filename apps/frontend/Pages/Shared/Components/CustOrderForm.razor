@@ -81,14 +81,8 @@
         await DropdownService.LoadCachedDropdownData();
         inventories = DropdownService.Inventories;
 
-        if (UserId.HasValue)
-        {
-            order.CustomerID = UserId.Value;
-        }
-        else
-        {
-            return;
-        }
+        if (!UserId.HasValue) return;
+        order.CustomerID = UserId.Value;
     }
     private void OnInventoryChanged(Guid inventoryId)
     {

@@ -340,12 +340,17 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 	// Create the token
 	claims := jwt.MapClaims{
-		"iss":   "my-client",   // Kong
-		"sub":   u.ID.String(), // subject
-		"email": u.Email,
-		"role":  u.Role, // custom claim
-		"name":  u.FullName,
-		"exp":   time.Now().Add(time.Hour * 24).Unix(), // expires in 24h
+		"iss":        "my-client",   // Kong
+		"sub":        u.ID.String(), // subject
+		"email":      u.Email,
+		"role":       u.Role, // custom claim
+		"name":       u.FullName,
+		"phone":      u.Phone,
+		"slug":       u.Slug,
+		"status":     string(u.Status),
+		"last_login": u.LastLogin.Unix(),
+		"created_at": u.CreatedAt.Unix(),
+		"exp":        time.Now().Add(time.Hour * 24).Unix(), // expires in 24h
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
