@@ -31,7 +31,7 @@ func NewOrderHandler(uc *application.OrderService) *OrderHandler {
 // @Accept json
 // @Produce json
 // @Param order body order.CreateOrderRequest true "Order input"
-// @Success 201 {object} order.Order
+// @Success 201 {object} order.OrderDoc
 // @Failure 400 {string} handlers.ErrorResponse "Bad request"
 // @Failure 500 {string} handlers.ErrorResponse "Internal server error"
 // @Router /orders/create [post]
@@ -81,7 +81,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 // @Tags orders
 // @Produce json
 // @Param id path string true "Order ID"
-// @Success 200 {object} order.Order
+// @Success 200 {object} order.OrderDoc
 // @Failure 400 {string} handlers.ErrorResponse "Invalid ID"
 // @Failure 404 {string} handlers.ErrorResponse "Not found"
 // @Router /orders/by-id/{id} [get]
@@ -109,7 +109,7 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 // @Tags orders
 // @Produce json
 // @Param customer_id path string true "Customer ID"
-// @Success 200 {object} []order.Order
+// @Success 200 {object} []order.OrderDoc
 // @Failure 400 {string} handlers.ErrorResponse "Invalid Customer ID"
 // @Failure 404 {string} handlers.ErrorResponse "Not found"
 // @Router /orders/by-customer/{customer_id} [get]
@@ -183,7 +183,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 // @Description Get a list of all orders
 // @Tags orders
 // @Produce  json
-// @Success 200 {array} order.Order
+// @Success 200 {array} order.OrderDoc
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /orders/all_orders [get]
 func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {

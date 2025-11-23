@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
 	"backend/internal/application"
 	"backend/internal/domain/driver"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 
@@ -105,7 +105,7 @@ func (h *DriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
 // @Tags drivers
 // @Produce  json
 // @Param id path string true "Driver ID"
-// @Success 200 {object} driver.Driver
+// @Success 200 {object} driver.DriverDoc
 // @Failure 400 {string} handlers.ErrorResponse "Invalid ID"
 // @Failure 404 {string} handlers.ErrorResponse "Driver not found"
 // @Router /drivers/by-id/{id} [get]
@@ -134,7 +134,7 @@ func (h *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 // @Tags drivers
 // @Produce  json
 // @Param email path string true "Driver Email"
-// @Success 200 {object} driver.Driver
+// @Success 200 {object} driver.DriverDoc
 // @Failure 400 {string} handlers.ErrorResponse "Invalid Email"
 // @Failure 404 {string} handlers.ErrorResponse "Driver not found"
 // @Router /drivers/by-email/{email} [get]
@@ -162,7 +162,7 @@ func (h *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request)
 // @Description Get a list of all registered drivers
 // @Tags drivers
 // @Produce  json
-// @Success 200 {array} driver.Driver
+// @Success 200 {array} driver.DriverDoc
 // @Router /drivers/all_drivers [get]
 func (h *DriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {
 	drivers, err := h.UC.Drivers.UseCase.ListDrivers(r.Context())
