@@ -34,3 +34,28 @@ type Order struct {
 	CreatedAt time.Time   `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time   `db:"updated_at" json:"updated_at"`
 }
+
+// Point represents a simple GeoJSON-style point for Swagger only.
+// swagger:model Point
+type Point struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+}
+
+type OrderDoc struct {
+	ID          uuid.UUID `db:"id" json:"id"`
+	AdminID     uuid.UUID `db:"admin_id" json:"admin_id"`
+	Quantity    int       `db:"quantity" json:"quantity"`
+	InventoryID uuid.UUID `db:"inventory_id" json:"inventory_id"`
+	CustomerID  uuid.UUID `db:"user_id" json:"customer_id"`
+
+	PickupAddress string `db:"pickup_address" json:"pickup_address"`
+	PickupPoint   Point  `db:"pickup_point" json:"pickup_point"`
+
+	DeliveryAddress string `db:"delivery_address" json:"delivery_address"`
+	DeliveryPoint   Point  `db:"delivery_point" json:"delivery_point"`
+
+	Status    OrderStatus `db:"status" json:"status"`
+	CreatedAt time.Time   `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time   `db:"updated_at" json:"updated_at"`
+}

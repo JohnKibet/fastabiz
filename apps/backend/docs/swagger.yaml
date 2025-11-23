@@ -38,30 +38,14 @@ definitions:
     - column
     - value
     type: object
-  driver.CreateDriverRequest:
-    properties:
-      current_location:
-        $ref: '#/definitions/dto.PointDTO'
-      email:
-        type: string
-      full_name:
-        type: string
-      vehicle_info:
-        type: string
-    required:
-    - current_location
-    - email
-    - full_name
-    - vehicle_info
-    type: object
-  driver.Driver:
+  driver.DriverDoc:
     properties:
       available:
         type: boolean
       created_at:
         type: string
       current_location:
-        $ref: '#/definitions/dto.PointDTO'
+        $ref: '#/definitions/driver.Point'
       email:
         type: string
       full_name:
@@ -71,6 +55,13 @@ definitions:
       vehicle_info:
         type: string
     type: object
+  driver.Point:
+    properties:
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
   driver.UpdateDriverRequest:
     properties:
       column:
@@ -79,18 +70,6 @@ definitions:
     required:
     - column
     - value
-    type: object
-  dto.PointDTO:
-    properties:
-      srid:
-        example: 4326
-        type: integer
-      x:
-        example: 36.8219
-        type: number
-      "y":
-        example: -1.2921
-        type: number
     type: object
   feedback.CreateFeedbackRequest:
     properties:
@@ -142,20 +121,12 @@ definitions:
       images:
         description: could be JSON array or URLs
         type: string
-      location:
-        description: optional
-        type: string
-      name:
-        description: e.g. “Fresh Milk”
-        type: string
       packaging:
         description: “Bucket/Single”
         type: string
       price_amount:
         type: integer
       price_currency:
-        type: string
-      slug:
         type: string
       stock:
         type: integer
@@ -166,22 +137,16 @@ definitions:
     - category
     - description
     - images
-    - location
-    - name
     - packaging
     - price_amount
     - price_currency
-    - slug
     - stock
     - unit
     type: object
   inventory.Inventory:
     properties:
-      admin_id:
-        description: Foreign key
-        type: string
       category:
-        description: e.g. “Dairy”
+        description: e.g. “Dairy” - "name" field equivalent
         type: string
       created_at:
         type: string
@@ -192,12 +157,6 @@ definitions:
       images:
         description: could be JSON array or URLs
         type: string
-      location:
-        description: optional
-        type: string
-      name:
-        description: e.g. “Fresh Milk”
-        type: string
       packaging:
         description: “Bucket/Single”
         type: string
@@ -205,44 +164,16 @@ definitions:
         type: integer
       price_currency:
         type: string
-      slug:
-        description: product slug
-        type: string
       stock:
         type: integer
+      store_id:
+        description: FK to stores.id
+        type: string
       unit:
         description: '"per litre", "per bucket"'
         type: string
       updated_at:
         type: string
-    type: object
-  inventory.InventorySummary:
-    properties:
-      image:
-        type: string
-      in_stock:
-        type: integer
-      name:
-        type: string
-      packaging:
-        type: string
-      price:
-        $ref: '#/definitions/money.Money'
-      unit:
-        type: string
-    type: object
-  inventory.StorePublicView:
-    properties:
-      admin_name:
-        type: string
-      category:
-        type: string
-      location:
-        type: string
-      products:
-        items:
-          $ref: '#/definitions/inventory.InventorySummary'
-        type: array
     type: object
   invite.CreateInviteRequest:
     properties:
@@ -295,13 +226,6 @@ definitions:
     - Driver
     - Customer
     - Guest
-  money.Money:
-    properties:
-      amount:
-        type: integer
-      currency:
-        type: string
-    type: object
   notification.CreateNotificationRequest:
     properties:
       message:
@@ -313,50 +237,60 @@ definitions:
     type: object
   notification.Notification:
     properties:
+      created_at:
+        type: string
       id:
         type: string
       message:
         type: string
       sent_at:
         type: string
+      status:
+        $ref: '#/definitions/notification.NotificationStatus'
       type:
         $ref: '#/definitions/notification.NotificationType'
+      updated_at:
+        type: string
       user_id:
         type: string
     type: object
+  notification.NotificationStatus:
+    enum:
+    - pending
+    - sent
+    - failed
+    - read
+    type: string
+    x-enum-varnames:
+    - Pending
+    - Sent
+    - Failed
+    - Read
   notification.NotificationType:
     enum:
     - email
     - sms
     - push
+    - system
     type: string
+    x-enum-comments:
+      System: for in-app or placeholder
+    x-enum-descriptions:
+    - ""
+    - ""
+    - ""
+    - for in-app or placeholder
     x-enum-varnames:
     - Email
     - SMS
     - Push
-  order.CreateOrderRequest:
+    - System
+  notification.UpdateNotificationStatusRequest:
     properties:
-      admin_id:
-        type: string
-      customer_id:
-        type: string
-      delivery_address:
-        type: string
-      delivery_point:
-        $ref: '#/definitions/dto.PointDTO'
-      inventory_id:
-        type: string
-      pickup_address:
-        type: string
-      pickup_point:
-        $ref: '#/definitions/dto.PointDTO'
-      quantity:
-        type: integer
-    required:
-    - admin_id
-    - customer_id
-    - inventory_id
-    - quantity
+      status:
+        $ref: '#/definitions/notification.NotificationStatus'
+    type: object
+  order.CreateOrderRequest:
     type: object
   order.Customer:
     properties:
@@ -387,7 +321,7 @@ definitions:
       name:
         type: string
     type: object
-  order.Order:
+  order.OrderDoc:
     properties:
       admin_id:
         type: string
@@ -398,7 +332,7 @@ definitions:
       delivery_address:
         type: string
       delivery_point:
-        $ref: '#/definitions/dto.PointDTO'
+        $ref: '#/definitions/order.Point'
       id:
         type: string
       inventory_id:
@@ -406,7 +340,7 @@ definitions:
       pickup_address:
         type: string
       pickup_point:
-        $ref: '#/definitions/dto.PointDTO'
+        $ref: '#/definitions/order.Point'
       quantity:
         type: integer
       status:
@@ -428,6 +362,13 @@ definitions:
     - InTransit
     - Delivered
     - Cancelled
+  order.Point:
+    properties:
+      x:
+        type: number
+      "y":
+        type: number
+    type: object
   order.UpdateOrderRequest:
     properties:
       column:
@@ -491,6 +432,76 @@ definitions:
     - StatusPending
     - StatusCompleted
     - StatusFailed
+  store.CreateStoreRequest:
+    properties:
+      banner_url:
+        description: example:"https://cdn.fastabiz.com/banners/kevins-banner.png"
+        type: string
+      description:
+        description: example:"Best electronics and accessories in Nairobi."
+        type: string
+      isPublic:
+        type: boolean
+      logo_url:
+        description: example:"https://cdn.fastabiz.com/logos/kevins.png"
+        type: string
+      name:
+        description: example:"Kevin's Electronics"
+        type: string
+      ownerID:
+        type: string
+      slug:
+        type: string
+    required:
+    - description
+    - isPublic
+    - name
+    - ownerID
+    - slug
+    type: object
+  store.Store:
+    properties:
+      banner_url:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      is_public:
+        type: boolean
+      location:
+        description: optional
+        type: string
+      logo_url:
+        type: string
+      name:
+        type: string
+      owner_id:
+        description: FK to users
+        type: string
+      slug:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  store.UpdateStoreRequest:
+    properties:
+      column:
+        type: string
+      value: {}
+    required:
+    - column
+    - value
+    type: object
+  user.ChangePasswordRequest:
+    properties:
+      currentPassword:
+        type: string
+      newPassword:
+        type: string
+    type: object
   user.CreateUserRequest:
     properties:
       email:
@@ -608,8 +619,8 @@ definitions:
 host: localhost:8000
 info:
   contact: {}
-  description: This is the API for logistics operations.
-  title: Logistics API
+  description: This is the API for fastabiz operations.
+  title: FastaBiz API
   version: "1.0"
 paths:
   /deliveries/{id}:
@@ -895,7 +906,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/driver.Driver'
+              $ref: '#/definitions/driver.DriverDoc'
             type: array
       security:
       - JWT: []
@@ -917,7 +928,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/driver.Driver'
+            $ref: '#/definitions/driver.DriverDoc'
         "400":
           description: Invalid Email
           schema:
@@ -946,7 +957,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/driver.Driver'
+            $ref: '#/definitions/driver.DriverDoc'
         "400":
           description: Invalid ID
           schema:
@@ -958,38 +969,6 @@ paths:
       security:
       - JWT: []
       summary: Get driver by ID
-      tags:
-      - drivers
-  /drivers/create:
-    post:
-      consumes:
-      - application/json
-      description: Register a new driver with name, email, etc.
-      parameters:
-      - description: User Input
-        in: body
-        name: user
-        required: true
-        schema:
-          $ref: '#/definitions/driver.CreateDriverRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/driver.Driver'
-        "400":
-          description: Invalid request
-          schema:
-            type: string
-        "500":
-          description: Failed to create driver
-          schema:
-            type: string
-      security:
-      - JWT: []
-      summary: Create a new driver
       tags:
       - drivers
   /feedbacks/{id}:
@@ -1222,6 +1201,37 @@ paths:
       summary: Get inventory by name
       tags:
       - inventories
+  /inventories/by-store/{id}:
+    get:
+      description: Fetch all inventory items belonging to a specific store
+      parameters:
+      - description: Store ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/inventory.Inventory'
+            type: array
+        "400":
+          description: Invalid store ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: No inventories found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Get inventories by Store ID
+      tags:
+      - inventories
   /inventories/categories:
     get:
       description: Get all unique categories that belong to existing inventories
@@ -1381,9 +1391,11 @@ paths:
       summary: Create a new invite
       tags:
       - Invites
-  /notifications/{id}:
-    get:
-      description: Retrieve a notification by their ID
+  /notifications/{id}/read:
+    patch:
+      consumes:
+      - application/json
+      description: Update notification status to "read" by ID
       parameters:
       - description: Notification ID
         in: path
@@ -1396,23 +1408,79 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/notification.Notification'
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Invalid ID
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Failed to update notification
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Mark a single notification as read
+      tags:
+      - notifications
+  /notifications/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Update notification status by ID
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Status update request
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/notification.UpdateNotificationStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
           description: Notification not found
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Failed to update notification
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
-      summary: Get notification by ID
+      summary: Update a notification's status (e.g. mark as sent or read)
       tags:
       - notifications
-  /notifications/all_notifications:
+  /notifications/all_my_notifications/{id}:
     get:
-      description: Get a list of all notifications
+      description: Get all notifications belonging to a user (optionally filtered
+        by status)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Notification status (pending, sent, failed, read)
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
@@ -1422,9 +1490,38 @@ paths:
             items:
               $ref: '#/definitions/notification.Notification'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
-      summary: List all notifications
+      summary: List notifications by user
+      tags:
+      - notifications
+  /notifications/all_pending_notifications:
+    get:
+      description: Get a list of notifications not yet sent
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/notification.Notification'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: List all pending notifications
       tags:
       - notifications
   /notifications/create:
@@ -1457,6 +1554,37 @@ paths:
       security:
       - JWT: []
       summary: Create a new notification
+      tags:
+      - notifications
+  /notifications/mark_all_as_read/{id}:
+    patch:
+      description: Mark all unread notifications for a given user ID as "read"
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid user ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Failed to mark notifications as read
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Mark all user notifications as read
       tags:
       - notifications
   /orders/{id}:
@@ -1545,7 +1673,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/order.Order'
+              $ref: '#/definitions/order.OrderDoc'
             type: array
         "500":
           description: Internal server error
@@ -1554,6 +1682,22 @@ paths:
       security:
       - JWT: []
       summary: List all orders
+      tags:
+      - orders
+  /orders/assign:
+    post:
+      description: Assign nearest available drivers to pending orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - JWT: []
+      summary: Run auto-assignment for pending orders
       tags:
       - orders
   /orders/by-customer/{customer_id}:
@@ -1572,7 +1716,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/order.Order'
+              $ref: '#/definitions/order.OrderDoc'
             type: array
         "400":
           description: Invalid Customer ID
@@ -1602,7 +1746,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/order.Order'
+            $ref: '#/definitions/order.OrderDoc'
         "400":
           description: Invalid ID
           schema:
@@ -1634,7 +1778,7 @@ paths:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/order.Order'
+            $ref: '#/definitions/order.OrderDoc'
         "400":
           description: Bad request
           schema:
@@ -1840,13 +1984,89 @@ paths:
       summary: Login user
       tags:
       - public
-  /public/store/{adminSlug}:
-    get:
-      description: View all public products for an admin store by slug
+  /stores/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a store by its ID
       parameters:
-      - description: Admin Slug
+      - description: Store ID
         in: path
-        name: adminSlug
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Store deleted
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid store ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Failed to delete store
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete a store
+      tags:
+      - stores
+  /stores/{id}/update:
+    put:
+      consumes:
+      - application/json
+      description: Update a specific field of an existing store
+      parameters:
+      - description: Store ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Field and value to update
+        in: body
+        name: update
+        required: true
+        schema:
+          $ref: '#/definitions/store.UpdateStoreRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Store updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid store ID or request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Store not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Update store
+      tags:
+      - stores
+  /stores/by-id/{id}:
+    get:
+      description: Fetches a single store using UUID
+      parameters:
+      - description: Store ID
+        in: query
+        name: slug
         required: true
         type: string
       produces:
@@ -1855,26 +2075,25 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/inventory.StorePublicView'
+            $ref: '#/definitions/store.Store'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "404":
           description: Not found
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: View public store page
+      summary: Get store by id
       tags:
-      - public
-  /public/store/{adminSlug}/product/{productSlug}:
+      - stores
+  /stores/by-slug:
     get:
-      description: View a specific product by admin slug and product slug
+      description: Fetches a single store by its slug
       parameters:
-      - description: Admin Slug
-        in: path
-        name: adminSlug
-        required: true
-        type: string
-      - description: Product Slug
-        in: path
-        name: productSlug
+      - description: Store slug
+        in: query
+        name: slug
         required: true
         type: string
       produces:
@@ -1883,14 +2102,69 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "404":
-          description: Not found
+            $ref: '#/definitions/store.Store'
+        "400":
+          description: Missing slug
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: View public product page
+        "404":
+          description: Store not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get store by slug
       tags:
-      - public
+      - stores
+  /stores/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new store for an owner and returns the created store
+      parameters:
+      - description: Store input
+        in: body
+        name: store
+        required: true
+        schema:
+          $ref: '#/definitions/store.CreateStoreRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/store.Store'
+        "400":
+          description: Invalid request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Create a new store
+      tags:
+      - stores
+  /stores/public:
+    get:
+      description: Returns all stores marked as public
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.Store'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: List all public stores
+      tags:
+      - stores
   /users/{id}:
     delete:
       consumes:
@@ -1922,6 +2196,49 @@ paths:
       security:
       - JWT: []
       summary: Delete a user
+      tags:
+      - users
+  /users/{id}/password:
+    put:
+      consumes:
+      - application/json
+      description: Verifies the user's current password and updates it to a new password
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Current and new passwords
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/user.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid user ID or request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Current password incorrect
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Change a user's password
       tags:
       - users
   /users/{id}/profile:
