@@ -98,6 +98,17 @@ public class UserService
         var error = await ParseError(response);
         return ServiceResult<HttpResponseMessage>.Fail(error);
     }
+    public async Task<ServiceResult2<HttpResponseMessage>> UpdateProfile(Guid userId, EditUserModel model)
+    {
+        var response = await _http.PatchAsJsonAsync($"users/{userId}/profile", model);
+
+        if (response.IsSuccessStatusCode)
+            return ServiceResult2<HttpResponseMessage>.Ok(response);
+
+        // Parse structured backend error (ErrorResponse)
+        var error = await ParseError(response);
+        return ServiceResult2<HttpResponseMessage>.Fail(error);
+    }
 
     public async Task<ServiceResult<List<User>>> GetAllCachedUsers(bool forceRefresh = false)
     {
