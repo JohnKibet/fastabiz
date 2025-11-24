@@ -2,6 +2,8 @@
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
+@inject ToastService ToastService
+@inject UserService UserService
 @using frontend.Pages.Shared.Components.Modals
 @using frontend.Models
 
@@ -80,7 +82,8 @@
         <EditProfile
             @ref="EditProfileRef"
             Show="@ShowEditProfileModal"
-            ShowChanged="@(value => ShowEditProfileModal = value)">
+            ShowChanged="@(value => ShowEditProfileModal = value)"
+            OnSubmit="SubmitProfileChange">
         </EditProfile>
 
         <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg shadow"
@@ -104,6 +107,7 @@
     private List<SessionModel> UserSessions = new();
     private bool ShowEditProfileModal = false;
     private EditUserModel EditModel = new();
+    private Guid UserID { get; set; }
     private string UserFullName { get; set; } = "Unknown User";
     private string UserEmail { get; set; } = "N/A";
     private string UserRole { get; set; } = "Guest";
@@ -120,6 +124,9 @@
 
         if (user.Identity?.IsAuthenticated == true)
         {
+            var id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (id != null) UserID = Guid.Parse(id);
+
             UserFullName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
             UserEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? "Not Provided";
             UserRole = user.FindFirst(ClaimTypes.Role)?.Value ?? "guest";
@@ -137,6 +144,44 @@
                 CreatedAt = created;
         }
     }
+    private async Task SubmitProfileChange()
+    {
+        var model = EditProfileRef!.Model;
+        var userId = UserID;
+
+        var result = await UserService.UpdateProfile(userId, model);
+
+        if (result.Success)
+        {
+            // Update UI instantly
+            UserFullName = model.FullName;
+            UserEmail = model.Email;
+            UserPhone = model.Phone ?? "Not Provided";
+
+            ShowEditProfileModal = false;
+
+            ToastService.ShowToast("Profile updated", ToastService.ToastLevel.Success);
+            return;
+        }
+
+        // ---- FAILED ----
+        var backend = result.Error;
+
+        if (backend == null)
+        {
+            ToastService.ShowToast("Profile update failed (unknown error)", ToastService.ToastLevel.Error);
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(backend.Detail))
+        {
+            ToastService.ShowToast(backend.Detail, ToastService.ToastLevel.Error);
+            return;
+        }
+
+        ToastService.ShowToast("Profile update failed", ToastService.ToastLevel.Error);
+    }
+
     private void OpenEditProfileModal()
     {
         EditModel = new EditUserModel
