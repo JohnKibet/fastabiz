@@ -48,7 +48,7 @@ func (r *UserRepository) Create(ctx context.Context, u *user.User) error {
 	return nil
 }
 
-func (r *UserRepository) UpdateProfile(ctx context.Context, userID uuid.UUID, phone string) error {
+func (r *UserRepository) UpdateDriverProfile(ctx context.Context, userID uuid.UUID, phone string) error {
 	query := `
 		UPDATE users
 		SET phone = :phone, updated_at = NOW()
@@ -57,6 +57,41 @@ func (r *UserRepository) UpdateProfile(ctx context.Context, userID uuid.UUID, ph
 
 	args := map[string]interface{}{
 		"phone": phone,
+		"id":    userID,
+	}
+
+	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, args)
+	if err != nil {
+		return fmt.Errorf("update user(driver) profile: %w", err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("no user found with id %s", userID)
+	}
+
+	return nil
+}
+
+func (r *UserRepository) UpdateUserProfile(ctx context.Context, userID uuid.UUID, phone, email, name string) error {
+	query := `
+		UPDATE users
+		SET 
+			phone = :phone,
+			email = :email,
+			full_name = :name,
+			updated_at = NOW()
+		WHERE id = :id
+	`
+
+	args := map[string]interface{}{
+		"phone": phone,
+		"email": email,
+		"name":  name,
 		"id":    userID,
 	}
 

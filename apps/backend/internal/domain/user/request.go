@@ -29,6 +29,12 @@ type ChangePasswordRequest struct {
 	NewPassword     string `json:"newPassword"`
 }
 
+type UpdateUserProfileRequest struct {
+	FullName string `json:"fullName" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Phone    string `json:"phone" binding:"required"`
+}
+
 func (r *CreateUserRequest) ToUser() *User {
 	baseSlug := generate.GenerateSlug(r.FullName)
 	uniqueSuffix := uuid.New().String()[:8]

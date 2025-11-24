@@ -7,6 +7,8 @@ import (
 	"backend/internal/usecase/common"
 	"context"
 	"fmt"
+	"regexp"
+	"strings"
 	"time"
 
 	"github.com/cridenour/go-postgis"
@@ -71,8 +73,8 @@ func (uc *UseCase) RegisterUser(ctx context.Context, u *domain.User) error {
 	})
 }
 
-// PATCH method for users to update details
-func (uc *UseCase) UpdateUserProfile(ctx context.Context, id uuid.UUID, req *domain.UpdateDriverUserProfileRequest) error {
+// PATCH method for user(driver) to update phone no. after registration
+func (uc *UseCase) UpdateDriverProfile(ctx context.Context, id uuid.UUID, req *domain.UpdateDriverUserProfileRequest) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		// fetch user for notification
 		user, err := uc.repo.GetByID(txCtx, id)
@@ -80,7 +82,33 @@ func (uc *UseCase) UpdateUserProfile(ctx context.Context, id uuid.UUID, req *dom
 			return fmt.Errorf("could not fetch user: %w", err)
 		}
 
-		if err := uc.repo.UpdateProfile(txCtx, id, req.Phone); err != nil {
+		if err := uc.repo.UpdateDriverProfile(txCtx, id, req.Phone); err != nil {
+			return fmt.Errorf("update user profile failed: %w", err)
+		}
+
+		go func() {
+			msg := "ℹ️ Your profile was updated successfully."
+			_ = uc.notify(ctx, user.ID, msg)
+		}()
+
+		return nil
+	})
+}
+
+// PATCH method for users to update profile details - phone, email & name
+func (uc *UseCase) UpdateUserProfile(ctx context.Context, id uuid.UUID, req *domain.UpdateUserProfileRequest) error {
+	if err := validateUserUpdate(req); err != nil {
+		return err // return domain error directly
+	}
+
+	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
+		// fetch user for notification
+		user, err := uc.repo.GetByID(txCtx, id)
+		if err != nil {
+			return fmt.Errorf("could not fetch user: %w: %w", domain.ErrDB, err)
+		}
+
+		if err := uc.repo.UpdateUserProfile(txCtx, id, req.Phone, req.Email, req.FullName); err != nil {
 			return fmt.Errorf("update user profile failed: %w", err)
 		}
 
@@ -185,4 +213,26 @@ func (uc *UseCase) notify(ctx context.Context, userID uuid.UUID, message string)
 		Status:  notification.Pending,
 	}
 	return uc.notfRepo.Create(ctx, n)
+}
+
+func validateUserUpdate(req *domain.UpdateUserProfileRequest) error {
+	if req.Phone != "" {
+		// Very simple Kenya phone format example
+		matched, _ := regexp.MatchString(`^\+254\s?\d{3}\s?\d{3}\s?\d{3}$`, req.Phone)
+		if !matched {
+			return domain.ErrInvalidPhone
+		}
+	}
+
+	if req.Email != "" {
+		if !strings.Contains(req.Email, "@") {
+			return domain.ErrInvalidEmail
+		}
+	}
+
+	if req.FullName != "" && len(req.FullName) < 2 {
+		return domain.ErrInvalidName
+	}
+
+	return nil
 }

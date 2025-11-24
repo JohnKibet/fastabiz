@@ -98,15 +98,54 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// UpdateUserProfile godoc
-// @Summary Update user phone number
-// @Description Updates the phone number of a user (commonly used by a driver after initial registration)
+// UpdateDriverProfile godoc
+// @Summary Update user (driver) phone number
+// @Description Updates only the phone number of a driver (commonly used after onboarding)
 // @Tags users
 // @Security JWT
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
-// @Param body body user.UpdateDriverUserProfileRequest true "User phone update payload"
+// @Param body body user.UpdateDriverUserProfileRequest true "Driver phone update payload"
+// @Success 200 {object} map[string]string "Profile updated successfully"
+// @Failure 400 {object} handlers.ErrorResponse "Bad request"
+// @Failure 404 {object} handlers.ErrorResponse "User not found"
+// @Failure 500 {object} handlers.ErrorResponse "Server error"
+// @Router /users/{id}/driver_profile [patch]
+func (h *UserHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	userID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid user ID", nil)
+		return
+	}
+
+	var req user.UpdateDriverUserProfileRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", err)
+		return
+	}
+
+	if err := h.UC.Users.UseCase.UpdateDriverProfile(r.Context(), userID, &req); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to update user(driver) profile", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User(driver) profile updated"})
+
+}
+
+// UpdateUserProfile godoc
+// @Summary Update user profile
+// @Description Updates the user's name, email, and/or phone number. Partial updates allowed.
+// @Tags users
+// @Security JWT
+// @Accept json
+// @Produce json
+// @Param id path string true "User ID"
+// @Param body body user.UpdateUserProfileRequest true "User profile update payload"
 // @Success 200 {object} map[string]string "Profile updated successfully"
 // @Failure 400 {object} handlers.ErrorResponse "Bad request"
 // @Failure 404 {object} handlers.ErrorResponse "User not found"
@@ -120,7 +159,7 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var req user.UpdateDriverUserProfileRequest
+	var req user.UpdateUserProfileRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSONError(w, http.StatusBadRequest, "Invalid request body", err)
 		return
