@@ -29,9 +29,10 @@ import (
 
 	_ "backend/docs"
 
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	"time"
 )
 
 // @title FastaBiz API

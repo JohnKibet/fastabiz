@@ -71,6 +71,7 @@ func NewRouter(
 				r.Get("/all_users", u.ListUsers)
 				r.Get("/by-id/{id}", u.GetUserByID)
 				r.Get("/by-email/{email}", u.GetUserByEmail)
+				r.Patch("/{id}/driver_profile", u.UpdateDriverProfile)
 				r.Patch("/{id}/profile", u.UpdateUserProfile)
 				r.Put("/{id}/update", u.UpdateUser)
 				r.Put("/{id}/password", u.ChangePassword)

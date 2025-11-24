@@ -569,6 +569,19 @@ definitions:
     required:
     - phone
     type: object
+  user.UpdateUserProfileRequest:
+    properties:
+      email:
+        type: string
+      fullName:
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - fullName
+    - phone
+    type: object
   user.UpdateUserRequest:
     properties:
       column:
@@ -2198,6 +2211,50 @@ paths:
       summary: Delete a user
       tags:
       - users
+  /users/{id}/driver_profile:
+    patch:
+      consumes:
+      - application/json
+      description: Updates only the phone number of a driver (commonly used after
+        onboarding)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Driver phone update payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateDriverUserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Profile updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: User not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Update user (driver) phone number
+      tags:
+      - users
   /users/{id}/password:
     put:
       consumes:
@@ -2245,20 +2302,20 @@ paths:
     patch:
       consumes:
       - application/json
-      description: Updates the phone number of a user (commonly used by a driver after
-        initial registration)
+      description: Updates the user's name, email, and/or phone number. Partial updates
+        allowed.
       parameters:
       - description: User ID
         in: path
         name: id
         required: true
         type: string
-      - description: User phone update payload
+      - description: User profile update payload
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/user.UpdateDriverUserProfileRequest'
+          $ref: '#/definitions/user.UpdateUserProfileRequest'
       produces:
       - application/json
       responses:
@@ -2282,7 +2339,7 @@ paths:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
-      summary: Update user phone number
+      summary: Update user profile
       tags:
       - users
   /users/{id}/update:

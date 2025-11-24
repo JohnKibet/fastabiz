@@ -2605,6 +2605,73 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/{id}/driver_profile": {
+            "patch": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Updates only the phone number of a driver (commonly used after onboarding)",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "users"
+                ],
+                "summary": "Update user (driver) phone number",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Driver phone update payload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/user.UpdateDriverUserProfileRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "User not found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}/password": {
             "put": {
                 "security": [
@@ -2679,7 +2746,7 @@ const docTemplate = `{
                         "JWT": []
                     }
                 ],
-                "description": "Updates the phone number of a user (commonly used by a driver after initial registration)",
+                "description": "Updates the user's name, email, and/or phone number. Partial updates allowed.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2689,7 +2756,7 @@ const docTemplate = `{
                 "tags": [
                     "users"
                 ],
-                "summary": "Update user phone number",
+                "summary": "Update user profile",
                 "parameters": [
                     {
                         "type": "string",
@@ -2699,12 +2766,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "User phone update payload",
+                        "description": "User profile update payload",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/user.UpdateDriverUserProfileRequest"
+                            "$ref": "#/definitions/user.UpdateUserProfileRequest"
                         }
                     }
                 ],
@@ -3617,6 +3684,25 @@ const docTemplate = `{
                 "phone"
             ],
             "properties": {
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "user.UpdateUserProfileRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "fullName",
+                "phone"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "fullName": {
+                    "type": "string"
+                },
                 "phone": {
                     "type": "string"
                 }
