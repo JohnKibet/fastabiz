@@ -243,11 +243,25 @@
             {
                 ToastService.ShowToast("Inventory created successfully.", ToastService.ToastLevel.Success);
                 Navigation.NavigateTo("/admin/inventories");
+                return;
             }
-            else
+
+            var errMessage = res.Error;
+
+            if (errMessage == null)
             {
-                ToastService.ShowToast(res.ErrorMessage ?? "Failed to create inventory.", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to create inventory (unknown error)", ToastService.ToastLevel.Error);
+                return;
             }
+
+            if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+            {
+                ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+                return;
+            }
+            
+            ToastService.ShowToast("Failed to create inventory.", ToastService.ToastLevel.Error);
+            
         }
         finally
         {

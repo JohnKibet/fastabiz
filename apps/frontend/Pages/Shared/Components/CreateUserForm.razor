@@ -90,12 +90,24 @@
                 ClearForm();
                 ToastService.ShowToast("User successfully created!", ToastService.ToastLevel.Success);
                 Navigation.NavigateTo("admin/users");
+                return;
             }
-            else
+
+            var errMessage = result.Error;
+
+            if (errMessage == null)
             {
-                var message = result.ErrorMessage ?? result.ErrorMessage ?? "Failed to create user!";
-                ToastService.ShowToast(message, ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to create user (unknown error)", ToastService.ToastLevel.Error);
+                return;
             }
+
+            if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+            {
+                ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+                return;
+            }
+
+            ToastService.ShowToast("Failed to create user.", ToastService.ToastLevel.Error);
         }
         catch (Exception ex)
         {

@@ -119,11 +119,25 @@
                 ClearForm();
                 ToastService.ShowToast("Store successfully created!", ToastService.ToastLevel.Success);
                 Navigation.NavigateTo("/stores");
+                return;
             }
-            else
+
+            var errMessage = result.Error;
+
+            if (errMessage == null)
             {
-                ToastService.ShowToast(result.ErrorMessage ?? "Failed to create store!", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to create store (unknown error)", ToastService.ToastLevel.Error);
+                return;
             }
+
+            if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+            {
+                ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+                return;
+            }
+
+            ToastService.ShowToast("Failed to create store.", ToastService.ToastLevel.Error);
+        
         }
         catch (Exception ex)
         {

@@ -126,7 +126,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        ServiceResult<List<string>> result;
+        ServiceResult2<List<string>> result;
 
         result = await InventoryService.GetCachedCategories();
         Categories = result.Data!;
@@ -309,11 +309,24 @@ else
             {
                 inventories = result.Data;
                 ToastService.ShowToast("Inventory updated successfully", ToastService.ToastLevel.Success);
+                return;
             }
-            else
+
+            var errMessage = result.Error;
+
+            if (errMessage == null)
             {
-                ToastService.ShowToast("Failed to update inventory.", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Inventory update failed (unknown error)", ToastService.ToastLevel.Error);
+                return;
             }
+
+            if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+            {
+                ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+                return;
+            }
+
+            ToastService.ShowToast("Failed to update inventory.", ToastService.ToastLevel.Error);
         }
         else
         {

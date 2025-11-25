@@ -22,17 +22,6 @@
                 You can end any session you don’t recognize.
             </p>
 
-            <!-- STATUS MESSAGES -->
-            @if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                <div class="text-red-600 text-sm mb-3">@ErrorMessage</div>
-            }
-
-            @if (!string.IsNullOrEmpty(SuccessMessage))
-            {
-                <div class="text-green-600 text-sm mb-3">@SuccessMessage</div>
-            }
-
             <!-- SESSIONS LIST -->
             <div class="space-y-4">
 
@@ -121,9 +110,6 @@
     // ACTION CALLBACKS
     [Parameter] public EventCallback<Guid> EndSession { get; set; }
     [Parameter] public EventCallback EndAllSessions { get; set; }
-
-    private string? ErrorMessage;
-    private string? SuccessMessage;
 
     private Task Close() => ShowChanged.InvokeAsync(false);
 

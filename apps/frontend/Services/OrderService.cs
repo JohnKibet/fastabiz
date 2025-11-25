@@ -14,7 +14,7 @@ public class OrderService
         _toastService = toastService;
     }
 
-    public async Task<ServiceResult<HttpResponseMessage>> AddOrder(CreateOrderRequest order)
+    public async Task<ServiceResult2<HttpResponseMessage>> AddOrder(CreateOrderRequest order)
     {
         try
         {
@@ -22,34 +22,34 @@ public class OrderService
             if (response.IsSuccessStatusCode)
             {
                 InvalidateCache();
-                return ServiceResult<HttpResponseMessage>.Ok(response);
+                return ServiceResult2<HttpResponseMessage>.Ok(response);
             }
 
             var error = await ParseError(response);
-            return ServiceResult<HttpResponseMessage>.Fail(error);
+            return ServiceResult2<HttpResponseMessage>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 
-    public async Task<ServiceResult<List<Order>>> GetOrderByID(Guid id)
+    public async Task<ServiceResult2<List<Order>>> GetOrderByID(Guid id)
     {
         return await GetFromJsonSafe<List<Order>>($"orders/by-id/{id}");
     }
 
 
-    public async Task<ServiceResult<List<Order>>> GetOrdersByCustomer(Guid customerId)
+    public async Task<ServiceResult2<List<Order>>> GetOrdersByCustomer(Guid customerId)
     {
         return await GetFromJsonSafe<List<Order>>($"orders/by-customer/{customerId}");
     }
 
-    public async Task<ServiceResult<DropdownData>> GetDropdownMenuData()
+    public async Task<ServiceResult2<DropdownData>> GetDropdownMenuData()
     {
         return await GetFromJsonSafe<DropdownData>("orders/form-data");
     }
@@ -73,17 +73,17 @@ public class OrderService
 
     }
 
-    public async Task<ServiceResult<List<Order>>> GetAllOrders()
+    public async Task<ServiceResult2<List<Order>>> GetAllOrders()
     {
         return await GetFromJsonSafe<List<Order>>("orders/all_orders");
     }
 
     // cache orders
-    public async Task<ServiceResult<List<Order>>> GetAllCachedOrders(bool forceRefresh = false)
+    public async Task<ServiceResult2<List<Order>>> GetAllCachedOrders(bool forceRefresh = false)
     {
         if (!forceRefresh && _cachedOrders != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
         {
-            return ServiceResult<List<Order>>.Ok(_cachedOrders, fromCache: true);
+            return ServiceResult2<List<Order>>.Ok(_cachedOrders, fromCache: true);
         }
 
         var result = await GetAllOrders();
@@ -100,9 +100,7 @@ public class OrderService
         }
         else
         {
-            var msg = result.ErrorMessage ?? "Failed to load orders.";
-            _toastService.ShowToast(msg, ToastService.ToastLevel.Error);
-            Console.WriteLine($"error msg: {msg}");
+            _toastService.ShowToast("Failed to load orders.", ToastService.ToastLevel.Error);
         }
 
         return result;
@@ -155,7 +153,7 @@ public class OrderService
         }
     }
 
-    private async Task<ServiceResult<T>> GetFromJsonSafe<T>(string url)
+    private async Task<ServiceResult2<T>> GetFromJsonSafe<T>(string url)
     {
         try
         {
@@ -164,19 +162,19 @@ public class OrderService
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<T>();
-                return ServiceResult<T>.Ok(result ?? Activator.CreateInstance<T>());
+                return ServiceResult2<T>.Ok(result ?? Activator.CreateInstance<T>());
             }
 
             var error = await ParseError(response);
-            return ServiceResult<T>.Fail(error);
+            return ServiceResult2<T>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<T>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<T>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 }

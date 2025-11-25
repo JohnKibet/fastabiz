@@ -94,15 +94,26 @@
 
         if (response.Success)
         {
-            ToastService.ShowToast("Password updated.", ToastService.ToastLevel.Success);
             PasswordModel = new();
             ShowChangePasswordModal = false;
+
+            ToastService.ShowToast("Password updated.", ToastService.ToastLevel.Success);
+            return;
         }
-        else
+        
+        var errMessage = response.Error;
+        if (errMessage == null)
         {
-            var message = response.ErrorMessage ?? response.ErrorMessage ?? "Password update failed.";
-            ToastService.ShowToast(message, ToastService.ToastLevel.Error);
+            ToastService.ShowToast("Password update failed (unknown error)", ToastService.ToastLevel.Error);
+            return;
         }
+        if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+        {
+            ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+            return;
+        }   
+
+        ToastService.ShowToast("Password update failed", ToastService.ToastLevel.Error);
     }
     private bool notificationsEnabled = true;
 

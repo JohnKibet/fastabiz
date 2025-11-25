@@ -141,14 +141,27 @@
             if (result.Success)
             {
                 ClearForm();
-                ToastService.ShowToast("Order successfully created!", ToastService.ToastLevel.Success);
+                ToastService.ShowToast("Order successfully created.", ToastService.ToastLevel.Success);
                 Navigation.NavigateTo("admin/orders");
+                return;
             }
-            else
+
+            var errMessage = result.Error;
+
+            if (errMessage == null)
             {
-                var message = result.ErrorMessage ?? result.ErrorMessage ?? "Failed to create order!";
-                ToastService.ShowToast(message, ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to create order (unknown error)", ToastService.ToastLevel.Error);
+                return;
             }
+
+            if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+            {
+                ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+                return;
+            }
+            
+            ToastService.ShowToast("Failed to create order.", ToastService.ToastLevel.Error);
+            
         }
         catch (Exception ex)
         {
