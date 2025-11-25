@@ -16,12 +16,12 @@ public class DropdownDataService
         _toastService = toastService;
     }
 
-    public async Task<ServiceResult<bool>> LoadCachedDropdownData(bool forceRefresh = false)
+    public async Task<ServiceResult2<bool>> LoadCachedDropdownData(bool forceRefresh = false)
     {
         if (!forceRefresh && Customers.Count > 0 && Inventories.Count > 0
             && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
         {
-            return ServiceResult<bool>.Ok(true);
+            return ServiceResult2<bool>.Ok(true);
         }
 
         var result = await _orderService.GetDropdownMenuData();
@@ -30,11 +30,17 @@ public class DropdownDataService
             Customers = result.Data.Customers ?? new();
             Inventories = result.Data.Inventories ?? new();
             _lastFetchTime = DateTime.UtcNow;            
-            return ServiceResult<bool>.Ok(true);
+            return ServiceResult2<bool>.Ok(true);
         }
-
-        _toastService.ShowToast("Failed to load dropdown data.", ToastService.ToastLevel.Warning);
-        return ServiceResult<bool>.Fail(result.ErrorMessage ?? "Failed to load dropdown data.");
+        else if (result.Error != null )
+        {    
+            _toastService.ShowToast(result.Error.Detail, ToastService.ToastLevel.Warning);
+            return ServiceResult2<bool>.Fail(result.Error);
+        }
+        else
+        {
+            return ServiceResult2<bool>.Fail("Failed to load dropdown data (unknown error).");
+        }
     }
 
     public void InvalidateCache()

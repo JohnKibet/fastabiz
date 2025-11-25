@@ -164,18 +164,17 @@
             return;
         }
 
-        // ---- FAILED ----
-        var backend = result.Error;
+        var errMessage = result.Error;
 
-        if (backend == null)
+        if (errMessage == null)
         {
             ToastService.ShowToast("Profile update failed (unknown error)", ToastService.ToastLevel.Error);
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(backend.Detail))
+        if (!string.IsNullOrWhiteSpace(errMessage.Detail))
         {
-            ToastService.ShowToast(backend.Detail, ToastService.ToastLevel.Error);
+            ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
             return;
         }
 

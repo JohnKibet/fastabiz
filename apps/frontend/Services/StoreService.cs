@@ -11,30 +11,30 @@ public class StoreService
         _http = http;
     }
 
-    public async Task<ServiceResult<HttpResponseMessage>> CreateStore(CreateStoreRequest store)
+    public async Task<ServiceResult2<HttpResponseMessage>> CreateStore(CreateStoreRequest store)
     {
         try
         {
             var response = await _http.PostAsJsonAsync("stores/create", store);
             if (response.IsSuccessStatusCode)
             {
-                return ServiceResult<HttpResponseMessage>.Ok(response);
+                return ServiceResult2<HttpResponseMessage>.Ok(response);
             }
 
             var error = await ParseError(response);
-            return ServiceResult<HttpResponseMessage>.Fail(error);
+            return ServiceResult2<HttpResponseMessage>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 
-    public async Task<ServiceResult<Store>> GetStoreByID(Guid id)
+    public async Task<ServiceResult2<Store>> GetStoreByID(Guid id)
     {
         return await GetFromJsonSafe<Store>($"stores/by-id/{id}");
     }
@@ -66,7 +66,7 @@ public class StoreService
         return null;
     }
 
-    public async Task<ServiceResult<List<Store>>> GetAllPublicStores()
+    public async Task<ServiceResult2<List<Store>>> GetAllPublicStores()
     {
         return await GetFromJsonSafe<List<Store>>("stores/public");
     }
@@ -103,7 +103,7 @@ public class StoreService
         }
     }
     
-    private async Task<ServiceResult<T>> GetFromJsonSafe<T>(string url)
+    private async Task<ServiceResult2<T>> GetFromJsonSafe<T>(string url)
     {
         try
         {
@@ -112,19 +112,19 @@ public class StoreService
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<T>();
-                return ServiceResult<T>.Ok(result ?? Activator.CreateInstance<T>());
+                return ServiceResult2<T>.Ok(result ?? Activator.CreateInstance<T>());
             }
 
             var error = await ParseError(response);
-            return ServiceResult<T>.Fail(error);
+            return ServiceResult2<T>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<T>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<T>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 }

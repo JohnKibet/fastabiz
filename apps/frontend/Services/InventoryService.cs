@@ -18,7 +18,7 @@ public class InventoryService
         _toastService = toastService;
     }
 
-    public async Task<ServiceResult<HttpResponseMessage>> AddInventory(CreateInventoryRequest inventory)
+    public async Task<ServiceResult2<HttpResponseMessage>> AddInventory(CreateInventoryRequest inventory)
     {
         try
         {
@@ -27,48 +27,48 @@ public class InventoryService
             {
                 InvalidateCache();
                 _dropdownService.InvalidateCache();
-                return ServiceResult<HttpResponseMessage>.Ok(response);
+                return ServiceResult2<HttpResponseMessage>.Ok(response);
             }
 
             var error = await ParseError(response);
-            return ServiceResult<HttpResponseMessage>.Fail(error);
+            return ServiceResult2<HttpResponseMessage>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 
-    public async Task<ServiceResult<Inventory>> GetInventoryByID(Guid inventory_id)
+    public async Task<ServiceResult2<Inventory>> GetInventoryByID(Guid inventory_id)
     {
         return await GetFromJsonSafe<Inventory>($"inventories/by-id/{inventory_id}");
     }
 
-    public async Task<ServiceResult<List<Inventory>>> GetInventoriesByName(string name)
+    public async Task<ServiceResult2<List<Inventory>>> GetInventoriesByName(string name)
     {
         var encodedName = Uri.EscapeDataString(name);
         return await GetFromJsonSafe<List<Inventory>>($"inventories/by-name?name={encodedName}");
     }
 
-    public async Task<ServiceResult<List<Inventory>>> GetInventoriesByStore(Guid id)
+    public async Task<ServiceResult2<List<Inventory>>> GetInventoriesByStore(Guid id)
     {
         return await GetFromJsonSafe<List<Inventory>>($"inventories/by-store/{id}");
     }
 
-    public async Task<ServiceResult<List<Inventory>>> GetAllInventories()
+    public async Task<ServiceResult2<List<Inventory>>> GetAllInventories()
     {
         return await GetFromJsonSafe<List<Inventory>>("inventories/all_inventories?limit=10&offset=0");
     }
 
-    public async Task<ServiceResult<List<Inventory>>> GetAllCachedInventories(bool forceRefresh = false)
+    public async Task<ServiceResult2<List<Inventory>>> GetAllCachedInventories(bool forceRefresh = false)
     {
         if (!forceRefresh && _cachedInventories != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
         {
-            return ServiceResult<List<Inventory>>.Ok(_cachedInventories, fromCache: true);
+            return ServiceResult2<List<Inventory>>.Ok(_cachedInventories, fromCache: true);
         }
 
         var result = await GetAllInventories();
@@ -86,7 +86,6 @@ public class InventoryService
         else
         {
             _toastService.ShowToast($"Failed to fetch inventories.", ToastService.ToastLevel.Error);
-            Console.WriteLine($"Fetch Error: {result.ErrorMessage}");
         }
 
         return result;
@@ -98,22 +97,22 @@ public class InventoryService
         _cachedCategories = null;
     }
 
-    public async Task<ServiceResult<List<Inventory>>> GetInventoriesByCategory(string category)
+    public async Task<ServiceResult2<List<Inventory>>> GetInventoriesByCategory(string category)
     {
         var encodedCategory = Uri.EscapeDataString(category);
         return await GetFromJsonSafe<List<Inventory>>($"inventories/by-category?category={encodedCategory}");
     }
 
-    public async Task<ServiceResult<List<string>>> GetCategories()
+    public async Task<ServiceResult2<List<string>>> GetCategories()
     {
         return await GetFromJsonSafe<List<string>>("inventories/categories");
     }
 
-    public async Task<ServiceResult<List<string>>> GetCachedCategories(bool forceRefresh = false)
+    public async Task<ServiceResult2<List<string>>> GetCachedCategories(bool forceRefresh = false)
     {
         if (!forceRefresh && _cachedCategories != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
         {
-            return new ServiceResult<List<string>> { Success = true, Data = _cachedCategories };
+            return new ServiceResult2<List<string>> { Success = true, Data = _cachedCategories };
         }
 
         var result = await GetCategories();
@@ -138,7 +137,7 @@ public class InventoryService
 
 
     // Generic method for GET + JSON
-    private async Task<ServiceResult<T>> GetFromJsonSafe<T>(string url)
+    private async Task<ServiceResult2<T>> GetFromJsonSafe<T>(string url)
     {
         try
         {
@@ -147,19 +146,19 @@ public class InventoryService
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<T>();
-                return ServiceResult<T>.Ok(result ?? Activator.CreateInstance<T>());
+                return ServiceResult2<T>.Ok(result ?? Activator.CreateInstance<T>());
             }
 
             var error = await ParseError(response);
-            return ServiceResult<T>.Fail(error);
+            return ServiceResult2<T>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<T>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<T>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 

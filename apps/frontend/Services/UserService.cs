@@ -16,7 +16,7 @@ public class UserService
         _toastService = toastService;
     }
 
-    public async Task<ServiceResult<HttpResponseMessage>> AddUser(CreateUserRequest user)
+    public async Task<ServiceResult2<HttpResponseMessage>> AddUser(CreateUserRequest user)
     {
         try
         {
@@ -25,19 +25,19 @@ public class UserService
             {
                 InvalidateCache();
                 _dropdownService.InvalidateCache();
-                return ServiceResult<HttpResponseMessage>.Ok(response);
+                return ServiceResult2<HttpResponseMessage>.Ok(response);
             }
 
             var error = await ParseError(response);
-            return ServiceResult<HttpResponseMessage>.Fail(error);
+            return ServiceResult2<HttpResponseMessage>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 
@@ -46,12 +46,12 @@ public class UserService
         var user = await _http.GetFromJsonAsync<User>($"users/by-id/{id}");
         return user ?? new User();
     }
-    public async Task<ServiceResult<List<User>>> GetAllUsers()
+    public async Task<ServiceResult2<List<User>>> GetAllUsers()
     {
         return await GetFromJsonSafe<List<User>>("users/all_users");
     }
 
-    public async Task<ServiceResult<HttpResponseMessage>> UpdateUser(Guid userId, string column, object value)
+    public async Task<ServiceResult2<HttpResponseMessage>> UpdateUser(Guid userId, string column, object value)
     {
         try
         {
@@ -65,24 +65,24 @@ public class UserService
             if (response.IsSuccessStatusCode)
             {
                 InvalidateCache();
-                return ServiceResult<HttpResponseMessage>.Ok(response);
+                return ServiceResult2<HttpResponseMessage>.Ok(response);
             }
 
             var error = await ParseError(response);
-            return ServiceResult<HttpResponseMessage>.Fail(error);
+            return ServiceResult2<HttpResponseMessage>.Fail(error);
             
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 
-    public async Task<ServiceResult<HttpResponseMessage>> ChangePassword(Guid userId, string currentPassword, string newPassword)
+    public async Task<ServiceResult2<HttpResponseMessage>> ChangePassword(Guid userId, string currentPassword, string newPassword)
     {
         var body = new ChangePasswordDto
         {
@@ -93,10 +93,10 @@ public class UserService
         var response = await _http.PutAsJsonAsync($"users/{userId}/password", body);
 
         if (response.IsSuccessStatusCode)
-            return ServiceResult<HttpResponseMessage>.Ok(response);
+            return ServiceResult2<HttpResponseMessage>.Ok(response);
 
         var error = await ParseError(response);
-        return ServiceResult<HttpResponseMessage>.Fail(error);
+        return ServiceResult2<HttpResponseMessage>.Fail(error);
     }
     public async Task<ServiceResult2<HttpResponseMessage>> UpdateProfile(Guid userId, EditUserModel model)
     {
@@ -110,11 +110,11 @@ public class UserService
         return ServiceResult2<HttpResponseMessage>.Fail(error);
     }
 
-    public async Task<ServiceResult<List<User>>> GetAllCachedUsers(bool forceRefresh = false)
+    public async Task<ServiceResult2<List<User>>> GetAllCachedUsers(bool forceRefresh = false)
     {
         if (!forceRefresh && _cachedUsers != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
         {
-            return ServiceResult<List<User>>.Ok(_cachedUsers, fromCache: true);
+            return ServiceResult2<List<User>>.Ok(_cachedUsers, fromCache: true);
         }
 
         var result = await GetAllUsers(); 
@@ -132,7 +132,6 @@ public class UserService
         else
         {
             _toastService.ShowToast("Failed to load users.", ToastService.ToastLevel.Error);
-            Console.WriteLine($"error: {result.ErrorMessage}");
         }
 
         return result;
@@ -171,7 +170,7 @@ public class UserService
             return $"HTTP {(int)response.StatusCode} - {response.ReasonPhrase}";
         }
     }
-    private async Task<ServiceResult<T>> GetFromJsonSafe<T>(string url)
+    private async Task<ServiceResult2<T>> GetFromJsonSafe<T>(string url)
     {
         try
         {
@@ -180,19 +179,19 @@ public class UserService
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<T>();
-                return ServiceResult<T>.Ok(result ?? Activator.CreateInstance<T>());
+                return ServiceResult2<T>.Ok(result ?? Activator.CreateInstance<T>());
             }
 
             var error = await ParseError(response);
-            return ServiceResult<T>.Fail(error);
+            return ServiceResult2<T>.Fail(error);
         }
         catch (HttpRequestException ex)
         {
-            return ServiceResult<T>.Fail($"Network error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Network error: {ex.Message}");
         }
         catch (Exception ex)
         {
-            return ServiceResult<T>.Fail($"Unexpected error: {ex.Message}");
+            return ServiceResult2<T>.Fail($"Unexpected error: {ex.Message}");
         }
     }
 }
