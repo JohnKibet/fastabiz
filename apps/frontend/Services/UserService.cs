@@ -109,6 +109,16 @@ public class UserService
         var error = await ParseError(response);
         return ServiceResult2<HttpResponseMessage>.Fail(error);
     }
+    public async Task<ServiceResult2<HttpResponseMessage>> UpdateStatus(Guid userId, UserStatus newStatus)
+    {
+        var response = await _http.PatchAsJsonAsync($"users/{userId}/status", newStatus);
+
+        if (response.IsSuccessStatusCode)
+            return ServiceResult2<HttpResponseMessage>.Ok(response);
+
+        var error = await ParseError(response);
+        return ServiceResult2<HttpResponseMessage>.Fail(error);
+    }
 
     public async Task<ServiceResult2<List<User>>> GetAllCachedUsers(bool forceRefresh = false)
     {
