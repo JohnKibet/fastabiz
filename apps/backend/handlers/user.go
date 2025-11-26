@@ -176,6 +176,43 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 
 }
 
+// UpdateUserStatus godoc
+// @Summary      Update a user's status
+// @Description  Updates the status (e.g., active, inactive, suspended) of a specific user.
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Param        id   path      string                        true  "User ID (UUID)"
+// @Param        body body      user.UpdateUserStatusRequest  true  "User status update payload"
+// @Success      200  {object}  map[string]string             "User status updated"
+// @Failure      400  {object}  ErrorResponse                 "Invalid ID or request body"
+// @Failure      500  {object}  ErrorResponse                 "Internal server error"
+// @Router       /users/{id}/status [patch]
+func (h *UserHandler) UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	userID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid user ID", nil)
+		return
+	}
+
+	var req user.UpdateUserStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", err)
+		return
+	}
+
+	if err := h.UC.Users.UseCase.UpdateStatus(r.Context(), userID, &req); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to update user status", err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"message": "User status updated"})
+
+}
+
 // UpdateUser godoc
 // @Summary Update a specific user field
 // @Description Updates a user's specific field (e.g., FullName, Email) based on user ID

@@ -105,7 +105,7 @@ func (uc *UseCase) UpdateUserProfile(ctx context.Context, id uuid.UUID, req *dom
 		// fetch user for notification
 		user, err := uc.repo.GetByID(txCtx, id)
 		if err != nil {
-			return fmt.Errorf("could not fetch user: %w: %w", domain.ErrDB, err)
+			return fmt.Errorf("could not fetch user: %w", err)
 		}
 
 		if err := uc.repo.UpdateUserProfile(txCtx, id, req.Phone, req.Email, req.FullName); err != nil {
@@ -114,6 +114,26 @@ func (uc *UseCase) UpdateUserProfile(ctx context.Context, id uuid.UUID, req *dom
 
 		go func() {
 			msg := "ℹ️ Your profile was updated successfully."
+			_ = uc.notify(ctx, user.ID, msg)
+		}()
+
+		return nil
+	})
+}
+
+func (uc *UseCase) UpdateStatus(ctx context.Context, id uuid.UUID, req *domain.UpdateUserStatusRequest) error {
+	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
+		user, err := uc.repo.GetByID(txCtx, id)
+		if err != nil {
+			return fmt.Errorf("could not fetch user: %w", err)
+		}
+
+		if err := uc.repo.UpdateUserStatus(txCtx, id, req.Status); err != nil {
+			return fmt.Errorf("update user status failed: %w", err)
+		}
+
+		go func() {
+			msg := "ℹ️ User status was updated successfully."
 			_ = uc.notify(ctx, user.ID, msg)
 		}()
 
