@@ -14,19 +14,23 @@
 
                     if (field.Type == "select")
                     {
-                        <FieldBlock Label="@field.Label"
-                                    FieldType="select"
-                                    Options="@field.Options"
-                                    Value="@fieldValue"
-                                    ValueChanged="async val => await field.SetValueAsync(val)"
-                                    IsEditing="IsEditMode" />
+                        <FieldBlock 
+                            Label="@field.Label"
+                            FieldType="select"
+                            Options="@field.Options"
+                            Value="@fieldValue"
+                            ValueChanged="@((string v) => fieldValue = v )"
+                            IsEditing="IsEditMode" 
+                        />
                     }
                     else
                     {
-                        <FieldBlock Label="@field.Label"
-                                    Value="@fieldValue"
-                                    ValueChanged="async val => await field.SetValueAsync(val)"
-                                    IsEditing="IsEditMode" />
+                        <FieldBlock 
+                            Label="@field.Label"
+                            Value="@fieldValue"
+                            ValueChanged="@((string v) => fieldValue = v)"
+                            IsEditing="IsEditMode" 
+                        />
                     }
                 }
             </div>

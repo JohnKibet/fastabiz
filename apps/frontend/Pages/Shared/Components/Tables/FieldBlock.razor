@@ -1,3 +1,6 @@
+@using System.Globalization
+@typeparam TValue
+
 <div>
     <label class="block text-sm font-medium text-gray-700">@Label</label>
 
@@ -5,7 +8,10 @@
     {
         @if (FieldType == "select" && Options != null)
         {
-            <select class="w-full px-3 py-2 border rounded-md" @bind="Value">
+            <select class="w-full px-3 py-2 border rounded-md" 
+                value="@BindConverter.FormatValue(Value)" 
+                @onchange="OnValueChanged"
+            >
                 @foreach (var opt in Options)
                 {
                     <option value="@opt">@opt</option>
@@ -14,7 +20,10 @@
         }
         else
         {
-            <input class="w-full px-3 py-2 border rounded-md" @bind="Value" />
+            <input class="w-full px-3 py-2 border rounded-md"
+                value="@BindConverter.FormatValue(Value)"
+                @onchange="OnValueChanged" 
+            />
         }
     }
     else
@@ -24,27 +33,33 @@
 </div>
 
 @code {
-    [Parameter]
-    public string Label { get; set; } = "";
-
-    [Parameter]
-    public string Value { get; set; } = "";
-
-    [Parameter]
-    public EventCallback<string> ValueChanged { get; set; }
-
-    [Parameter]
-    public bool IsEditing { get; set; }
-
-    [Parameter]
-    public string FieldType { get; set; } = "text";
-
-    [Parameter]
-    public List<string>? Options { get; set; }
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public TValue Value { get; set; } = default!;
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public bool IsEditing { get; set; }
+    [Parameter] public string FieldType { get; set; } = "text";
+    [Parameter] public List<string>? Options { get; set; }
 
     private async Task OnValueChanged(ChangeEventArgs e)
     {
-        var newValue = e.Value?.ToString() ?? "";
-        await ValueChanged.InvokeAsync(newValue);
+        if (typeof(TValue) == typeof(UserStatus?))
+        {
+            if (Enum.TryParse<UserStatus>(e.Value?.ToString(), out var status))
+            {
+                Value = (TValue)(object)status;
+                await ValueChanged.InvokeAsync(Value);
+            }
+        }
+        else
+        {
+            var strValue = e.Value?.ToString();
+            if (BindConverter.TryConvertTo<TValue>(strValue, CultureInfo.InvariantCulture, out var typedValue))
+            {
+                Value = typedValue;
+                await ValueChanged.InvokeAsync(typedValue);
+            }
+        }
+
+        Console.WriteLine($"Selected: {e.Value}, Parsed: {Value}");
     }
 }

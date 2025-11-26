@@ -176,35 +176,13 @@ else
     {
         userFields = new List<IFieldDefinitionBase>
         {
-            new FieldDefinition<string>
-            {
-                Label = "FullName",
-                Type = "text",
-                Value = user.FullName,
-                ValueChanged = EventCallback.Factory.Create<string>(this, val => 
-                {
-                    user.FullName = val;
-                })
-            },
-
-            new FieldDefinition<string>
-            {
-                Label = "Email",
-                Type = "text",
-                Value = user.Email,
-                ValueChanged = EventCallback.Factory.Create<string>(this, val => 
-                {
-                    user.Email = val;
-                })
-            },
-
             new FieldDefinition<UserStatus?>
             {
                 Label = "Status",
                 Type = "select",
-                Value = user.Status,
                 Options = Enum.GetNames(typeof (UserStatus)).ToList(),
-                ValueChanged = EventCallback.Factory.Create<UserStatus?>(this, val => 
+                Value = user.Status,
+                ValueChanged = EventCallback.Factory.Create<UserStatus?>(this, val =>
                 {
                     user.Status = val;
                 })
@@ -241,8 +219,6 @@ else
             editableUser = new User
             {
                 ID = selectedUser.ID,
-                FullName = selectedUser.FullName,
-                Email = selectedUser.Email,
                 Status = selectedUser.Status
                 // other fields
             };
@@ -279,54 +255,38 @@ else
     private async Task SaveChanges()
     {
         if (selectedUser == null || editableUser == null)
-        return;
+            return;
 
-        bool updated = false;
+        Console.WriteLine($"selected: {selectedUser.Status}, editable: {editableUser.Status}");
 
-        if (editableUser.FullName != selectedUser.FullName)
-            await UserService.UpdateUser(selectedUser.ID, "FullName", editableUser.FullName);
-            updated = true;
-
-        if (editableUser.Email != selectedUser.Email)
-            await UserService.UpdateUser(selectedUser.ID, "Email", editableUser.Email);
-            updated = true;
-        
-        if (editableUser.Status != selectedUser.Status && editableUser.Status != null)
-        {
-            await UserService.UpdateUser(selectedUser.ID, "Status", editableUser.Status);
-            updated = true;
-        }
-
-        if (updated)
-        {
-            var result = await UserService.GetAllUsers();
-            if (result.Success && result.Data != null)
-            {
-                users = result.Data;
-                ToastService.ShowToast("User updated successfully", ToastService.ToastLevel.Success);
-                return;
-            }
-
-            var errMessage = result.Error;
-
-            if (errMessage == null)
-            {
-                ToastService.ShowToast("Failed to update user (unknown error)", ToastService.ToastLevel.Error);
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(errMessage.Detail))
-            {
-                ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
-                return;
-            }
-            
-            ToastService.ShowToast("Failed to update user.", ToastService.ToastLevel.Error);
-            
-        }
-        else
+        if (editableUser.Status == selectedUser.Status || editableUser.Status == null)
         {
             ToastService.ShowToast("No changes were made", ToastService.ToastLevel.Warning);
+            CloseModal();
+            return;
+        }
+
+        try
+        {
+            var result = await UserService.UpdateStatus(selectedUser.ID, editableUser.Status.Value);
+
+            if (!result.Success)
+            {
+                var errorMsg = result.Error?.Detail ?? "Failed to update user status.";
+                ToastService.ShowToast(errorMsg, ToastService.ToastLevel.Error);
+            }
+            else
+            {
+                var refresh = await UserService.GetAllUsers();
+                if (refresh.Success && refresh.Data != null)
+                    users = refresh.Data;
+
+                ToastService.ShowToast("User status updated successfully", ToastService.ToastLevel.Success);
+            }
+        }
+        catch
+        {
+            ToastService.ShowToast("Failed to update user status.", ToastService.ToastLevel.Error);
         }
 
         CloseModal();
