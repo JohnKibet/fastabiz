@@ -112,6 +112,35 @@ func (r *UserRepository) UpdateUserProfile(ctx context.Context, userID uuid.UUID
 	return nil
 }
 
+func (r *UserRepository) UpdateUserStatus(ctx context.Context, userID uuid.UUID, status user.UserStatus) error {
+	query := `
+		UPDATE users
+		SET status = :status, updated_at = NOW()
+		WHERE id = :id
+	`
+
+	args := map[string]interface{}{
+		"status": status,
+		"id":     userID,
+	}
+
+	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, args)
+	if err != nil {
+		return fmt.Errorf("update user status: %w", err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("no user found with id %s", userID)
+	}
+
+	return nil
+}
+
 func (r *UserRepository) UpdateColum(ctx context.Context, userID uuid.UUID, column string, value any) error {
 	allowed := map[string]bool{
 		"full_name":     true,

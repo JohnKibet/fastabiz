@@ -35,6 +35,10 @@ type UpdateUserProfileRequest struct {
 	Phone    string `json:"phone" binding:"required"`
 }
 
+type UpdateUserStatusRequest struct {
+	Status UserStatus `json:"status" binding:"required"`
+}
+
 func (r *CreateUserRequest) ToUser() *User {
 	baseSlug := generate.GenerateSlug(r.FullName)
 	uniqueSuffix := uuid.New().String()[:8]

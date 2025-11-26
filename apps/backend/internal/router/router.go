@@ -75,6 +75,7 @@ func NewRouter(
 				r.Patch("/{id}/profile", u.UpdateUserProfile)
 				r.Put("/{id}/update", u.UpdateUser)
 				r.Put("/{id}/password", u.ChangePassword)
+				r.Patch("/{id}/status", u.UpdateUserStatus)
 				r.Delete("/{id}", u.DeleteUser)
 			})
 
