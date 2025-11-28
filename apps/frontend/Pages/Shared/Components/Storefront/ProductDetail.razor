@@ -1,0 +1,103 @@
+@page "/product/{ProductId}"
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Storefront
+@inject NavigationManager Nav
+
+@if (Product is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="product-detail grid grid-cols-2 gap-8 p-6">
+
+        <!-- LEFT: Image Gallery -->
+        <div>
+            <ImageGallery Images="@Product.Images" />
+        </div>
+
+        <!-- RIGHT: Info -->
+        <div class="space-y-4">
+
+            <h2 class="text-2xl font-bold">@Product.Name</h2>
+
+            <button class="text-blue-600 underline"
+                    @onclick="() => ViewMerchant(Product.MerchantId)">
+                @Merchant?.Name
+            </button>
+
+            <p class="text-gray-700">@Product.Description</p>
+
+            <!-- VARIANTS -->
+            @if (Product.HasVariants)
+            {
+                <VariantSelector Options="@Product.Options"
+                                 Variants="@Product.Variants"
+                                 SelectedVariant="@SelectedVariant"
+                                 OnVariantSelected="@SelectVariant" />
+
+                @if (SelectedVariant is not null)
+                {
+                    <p class="text-xl font-semibold">
+                        Price: KES @SelectedVariant.Price.ToString("N2")
+                    </p>
+
+                    <p class="text-sm text-gray-500">
+                        Stock: @SelectedVariant.Stock
+                    </p>
+                }
+            }
+            else
+            {
+                <p class="text-xl font-semibold">
+                    Price: KES @Product.Price?.ToString("N2")
+                </p>
+
+                <p class="text-sm text-gray-500">
+                    Stock: @Product.Stock
+                </p>
+            }
+
+            <AddToCartButton 
+                OnAdd="@AddToCart"
+                IsDisabled="@(Product.HasVariants && SelectedVariant is null)" 
+            />
+
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string ProductId { get; set; } = string.Empty;
+
+    private ProductX? Product;
+    private Merchant? Merchant;
+    private Variant? SelectedVariant;
+
+    protected override void OnInitialized()
+    {
+        Product = MockData.Merchants
+            .SelectMany(m => m.Products)
+            .FirstOrDefault(p => p.Id == ProductId);
+
+        if (Product != null)
+        {
+            Merchant = MockData.Merchants.First(m => m.Id == Product.MerchantId);
+        }
+    }
+
+    private void ViewMerchant(string id)
+    {
+        Nav.NavigateTo($"/store/{id}");
+    }
+
+    private void SelectVariant(Variant v)
+    {
+        SelectedVariant = v;
+    }
+
+    private void AddToCart()
+    {
+        Console.WriteLine($"Added product={Product?.Id} variant={SelectedVariant?.Id}");
+    }
+}

@@ -1,0 +1,69 @@
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Storefront
+
+<div class="space-y-4">
+    @foreach (var option in Options)
+    {
+        <div>
+            <label class="block font-semibold mb-2">@option.Name</label>
+            <div class="flex gap-2 flex-wrap">
+                @foreach (var val in option.Values)
+                {
+                    <button
+                        class="@GetValueClass(option.Name, val)"
+                        @onclick="() => SelectOption(option.Name, val)">
+                        @val
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<Option> Options { get; set; } = new();
+    [Parameter] public List<Variant> Variants { get; set; } = new();
+
+    // Output → tells ProductDetail which variant is chosen
+    [Parameter] public EventCallback<Variant?> OnVariantSelected { get; set; }
+
+    // internal storage of selected option values
+    private Dictionary<string, string> Selected = new();
+
+    protected override void OnInitialized()
+    {
+        // Initialize selected options to first value
+        foreach (var opt in Options)
+        {
+            if (opt.Values.Count > 0)
+                Selected[opt.Name] = opt.Values[0];
+        }
+
+        EmitSelectedVariant();
+    }
+
+    private void SelectOption(string optionName, string value)
+    {
+        Selected[optionName] = value;
+        EmitSelectedVariant();
+    }
+
+    private void EmitSelectedVariant()
+    {
+        Variant? match = Variants.FirstOrDefault(v =>
+            v.Options.All(kv =>
+                Selected.ContainsKey(kv.Key) &&
+                Selected[kv.Key] == kv.Value));
+
+        OnVariantSelected.InvokeAsync(match);
+    }
+
+    private string GetValueClass(string optionName, string value)
+    {
+        bool isActive = Selected.ContainsKey(optionName) && Selected[optionName] == value;
+
+        return isActive
+            ? "px-3 py-1 rounded-lg border border-blue-600 bg-blue-50 text-blue-700"
+            : "px-3 py-1 rounded-lg border border-gray-300 hover:border-gray-600 cursor-pointer";
+    }
+}

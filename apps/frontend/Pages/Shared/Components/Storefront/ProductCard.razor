@@ -1,0 +1,36 @@
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Storefront
+
+<div class="product-card border rounded shadow hover:shadow-lg cursor-pointer p-4 flex flex-col"
+     @onclick="() => OnSelected.InvokeAsync(Product)">
+    <!-- Product Image -->
+    <img src="@Product.Thumbnail" alt="@Product.Name" class="w-full h-48 object-cover mb-2 rounded" />
+
+    <!-- Product Info -->
+    <h4 class="font-semibold text-lg">@Product.Name</h4>
+    <p class="text-sm text-gray-600">@Product.MerchantName</p>
+
+    <!-- Price -->
+    @if (!Product.HasVariants)
+    {
+        <p class="mt-1 font-bold">KES @Product.Price?.ToString("N2")</p>
+    }
+    else
+    {
+        <p class="mt-1 font-bold">From KES @Product.MinPrice?.ToString("N2") – KES @Product.MaxPrice?.ToString("N2")</p>
+    }
+
+    <!-- Optional Rating / Sold -->
+    <div class="mt-2 flex justify-between items-center text-sm text-gray-500">
+        <span>⭐ @Product.Rating.ToString("0.0")</span>
+        <span>@Product.TotalSold sold</span>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ProductListItem Product { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<ProductListItem> OnSelected { get; set; }
+}
