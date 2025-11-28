@@ -1,0 +1,40 @@
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Storefront
+
+<div class="merchant-filter">
+    <ul class="space-y-2">
+        @foreach (var merchant in Merchants)
+        {
+            <li>
+                <button class="@GetButtonClasses(merchant.Id)"
+                        @onclick="() => OnMerchantSelected.InvokeAsync(merchant.Id)">
+                    <div class="flex items-center space-x-2">
+                        @if (!string.IsNullOrEmpty(merchant.Logo))
+                        {
+                            <img src="@merchant.Logo" alt="@merchant.Name" class="w-6 h-6 rounded-full" />
+                        }
+                        <span>@merchant.Name</span>
+                    </div>
+                </button>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public List<Merchant> Merchants { get; set; } = new();
+
+    [Parameter]
+    public string? SelectedMerchantId { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnMerchantSelected { get; set; }
+
+    private string GetButtonClasses(string merchantId)
+    {
+        return merchantId == SelectedMerchantId
+            ? "w-full text-left px-2 py-1 font-semibold bg-blue-500 text-white rounded"
+            : "w-full text-left px-2 py-1 hover:bg-gray-200 rounded";
+    }
+}

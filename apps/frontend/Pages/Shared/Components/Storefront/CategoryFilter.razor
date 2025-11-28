@@ -1,0 +1,34 @@
+@using System
+@namespace frontend.Pages.Shared.Components.Storefront
+
+<div class="category-filter">
+    <ul class="space-y-2">
+        @foreach (var category in Categories)
+        {
+            <li>
+                <button class="@GetButtonClasses(category)"
+                        @onclick="() => OnCategorySelected.InvokeAsync(category)">
+                    @category
+                </button>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public List<string> Categories { get; set; } = new();
+
+    [Parameter]
+    public string? SelectedCategory { get; set; }
+
+    [Parameter]
+    public EventCallback<string> OnCategorySelected { get; set; }
+
+    private string GetButtonClasses(string category)
+    {
+        return category == SelectedCategory
+            ? "w-full text-left px-2 py-1 font-semibold bg-blue-500 text-white rounded"
+            : "w-full text-left px-2 py-1 hover:bg-gray-200 rounded";
+    }
+}

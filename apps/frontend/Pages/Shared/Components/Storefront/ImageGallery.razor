@@ -1,0 +1,52 @@
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Storefront
+
+<div class="image-gallery w-full">
+
+    <!-- Main Image -->
+    <div class="main-image w-full h-96 bg-gray-100 rounded flex justify-center items-center overflow-hidden mb-4">
+        <img src="@CurrentImage"
+             alt="Product Image"
+             class="object-contain max-h-full max-w-full" />
+    </div>
+
+    @if (Images != null && Images.Count > 1)
+    {
+        <!-- Thumbnails -->
+        <div class="thumbnails flex space-x-3">
+            @foreach (var img in Images)
+            {
+                <img src="@img"
+                     class="@GetThumbClass(img)"
+                     @onclick="() => SelectImage(img)" />
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public List<string>? Images { get; set; }
+
+    private string CurrentImage = "";
+
+    protected override void OnInitialized()
+    {
+        if (Images is { Count: > 0 })
+            CurrentImage = Images[0];
+    }
+
+    private void SelectImage(string img)
+    {
+        CurrentImage = img;
+    }
+
+    private string GetThumbClass(string img)
+    {
+        var baseClass = "w-20 h-20 object-cover rounded cursor-pointer border";
+
+        return img == CurrentImage
+            ? $"{baseClass} border-blue-500"
+            : $"{baseClass} border-gray-300 hover:border-gray-500";
+    }
+}
