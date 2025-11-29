@@ -1,0 +1,56 @@
+@page "/admin/notifications"
+@layout AdminLayout
+@inject NotificationService NotificationService
+@inject ToastService ToastService
+
+@using frontend.Models
+@using frontend.Pages.Shared.Components.NotificationItem
+
+<h2 class="text-xl font-semibold mb-4">All Notifications</h2>
+
+@if (notifications is null)
+{
+    <p>Loading...</p>
+}
+else if (!notifications.Any())
+{
+    <p>No notifications available.</p>
+}
+else
+{
+    <div class="space-y-2">
+        @foreach (var note in notifications)
+        {
+            <NotificationItem Notification="@note" OnRead="@OnNotificationRead" />
+        }
+    </div>
+}
+
+@code {
+    [CascadingParameter] public Guid? UserId { get; set; }
+    private List<Notification> notifications = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (UserId.HasValue)
+        {
+            notifications = await NotificationService.GetNotificationByUser(UserId.Value);
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    private async Task OnNotificationRead(Guid id)
+    {
+        await NotificationService.UpdateNotificationStatus(id, NotificationStatus.Read);
+        var note = notifications.FirstOrDefault(n => n.ID == id);
+        if (note != null)
+        {
+            note.Status = NotificationStatus.Read;
+        }
+
+        StateHasChanged(); // graying out or removing the notification 
+    }
+}
