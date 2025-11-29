@@ -1,0 +1,7 @@
+@page "/admin/createstore"
+@layout AdminLayout
+@using frontend.Pages.Shared.Components
+
+@attribute [Authorize(Roles = "admin")]
+
+<CreateStoreForm />
