@@ -1,7 +1,5 @@
 @page "/product/{ProductId}"
-@using frontend.Models
-@namespace frontend.Pages.Storefront
-@using frontend.Pages.Shared.Components.Storefront
+@layout StorefrontLayout
 @inject NavigationManager Nav
 
 @if (Product is null)

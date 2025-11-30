@@ -1,7 +1,77 @@
 @inherits LayoutComponentBase
-@namespace frontend.Pages.Storefront
-@using frontend.Pages.Shared
-    
-<div class="flex flex-col min-h-screen pt-12">
+@inject NavigationManager Nav
+
+<!-- Top Navigation -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+        <!-- Logo -->
+        <a href="/" class="flex items-center space-x-2">
+            <img src="/Images/logo.png" alt="logo" class="h-8 w-8" />
+            <span class="font-bold text-xl">FastaBiz</span>
+        </a>
+
+        <!-- Desktop Menu -->
+        <div class="hidden md:flex items-center space-x-8">
+            <a href="/storefront" class="text-gray-700 hover:text-blue-600 font-medium">Products</a>
+            <a href="/stores" class="text-gray-700 hover:text-blue-600 font-medium">Stores</a>
+            <a href="/categories" class="text-gray-700 hover:text-blue-600 font-medium">Categories</a>
+
+            <!-- Cart -->
+            <a href="/cart" class="relative">
+                <svg class="w-6 h-6 text-gray-800 hover:text-blue-600" fill="none" stroke="currentColor" stroke-width="2"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.2 6h12.4M7 13L5.4 5M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z"/>
+                </svg>
+
+                <!-- Badge -->
+                <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 rounded-full">
+                    2
+                </span>
+            </a>
+
+            <!-- Account Button -->
+            <a href="/auth/login" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                Login
+            </a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden focus:outline-none" @onclick="ToggleMobile">
+            <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div class="@MobileMenuCss md:hidden bg-white shadow-inner px-6 pt-2 pb-4 space-y-2">
+        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/storefront">Products</a>
+        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/stores">Stores</a>
+        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/categories">Categories</a>
+        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/cart">Cart</a>
+
+        <a href="/auth/login"
+           class="inline-block w-full bg-blue-600 text-white text-center py-2 rounded mt-3 hover:bg-blue-700">
+            Login
+        </a>
+    </div>
+</nav>
+
+<!-- MAIN BODY -->
+<div class="min-h-screen pt-24 pb-10 bg-gray-50">
     @Body
 </div>
+
+@code {
+    private bool mobileOpen = false;
+
+    private void ToggleMobile()
+    {
+        mobileOpen = !mobileOpen;
+    }
+
+    private string MobileMenuCss => mobileOpen ? "block" : "hidden";
+}
