@@ -14,6 +14,7 @@
 	<link rel="icon" type="image/png" href="favicon.png" />
 
 	<script src="js/pageStyles.js" defer></script>
+	<script src="js/site.js"></script>
 </head>
 
 <body>
@@ -37,6 +38,23 @@
 	<script>
 		window.addEventListener("DOMContentLoaded", () => {
 			lucide.createIcons();
+		});
+	</script>
+	<script>
+		let lastScroll = 0;
+		window.addEventListener('scroll', function () {
+			const nav = document.getElementById('scrollNav');
+			const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+			if (!nav) return;
+
+			if (currentScroll > lastScroll) {
+				// Scrolling down
+				nav.classList.add('-translate-y-full');
+			} else {
+				// Scrolling up
+				nav.classList.remove('-translate-y-full');
+			}
+			lastScroll = currentScroll <= 0 ? 0 : currentScroll;
 		});
 	</script>
 </body>
