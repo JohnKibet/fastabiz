@@ -1,6 +1,5 @@
 @page "/customer/dashboard"
 @layout CustomerLayout
-@using frontend.Pages.Shared.Components
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject ToastService ToastService
@@ -78,8 +77,8 @@
 
     class OrderSummary
     {
-        public string OrderCode { get; set; }
-        public string Status { get; set; }
-        public string Eta { get; set; }
+        public string? OrderCode { get; set; }
+        public string? Status { get; set; }
+        public string? Eta { get; set; }
     }
 }
