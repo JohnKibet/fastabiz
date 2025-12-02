@@ -1,7 +1,5 @@
 @page "/admin/users"
 @layout AdminLayout
-@using frontend.Models
-@using frontend.Pages.Shared.Components.Tables
 @inject UserService UserService
 @inject ToastService ToastService
 @attribute [Authorize(Roles = "admin")]
