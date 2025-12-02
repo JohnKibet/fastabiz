@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@using frontend.Models
 @inject NavigationManager Nav
 
 <nav id="scrollNav" class="fixed top-0 left-0 right-0 z-50 bg-white shadow transition-transform duration-300 ease-in-out">
@@ -13,7 +14,6 @@
         <div class="hidden md:flex items-center space-x-8">
             <a href="/storefront" class="text-gray-700 hover:text-blue-600 font-medium">Products</a>
             <a href="/stores" class="text-gray-700 hover:text-blue-600 font-medium">Stores</a>
-            <a href="/categories" class="text-gray-700 hover:text-blue-600 font-medium">Categories</a>
             <a href="/cart" class="relative">Cart</a>
             <a href="/auth/login" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Login</a>
         </div>
@@ -38,6 +38,11 @@
                 </svg>
                 <span class="text-sm font-medium">All</span>
             </button>
+
+            <!-- Breadcrumb -->
+            <div class="ml-auto flex items-center">
+                <BreadCrumb Items="Breadcrumbs" />
+            </div>
         </div>
     </div>
 
@@ -48,16 +53,17 @@
     <div class="@MobileMenuCss md:hidden bg-white shadow-inner px-6 pt-2 pb-4 space-y-2">
         <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/storefront">Products</a>
         <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/stores">Stores</a>
-        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/categories">Categories</a>
         <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/cart">Cart</a>
         <a href="/auth/login" class="inline-block w-full bg-blue-600 text-white text-center py-2 rounded mt-3 hover:bg-blue-700">Login</a>
     </div>
 </nav>
 
 <!-- PAGE BODY -->
-<div class="min-h-screen bg-gray-50 pb-10 pt-[calc(64px+40px)]">
-    @Body
-</div>
+<CascadingValue Value="this">
+    <div class="min-h-screen bg-gray-50 pb-10 pt-[calc(64px+60px)]">
+        @Body
+    </div>
+</CascadingValue>
 
 @code {
     private bool mobileOpen = false;
@@ -65,5 +71,12 @@
     private void ToggleMobile() => mobileOpen = !mobileOpen;
     private string MobileMenuCss => mobileOpen ? "block" : "hidden";
     private void ToggleFiltersOpen() => IsFiltersOpen = !IsFiltersOpen;
+
+    private List<BreadcrumbItem> Breadcrumbs { get; set; } = new();
+    public void SetBreadcrumbs(List<BreadcrumbItem> crumbs)
+    {
+        Breadcrumbs = crumbs;
+        StateHasChanged();
+    }
 }
 

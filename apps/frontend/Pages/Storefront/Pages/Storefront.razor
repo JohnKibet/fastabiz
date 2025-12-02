@@ -3,8 +3,6 @@
 @inject NavigationManager NavigationManager
 
 <div class="px-4">
-    <h3 class="text-xl font-bold mb-0">Storefront</h3>
-
     <div class="storefront-container flex">
         <!-- Products Grid -->
         <main class="w-full grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -25,6 +23,7 @@
 @code {
     // Mock Data (can be replaced by API call)
     private List<ProductListItem> Products = MockData.GetAllProducts();
+    [CascadingParameter] StorefrontLayout Layout { get; set; }
 
     private int CurrentPage = 1;
     private int TotalPages = 1;
@@ -32,6 +31,16 @@
     protected override void OnInitialized()
     {
         TotalPages = (int)Math.Ceiling((double)Products.Count / 9); // example: 9 per page
+
+        // Set breadcrumb
+        if (Layout is StorefrontLayout layout)
+        {
+            layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+            {
+                new() { Title = "Home", Url = "/" },
+                new() { Title = "Products", Url = "/storefront" }
+            });
+        }
     }
 
     private async Task LoadPreviousPage(int page)

@@ -68,6 +68,7 @@ else
 
 @code {
     [Parameter] public string ProductId { get; set; } = string.Empty;
+    [CascadingParameter] StorefrontLayout Layout { get; set; }
 
     private ProductX? Product;
     private Merchant? Merchant;
@@ -83,6 +84,14 @@ else
         {
             Merchant = MockData.Merchants.First(m => m.Id == Product.MerchantId);
         }
+
+        Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+        {
+            new() { Title = "Home", Url = "/" },
+            new() { Title = "Stores", Url = "/stores" },
+            new() { Title = Merchant?.Name ?? "", Url = $"/store/{Merchant?.Id}" },
+            new() { Title = Product?.Name ?? "", Url = $"/product/{ProductId}" }
+        });
     }
 
     private void ViewMerchant(string id)

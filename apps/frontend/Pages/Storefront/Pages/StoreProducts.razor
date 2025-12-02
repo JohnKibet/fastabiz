@@ -45,6 +45,7 @@
 
 @code {
     [Parameter] public string MerchantId { get; set; } = string.Empty;
+    [CascadingParameter] StorefrontLayout Layout { get; set; }
 
     private Merchant? Merchant;
     private List<ProductX> FilteredProducts = new();
@@ -65,6 +66,13 @@
             FilteredProducts = Merchant.Products;
             Categories = Merchant.Products.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
             TotalPages = (int)Math.Ceiling((double)FilteredProducts.Count / PageSize);
+
+            Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+            {
+                new() { Title = "Home", Url = "/" },
+                new() { Title = "Stores", Url = "/stores" },
+                new() { Title = $"{Merchant?.Name}", Url = $"/store{MerchantId}" }
+            });
         }
     }
 

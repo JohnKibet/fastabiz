@@ -40,7 +40,21 @@
             </div>
             <div class="mb-4">
                 <label class="block font-medium mb-1">Shop by Merchant</label>
-                <MerchantFilter Merchants="@Merchants" OnMerchantSelected="@FilterByMerchant" />
+                <ul>
+                    @foreach (var merchant in Merchants)
+                    {
+                        <li class="flex justify-between items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
+                            @onclick="(() => OpenMerchantDrawer(merchant))">
+                            <span>@merchant.Name</span>
+                            @if (Products.Any(p => p.MerchantId == merchant.Id))
+                            {
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            }
+                        </li>
+                    }
+                </ul>
             </div>
         </div>
 
@@ -79,6 +93,18 @@
                         }
                     </ul>
                 }
+                else if (SelectedMerchant != null && MerchantProducts.Any())
+                {
+                    <ul>
+                        @foreach (var p in MerchantProducts)
+                        {
+                            <li class="p-2 flex items-center gap-3 hover:bg-gray-100 rounded cursor-pointer">
+                                <img src="@p.Thumbnail" class="w-10 h-10 rounded object-cover" />
+                                <span>@p.Name</span>
+                            </li>
+                        }
+                    </ul>
+                }
                 else
                 {
                     <p class="text-gray-500 text-sm">No products found.</p>
@@ -99,7 +125,9 @@
     private List<Merchant> Merchants = MockData.Merchants;
 
     private List<ProductListItem> CategoryProducts = new(); // second drawer items
+    private List<ProductListItem> MerchantProducts = new();
     private string? SelectedCategory;
+    private string? SelectedMerchant;
     private bool IsSecondOpen = false;
 
     protected override async Task OnParametersSetAsync()
@@ -119,6 +147,20 @@
         IsSecondOpen = true;
     }
 
+    private void OpenMerchantDrawer(Merchant merchant)
+    {
+        SelectedMerchant = merchant.Id;
+        SelectedCategory = null;          // reset category selection
+        CategoryProducts.Clear();         // clear category products
+
+        // get products for that merchant
+        MerchantProducts = Products
+            .Where(p => p.MerchantId == merchant.Id)
+            .ToList();
+
+        IsSecondOpen = true;
+    }
+
     private void CloseCategoryDrawer()
     {
         IsSecondOpen = false;
@@ -127,10 +169,5 @@
     private void GoBackToMainDrawer()
     {
         IsSecondOpen = false;   // Close this drawer
-    }
-
-    private void FilterByMerchant(string merchantId)
-    {
-        
     }
 }
