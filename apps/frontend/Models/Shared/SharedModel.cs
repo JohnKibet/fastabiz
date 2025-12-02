@@ -35,4 +35,9 @@ namespace frontend.Models
                 await ValueChanged.InvokeAsync(typedValue);
         }
     }
+    public class BreadcrumbItem
+    {
+        public string Title { get; set; } = "";
+        public string Url { get; set; } = "";
+    }
 }
