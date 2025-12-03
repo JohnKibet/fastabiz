@@ -55,7 +55,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<DropdownDataService>();
 builder.Services.AddScoped<DriverService>();
-builder.Services.AddScoped<PaymentService>();
+// builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<DeliveryService>();
 builder.Services.AddScoped<FeedbackService>();
 builder.Services.AddScoped<InventoryService>();
