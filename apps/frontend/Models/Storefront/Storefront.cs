@@ -5,7 +5,7 @@ public class Merchant
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string? Logo { get; set; }
+    public string Logo { get; set; } = string.Empty;
     public double Rating { get; set; }
     public int TotalProducts { get; set; }
 
@@ -27,8 +27,8 @@ public class ProductX
     public bool HasVariants { get; set; }
 
     // Simple products (HasVariants == false)
-    public double? Price { get; set; }
-    public int? Stock { get; set; }
+    public double Price { get; set; }
+    public int Stock { get; set; }
 
     // Variant-enabled products
     public List<Option> Options { get; set; } = new();
