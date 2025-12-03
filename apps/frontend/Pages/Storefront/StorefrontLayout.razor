@@ -32,7 +32,7 @@
                 class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
                 @onclick="ToCheckout">
                 <LucideIcon Name="cart" Size="6" />
-                <span class="text-sm font-medium">Cart</span>
+                <span class="text-sm font-medium">Cart (@CartService.Count)</span>
             </button>
 
             @if (!IsLoggedIn)
@@ -96,6 +96,7 @@
 </CascadingValue>
 
 @code {
+    [Inject] private CartService CartService { get; set; } = default!;
     private bool mobileOpen = false;
     private bool IsFiltersOpen = false;
     private void ToggleMobile() => mobileOpen = !mobileOpen;
@@ -128,8 +129,13 @@
         IsLoggedIn = user.Identity?.IsAuthenticated ?? false;
 
         if (IsLoggedIn) UserName = user.Identity!.Name;
-    }
 
+        CartService.OnChange += StateHasChanged;
+    }
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+    }
     private void ToCheckout()
     {
         if (!IsLoggedIn) Nav.NavigateTo("/auth/login");

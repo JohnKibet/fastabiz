@@ -28,9 +28,7 @@
 </div>
 
 @code {
-    [Parameter]
-    public ProductListItem Product { get; set; } = new();
+    [Parameter] public ProductListItem Product { get; set; } = new();
 
-    [Parameter]
-    public EventCallback<ProductListItem> OnSelected { get; set; }
+    [Parameter] public EventCallback<ProductListItem> OnSelected { get; set; }
 }

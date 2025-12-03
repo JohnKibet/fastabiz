@@ -8,7 +8,7 @@
 }
 else
 {
-    <div class="product-detail grid grid-cols-2 gap-8 p-6">
+    <div class="product-detail grid grid-cols-2 gap-8 p-6 @(IsInCart ? "bg-yellow-50" : "")">
 
         <!-- LEFT: Image Gallery -->
         <div>
@@ -28,51 +28,63 @@ else
             <p class="text-gray-700">@Product.Description</p>
 
             <!-- VARIANTS -->
-            @if (Product.HasVariants)
+            @if (Product.HasVariants && Product.Variants.Count > 1)
             {
-                <VariantSelector Options="@Product.Options"
-                                 Variants="@Product.Variants"
-                                 SelectedVariant="@SelectedVariant"
-                                 OnVariantSelected="@SelectVariant" />
+                <VariantSelector
+                    Options="@Product.Options"
+                    Variants="@Product.Variants"
+                    OnVariantSelected="@SelectVariant"
+                    OnSelectionChanged="UpdateSelections" />
 
-                @if (SelectedVariant is not null)
+                @if (ShowError)
                 {
-                    <p class="text-xl font-semibold">
-                        Price: KES @SelectedVariant.Price.ToString("N2")
-                    </p>
-
-                    <p class="text-sm text-gray-500">
-                        Stock: @SelectedVariant.Stock
+                    <p class="text-red-600 font-medium">
+                        This combination is not available. Try different options.
                     </p>
                 }
             }
+
+            <!-- PRICE & STOCK -->
+            <p class="text-xl font-semibold">
+                Price: KES @(GetPriceDisplay())
+            </p>
+            <p class="text-sm text-gray-500">
+                Stock: @(GetStockDisplay())
+            </p>
+
+            <!-- ADD / REMOVE FROM CART -->
+            @if (IsInCart)
+            {
+                <button
+                    class="w-1/2 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-semibold"
+                    @onclick="RemoveFromCart">
+                    Remove from Cart
+                </button>
+            }
             else
             {
-                <p class="text-xl font-semibold">
-                    Price: KES @Product.Price?.ToString("N2")
-                </p>
-
-                <p class="text-sm text-gray-500">
-                    Stock: @Product.Stock
-                </p>
+                <button class="w-1/2 px-4 py-3 rounded-lg font-semibold
+                               @(CanAddToCart ? "bg-green-600 text-white hover:bg-green-700"
+                                              : "bg-gray-300 text-gray-500 cursor-not-allowed")"
+                        disabled="@(!CanAddToCart)"
+                        @onclick="AddToCart">
+                    Add to Cart
+                </button>
             }
-
-            <AddToCartButton 
-                OnAdd="@AddToCart"
-                IsDisabled="@(Product.HasVariants && SelectedVariant is null)" 
-            />
-
         </div>
     </div>
 }
 
 @code {
     [Parameter] public string ProductId { get; set; } = string.Empty;
-    [CascadingParameter] StorefrontLayout Layout { get; set; }
+    [CascadingParameter] StorefrontLayout? Layout { get; set; }
+    [Inject] private CartService CartService { get; set; } = default!;
 
-    private ProductX? Product;
-    private Merchant? Merchant;
-    private Variant? SelectedVariant;
+    private ProductX Product = new();
+    private Merchant Merchant = new();
+
+    private Variant SelectedVariant = new();
+    private Dictionary<string, string?> Selections = new();
 
     protected override void OnInitialized()
     {
@@ -94,18 +106,76 @@ else
         });
     }
 
-    private void ViewMerchant(string id)
+    private void UpdateSelections(Dictionary<string, string?> map) => Selections = map;
+
+    private bool AllOptionsSelected =>
+        Product!.Variants.Count > 1 && // only for multiple variants
+        Product.Options.All(o => Selections.ContainsKey(o.Name) && Selections[o.Name] != null);
+
+    private bool ShowError =>
+        Product!.Variants.Count > 1 && AllOptionsSelected && SelectedVariant == null;
+
+    private bool CanAddToCart =>
+        !Product!.HasVariants ||       // no variants
+        Product.Variants.Count == 1 || // single variant
+        (AllOptionsSelected && SelectedVariant != null); // multiple variants
+
+    private bool IsInCart => CartService.IsInCart(Product!.Id, SelectedVariant?.Id);
+
+    private string GetPriceDisplay()
     {
-        Nav.NavigateTo($"/store/{id}");
+        if (!Product!.HasVariants) 
+        return Product.Price.ToString("N2") ?? "-";
+
+        if (Product.Variants.Count == 1) 
+            return Product.Variants[0].Price.ToString("N2");
+
+        // multiple variants
+        if (SelectedVariant != null)
+            return SelectedVariant.Price.ToString("N2");
+
+        // Show price range
+        var prices = Product.Variants.Select(v => v.Price);
+        double min = prices.Min();
+        double max = prices.Max();
+        return min == max ? min.ToString("N2") : $"{min:N2} - {max:N2}";
     }
+
+    private string GetStockDisplay()
+    {
+        if (!Product!.HasVariants) 
+            return Product.Stock.ToString();
+
+        if (Product.Variants.Count == 1) 
+            return Product.Variants[0].Stock.ToString();
+
+        if (SelectedVariant != null)
+            return SelectedVariant.Stock.ToString();
+
+        // Show stock range
+        var stocks = Product.Variants.Select(v => v.Stock);
+        int min = stocks.Min();
+        int max = stocks.Max();
+        return min == max ? min.ToString() : $"{min} - {max}";
+    }
+
+    private void ViewMerchant(string id) => Nav.NavigateTo($"/store/{id}");
 
     private void SelectVariant(Variant v)
     {
         SelectedVariant = v;
+        StateHasChanged();
     }
 
     private void AddToCart()
     {
-        Console.WriteLine($"Added product={Product?.Id} variant={SelectedVariant?.Id}");
+        if (!CanAddToCart) return;
+        CartService.AddItem(Product!, SelectedVariant);
+        // show toast here
+    }
+
+    private void RemoveFromCart()
+    {
+        CartService.RemoveItem(Product!.Id, SelectedVariant?.Id);
     }
 }

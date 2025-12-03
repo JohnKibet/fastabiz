@@ -2,50 +2,69 @@
 @layout StorefrontLayout
 @inject NavigationManager NavigationManager
 
-<h3 class="text-2xl font-bold mb-4">@Merchant?.Name</h3>
+<div class="p-2">
+    <h3 class="text-2xl font-bold mb-4">@Merchant?.Name</h3>
 
-<div class="flex mb-6">
-    <!-- Merchant Info -->
-    <div class="flex items-center space-x-4">
-        @if (!string.IsNullOrEmpty(Merchant?.Logo))
-        {
-            <img src="@Merchant.Logo" alt="@Merchant.Name" class="w-16 h-16 rounded-full object-cover" />
-        }
-        <div>
-            <p class="text-lg font-semibold">@Merchant?.Name</p>
-            <p class="text-sm text-yellow-600">⭐ @Merchant?.Rating.ToString("0.0")</p>
-            <p class="text-sm text-gray-600">@Merchant?.TotalProducts product(s)</p>
+    <div class="flex mb-6">
+        <!-- Merchant Info -->
+        <div class="flex items-center space-x-4">
+            @if (!string.IsNullOrEmpty(Merchant?.Logo))
+            {
+                <img src="@Merchant.Logo" alt="@Merchant.Name" class="w-16 h-16 rounded-full object-cover" />
+            }
+            <div>
+                <p class="text-sm text-yellow-600">⭐ @Merchant?.Rating.ToString("0.0")</p>
+                <p class="text-sm text-gray-600">@Merchant?.TotalProducts product(s)</p>
+            </div>
         </div>
     </div>
+
+    <div class="flex">
+        <!-- CATEGORY FILTERS -->
+        <div class="flex-1/2 space-x-2 overflow-x-auto py-2 px-1">
+            @foreach (var cat in Categories)
+            {
+                <button class="px-3 py-1 rounded-full border text-sm whitespace-nowrap
+                                @(SelectedCategory == cat 
+                                    ? "bg-blue-600 text-white border-blue-600" 
+                                    : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200")"
+                        @onclick="() => FilterByCategory(cat)">
+                    @cat
+                </button>
+            }
+            @if (!string.IsNullOrEmpty(SelectedCategory))
+            {
+                <button class="px-3 py-1 rounded-full border bg-red-100 text-red-600 text-sm"
+                        @onclick="() => FilterByCategory(null)">
+                    Clear
+                </button>
+            }
+        </div>
+
+        <!-- Products Grid -->
+        <main class="w-3/4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            @foreach (var product in FilteredProducts)
+            {
+                <ProductCard 
+                    Product="@ConvertToListItem(product)" 
+                    OnSelected="@ViewProductDetail" 
+                />
+            }
+        </main>
+    </div>
+
+    <!-- Pagination -->
+    <PaginationControl 
+        CurrentPage="@CurrentPage" 
+        TotalPages="@TotalPages"
+        OnPreviousPage="@LoadPreviousPage"
+        OnNextPage="@LoadNextPage" 
+    />
 </div>
-
-<div class="flex">
-    <!-- Sidebar Category Filter -->
-    <aside class="w-1/4 pr-4">
-        <h4 class="font-semibold mb-2">Categories</h4>
-        <CategoryFilter 
-            Categories="@Categories" 
-            SelectedCategory="@SelectedCategory" 
-            OnCategorySelected="@FilterByCategory" />
-    </aside>
-
-    <!-- Products Grid -->
-    <main class="w-3/4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        @foreach (var product in FilteredProducts)
-        {
-            <ProductCard Product="@ConvertToListItem(product)" OnSelected="@ViewProductDetail" />
-        }
-    </main>
-</div>
-
-<!-- Pagination -->
-<PaginationControl CurrentPage="@CurrentPage" TotalPages="@TotalPages"
-                   OnPreviousPage="@LoadPreviousPage"
-                   OnNextPage="@LoadNextPage" />
 
 @code {
     [Parameter] public string MerchantId { get; set; } = string.Empty;
-    [CascadingParameter] StorefrontLayout Layout { get; set; }
+    [CascadingParameter] StorefrontLayout? Layout { get; set; }
 
     private Merchant? Merchant;
     private List<ProductX> FilteredProducts = new();

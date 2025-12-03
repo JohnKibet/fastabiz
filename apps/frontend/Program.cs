@@ -63,6 +63,7 @@ builder.Services.AddScoped<UserSessionService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<StoreService>();
+builder.Services.AddSingleton<CartService>();
 
 // Authentication & Authorization
 builder.Services.AddOptions();

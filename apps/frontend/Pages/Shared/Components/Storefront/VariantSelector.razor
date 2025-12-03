@@ -1,42 +1,55 @@
 @using frontend.Models
 @namespace frontend.Pages.Shared.Components.Storefront
 
-<div class="space-y-4">
-    @foreach (var option in Options)
-    {
-        <div>
-            <label class="block font-semibold mb-2">@option.Name</label>
-            <div class="flex gap-2 flex-wrap">
-                @foreach (var val in option.Values)
-                {
-                    <button
-                        class="@GetValueClass(option.Name, val)"
-                        @onclick="() => SelectOption(option.Name, val)">
-                        @val
-                    </button>
-                }
+@if (Options?.Any() == true && Variants?.Any() == true && Options.Count > 0 && Variants.Count > 1)
+{
+    <div class="space-y-4">
+        @foreach (var option in Options)
+        {
+            <div>
+                <label class="block font-semibold mb-2">@option.Name</label>
+                <div class="flex gap-2 flex-wrap">
+                    @foreach (var val in option.Values)
+                    {
+                        bool unavailable = IsValueUnavailable(option.Name, val);
+
+                        <button
+                            disabled="@unavailable"
+                            class="@GetValueClass(option.Name, val, unavailable)"
+                            @onclick="() => SelectOption(option.Name, val)">
+                            @val
+                        </button>
+                    }
+                </div>
             </div>
-        </div>
-    }
-</div>
+        }
+
+        @if (Selected.Values.Any(v => !string.IsNullOrEmpty(v)))
+        {
+            <button class="mt-2 px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+                    @onclick="ClearSelections">
+                Clear Selection
+            </button>
+        }
+    </div>
+}
 
 @code {
     [Parameter] public List<Option> Options { get; set; } = new();
     [Parameter] public List<Variant> Variants { get; set; } = new();
 
-    // Output → tells ProductDetail which variant is chosen
     [Parameter] public EventCallback<Variant?> OnVariantSelected { get; set; }
+    [Parameter] public EventCallback<Dictionary<string, string?>> OnSelectionChanged { get; set; }
 
-    // internal storage of selected option values
-    private Dictionary<string, string> Selected = new();
+    private Dictionary<string, string?> Selected = new();
 
     protected override void OnInitialized()
     {
-        // Initialize selected options to first value
-        foreach (var opt in Options)
+        // Initialize selections only if multiple options exist
+        if (Options?.Any() == true)
         {
-            if (opt.Values.Count > 0)
-                Selected[opt.Name] = opt.Values[0];
+            foreach (var opt in Options)
+                Selected[opt.Name] = null;
         }
 
         EmitSelectedVariant();
@@ -46,6 +59,16 @@
     {
         Selected[optionName] = value;
         EmitSelectedVariant();
+        OnSelectionChanged.InvokeAsync(Selected);
+    }
+
+    private void ClearSelections()
+    {
+        foreach (var opt in Options)
+            Selected[opt.Name] = null;
+
+        EmitSelectedVariant();
+        OnSelectionChanged.InvokeAsync(Selected);
     }
 
     private void EmitSelectedVariant()
@@ -58,12 +81,29 @@
         OnVariantSelected.InvokeAsync(match);
     }
 
-    private string GetValueClass(string optionName, string value)
+    private bool IsValueUnavailable(string optionName, string value)
     {
-        bool isActive = Selected.ContainsKey(optionName) && Selected[optionName] == value;
+        var temp = new Dictionary<string, string?>(Selected)
+        {
+            [optionName] = value
+        };
 
-        return isActive
-            ? "px-3 py-1 rounded-lg border border-blue-600 bg-blue-50 text-blue-700"
-            : "px-3 py-1 rounded-lg border border-gray-300 hover:border-gray-600 cursor-pointer";
+        return !Variants.Any(v =>
+            v.Options.All(kv =>
+                temp.ContainsKey(kv.Key) &&
+                (temp[kv.Key] == null || temp[kv.Key] == kv.Value)));
+    }
+
+    private string GetValueClass(string optionName, string value, bool unavailable)
+    {
+        bool isActive = Selected.TryGetValue(optionName, out var current) && current == value;
+
+        if (unavailable)
+            return "px-3 py-1 rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed";
+
+        if (isActive)
+            return "px-3 py-1 rounded-lg border border-blue-600 bg-blue-50 text-blue-700";
+
+        return "px-3 py-1 rounded-lg border border-gray-300 hover:border-gray-600 cursor-pointer";
     }
 }
