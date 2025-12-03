@@ -1,6 +1,8 @@
 @inherits LayoutComponentBase
+@using System.Security.Claims
 @using frontend.Models
 @inject NavigationManager Nav
+@inject CustomAuthStateProvider AuthStateProvider 
 
 <nav id="scrollNav" class="fixed top-0 left-0 right-0 z-50 bg-white shadow transition-transform duration-300 ease-in-out">
 
@@ -11,11 +13,39 @@
             <span class="font-bold text-xl">FastaBiz</span>
         </a>
 
-        <div class="hidden md:flex items-center space-x-8">
-            <a href="/storefront" class="text-gray-700 hover:text-blue-600 font-medium">Products</a>
-            <a href="/stores" class="text-gray-700 hover:text-blue-600 font-medium">Stores</a>
-            <a href="/cart" class="relative">Cart</a>
-            <a href="/auth/login" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Login</a>
+        <div class="hidden md:flex items-center space-x-4">
+            <button 
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
+                @onclick="ToProducts">
+                <LucideIcon Name="package" Size="6" />
+                <span class="text-sm font-medium">Products</span>
+            </button>
+
+            <button 
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
+                @onclick="ToStores">
+                <LucideIcon Name="store" Size="6" />
+                <span class="text-sm font-medium">Stores</span>
+            </button>
+
+            <button 
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
+                @onclick="ToCheckout">
+                <LucideIcon Name="cart" Size="6" />
+                <span class="text-sm font-medium">Cart</span>
+            </button>
+
+            @if (!IsLoggedIn)
+            {
+                <a href="/auth/login" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Login</a>
+            }
+            else
+            {
+                <div class="flex items-center gap-2 px-3 py-2 border rounded bg-gray-50 shadow">
+                    <LucideIcon Name="user-icon" Size="6" />
+                    <span class="text-sm font-medium">Hello @UserName</span>
+                </div>
+            }
         </div>
 
         <button class="md:hidden focus:outline-none" @onclick="ToggleMobile">
@@ -77,6 +107,33 @@
     {
         Breadcrumbs = crumbs;
         StateHasChanged();
+    }
+    private void ToProducts()
+    {
+        Nav.NavigateTo("/storefront");
+    }
+    private void ToStores()
+    {
+        Nav.NavigateTo("/stores");
+    }
+
+    private string? UserName;
+    private bool IsLoggedIn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        IsLoggedIn = user.Identity?.IsAuthenticated ?? false;
+
+        if (IsLoggedIn) UserName = user.Identity!.Name;
+    }
+
+    private void ToCheckout()
+    {
+        if (!IsLoggedIn) Nav.NavigateTo("/auth/login");
+        Nav.NavigateTo("/customer/checkout");
     }
 }
 

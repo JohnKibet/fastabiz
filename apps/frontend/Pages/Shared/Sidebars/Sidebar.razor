@@ -82,6 +82,12 @@
                             IsOpen="@IsSectionOpen(nameof(CustomerOperations))"
                             OnToggle="@ToggleSection" />
 
+            <SidebarSection Title="Checkout" Icon=""
+                            SectionKey="CustomerCheckout"
+                            IsCollapsed="IsCollapsed" Items="CustomerCheckout"
+                            IsOpen="@IsSectionOpen(nameof(CustomerCheckout))"
+                            OnToggle="@ToggleSection" />
+
             <SidebarSection Title="Feedback" Icon="shopping-bag"
                             SectionKey="CustomerFeedback"
                             IsCollapsed="IsCollapsed" Items="CustomerFeedback"
@@ -213,6 +219,11 @@
     {
         new("My Orders", "/customer/myorders", "files"),
         new("Payments", "/customer/payments", "credit-card")
+    };
+
+    private List<SidebarMenuItem> CustomerCheckout => new()
+    {
+        new("Checkout", "/customer/checkout", "cart")
     };
 
     #endregion

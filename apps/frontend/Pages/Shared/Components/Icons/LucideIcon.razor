@@ -22,7 +22,7 @@
             break;
 
         case "store":
-            <path d="M3 9h18l-1 11H4L3 9zM2 5h20v4H2V5zM6 13h2v4H6v-4z" />;
+            <path d="M15 21v-5a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v5"/><path d="M17.774 10.31a1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.451 0 1.12 1.12 0 0 0-1.548 0 2.5 2.5 0 0 1-3.452 0 1.12 1.12 0 0 0-1.549 0 2.5 2.5 0 0 1-3.77-3.248l2.889-4.184A2 2 0 0 1 7 2h10a2 2 0 0 1 1.653.873l2.895 4.192a2.5 2.5 0 0 1-3.774 3.244"/><path d="M4 10.95V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.05"/>
             break;
 
         case "chart":
@@ -85,6 +85,22 @@
         case "close":
             <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
             break;
+
+        case "cart":
+            <circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+            break;
+            
+        case "shopping-basket":
+            <path d="m15 11-1 9"/><path d="m19 11-4-7"/><path d="M2 11h20"/><path d="m3.5 11 1.6 7.4a2 2 0 0 0 2 1.6h9.8a2 2 0 0 0 2-1.6l1.7-7.4"/><path d="M4.5 15.5h15"/><path d="m5 11 4-7"/><path d="m9 11 1 9"/>
+            break;
+
+        case "package":
+            <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/>
+            break;
+
+        case "user-icon":
+            <path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/><circle cx="12" cy="12" r="10"/>
+            break;
             
         default:
             <circle cx="12" cy="12" r="9" />;
@@ -95,5 +111,5 @@
 @code {
     [Parameter] public string Name { get; set; } = "";
     [Parameter] public int Size { get; set; } = 5;
-    [Parameter] public string Class { get; set; } = "text-gray-600";
+    [Parameter] public string Class { get; set; } = "text-gray-900";
 }
