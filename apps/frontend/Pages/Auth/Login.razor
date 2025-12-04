@@ -167,8 +167,16 @@
 
 
 @code {
+    private string? returnUrl;
     private LoginModel loginModel = new();
     private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        returnUrl = query["returnUrl"];
+    }
     private void SelectRole(string role)
     {
         loginModel.Role = role;
@@ -225,7 +233,8 @@
                 await AuthProvider.SignInAsync(tokenResponse.Token);
 
                 await JS.InvokeVoidAsync("localStorage.setItem", "showLoginSuccess", "true");
-                Navigation.NavigateTo($"/{claimsUser.Role}/dashboard", forceLoad: true);
+                var target = returnUrl ?? $"/{claimsUser.Role}/dashboard";
+                Navigation.NavigateTo(target, forceLoad: true);
             }
             else
             {
