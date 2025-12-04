@@ -80,4 +80,5 @@ public class CartItem
     public string? VariantName { get; set; } // e.g., Size: M, Color: Red
     public double Price { get; set; }
     public int Quantity { get; set; }
+    public string Thumbnail { get; set; } = string.Empty;
 }
