@@ -4,6 +4,7 @@
 @inject CustomAuthStateProvider AuthProvider
 @using frontend.Models
 @inject NavigationManager Navigation
+@inject CartService CartService
 
 <nav class="w-full bg-white shadow-md px-6 py-3 flex items-center justify-between max-w-7xl mx-auto">
   <!-- Global Search -->
@@ -24,30 +25,21 @@
 
   <!-- Right section (User + Actions) -->
   <div class="flex items-center space-x-4">
-    <!-- Shop, stores, cart if user == customer -->
-    @if (UserRole == "customer")
-    {
-      <button 
-        class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
-        @onclick="ToProducts">
-        <LucideIcon Name="shopping-basket" Size="6" />
-        <span class="text-sm font-medium">Shop</span>
-      </button>
 
-      <button 
-        class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
-        @onclick="ToStores">
-        <LucideIcon Name="store" Size="6" />
-        <span class="text-sm font-medium">Stores</span>
-      </button>
-
-      <button 
-        class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
-        @onclick="ToStores">
-        <LucideIcon Name="cart" Size="6" />
-        <span class="text-sm font-medium">Cart</span>
-      </button>
-    }
+    <!-- Role-specific Menu --> 
+    <div class="flex items-center gap-3">
+      @foreach (var item in MenuItems.Where(m => m.Visible?.Invoke() ?? true))
+      {
+        <button class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow text-sm"
+          @onclick="@(() => item.OnClick?.Invoke())">
+            @if (!string.IsNullOrEmpty(item.Icon))
+            {
+                <LucideIcon Name="@item.Icon" Size="6" />
+            }
+            <span>@item.Text</span>
+        </button>
+      }
+    </div>
 
     <!-- Notifications Dropdown -->
     <NotificationDropdown />
@@ -100,6 +92,7 @@
   protected override void OnInitialized()
   {
     Navigation.LocationChanged += HandleLocationChanged;
+    CartService.OnChange += StateHasChanged;
   }
 
   // Combine quick actions + sidebar-like items
@@ -163,4 +156,33 @@
   }
 
   private record SearchItem(string Title, string Link, string Icon);
+
+  private List<NavbarMenuItem> MenuItems = new();
+
+  protected override void OnParametersSet()
+  {
+    MenuItems.Clear();
+
+    if (UserRole == "customer")
+    {
+      MenuItems.Add(new NavbarMenuItem
+      {
+        Text = CartService.Count > 0 ? "Shop More" : "Shop",
+        Icon = "shopping-basket",
+        OnClick = ToProducts
+      });
+      MenuItems.Add(new NavbarMenuItem
+      {
+        Text = "Stores",
+        Icon = "store",
+        OnClick = ToStores
+      });
+      MenuItems.Add(new NavbarMenuItem
+      {
+        Text = $"Cart ({CartService.Count})",
+        Icon = "cart",
+        OnClick = null
+      });
+    }
+  }
 }

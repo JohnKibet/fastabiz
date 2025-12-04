@@ -86,12 +86,42 @@
     <Drawer IsOpen="IsFiltersOpen" OnClose="ToggleFiltersOpen" />
 
     <!-- MOBILE MENU -->
-    <div class="@MobileMenuCss md:hidden bg-white shadow-inner px-6 pt-2 pb-4 space-y-2">
-        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/storefront">Products</a>
-        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/stores">Stores</a>
-        <a class="block py-2 font-medium text-gray-700 hover:text-blue-600" href="/cart">Cart</a>
-        <a href="/auth/login" class="inline-block w-full bg-blue-600 text-white text-center py-2 rounded mt-3 hover:bg-blue-700">Login</a>
+    <div class="@MobileMenuCss md:hidden bg-white shadow-inner px-6 pt-2 pb-4 space-y-3">
+        <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
+                @onclick="() => { ToggleMobile(); ToProducts(); }">
+            <LucideIcon Name="package" Size="6" />
+            Products
+        </button>
+
+        <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
+                @onclick="() => { ToggleMobile(); ToStores(); }">
+            <LucideIcon Name="store" Size="6" />
+            Stores
+        </button>
+
+        <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
+                @onclick="() => { ToggleMobile(); ToggleMiniCart(); }">
+            <LucideIcon Name="cart" Size="6" />
+            Cart (@CartService.Count)
+        </button>
+
+        @if (!IsLoggedIn)
+        {
+            <button class="block w-full bg-blue-600 text-white text-center py-2 rounded mt-3 hover:bg-blue-700"
+                    @onclick="() => { ToggleMobile(); ToCheckout(); }">
+                Login
+            </button>
+        }
+        else
+        {
+            <div class="flex items-center gap-2 px-3 py-2 border rounded bg-gray-50 shadow mt-3">
+                <LucideIcon Name="user-icon" Size="6" />
+                <span class="text-sm font-medium">@UserName</span>
+            </div>
+        }
+
     </div>
+
 </nav>
 
 <!-- PAGE BODY -->
@@ -149,6 +179,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await CartService.LoadCartAsync();
+
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -200,3 +232,14 @@
     }
 }
 
+@* 💡 Bonus: When Login Happens, Sync Cart With Backend
+
+If your backend supports merging anonymous cart with user cart later, you’ll want to:
+
+Send local cart to server after login.
+
+Server merges or attaches cart to user.
+
+Replace local cart with server cart.
+
+For now, local storage persistence is enough. *@

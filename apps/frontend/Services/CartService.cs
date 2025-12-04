@@ -1,18 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 using frontend.Models;
+using Microsoft.JSInterop;
 
 public class CartService
 {
+    private readonly IJSRuntime _jSRuntime;
+    public CartService(IJSRuntime jSRuntime)
+    {
+        _jSRuntime = jSRuntime;
+    }
     public event Action? OnChange;
 
-    private readonly List<CartItem> items = new();
+    private List<CartItem> items = new();
 
     public IReadOnlyList<CartItem> Items => items.AsReadOnly();
     public int Count => items.Sum(i => i.Quantity); // total number of products in cart
 
-    public void AddItem(ProductX product, Variant? variant = null)
+    public async Task AddItem(ProductX product, Variant? variant = null)
     {
         var existing = items.FirstOrDefault(i =>
             i.ProductId == product.Id &&
@@ -36,6 +44,7 @@ public class CartService
             });
         }
 
+        await SaveCartAsync();
         NotifyStateChanged();
     }
 
@@ -46,7 +55,7 @@ public class CartService
             i.VariantId == variantId);
     }
 
-    public void RemoveItem(string productId, string? variantId)
+    public async Task RemoveItem(string productId, string? variantId)
     {
         var item = Items.FirstOrDefault(i =>
             i.ProductId == productId &&
@@ -55,21 +64,38 @@ public class CartService
         if (item != null)
             items.Remove(item);
 
+        await SaveCartAsync();
         NotifyStateChanged();
     }
 
-    public void DecrementItem(CartItem item)
+    public async Task DecrementItem(CartItem item)
     {
         var existing = items.FirstOrDefault(i => i == item);
         if (existing != null)
         {
             existing.Quantity--;
             if (existing.Quantity <= 0) items.Remove(existing);
+            await SaveCartAsync();
             NotifyStateChanged();
         }
     }
 
     private void NotifyStateChanged() => OnChange?.Invoke();
+
+    public async Task SaveCartAsync()
+    {
+        await _jSRuntime.InvokeVoidAsync("localStorage.setItem", "cart", JsonSerializer.Serialize(items));
+    }
+
+    public async Task LoadCartAsync()
+    {
+        var json = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "cart");
+        if (!string.IsNullOrEmpty(json))
+        {
+            items = JsonSerializer.Deserialize<List<CartItem>>(json)!;
+            OnChange?.Invoke();
+        }
+    }
 }
 
 public class CartItem
