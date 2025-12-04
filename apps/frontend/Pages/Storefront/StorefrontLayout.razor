@@ -2,6 +2,7 @@
 @using System.Security.Claims
 @using frontend.Models
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 @inject CustomAuthStateProvider AuthStateProvider 
 
 <nav id="scrollNav" class="fixed top-0 left-0 right-0 z-50 bg-white shadow transition-transform duration-300 ease-in-out">
@@ -29,11 +30,16 @@
             </button>
 
             <button 
-                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
-                @onclick="ToCheckout">
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow"
+                @onclick="ToggleMiniCart">
                 <LucideIcon Name="cart" Size="6" />
                 <span class="text-sm font-medium">Cart (@CartService.Count)</span>
             </button>
+
+            @if (ShowMiniCart)
+            {
+                <MiniCart OnClose="ToggleMiniCart" OnCheckout="ToCheckout" />
+            }
 
             @if (!IsLoggedIn)
             {
@@ -96,7 +102,27 @@
 </CascadingValue>
 
 @code {
+    private DotNetObjectReference<StorefrontLayout>? objRef;
+    private string? clickOutsideToken;
     [Inject] private CartService CartService { get; set; } = default!;
+    private bool ShowMiniCart = false;
+    
+    private void ToggleMiniCart()
+    {
+        ShowMiniCart = !ShowMiniCart;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void CloseMiniCart()
+    {
+        if (ShowMiniCart)
+        {
+            ShowMiniCart = false;
+            StateHasChanged();
+        }
+    }
+
     private bool mobileOpen = false;
     private bool IsFiltersOpen = false;
     private void ToggleMobile() => mobileOpen = !mobileOpen;
@@ -132,13 +158,44 @@
 
         CartService.OnChange += StateHasChanged;
     }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // create the DotNet reference (needed by JS to call back)
+            objRef = DotNetObjectReference.Create(this);
+
+            // register click outside handler and keep the token
+            try
+            {
+                clickOutsideToken = await JS.InvokeAsync<string>("miniCartClickOutside.register", objRef);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Failed to register miniCartClickOutside: " + ex.Message);
+            }
+        }
+    }
     public void Dispose()
     {
         CartService.OnChange -= StateHasChanged;
+
+        // Unregister the JS handler (fire-and-forget is fine here)
+        if (!string.IsNullOrEmpty(clickOutsideToken))
+        {
+            _ = JS.InvokeVoidAsync("miniCartClickOutside.unregister", clickOutsideToken);
+        }
+
+        objRef?.Dispose();
     }
     private void ToCheckout()
     {
-        if (!IsLoggedIn) Nav.NavigateTo("/auth/login");
+        if (!IsLoggedIn)
+        {
+            Nav.NavigateTo("/auth/login?returnUrl=/customer/checkout");
+            return;
+        }
+
         Nav.NavigateTo("/customer/checkout");
     }
 }
