@@ -48,8 +48,8 @@
     [Parameter] public EventCallback OnCheckout { get; set; }
 
     private void GoToCart() => Nav.NavigateTo("/customer/checkout");
-    private void RemoveItem(CartItem item)
+    private async void RemoveItem(CartItem item)
     {
-        CartService.RemoveItem(item.ProductId, item.VariantId);
+        await CartService.RemoveItem(item.ProductId, item.VariantId);
     }
 }

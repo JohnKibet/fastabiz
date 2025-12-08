@@ -4,6 +4,7 @@
 @using frontend.Pages.Shared.Sidebars
 @inject NavigationManager Navigation
 @inject CustomAuthStateProvider AuthProvider
+@inject CartService CartService
 
 <CascadingAuthenticationState>
     <AuthorizeView>
@@ -60,6 +61,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        CartService.OnChange += StateHasChanged;
+
         var authState = await AuthProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -107,5 +110,10 @@
         }
 
         IsReady = true;
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
     }
 }

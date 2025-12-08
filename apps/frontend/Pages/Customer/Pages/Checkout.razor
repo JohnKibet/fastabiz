@@ -1,7 +1,5 @@
-@page "/customer/checkout"
+@* @page "/customer/checkout"
 @layout CustomerLayout
-
-@* @inject PaymentService PaymentService *@
 
 <PageTitle>Checkout</PageTitle>
 
@@ -36,13 +34,70 @@
 
     protected override async Task OnInitializedAsync()
     {
-        @* Invoice = await PaymentService.GetInvoiceAsync(InvoiceId); *@
     }
 
     private async Task HandlePayment()
     {
-        @* IsProcessing = true;
-        PaymentResult = await PaymentService.ProcessPaymentAsync(InvoiceId, SelectedMethod);
-        IsProcessing = false; *@
+    }
+} *@
+
+@page "/customer/checkout"
+@layout CustomerLayout
+@using frontend.Models
+@using frontend.Pages.Shared.Components.Cart
+@inject CartService CartService
+@inject NavigationManager Navigation
+
+<div class="p-2">
+    <h1 class="text-2xl font-bold mb-6">Checkout</h1>
+
+    @if (!CartService.Items.Any())
+    {
+        <p class="text-gray-500">
+            Your cart is empty. 
+            <button class="text-stoneblue font-medium" @onclick="GoShop">Shop Now</button>
+        </p>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Cart Items -->
+            <CartCard />
+
+            <!-- Delivery & Actions -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="font-semibold text-lg mb-4">Delivery Info</h2>
+                <div class="flex flex-col gap-4">
+                    <input type="text" placeholder="Delivery Address" class="border rounded px-3 py-2" @bind="DeliveryAddress" />
+                    <input type="text" placeholder="Pickup Address" class="border rounded px-3 py-2" @bind="PickupAddress" />
+                </div>
+
+                <button class="mt-6 w-full px-6 py-3 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
+                        @onclick="GoToPayment">
+                    Proceed to Payment
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+
+@code {
+    private string DeliveryAddress { get; set; } = "";
+    private string PickupAddress { get; set; } = "";
+
+    private void GoShop() => Navigation.NavigateTo("/storefront");
+
+    private void GoToPayment()
+    {
+        if (string.IsNullOrWhiteSpace(DeliveryAddress) || string.IsNullOrWhiteSpace(PickupAddress))
+        {
+            // TODO: show validation error
+            return;
+        }
+
+        Navigation.NavigateTo($"/payment?delivery={Uri.EscapeDataString(DeliveryAddress)}&pickup={Uri.EscapeDataString(PickupAddress)}");
     }
 }
+

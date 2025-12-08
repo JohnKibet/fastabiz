@@ -799,6 +799,7 @@ public static class MockData
                     Id = p.Id,
                     Name = p.Name,
                     Category = p.Category,
+                    Description = p.Description,
                     Thumbnail = p.Images.FirstOrDefault() ?? "https://via.placeholder.com/150",
                     HasVariants = p.HasVariants,
                     Price = p.Price,
