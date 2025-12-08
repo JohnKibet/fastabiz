@@ -23,7 +23,7 @@
 @code {
     // Mock Data (can be replaced by API call)
     private List<ProductListItem> Products = MockData.GetAllProducts();
-    [CascadingParameter] StorefrontLayout Layout { get; set; }
+    [CascadingParameter] StorefrontLayout? Layout { get; set; }
 
     private int CurrentPage = 1;
     private int TotalPages = 1;

@@ -18,29 +18,42 @@ public class CartService
     private List<CartItem> items = new();
 
     public IReadOnlyList<CartItem> Items => items.AsReadOnly();
-    public int Count => items.Sum(i => i.Quantity); // total number of products in cart
+    public int Count => items.Count();
 
-    public async Task AddItem(ProductX product, Variant? variant = null)
+    public async Task AddItem(ProductX product, Variant? variant, int qty = 1 )
     {
+        var variantId = variant?.Id ?? null;
+
         var existing = items.FirstOrDefault(i =>
             i.ProductId == product.Id &&
-            i.VariantId == variant?.Id
+            i.VariantId == variantId
         );
+
+        double price = (variant != null && variant.Price > 0) ? variant.Price : product.Price;
+        string thumbnail = (variant != null && !string.IsNullOrEmpty(variant.Image)) 
+                        ? variant.Image 
+                        : product.Images.FirstOrDefault() ?? "placeholder.jpg";
 
         if (existing != null)
         {
-            existing.Quantity++;
+            existing.Quantity += qty;
         }
         else
         {
             items.Add(new CartItem
             {
                 ProductId = product.Id,
-                VariantId = variant?.Id,
+                VariantId = variantId,
                 Name = product.Name,
-                VariantName = variant != null ? string.Join(", ", variant.Options.Select(o => $"{o.Key}: {o.Value}")) : null,
-                Price = variant?.Price ?? 0,
-                Quantity = 1
+                VariantName = variant != null 
+                    ? string.Join(", ", variant.Options.Select(o => $"{o.Key}: {o.Value}")) 
+                    : null,
+                Price = price,
+                Thumbnail = thumbnail,
+                Quantity = qty,
+                SKU = variant?.SKU ?? null,
+                MerchantId = product.MerchantId,
+                Description = product.Description,
             });
         }
 
@@ -68,6 +81,17 @@ public class CartService
         NotifyStateChanged();
     }
 
+    public async Task IncrementItem(CartItem item)
+    {
+        var existing = items.FirstOrDefault(i => i == item);
+        if (existing != null)
+        {
+            existing.Quantity++;
+            await SaveCartAsync();
+            NotifyStateChanged();
+        }
+    }
+
     public async Task DecrementItem(CartItem item)
     {
         var existing = items.FirstOrDefault(i => i == item);
@@ -91,10 +115,9 @@ public class CartService
     {
         var json = await _jSRuntime.InvokeAsync<string>("localStorage.getItem", "cart");
         if (!string.IsNullOrEmpty(json))
-        {
             items = JsonSerializer.Deserialize<List<CartItem>>(json)!;
-            OnChange?.Invoke();
-        }
+
+        NotifyStateChanged();
     }
 }
 
@@ -103,8 +126,13 @@ public class CartItem
     public string ProductId { get; set; } = string.Empty;
     public string? VariantId { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? VariantName { get; set; } // e.g., Size: M, Color: Red
+    public string? VariantName { get; set; }
+    public string Thumbnail { get; set; } = string.Empty;
     public double Price { get; set; }
     public int Quantity { get; set; }
-    public string Thumbnail { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+
+    // Optional but recommended:
+    public string MerchantId { get; set; } = string.Empty;
+    public string? SKU { get; set; }
 }

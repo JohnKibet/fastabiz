@@ -1,4 +1,6 @@
 @page "/product/{ProductId}"
+@page "/product/{ProductId}/{VariantId}"
+@using System.Threading.Tasks
 @layout StorefrontLayout
 @inject NavigationManager Nav
 
@@ -52,6 +54,19 @@ else
                 Stock: @(GetStockDisplay())
             </p>
 
+            <!-- QUANTITY SELECTOR -->
+            <div class="flex items-center gap-3">
+                <button class="px-3 py-1 border rounded-lg text-lg font-bold"
+                        @onclick="DecreaseQty"
+                        disabled="@(IsInCart || Quantity <= 1)">-</button>
+
+                <span class="min-w-[40px] text-center font-semibold">@Quantity</span>
+
+                <button class="px-3 py-1 border rounded-lg text-lg font-bold"
+                        @onclick="IncreaseQty"
+                        disabled="@(IsInCart || Quantity >= GetCurrentStock())">+</button>
+            </div>
+
             <!-- ADD / REMOVE FROM CART -->
             @if (IsInCart)
             {
@@ -76,6 +91,7 @@ else
 }
 
 @code {
+    [Parameter] public string? VariantId { get; set; }
     [Parameter] public string ProductId { get; set; } = string.Empty;
     [CascadingParameter] StorefrontLayout? Layout { get; set; }
     [Inject] private CartService CartService { get; set; } = default!;
@@ -83,11 +99,24 @@ else
     private ProductX Product = new();
     private Merchant Merchant = new();
 
-    private Variant SelectedVariant = new();
+    private Variant? SelectedVariant;
     private Dictionary<string, string?> Selections = new();
 
     protected override void OnInitialized()
     {
+        // prefill from cart for changes to be made 
+        if(!string.IsNullOrEmpty(VariantId) && Product.HasVariants)
+        {
+            SelectedVariant = Product.Variants.FirstOrDefault(v => v.Id == VariantId);
+            if (SelectedVariant != null)
+            {
+                foreach (var opt in SelectedVariant.Options)
+                {
+                    Selections[opt.Key] = opt.Value;
+                }
+            }
+        }
+
         Product = MockData.Merchants
             .SelectMany(m => m.Products)
             .FirstOrDefault(p => p.Id == ProductId);
@@ -125,7 +154,7 @@ else
     private string GetPriceDisplay()
     {
         if (!Product!.HasVariants) 
-        return Product.Price.ToString("N2") ?? "-";
+            return Product.Price.ToString("N2") ?? "-";
 
         if (Product.Variants.Count == 1) 
             return Product.Variants[0].Price.ToString("N2");
@@ -167,15 +196,46 @@ else
         StateHasChanged();
     }
 
-    private void AddToCart()
+    private int Quantity = 1;
+    private void IncreaseQty()
     {
-        if (!CanAddToCart) return;
-        CartService.AddItem(Product!, SelectedVariant);
-        // show toast here
+        int stock = GetCurrentStock();
+        if (Quantity < stock)
+            Quantity++;
+    }
+    private void DecreaseQty()
+    {
+        if (Quantity > 1)
+            Quantity--;
     }
 
-    private void RemoveFromCart()
+    private int GetCurrentStock()
     {
-        CartService.RemoveItem(Product!.Id, SelectedVariant?.Id);
+        if (!Product!.HasVariants)
+            return Product.Stock;
+        
+        if (Product.Variants.Count == 1)
+            return Product.Variants[0].Stock;
+
+        return SelectedVariant?.Stock ?? 1;
+    }
+
+    private async Task AddToCart()
+    {
+        if (!CanAddToCart) return;
+
+        Variant? variantToAdd = Product.HasVariants ? SelectedVariant : null;
+
+        await CartService.AddItem(Product!, variantToAdd, Quantity);
+        StateHasChanged();
+    }
+
+    private async Task RemoveFromCart()
+    {
+        await CartService.RemoveItem(Product!.Id, SelectedVariant?.Id);
+        Quantity = 1;
+        if (Product.HasVariants && Product.Variants.Count > 1)
+            SelectedVariant = null; // reset variant selection
+        StateHasChanged();
     }
 }
