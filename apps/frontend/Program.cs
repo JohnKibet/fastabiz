@@ -64,6 +64,8 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<ToastService>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddSingleton<CartService>();
+builder.Services.AddSingleton<MapService>();
+builder.Services.AddSingleton<GeoService>();
 
 // Authentication & Authorization
 builder.Services.AddOptions();

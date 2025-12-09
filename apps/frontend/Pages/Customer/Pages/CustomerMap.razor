@@ -1,0 +1,79 @@
+@using System.Runtime.CompilerServices
+@using frontend.Pages.Shared.Components
+@inject MapService MapService
+@inject GeoService GeoService
+@inject IJSRuntime JS
+
+<div @ref="mapContainer" style="height:500px; width:100%">
+    <RealTimeMap 
+        @ref="realTimeMap"
+        Parameters="parameters"
+        OnClickMap="HandleMapClick"
+        height="500px"
+        width="100%" 
+    />
+</div>
+
+@code {
+    [Parameter] public EventCallback<string> OnDeliverySelected { get; set; }
+    [Parameter] public EventCallback<string> OnPickupSelected { get; set; }
+
+    private ElementReference mapContainer; 
+    private RealTimeMap? realTimeMap;
+    private RealTimeMap.LoadParameters? parameters;
+    private DotNetObjectReference<CustomerMap>? dotNetRef; 
+
+    public enum MapClickMode { Delivery, Pickup }
+    [Parameter] public MapClickMode CurrentMode { get; set; } = MapClickMode.Delivery;
+
+    public double? SelectedLatitude { get; private set; }
+    public double? SelectedLongitude { get; private set; }
+
+    protected override void OnInitialized()
+    {
+        parameters = new RealTimeMap.LoadParameters
+        {
+            basemap = new RealTimeMap.Basemap
+            {
+                basemapLayers = MapService.GetDefaultBasemapLayers()
+            },
+            location = new RealTimeMap.Location
+            {
+                latitude = -1.29207,
+                longitude = 36.82195
+            },
+            zoomLevel = 14
+        };
+    }
+
+    private async Task HandleMapClick(RealTimeMap.ClicksMapArgs value)
+    {
+        var lat = value.location.latitude;
+        var lng = value.location.longitude;
+
+        Console.WriteLine($"Selected lat: {value.location.latitude}, lng: {value.location.longitude}");
+        var address = await GeoService.GetAddressAsync(lat, lng) ?? "Unknown location";
+
+        Console.WriteLine($"Selected: {address ?? "Unknown location"}");
+
+        // Place marker (optional)
+        await JS.InvokeVoidAsync(
+            "addAwesomeMarker",
+            mapContainer,
+            lat,
+            lng,
+            new { icon = "map-pin", markerColor = CurrentMode == MapClickMode.Delivery ? "blue" : "green", prefix = "fa" }
+        );
+
+        // Fire the proper callback
+        if (CurrentMode == MapClickMode.Delivery)
+            await OnDeliverySelected.InvokeAsync(address);
+        else
+            await OnPickupSelected.InvokeAsync(address);
+    }
+
+    public void Dispose()
+    {
+        dotNetRef?.Dispose(); // important to avoid memory leaks
+    }
+}
