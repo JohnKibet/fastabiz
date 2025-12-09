@@ -1,46 +1,3 @@
-@* @page "/customer/checkout"
-@layout CustomerLayout
-
-<PageTitle>Checkout</PageTitle>
-
-<div class="max-w-2xl mx-auto p-6 space-y-6 bg-white rounded-xl shadow-sm">
-    @if (Invoice is null)
-    {
-        <p>Loading...</p>
-    }
-    else
-    {
-        <div class="divide-y divide-gray-200">
-            <OrderSummary Invoice="Invoice" />
-            <PaymentMethods 
-                SelectedMethod="SelectedMethod" 
-                OnMethodChanged="method => SelectedMethod = method" />
-            <PaymentForm 
-                Method="SelectedMethod" 
-                OnSubmit="HandlePayment" 
-                IsLoading="@IsProcessing" />
-            <PaymentStatus Status="@PaymentResult" />
-        </div>
-    }
-</div>
-
-@code {
-    [Parameter] public Guid InvoiceId { get; set; }
-
-    private Invoice? Invoice;
-    private string? SelectedMethod;
-    private string? PaymentResult;
-    private bool IsProcessing;
-
-    protected override async Task OnInitializedAsync()
-    {
-    }
-
-    private async Task HandlePayment()
-    {
-    }
-} *@
-
 @page "/customer/checkout"
 @layout CustomerLayout
 @using frontend.Models
@@ -48,7 +5,7 @@
 @inject CartService CartService
 @inject NavigationManager Navigation
 
-<div class="p-2">
+<div class="p-0">
     <h1 class="text-2xl font-bold mb-6">Checkout</h1>
 
     @if (!CartService.Items.Any())
@@ -62,16 +19,43 @@
     {
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-            <!-- Cart Items -->
             <CartCard />
 
-            <!-- Delivery & Actions -->
             <div class="bg-white shadow rounded-lg p-6">
                 <h2 class="font-semibold text-lg mb-4">Delivery Info</h2>
-                <div class="flex flex-col gap-4">
-                    <input type="text" placeholder="Delivery Address" class="border rounded px-3 py-2" @bind="DeliveryAddress" />
-                    <input type="text" placeholder="Pickup Address" class="border rounded px-3 py-2" @bind="PickupAddress" />
+
+                <!-- Delivery Selection -->
+                <div class="flex items-center gap-2 mb-4">
+                    <button class="px-4 py-2 rounded text-white @DeliveryBtnClass"
+                            @onclick="() => SetMode(CustomerMap.MapClickMode.Delivery)">
+                        Delivery
+                    </button>
+
+                    <input type="text" class="border rounded px-2 py-1 flex-1"
+                           placeholder="Delivery address"
+                           @bind-value="DeliveryAddress"
+                           disabled="@(!IsDeliveryMode)" />
                 </div>
+
+                <!-- Pickup Selection -->
+                <div class="flex items-center gap-2 mb-6">
+                    <button class="px-4 py-2 rounded text-white @PickupBtnClass"
+                            @onclick="() => SetMode(CustomerMap.MapClickMode.Pickup)">
+                        Pickup
+                    </button>
+
+                    <input type="text" class="border rounded px-2 py-1 flex-1"
+                           placeholder="Pickup location"
+                           @bind-value="PickupAddress"
+                           disabled="@(!IsPickupMode)" />
+                </div>
+
+                <!-- Map Component -->
+                <CustomerMap 
+                    CurrentMode="@mapClickMode"
+                    OnDeliverySelected="HandleDeliverySelected"
+                    OnPickupSelected="HandlePickupSelected" 
+                />
 
                 <button class="mt-6 w-full px-6 py-3 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
                         @onclick="GoToPayment">
@@ -82,22 +66,51 @@
     }
 </div>
 
-
 @code {
+    private CustomerMap.MapClickMode mapClickMode = CustomerMap.MapClickMode.Delivery;
     private string DeliveryAddress { get; set; } = "";
     private string PickupAddress { get; set; } = "";
+
+    private bool IsDeliveryMode => mapClickMode == CustomerMap.MapClickMode.Delivery;
+    private bool IsPickupMode   => mapClickMode == CustomerMap.MapClickMode.Pickup;
+
+    private string DeliveryBtnClass => IsDeliveryMode ? "bg-blue-600 opacity-100" : "bg-blue-400 opacity-60 hover:opacity-90";
+    private string PickupBtnClass   => IsPickupMode ? "bg-green-600 opacity-100" : "bg-green-400 opacity-60 hover:opacity-90";
+
+    private void SetMode(CustomerMap.MapClickMode mode)
+    {
+        mapClickMode = mode;
+        StateHasChanged(); // update when switching mode
+    }
+
+    private Task HandleDeliverySelected(string addr)
+    {
+        DeliveryAddress = addr;
+        Console.WriteLine($"Delivery Address: {DeliveryAddress}");
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task HandlePickupSelected(string addr)
+    {
+        PickupAddress = addr;
+        Console.WriteLine($"Pickup Address: {PickupAddress}");
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
 
     private void GoShop() => Navigation.NavigateTo("/storefront");
 
     private void GoToPayment()
     {
-        if (string.IsNullOrWhiteSpace(DeliveryAddress) || string.IsNullOrWhiteSpace(PickupAddress))
+        if (string.IsNullOrWhiteSpace(DeliveryAddress) && string.IsNullOrWhiteSpace(PickupAddress))
         {
-            // TODO: show validation error
+            // TODO: show user message
             return;
         }
 
-        Navigation.NavigateTo($"/payment?delivery={Uri.EscapeDataString(DeliveryAddress)}&pickup={Uri.EscapeDataString(PickupAddress)}");
+        Navigation.NavigateTo(
+            $"/payment?delivery={Uri.EscapeDataString(DeliveryAddress)}&pickup={Uri.EscapeDataString(PickupAddress)}"
+        );
     }
 }
-
