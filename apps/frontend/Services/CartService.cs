@@ -43,7 +43,7 @@ public class CartService
             items.Add(new CartItem
             {
                 ProductId = product.Id,
-                VariantId = variantId,
+                VariantId = variantId ?? "",
                 Name = product.Name,
                 VariantName = variant != null 
                     ? string.Join(", ", variant.Options.Select(o => $"{o.Key}: {o.Value}")) 
@@ -124,7 +124,7 @@ public class CartService
 public class CartItem
 {
     public string ProductId { get; set; } = string.Empty;
-    public string? VariantId { get; set; }
+    public string VariantId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string? VariantName { get; set; }
     public string Thumbnail { get; set; } = string.Empty;

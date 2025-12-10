@@ -105,12 +105,29 @@
     {
         if (string.IsNullOrWhiteSpace(DeliveryAddress) && string.IsNullOrWhiteSpace(PickupAddress))
         {
-            // TODO: show user message
+            // Temporary hardcoded fallback
+            DeliveryAddress = "Kenyatta Avenue, CBD division, Nairobi, Kenya";
+            PickupAddress   = "Accra Road, CBD division, Nairobi, Kenya";
+
+            // Hardcoded coords
+            var delLat = "-1.2848242046310998";
+            var delLng = "36.82204128701168";
+            var pickLat = "-1.2829256773845723";
+            var pickLng = "36.827309307951396";
+
+            // Forward to payment with all values for now
+            Navigation.NavigateTo(
+                $"/customer/payment" +
+                $"?delivery={Uri.EscapeDataString(DeliveryAddress)}" +
+                $"&pickup={Uri.EscapeDataString(PickupAddress)}" +
+                $"&delLat={delLat}&delLng={delLng}&pickLat={pickLat}&pickLng={pickLng}"
+            );
             return;
         }
 
+        // Normal (non-hardcoded)
         Navigation.NavigateTo(
-            $"/payment?delivery={Uri.EscapeDataString(DeliveryAddress)}&pickup={Uri.EscapeDataString(PickupAddress)}"
+            $"/customer/payment?delivery={Uri.EscapeDataString(DeliveryAddress)}&pickup={Uri.EscapeDataString(PickupAddress)}"
         );
     }
 }

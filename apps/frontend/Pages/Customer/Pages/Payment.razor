@@ -142,6 +142,7 @@
 @page "/customer/payment"
 @layout CustomerLayout
 @using frontend.Models
+@using Microsoft.AspNetCore.WebUtilities
 @inject CartService CartService
 @inject NavigationManager Navigation
 
@@ -267,33 +268,62 @@ else
 }
 
 @code {
-    private string SelectedMethod { get; set; } = "card";
+    [CascadingParameter] public Guid? UserId { get; set; }
+    private string SelectedMethod { get; set; } = "cod";
     private string? SuccessMessage { get; set; }
     private string? ErrorMessage { get; set; }
+    private string? CustomerID { get; set; }
 
     private void GoShop() => Navigation.NavigateTo("/storefront");
 
+    protected override Task OnInitializedAsync()
+    {
+        if (!UserId.HasValue)
+        {
+            Navigation.NavigateTo("/auth/login");
+            return Task.CompletedTask;
+        }
+
+        return Task.CompletedTask;
+    }
+
     private async Task ConfirmPayment()
     {
-        if (string.IsNullOrWhiteSpace(SelectedMethod))
-        {
-            ErrorMessage = "Please select a payment method.";
-            SuccessMessage = null;
-            return;
-        }
+       // simulate fetching location from URL until we do service-based map
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
 
-        try
-        {
-            // TODO: Integrate with backend payment service
-            SuccessMessage = "Payment successful! 🎉";
-            ErrorMessage = null;
+        string delAddress = query["delivery"].ToString() ?? "";
+        string pickAddress = query["pickup"].ToString() ?? "";
+        double.TryParse(query["delLat"], out var delLat);
+        double.TryParse(query["delLng"], out var delLng);
+        double.TryParse(query["pickLat"], out var pickLat);
+        double.TryParse(query["pickLng"], out var pickLng);
 
-            Navigation.NavigateTo("/orders/confirmation");
-        }
-        catch (Exception ex)
+        // Construct temporary NewOrder for logging
+        var tempOrder = new NewCreateOrderRequest
         {
-            ErrorMessage = $"Payment failed: {ex.Message}";
-            SuccessMessage = null;
-        }
+            CustomerId = UserId.Value,
+            DeliveryAddress = delAddress,
+            DeliveryLatitude = delLat,
+            DeliveryLongitude = delLng,
+            PickupAddress = pickAddress,
+            PickupLatitude = pickLat,
+            PickupLongitude = pickLng,
+            PaymentMethod = SelectedMethod,
+            Items = CartService.Items.Select(i => new OrderLineItem
+            {
+                ProductId = i.ProductId,
+                VariantId = i.VariantId,
+                Quantity = i.Quantity,
+                Price = i.Price
+            }).ToList()
+        };
+
+        Console.WriteLine($"ORDER TEST OBJECT: {System.Text.Json.JsonSerializer.Serialize(tempOrder)}");
+
+        SuccessMessage = "Payment successful (test only)";
+        ErrorMessage = null;
+        Navigation.NavigateTo("/orders/confirmation");
     }
 }
