@@ -11,6 +11,7 @@ type Role string
 type UserStatus string
 
 const (
+	Merchant Role = "merchant"
 	Admin    Role = "admin"
 	Driver   Role = "driver"
 	Customer Role = "customer"
