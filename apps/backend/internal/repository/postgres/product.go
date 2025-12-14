@@ -252,6 +252,21 @@ func (r *ProductRepository) CreateVariant(ctx context.Context, variant *product.
 	return nil
 }
 
+func (r *ProductRepository) GetVariantByID(ctx context.Context, id uuid.UUID) (*product.Variant, error) {
+	query := `
+		SELECT id, product_id, sku, price, stock, image_url, options 
+		FROM variants
+		WHERE id = $1
+	`
+
+	var v product.Variant
+	if err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &v, query, id); err != nil {
+		return nil, fmt.Errorf("get variant by id: %w", err)
+	}
+
+	return &v, nil
+}
+
 func (r *ProductRepository) UpdateVariantStock(ctx context.Context, variantID uuid.UUID, stock int) error {
 	params := map[string]interface{}{
 		"variant_id": variantID,
@@ -408,7 +423,7 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 	return nil
 }
 
-func (r *ProductRepository) GetByID(ctx context.Context, id uuid.UUID) (*product.Product, error) {
+func (r *ProductRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*product.Product, error) {
 	query := `
 		SELECT id, merchant_id, name, description, category
 		FROM products 
@@ -421,6 +436,36 @@ func (r *ProductRepository) GetByID(ctx context.Context, id uuid.UUID) (*product
 	}
 
 	return &p, nil
+}
+
+func (r *ProductRepository) UpdateProductStock(ctx context.Context, productID uuid.UUID, stock int) error {
+	params := map[string]interface{}{
+		"product_id": productID,
+		"stock":      stock,
+	}
+
+	query := `
+		UPDATE products
+        SET stock = :stock,
+            updated_at = NOW()
+        WHERE id = :product_id
+	`
+	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
+	if err != nil {
+		return fmt.Errorf("update product stock: %w", err)
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("no product found with id %s", productID)
+	}
+
+	return nil
+
 }
 
 func (r *ProductRepository) UpdateDetails(ctx context.Context, productID uuid.UUID, name, description, category string) error {
