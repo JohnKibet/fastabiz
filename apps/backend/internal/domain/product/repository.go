@@ -33,7 +33,7 @@ type Repository interface {
 
 	// CreateVariant creates a new purchasable variant for a product
 	// and associates it with the specified option values.
-	CreateVariant(ctx context.Context, variant *VariantInput) error
+	CreateVariant(ctx context.Context, variant *Variant) error
 
 	// UpdateVariantStock updates the available inventory quantity
 	// for a specific variant.
@@ -44,7 +44,7 @@ type Repository interface {
 
 	// DeleteVariant permanently removes a variant and all associated
 	// option-value mappings.
-	DeleteVariant(ctx context.Context, variantID uuid.UUID) error
+	RemoveVariant(ctx context.Context, variantID uuid.UUID) error
 
 	// AddImage attaches a new image to a product.
 	// If isPrimary is true, existing primary images should be unset.

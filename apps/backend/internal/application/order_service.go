@@ -1,16 +1,17 @@
 package application
 
 import (
-	"context"
-	"database/sql"
-	"errors"
-	"fmt"
 	deliveryadapter "backend/internal/adapters/delivery"
 	driveradapter "backend/internal/adapters/driver"
 	inventoryadapter "backend/internal/adapters/inventory"
 	notificationadapter "backend/internal/adapters/notification"
 	orderadapter "backend/internal/adapters/order"
+	productadapter "backend/internal/adapters/product"
 	useradapter "backend/internal/adapters/user"
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 	"sort"
 
 	"backend/internal/domain/driver"
@@ -32,6 +33,7 @@ type OrderService struct {
 	Deliveries    *deliveryadapter.UseCaseAdapter
 	Inventories   *inventoryadapter.UseCaseAdapter
 	Notifications *notificationadapter.UseCaseAdapter
+	Products      *productadapter.UseCaseAdapter
 }
 
 func NewOrderService(
@@ -41,6 +43,7 @@ func NewOrderService(
 	deliveryUC *deliveryadapter.UseCaseAdapter,
 	inventoryUC *inventoryadapter.UseCaseAdapter,
 	notificationUC *notificationadapter.UseCaseAdapter,
+	productUC *productadapter.UseCaseAdapter,
 ) *OrderService {
 	return &OrderService{
 		Users:         userUC,
@@ -49,6 +52,7 @@ func NewOrderService(
 		Deliveries:    deliveryUC,
 		Inventories:   inventoryUC,
 		Notifications: notificationUC,
+		Products:      productUC,
 	}
 }
 

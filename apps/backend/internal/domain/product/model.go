@@ -37,7 +37,7 @@ type Option struct {
 }
 
 type Variant struct {
-	ID        string                  `db:"id" json:"id"`
+	ID        uuid.UUID               `db:"id" json:"id"`
 	ProductID uuid.UUID               `db:"product_id" json:"product_id"`
 	SKU       string                  `db:"sku" json:"sku"`
 	Price     float64                 `db:"price" json:"price"`

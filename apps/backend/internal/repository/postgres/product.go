@@ -225,7 +225,7 @@ func (r *ProductRepository) RemoveOptionValue(ctx context.Context, optionValueID
 	return nil
 }
 
-func (r *ProductRepository) CreateVariant(ctx context.Context, variant *product.VariantInput) error {
+func (r *ProductRepository) CreateVariant(ctx context.Context, variant *product.Variant) error {
 	query := `
 		INSERT INTO variants (
 			product_id, sku, price, stock, image_url, options
@@ -312,7 +312,7 @@ func (r *ProductRepository) UpdateVariantPrice(ctx context.Context, variantID uu
 	return nil
 }
 
-func (r *ProductRepository) DeleteVariant(ctx context.Context, variantID uuid.UUID) error {
+func (r *ProductRepository) RemoveVariant(ctx context.Context, variantID uuid.UUID) error {
 	query := `
 		DELETE FROM variants 
 		WHERE id = $1
@@ -385,7 +385,8 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 	if p.HasVariants {
 		for _, v := range p.Variants {
 			// mapping - mv top level later
-			vi := &product.VariantInput{
+			vi := &product.Variant{
+				ID:        p.ID,
 				ProductID: p.ID,
 				SKU:       v.SKU,
 				Price:     v.Price,
@@ -394,7 +395,7 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 			}
 
 			if v.ImageURL != "" {
-				vi.ImageURL = &v.ImageURL
+				vi.ImageURL = v.ImageURL
 			}
 
 			// insert into variants and variant_option_values
