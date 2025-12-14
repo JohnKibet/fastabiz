@@ -22,7 +22,6 @@ func NewRouter(
 	e *handlers.DeliveryHandler,
 	p *handlers.PaymentHandler, f *handlers.FeedbackHandler,
 	n *handlers.NotificationHandler,
-	i *handlers.InventoryHandler,
 	publicApiBaseUrl string,
 	c *handlers.InviteHandler,
 	s *handlers.StoreHandler,
@@ -92,24 +91,11 @@ func NewRouter(
 			r.Route("/orders", func(r chi.Router) {
 				r.Post("/create", o.CreateOrder)
 				r.Get("/all_orders", o.ListOrders)
-				r.Get("/form-data", o.GetOrderFormData)
 				r.Post("/assign", o.AutoAssignOrders)
 				r.Get("/by-id/{id}", o.GetOrderByID)
 				r.Get("/by-customer/{customer_id}", o.GetOrderByCustomer)
 				r.Put("/{id}/update", o.UpdateOrder)
 				r.Delete("/{id}", o.DeleteOrder)
-			})
-
-			// Inventories
-			r.Route("/inventories", func(r chi.Router) {
-				r.Post("/create", i.CreateInventory)
-				r.Get("/by-name", i.GetByInventoryName)
-				r.Get("/all_inventories", i.ListInventories)
-				r.Get("/by-category", i.GetInventoryByCategory)
-				r.Get("/categories", i.ListCategories)
-				r.Get("/by-id/{id}", i.GetByInventoryID)
-				r.Get("/by-store/{id}", i.GetInventoryByStore)
-				r.Delete("/{id}", i.DeleteInventory)
 			})
 
 			// Drivers

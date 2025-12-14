@@ -79,10 +79,10 @@ type OrderDoc struct {
 
 	InventoryID uuid.UUID `db:"inventory_id" json:"inventory_id"`
 
-	PickupAddress   string         `db:"pickup_address" json:"pickup_address"`
-	PickupPoint     postgis.PointS `db:"pickup_point" json:"pickup_point"`
-	DeliveryAddress string         `db:"delivery_address" json:"delivery_address"`
-	DeliveryPoint   postgis.PointS `db:"delivery_point" json:"delivery_point"`
+	PickupAddress   string `db:"pickup_address" json:"pickup_address"`
+	PickupPoint     Point  `db:"pickup_point" json:"pickup_point"`
+	DeliveryAddress string `db:"delivery_address" json:"delivery_address"`
+	DeliveryPoint   Point  `db:"delivery_point" json:"delivery_point"`
 
 	Status    OrderStatus `db:"status" json:"status"`
 	CreatedAt time.Time   `db:"created_at" json:"created_at"`

@@ -108,73 +108,6 @@ definitions:
         example: Invalid request
         type: string
     type: object
-  inventory.CreateInventoryRequest:
-    properties:
-      admin_id:
-        description: Foreign key
-        type: string
-      category:
-        description: e.g. “Dairy”
-        type: string
-      description:
-        type: string
-      images:
-        description: could be JSON array or URLs
-        type: string
-      packaging:
-        description: “Bucket/Single”
-        type: string
-      price_amount:
-        type: integer
-      price_currency:
-        type: string
-      stock:
-        type: integer
-      unit:
-        description: '"per litre", "per bucket"'
-        type: string
-    required:
-    - category
-    - description
-    - images
-    - packaging
-    - price_amount
-    - price_currency
-    - stock
-    - unit
-    type: object
-  inventory.Inventory:
-    properties:
-      category:
-        description: e.g. “Dairy” - "name" field equivalent
-        type: string
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      images:
-        description: could be JSON array or URLs
-        type: string
-      packaging:
-        description: “Bucket/Single”
-        type: string
-      price_amount:
-        type: integer
-      price_currency:
-        type: string
-      stock:
-        type: integer
-      store_id:
-        description: FK to stores.id
-        type: string
-      unit:
-        description: '"per litre", "per bucket"'
-        type: string
-      updated_at:
-        type: string
-    type: object
   invite.CreateInviteRequest:
     properties:
       email:
@@ -292,40 +225,13 @@ definitions:
     type: object
   order.CreateOrderRequest:
     type: object
-  order.Customer:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-    type: object
-  order.DropdownDataRequest:
-    properties:
-      customers:
-        items:
-          $ref: '#/definitions/order.Customer'
-        type: array
-      inventories:
-        items:
-          $ref: '#/definitions/order.Inventory'
-        type: array
-    type: object
-  order.Inventory:
-    properties:
-      admin_id:
-        type: string
-      category:
-        type: string
-      id:
-        type: string
-      name:
-        type: string
-    type: object
   order.OrderDoc:
     properties:
       admin_id:
         type: string
       created_at:
+        type: string
+      currency:
         type: string
       customer_id:
         type: string
@@ -335,17 +241,33 @@ definitions:
         $ref: '#/definitions/order.Point'
       id:
         type: string
+      image_url:
+        type: string
       inventory_id:
+        type: string
+      merchant_id:
         type: string
       pickup_address:
         type: string
       pickup_point:
         $ref: '#/definitions/order.Point'
+      product_id:
+        type: string
+      product_name:
+        type: string
       quantity:
         type: integer
       status:
         $ref: '#/definitions/order.OrderStatus'
+      total:
+        type: integer
+      unit_price:
+        type: integer
       updated_at:
+        type: string
+      variant_id:
+        type: string
+      variant_name:
         type: string
     type: object
   order.OrderStatus:
@@ -1260,242 +1182,6 @@ paths:
       summary: Create a new feedback
       tags:
       - feedbacks
-  /inventories/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Permanently deletes an inventory by their ID
-      parameters:
-      - description: Inventory ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Inventory deleted
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Invalid inventory ID
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Delete an inventory
-      tags:
-      - inventories
-  /inventories/all_inventories:
-    get:
-      description: List all inventories with optional pagination
-      parameters:
-      - description: Limit number of items
-        in: query
-        name: limit
-        type: integer
-      - description: Offset for pagination
-        in: query
-        name: offset
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/inventory.Inventory'
-            type: array
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: List all inventories
-      tags:
-      - inventories
-  /inventories/by-category:
-    get:
-      description: Get all inventory items in a specific category
-      parameters:
-      - description: Category Name
-        in: query
-        name: category
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/inventory.Inventory'
-            type: array
-        "400":
-          description: Invalid Category
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventories by category
-      tags:
-      - inventories
-  /inventories/by-id/{id}:
-    get:
-      description: Get a specific inventory item by UUID
-      parameters:
-      - description: Inventory ID
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "400":
-          description: Invalid inventory ID or request body
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventory by ID
-      tags:
-      - inventories
-  /inventories/by-name:
-    get:
-      description: Search inventory by item name (exact match)
-      parameters:
-      - description: Inventory Name
-        in: query
-        name: name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "400":
-          description: Invalid inventory ID or request body
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventory by name
-      tags:
-      - inventories
-  /inventories/by-store/{id}:
-    get:
-      description: Fetch all inventory items belonging to a specific store
-      parameters:
-      - description: Store ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/inventory.Inventory'
-            type: array
-        "400":
-          description: Invalid store ID
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: No inventories found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventories by Store ID
-      tags:
-      - inventories
-  /inventories/categories:
-    get:
-      description: Get all unique categories that belong to existing inventories
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: List all categories
-      tags:
-      - inventories
-  /inventories/create:
-    post:
-      consumes:
-      - application/json
-      description: Creates an inventory and returns the created object
-      parameters:
-      - description: Inventory input
-        in: body
-        name: inventory
-        required: true
-        schema:
-          $ref: '#/definitions/inventory.CreateInventoryRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "400":
-          description: Invalid inventory ID or request body
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Create a new inventory
-      tags:
-      - inventories
   /invites/{id}:
     delete:
       description: Delete an invite by ID
@@ -2001,24 +1687,6 @@ paths:
       security:
       - JWT: []
       summary: Create a new order
-      tags:
-      - orders
-  /orders/form-data:
-    get:
-      description: Returns a list of customers and inventories for populating order
-        form dropdowns.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/order.DropdownDataRequest'
-        "500":
-          description: Failed to fetch customers or inventories
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Get data for order form dropdowns
       tags:
       - orders
   /payments/{id}:

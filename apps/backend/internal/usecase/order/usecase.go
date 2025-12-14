@@ -14,7 +14,6 @@ import (
 
 type UseCase struct {
 	repo      order.Repository
-	invRepo   order.InventoryReader // X
 	usrRepo   order.CustomerReader
 	drvRepo   order.DriverReader
 	txManager common.TxManager
@@ -22,8 +21,8 @@ type UseCase struct {
 	prodvrt   order.ProductOrVariantReader
 }
 
-func NewUseCase(repo order.Repository, invRepo order.InventoryReader, usrRepo order.CustomerReader, drvRepo order.DriverReader, txm common.TxManager, notf order.NotificationReader, prodvrt order.ProductOrVariantReader) *UseCase {
-	return &UseCase{repo: repo, invRepo: invRepo, usrRepo: usrRepo, drvRepo: drvRepo, txManager: txm, notfRepo: notf, prodvrt: prodvrt}
+func NewUseCase(repo order.Repository, usrRepo order.CustomerReader, drvRepo order.DriverReader, txm common.TxManager, notf order.NotificationReader, prodvrt order.ProductOrVariantReader) *UseCase {
+	return &UseCase{repo: repo, usrRepo: usrRepo, drvRepo: drvRepo, txManager: txm, notfRepo: notf, prodvrt: prodvrt}
 }
 
 func (uc *UseCase) CreateOrder(ctx context.Context, o *order.Order) (err error) {
@@ -133,10 +132,6 @@ func (uc *UseCase) DeleteOrder(ctx context.Context, id uuid.UUID) error {
 
 		return nil
 	})
-}
-
-func (uc *UseCase) GetAllInventories(ctx context.Context) ([]order.Inventory, error) {
-	return uc.invRepo.GetAllInventories(ctx)
 }
 
 func (uc *UseCase) GetAllCustomers(ctx context.Context) ([]order.Customer, error) {
