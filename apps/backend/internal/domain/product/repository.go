@@ -13,9 +13,11 @@ type Repository interface {
 	// separately using their respective methods.
 	Create(ctx context.Context, product *Product) error
 
-	// GetByID retrieves a fully-hydrated product aggregate by its ID,
+	// GetProductByID retrieves a fully-hydrated product aggregate by its ID,
 	// including images, options, option values, and variants.
-	GetByID(ctx context.Context, id uuid.UUID) (*Product, error)
+	GetProductByID(ctx context.Context, id uuid.UUID) (*Product, error)
+
+	UpdateProductStock(ctx context.Context, productID uuid.UUID, stock int) error
 
 	// List returns all products accessible to the caller.
 	// Each product should be returned as a fully-hydrated aggregate.
@@ -34,6 +36,8 @@ type Repository interface {
 	// CreateVariant creates a new purchasable variant for a product
 	// and associates it with the specified option values.
 	CreateVariant(ctx context.Context, variant *Variant) error
+
+	GetVariantByID(ctx context.Context, variantID uuid.UUID) (*Variant, error)
 
 	// UpdateVariantStock updates the available inventory quantity
 	// for a specific variant.

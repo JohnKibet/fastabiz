@@ -28,7 +28,7 @@ func (uc *UseCase) CreateProduct(ctx context.Context, p *product.Product) (err e
 }
 
 func (uc *UseCase) GetProductByID(ctx context.Context, id uuid.UUID) (*product.Product, error) {
-	return uc.repo.GetByID(ctx, id)
+	return uc.repo.GetProductByID(ctx, id)
 }
 
 func (uc *UseCase) UpdateProductDetails(ctx context.Context, req *product.UpdateProductDetailsRequest) error {

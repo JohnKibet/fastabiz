@@ -81,7 +81,7 @@ func main() {
 	driverUC := driverUsecase.NewUseCase(driverRepo, txm, notificationRepo)
 	userUC := userUsecase.NewUseCase(userRepo, driverUC, txm, notificationRepo)
 	inventoryUC := inventoryUsecase.NewUseCase(inventoryRepo, txm, notificationRepo, storeRepo)
-	orderUC := orderUsecase.NewUseCase(orderRepo, &inventoryadapter.UseCaseAdapter{UseCase: inventoryUC}, &useradapter.UseCaseAdapter{UseCase: userUC}, txm, notificationRepo, storeRepo)
+	orderUC := orderUsecase.NewUseCase(orderRepo, &inventoryadapter.UseCaseAdapter{UseCase: inventoryUC}, &useradapter.UseCaseAdapter{UseCase: userUC}, driverRepo, txm, notificationRepo, productRepo)
 	deliveryUC := deliveryUsecase.NewUseCase(deliveryRepo, &orderadapter.UseCaseAdapter{UseCase: orderUC}, &driveradapter.UseCaseAdapter{UseCase: driverUC}, txm, notificationRepo)
 	notificationUC := notificationUsecase.NewUseCase(notificationRepo, txm)
 	storeUC := storeUsecase.NewUseCase(storeRepo, txm)
