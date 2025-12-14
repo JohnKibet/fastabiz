@@ -229,24 +229,6 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// GetOrderFormData godoc
-// @Summary      Get data for order form dropdowns
-// @Description  Returns a list of customers and inventories for populating order form dropdowns.
-// @Tags         orders
-// @Produce      json
-// @Success      200  {object}  order.DropdownDataRequest
-// @Failure      500  {object}  ErrorResponse "Failed to fetch customers or inventories"
-// @Router       /orders/form-data [get]
-func (h *OrderHandler) GetOrderFormData(w http.ResponseWriter, r *http.Request) {
-	data, err := h.UC.GetCustomersAndInventories(r.Context())
-	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to fetch form data", err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
-}
-
 // @Summary Run auto-assignment for pending orders
 // @Security JWT
 // @Description Assign nearest available drivers to pending orders

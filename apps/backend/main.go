@@ -8,7 +8,6 @@ import (
 	"backend/handlers"
 	deliveryadapter "backend/internal/adapters/delivery"
 	driveradapter "backend/internal/adapters/driver"
-	inventoryadapter "backend/internal/adapters/inventory"
 	notificationadapter "backend/internal/adapters/notification"
 	orderadapter "backend/internal/adapters/order"
 	productadapter "backend/internal/adapters/product"
@@ -18,7 +17,6 @@ import (
 	deliveryUsecase "backend/internal/usecase/delivery"
 	driverUsecase "backend/internal/usecase/driver"
 	feedbackUsecase "backend/internal/usecase/feedback"
-	inventoryUsecase "backend/internal/usecase/inventory"
 	inviteUsecase "backend/internal/usecase/invite"
 	notificationUsecase "backend/internal/usecase/notification"
 	orderUsecase "backend/internal/usecase/order"
@@ -70,7 +68,6 @@ func main() {
 	paymentRepo := postgres.NewPaymentRepository(db)
 	feedbackRepo := postgres.NewFeedbackRepository(db)
 	notificationRepo := postgres.NewNotificationRepository(db)
-	inventoryRepo := postgres.NewInventoryRespository(db)
 	inviteRepo := postgres.NewInviteRepository(db)
 	storeRepo := postgres.NewStoreRepository(db)
 	productRepo := postgres.NewProductRepository(db)
@@ -80,8 +77,7 @@ func main() {
 	inviteUC := inviteUsecase.NewUseCase(inviteRepo, txm)
 	driverUC := driverUsecase.NewUseCase(driverRepo, txm, notificationRepo)
 	userUC := userUsecase.NewUseCase(userRepo, driverUC, txm, notificationRepo)
-	inventoryUC := inventoryUsecase.NewUseCase(inventoryRepo, txm, notificationRepo, storeRepo)
-	orderUC := orderUsecase.NewUseCase(orderRepo, &inventoryadapter.UseCaseAdapter{UseCase: inventoryUC}, &useradapter.UseCaseAdapter{UseCase: userUC}, driverRepo, txm, notificationRepo, productRepo)
+	orderUC := orderUsecase.NewUseCase(orderRepo, &useradapter.UseCaseAdapter{UseCase: userUC}, driverRepo, txm, notificationRepo, productRepo)
 	deliveryUC := deliveryUsecase.NewUseCase(deliveryRepo, &orderadapter.UseCaseAdapter{UseCase: orderUC}, &driveradapter.UseCaseAdapter{UseCase: driverUC}, txm, notificationRepo)
 	notificationUC := notificationUsecase.NewUseCase(notificationRepo, txm)
 	storeUC := storeUsecase.NewUseCase(storeRepo, txm)
@@ -93,7 +89,6 @@ func main() {
 		&orderadapter.UseCaseAdapter{UseCase: orderUC},
 		&driveradapter.UseCaseAdapter{UseCase: driverUC},
 		&deliveryadapter.UseCaseAdapter{UseCase: deliveryUC},
-		&inventoryadapter.UseCaseAdapter{UseCase: inventoryUC},
 		&notificationadapter.UseCaseAdapter{UseCase: notificationUC},
 		&productadapter.UseCaseAdapter{UseCase: productUC},
 	)
@@ -111,7 +106,6 @@ func main() {
 	feedbackHandler := handlers.NewFeedbackHandler(feedbackUC)
 	notificationHandler := handlers.NewNotificationHandler(orderService)
 	inviteHandler := handlers.NewInviteHandler(inviteUC)
-	inventoryHandler := handlers.NewInventoryHandler(orderService)
 	storeHandler := handlers.NewStoreHandler(storeUC)
 	productHandler := handlers.NewProductHandler(orderService)
 
@@ -124,7 +118,6 @@ func main() {
 		paymentHandler,
 		feedbackHandler,
 		notificationHandler,
-		inventoryHandler,
 		publicApiBaseUrl,
 		inviteHandler,
 		storeHandler,

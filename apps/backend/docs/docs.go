@@ -685,381 +685,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/inventories/all_inventories": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "List all inventories with optional pagination",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "List all inventories",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Limit number of items",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Offset for pagination",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/inventory.Inventory"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/by-category": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Get all inventory items in a specific category",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "Get inventories by category",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Category Name",
-                        "name": "category",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/inventory.Inventory"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid Category",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/by-id/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Get a specific inventory item by UUID",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "Get inventory by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Inventory ID",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/inventory.Inventory"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid inventory ID or request body",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/by-name": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Search inventory by item name (exact match)",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "Get inventory by name",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Inventory Name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/inventory.Inventory"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid inventory ID or request body",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/by-store/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Fetch all inventory items belonging to a specific store",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "Get inventories by Store ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Store ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/inventory.Inventory"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid store ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "No inventories found",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/categories": {
-            "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Get all unique categories that belong to existing inventories",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "List all categories",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/create": {
-            "post": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Creates an inventory and returns the created object",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "Create a new inventory",
-                "parameters": [
-                    {
-                        "description": "Inventory input",
-                        "name": "inventory",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/inventory.CreateInventoryRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/inventory.Inventory"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid inventory ID or request body",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/inventories/{id}": {
-            "delete": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
-                "description": "Permanently deletes an inventory by their ID",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "inventories"
-                ],
-                "summary": "Delete an inventory",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Inventory ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Inventory deleted",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid inventory ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/invites/all_invites": {
             "get": {
                 "description": "Get all invites that are pending",
@@ -1730,32 +1355,6 @@ const docTemplate = `{
                         "description": "Internal server error",
                         "schema": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/orders/form-data": {
-            "get": {
-                "description": "Returns a list of customers and inventories for populating order form dropdowns.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "orders"
-                ],
-                "summary": "Get data for order form dropdowns",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/order.DropdownDataRequest"
-                        }
-                    },
-                    "500": {
-                        "description": "Failed to fetch customers or inventories",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -4061,99 +3660,6 @@ const docTemplate = `{
                 }
             }
         },
-        "inventory.CreateInventoryRequest": {
-            "type": "object",
-            "required": [
-                "category",
-                "description",
-                "images",
-                "packaging",
-                "price_amount",
-                "price_currency",
-                "stock",
-                "unit"
-            ],
-            "properties": {
-                "admin_id": {
-                    "description": "Foreign key",
-                    "type": "string"
-                },
-                "category": {
-                    "description": "e.g. “Dairy”",
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "images": {
-                    "description": "could be JSON array or URLs",
-                    "type": "string"
-                },
-                "packaging": {
-                    "description": "“Bucket/Single”",
-                    "type": "string"
-                },
-                "price_amount": {
-                    "type": "integer"
-                },
-                "price_currency": {
-                    "type": "string"
-                },
-                "stock": {
-                    "type": "integer"
-                },
-                "unit": {
-                    "description": "\"per litre\", \"per bucket\"",
-                    "type": "string"
-                }
-            }
-        },
-        "inventory.Inventory": {
-            "type": "object",
-            "properties": {
-                "category": {
-                    "description": "e.g. “Dairy” - \"name\" field equivalent",
-                    "type": "string"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "images": {
-                    "description": "could be JSON array or URLs",
-                    "type": "string"
-                },
-                "packaging": {
-                    "description": "“Bucket/Single”",
-                    "type": "string"
-                },
-                "price_amount": {
-                    "type": "integer"
-                },
-                "price_currency": {
-                    "type": "string"
-                },
-                "stock": {
-                    "type": "integer"
-                },
-                "store_id": {
-                    "description": "FK to stores.id",
-                    "type": "string"
-                },
-                "unit": {
-                    "description": "\"per litre\", \"per bucket\"",
-                    "type": "string"
-                },
-                "updated_at": {
-                    "type": "string"
-                }
-            }
-        },
         "invite.CreateInviteRequest": {
             "type": "object",
             "required": [
@@ -4319,51 +3825,6 @@ const docTemplate = `{
         "order.CreateOrderRequest": {
             "type": "object"
         },
-        "order.Customer": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "order.DropdownDataRequest": {
-            "type": "object",
-            "properties": {
-                "customers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/order.Customer"
-                    }
-                },
-                "inventories": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/order.Inventory"
-                    }
-                }
-            }
-        },
-        "order.Inventory": {
-            "type": "object",
-            "properties": {
-                "admin_id": {
-                    "type": "string"
-                },
-                "category": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
         "order.OrderDoc": {
             "type": "object",
             "properties": {
@@ -4371,6 +3832,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "currency": {
                     "type": "string"
                 },
                 "customer_id": {
@@ -4385,7 +3849,13 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "image_url": {
+                    "type": "string"
+                },
                 "inventory_id": {
+                    "type": "string"
+                },
+                "merchant_id": {
                     "type": "string"
                 },
                 "pickup_address": {
@@ -4394,13 +3864,31 @@ const docTemplate = `{
                 "pickup_point": {
                     "$ref": "#/definitions/order.Point"
                 },
+                "product_id": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "type": "string"
+                },
                 "quantity": {
                     "type": "integer"
                 },
                 "status": {
                     "$ref": "#/definitions/order.OrderStatus"
                 },
+                "total": {
+                    "type": "integer"
+                },
+                "unit_price": {
+                    "type": "integer"
+                },
                 "updated_at": {
+                    "type": "string"
+                },
+                "variant_id": {
+                    "type": "string"
+                },
+                "variant_name": {
                     "type": "string"
                 }
             }
