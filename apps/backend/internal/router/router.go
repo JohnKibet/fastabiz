@@ -26,6 +26,7 @@ func NewRouter(
 	publicApiBaseUrl string,
 	c *handlers.InviteHandler,
 	s *handlers.StoreHandler,
+	pr *handlers.ProductHandler,
 	db *sqlx.DB,
 ) http.Handler {
 	r := chi.NewRouter()
@@ -165,8 +166,26 @@ func NewRouter(
 				r.Delete("/{id}", s.DeleteStore)
 			})
 
+			// Products
+			r.Route("/products", func(r chi.Router) {
+				r.Post("/create", pr.CreateProduct)
+				r.Get("/all_products", pr.ListProducts)
+				r.Post("/images/add", pr.AddImage)
+				r.Post("/options/add", pr.AddOptionName)
+				r.Post("/options/values/add", pr.AddOptionValue)
+				r.Post("/variants/add", pr.CreateVariant)
+				r.Patch("/variants/stock/update", pr.UpdateVariantStock)
+				r.Patch("/variants/price/update", pr.UpdateVariantPrice)
+				r.Patch("/images/reorder", pr.ReorderImages)
+				r.Patch("/{id}/product_details", pr.UpdateProductDetails)
+				r.Get("/by-id/{id}", pr.GetProductByID)
+				r.Delete("/{id}/product", pr.DeleteProduct)
+				r.Delete("/images/{imageId}", pr.DeleteImage)
+				r.Delete("/options/{optionId}", pr.DeleteOptionName)
+				r.Delete("/options/values/{valueId}", pr.DeleteOptionValue)
+				r.Delete("/variants/{variantId}", pr.DeleteVariant)
+			})
 		})
-
 	})
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

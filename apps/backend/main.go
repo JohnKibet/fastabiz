@@ -11,6 +11,7 @@ import (
 	inventoryadapter "backend/internal/adapters/inventory"
 	notificationadapter "backend/internal/adapters/notification"
 	orderadapter "backend/internal/adapters/order"
+	productadapter "backend/internal/adapters/product"
 	useradapter "backend/internal/adapters/user"
 	"backend/internal/repository/postgres"
 	"backend/internal/router"
@@ -22,6 +23,7 @@ import (
 	notificationUsecase "backend/internal/usecase/notification"
 	orderUsecase "backend/internal/usecase/order"
 	paymentUsecase "backend/internal/usecase/payment"
+	productUsecase "backend/internal/usecase/product"
 	storeUsecase "backend/internal/usecase/store"
 	userUsecase "backend/internal/usecase/user"
 
@@ -71,6 +73,7 @@ func main() {
 	inventoryRepo := postgres.NewInventoryRespository(db)
 	inviteRepo := postgres.NewInviteRepository(db)
 	storeRepo := postgres.NewStoreRepository(db)
+	productRepo := postgres.NewProductRepository(db)
 
 	// Set up usecase
 	// Individual
@@ -82,6 +85,7 @@ func main() {
 	deliveryUC := deliveryUsecase.NewUseCase(deliveryRepo, &orderadapter.UseCaseAdapter{UseCase: orderUC}, &driveradapter.UseCaseAdapter{UseCase: driverUC}, txm, notificationRepo)
 	notificationUC := notificationUsecase.NewUseCase(notificationRepo, txm)
 	storeUC := storeUsecase.NewUseCase(storeRepo, txm)
+	productUC := productUsecase.NewUseCase(productRepo, txm)
 
 	// Combined cross-domain service
 	orderService := application.NewOrderService(
@@ -91,6 +95,7 @@ func main() {
 		&deliveryadapter.UseCaseAdapter{UseCase: deliveryUC},
 		&inventoryadapter.UseCaseAdapter{UseCase: inventoryUC},
 		&notificationadapter.UseCaseAdapter{UseCase: notificationUC},
+		&productadapter.UseCaseAdapter{UseCase: productUC},
 	)
 
 	// Other usecases
@@ -108,6 +113,7 @@ func main() {
 	inviteHandler := handlers.NewInviteHandler(inviteUC)
 	inventoryHandler := handlers.NewInventoryHandler(orderService)
 	storeHandler := handlers.NewStoreHandler(storeUC)
+	productHandler := handlers.NewProductHandler(orderService)
 
 	// Start server
 	r := router.NewRouter(
@@ -122,6 +128,7 @@ func main() {
 		publicApiBaseUrl,
 		inviteHandler,
 		storeHandler,
+		productHandler,
 		db,
 	)
 
