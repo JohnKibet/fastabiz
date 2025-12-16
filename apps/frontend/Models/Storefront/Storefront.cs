@@ -1,7 +1,7 @@
 namespace frontend.Models;
 
-// Represents a merchant or store owner
-public class Merchant
+// Represents a Store
+public class Store
 {
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
@@ -9,7 +9,7 @@ public class Merchant
     public double Rating { get; set; }
     public int TotalProducts { get; set; }
 
-    // Optional: Products owned by this merchant (for merchant detail page)
+    // Optional: Products found in Store (for Store detail page)
     public List<ProductX> Products { get; set; } = new();
 }
 
@@ -17,7 +17,7 @@ public class Merchant
 public class ProductX
 {
     public string Id { get; set; } = string.Empty;
-    public string MerchantId { get; set; } = string.Empty;
+    public string StoreId { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
@@ -75,8 +75,8 @@ public class ProductListItem
     public double? MinPrice { get; set; }
     public double? MaxPrice { get; set; }
 
-    public string MerchantId { get; set; } = string.Empty;
-    public string MerchantName { get; set; } = string.Empty;
+    public string StoreId { get; set; } = string.Empty;
+    public string StoreName { get; set; } = string.Empty;
     public double Rating { get; set; }
     public int TotalSold { get; set; }
 }

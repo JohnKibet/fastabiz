@@ -1,20 +1,20 @@
-@page "/store/{MerchantId}"
+@page "/store/{StoreId}"
 @layout StorefrontLayout
 @inject NavigationManager NavigationManager
 
 <div class="p-2">
-    <h3 class="text-2xl font-bold mb-4">@Merchant?.Name</h3>
+    <h3 class="text-2xl font-bold mb-4">@Store?.Name</h3>
 
     <div class="flex mb-6">
-        <!-- Merchant Info -->
+        <!-- Store Info -->
         <div class="flex items-center space-x-4">
-            @if (!string.IsNullOrEmpty(Merchant?.Logo))
+            @if (!string.IsNullOrEmpty(Store?.Logo))
             {
-                <img src="@Merchant.Logo" alt="@Merchant.Name" class="w-16 h-16 rounded-full object-cover" />
+                <img src="@Store.Logo" alt="@Store.Name" class="w-16 h-16 rounded-full object-cover" />
             }
             <div>
-                <p class="text-sm text-yellow-600">⭐ @Merchant?.Rating.ToString("0.0")</p>
-                <p class="text-sm text-gray-600">@Merchant?.TotalProducts product(s)</p>
+                <p class="text-sm text-yellow-600">⭐ @Store?.Rating.ToString("0.0")</p>
+                <p class="text-sm text-gray-600">@Store?.TotalProducts product(s)</p>
             </div>
         </div>
     </div>
@@ -63,10 +63,10 @@
 </div>
 
 @code {
-    [Parameter] public string MerchantId { get; set; } = string.Empty;
+    [Parameter] public string StoreId { get; set; } = string.Empty;
     [CascadingParameter] StorefrontLayout? Layout { get; set; }
 
-    private Merchant? Merchant;
+    private Store? Store;
     private List<ProductX> FilteredProducts = new();
     private List<string> Categories = new();
     private string? SelectedCategory;
@@ -77,20 +77,20 @@
 
     protected override void OnInitialized()
     {
-        // Find the merchant
-        Merchant = MockData.Merchants.FirstOrDefault(m => m.Id == MerchantId);
+        // Find the Store
+        Store = MockData.Stores.FirstOrDefault(m => m.Id == StoreId);
 
-        if (Merchant != null)
+        if (Store != null)
         {
-            FilteredProducts = Merchant.Products;
-            Categories = Merchant.Products.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
+            FilteredProducts = Store.Products;
+            Categories = Store.Products.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
             TotalPages = (int)Math.Ceiling((double)FilteredProducts.Count / PageSize);
 
             Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
             {
                 new() { Title = "Home", Url = "/" },
                 new() { Title = "Stores", Url = "/stores" },
-                new() { Title = $"{Merchant?.Name}", Url = $"/store{MerchantId}" }
+                new() { Title = $"{Store?.Name}", Url = $"/store{StoreId}" }
             });
         }
     }
@@ -103,9 +103,9 @@
 
     private void ApplyFilters()
     {
-        if (Merchant is null) return;
+        if (Store is null) return;
 
-        FilteredProducts = Merchant.Products;
+        FilteredProducts = Store.Products;
 
         if (!string.IsNullOrEmpty(SelectedCategory))
             FilteredProducts = FilteredProducts.Where(p => p.Category == SelectedCategory).ToList();
@@ -144,9 +144,9 @@
             Price = p.Price,
             MinPrice = p.MinPrice,
             MaxPrice = p.MaxPrice,
-            MerchantId = Merchant?.Id ?? "",
-            MerchantName = Merchant?.Name ?? "",
-            Rating = Merchant?.Rating ?? 0,
+            StoreId = Store?.Id ?? "",
+            StoreName = Store?.Name ?? "",
+            Rating = Store?.Rating ?? 0,
             TotalSold = new Random().Next(10, 200) // mock sold count
         };
     }

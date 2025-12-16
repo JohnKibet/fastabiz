@@ -52,7 +52,7 @@ public class CartService
                 Thumbnail = thumbnail,
                 Quantity = qty,
                 SKU = variant?.SKU ?? null,
-                MerchantId = product.MerchantId,
+                StoreId = product.StoreId,
                 Description = product.Description,
             });
         }
@@ -133,6 +133,6 @@ public class CartItem
     public string Description { get; set; } = string.Empty;
 
     // Optional but recommended:
-    public string MerchantId { get; set; } = string.Empty;
+    public string StoreId { get; set; } = string.Empty;
     public string? SKU { get; set; }
 }
