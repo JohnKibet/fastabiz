@@ -24,8 +24,6 @@ type CreateOrderRequest struct {
 	VariantName string `json:"variant_name" binding:"required"`
 	ImageURL    string `json:"image_url" binding:"required"`
 
-	InventoryID uuid.UUID `json:"inventory_id" binding:"required"` // replaced with product/variant id
-
 	PickupAddress   string         `json:"pickup_address" binding:"required"`
 	PickupPoint     postgis.PointS `json:"pickup_point" binding:"required"`
 	DeliveryAddress string         `json:"delivery_address" binding:"required"`
@@ -54,8 +52,6 @@ func (r *CreateOrderRequest) ToOrder() *Order {
 		ProductName: r.ProductName,
 		VariantName: r.VariantName,
 		ImageURL:    r.ImageURL,
-
-		InventoryID: r.InventoryID,
 
 		PickupAddress:   r.PickupAddress,
 		DeliveryAddress: r.DeliveryAddress,
@@ -101,8 +97,6 @@ type CreateOrderRequestDoc struct {
 	ProductName string `json:"product_name" binding:"required"`
 	VariantName string `json:"variant_name" binding:"required"`
 	ImageURL    string `json:"image_url" binding:"required"`
-
-	InventoryID uuid.UUID `json:"inventory_id" binding:"required"` // replaced with product/variant id
 
 	PickupAddress   string `json:"pickup_address" binding:"required"`
 	PickupPoint     Point  `json:"pickup_point" binding:"required"`
