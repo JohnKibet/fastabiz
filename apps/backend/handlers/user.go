@@ -179,7 +179,7 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 // UpdateUserStatus godoc
 // @Summary      Update a user's status
 // @Description  Updates the status (e.g., active, inactive, suspended) of a specific user.
-// @Tags         Users
+// @Tags         users
 // @Accept       json
 // @Produce      json
 // @Param        id   path      string                        true  "User ID (UUID)"

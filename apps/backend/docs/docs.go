@@ -1334,7 +1334,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/order.CreateOrderRequest"
+                            "$ref": "#/definitions/order.CreateOrderRequestDoc"
                         }
                     }
                 ],
@@ -3392,7 +3392,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Users"
+                    "users"
                 ],
                 "summary": "Update a user's status",
                 "parameters": [
@@ -3822,8 +3822,82 @@ const docTemplate = `{
                 }
             }
         },
-        "order.CreateOrderRequest": {
-            "type": "object"
+        "order.CreateOrderRequestDoc": {
+            "type": "object",
+            "required": [
+                "admin_id",
+                "currency",
+                "customer_id",
+                "delivery_address",
+                "delivery_point",
+                "image_url",
+                "inventory_id",
+                "merchant_id",
+                "pickup_address",
+                "pickup_point",
+                "product_id",
+                "product_name",
+                "quantity",
+                "total",
+                "unit_price",
+                "variant_id",
+                "variant_name"
+            ],
+            "properties": {
+                "admin_id": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "customer_id": {
+                    "type": "string"
+                },
+                "delivery_address": {
+                    "type": "string"
+                },
+                "delivery_point": {
+                    "$ref": "#/definitions/order.Point"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "inventory_id": {
+                    "description": "replaced with product/variant id",
+                    "type": "string"
+                },
+                "merchant_id": {
+                    "type": "string"
+                },
+                "pickup_address": {
+                    "type": "string"
+                },
+                "pickup_point": {
+                    "$ref": "#/definitions/order.Point"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "product_name": {
+                    "description": "snapshot at purchase time",
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "unit_price": {
+                    "type": "integer"
+                },
+                "variant_id": {
+                    "type": "string"
+                },
+                "variant_name": {
+                    "type": "string"
+                }
+            }
         },
         "order.OrderDoc": {
             "type": "object",

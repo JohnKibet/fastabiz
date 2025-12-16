@@ -1,29 +1,6 @@
--- Migration: fix currency columns in inventories and payments
+-- Migration: fix currency column in payments
 
 BEGIN;
-
--- ===== Inventories =====
-
--- 1. Ensure price_currency is VARCHAR(3) instead of CHAR(3)
-ALTER TABLE inventories
-ALTER COLUMN price_currency TYPE VARCHAR(3);
-
--- 2. Drop old constraints if they exist
-ALTER TABLE inventories
-DROP CONSTRAINT IF EXISTS price_currency_code_check;
-ALTER TABLE inventories
-DROP CONSTRAINT IF EXISTS price_currency_allowed_check;
-
--- 3. Add stricter regex check (must be exactly 3 uppercase letters)
-ALTER TABLE inventories
-ADD CONSTRAINT price_currency_code_check
-CHECK (price_currency ~ '^[A-Z]{3}$');
-
--- 4. Optional: whitelist of supported currencies
-ALTER TABLE inventories
-ADD CONSTRAINT price_currency_allowed_check
-CHECK (price_currency IN ('KES', 'USD', 'EUR', 'GBP'));
-
 
 -- ===== Payments =====
 
