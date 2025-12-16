@@ -23,6 +23,8 @@ type Repository interface {
 	// Each product should be returned as a fully-hydrated aggregate.
 	List(ctx context.Context) ([]Product, error)
 
+	// ListByStore()
+
 	// UpdateDetails updates the core mutable fields of a product.
 	// This does not affect images, options, variants, or inventory.
 	UpdateDetails(

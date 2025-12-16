@@ -38,8 +38,6 @@ type Order struct {
 	VariantName string `db:"variant_name" json:"variant_name"`
 	ImageURL    string `db:"image_url" json:"image_url"`
 
-	InventoryID uuid.UUID `db:"inventory_id" json:"inventory_id"` // replaced by product & variant
-
 	// Pickup/delivery
 	PickupAddress   string         `db:"pickup_address" json:"pickup_address"`
 	PickupPoint     postgis.PointS `db:"pickup_point" json:"pickup_point"`
@@ -76,8 +74,6 @@ type OrderDoc struct {
 	ProductName string `db:"product_name" json:"product_name"`
 	VariantName string `db:"variant_name" json:"variant_name"`
 	ImageURL    string `db:"image_url" json:"image_url"`
-
-	InventoryID uuid.UUID `db:"inventory_id" json:"inventory_id"`
 
 	PickupAddress   string `db:"pickup_address" json:"pickup_address"`
 	PickupPoint     Point  `db:"pickup_point" json:"pickup_point"`

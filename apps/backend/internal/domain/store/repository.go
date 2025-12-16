@@ -14,4 +14,7 @@ type Repository interface {
 	Update(ctx context.Context, storeID uuid.UUID, column string, value any) error
 	ListPublic(ctx context.Context) ([]*Store, error)
 	Delete(ctx context.Context, id uuid.UUID) error
+
+	// GetStoreWithProducts()
+	// GetStoreSummary()
 }
