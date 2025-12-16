@@ -30,7 +30,7 @@ func NewOrderHandler(uc *application.OrderService) *OrderHandler {
 // @Tags orders
 // @Accept json
 // @Produce json
-// @Param order body order.CreateOrderRequest true "Order input"
+// @Param order body order.CreateOrderRequestDoc true "Order input"
 // @Success 201 {object} order.OrderDoc
 // @Failure 400 {string} handlers.ErrorResponse "Bad request"
 // @Failure 500 {string} handlers.ErrorResponse "Internal server error"

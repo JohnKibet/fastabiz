@@ -80,3 +80,32 @@ type Inventory struct {
 	AdminID  uuid.UUID `db:"admin_id" json:"admin_id"`
 	Category string    `db:"category" json:"category"`
 }
+
+// Point represents a simple GeoJSON-style point for Swagger only.
+// swagger:model Point
+type CreateOrderRequestDoc struct {
+	MerchantID uuid.UUID `json:"merchant_id" binding:"required"`
+	AdminID    uuid.UUID `json:"admin_id" binding:"required"`
+	CustomerID uuid.UUID `json:"customer_id" binding:"required"`
+
+	ProductID uuid.UUID  `json:"product_id" binding:"required"`
+	VariantID *uuid.UUID `json:"variant_id" binding:"required"`
+
+	Quantity int `json:"quantity" binding:"required"`
+
+	UnitPrice int64  `json:"unit_price" binding:"required"`
+	Currency  string `json:"currency" binding:"required"`
+	Total     int64  `json:"total" binding:"required"`
+
+	// snapshot at purchase time
+	ProductName string `json:"product_name" binding:"required"`
+	VariantName string `json:"variant_name" binding:"required"`
+	ImageURL    string `json:"image_url" binding:"required"`
+
+	InventoryID uuid.UUID `json:"inventory_id" binding:"required"` // replaced with product/variant id
+
+	PickupAddress   string `json:"pickup_address" binding:"required"`
+	PickupPoint     Point  `json:"pickup_point" binding:"required"`
+	DeliveryAddress string `json:"delivery_address" binding:"required"`
+	DeliveryPoint   Point  `json:"delivery_point" binding:"required"`
+}

@@ -1,1 +1,0 @@
-ALTER TABLE inventories ADD COLUMN slug TEXT UNIQUE;
