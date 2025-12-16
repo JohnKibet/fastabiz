@@ -4,9 +4,9 @@ namespace frontend.Models;
 
 public static class MockData
 {
-    public static List<Merchant> Merchants = new()
+    public static List<Store> Stores = new()
     {
-        new Merchant
+        new Store
         {
             Id = "m001",
             Name = "Green Valley Farms",
@@ -18,7 +18,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p001",
-                    MerchantId = "m001",
+                    StoreId = "m001",
                     Name = "Fresh Apples",
                     Category = "Fruits",
                     Description = "Crisp, sweet organic apples harvested this season.",
@@ -38,7 +38,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p002",
-                    MerchantId = "m001",
+                    StoreId = "m001",
                     Name = "Bananas",
                     Category = "Fruits",
                     Description = "Sweet ripe bananas grown locally.",
@@ -50,7 +50,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p003",
-                    MerchantId = "m001",
+                    StoreId = "m001",
                     Name = "Carrots",
                     Category = "Vegetables",
                     Description = "Fresh organic carrots.",
@@ -62,7 +62,7 @@ public static class MockData
             }
         },
 
-        new Merchant
+        new Store
         {
             Id = "m002",
             Name = "Sunrise Orchard",
@@ -74,7 +74,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p101",
-                    MerchantId = "m002",
+                    StoreId = "m002",
                     Name = "Oranges",
                     Category = "Fruits",
                     Description = "Juicy oranges rich in vitamin C.",
@@ -93,7 +93,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p102",
-                    MerchantId = "m002",
+                    StoreId = "m002",
                     Name = "Limes",
                     Category = "Fruits",
                     Description = "Fresh and zesty limes.",
@@ -105,7 +105,7 @@ public static class MockData
             }
         },
 
-        new Merchant
+        new Store
         {
             Id = "m003",
             Name = "Highland Fresh Produce",
@@ -117,7 +117,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p201",
-                    MerchantId = "m003",
+                    StoreId = "m003",
                     Name = "Strawberries",
                     Category = "Berries",
                     Description = "Fresh, sweet strawberries delivered daily.",
@@ -129,7 +129,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p202",
-                    MerchantId = "m003",
+                    StoreId = "m003",
                     Name = "Blueberries",
                     Category = "Berries",
                     Description = "Antioxidant-rich fresh blueberries.",
@@ -141,7 +141,7 @@ public static class MockData
             }
         },
 
-        new Merchant
+        new Store
         {
             Id = "m004",
             Name = "Coastal Citrus Co.",
@@ -153,7 +153,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p301",
-                    MerchantId = "m004",
+                    StoreId = "m004",
                     Name = "Lemons",
                     Category = "Citrus",
                     Description = "Fresh lemons with strong aroma.",
@@ -165,7 +165,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p302",
-                    MerchantId = "m004",
+                    StoreId = "m004",
                     Name = "Grapefruits",
                     Category = "Citrus",
                     Description = "Juicy grapefruits.",
@@ -177,7 +177,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p303",
-                    MerchantId = "m004",
+                    StoreId = "m004",
                     Name = "Oranges",
                     Category = "Fruits",
                     Description = "Tangy oranges from coastal farms.",
@@ -189,7 +189,7 @@ public static class MockData
             }
         },
 
-        new Merchant
+        new Store
         {
             Id = "m005",
             Name = "Happy Harvest Market",
@@ -201,7 +201,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p401",
-                    MerchantId = "m005",
+                    StoreId = "m005",
                     Name = "Pineapples",
                     Category = "Fruits",
                     Description = "Sweet tropical pineapples.",
@@ -213,7 +213,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p402",
-                    MerchantId = "m005",
+                    StoreId = "m005",
                     Name = "Papayas",
                     Category = "Fruits",
                     Description = "Sweet and soft papayas.",
@@ -225,7 +225,7 @@ public static class MockData
             }
         },
 
-        new Merchant
+        new Store
         {
             Id = "m006",
             Name = "Farm Direct Foods",
@@ -237,7 +237,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p501",
-                    MerchantId = "m006",
+                    StoreId = "m006",
                     Name = "Grapes",
                     Category = "Fruits",
                     Description = "Seedless grapes, red or green.",
@@ -256,7 +256,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p502",
-                    MerchantId = "m006",
+                    StoreId = "m006",
                     Name = "Avocados",
                     Category = "Fruits",
                     Description = "Fresh organic avocados.",
@@ -268,7 +268,7 @@ public static class MockData
             }
         },
 
-        new Merchant
+        new Store
         {
             Id = "m007",
             Name = "Tropical Delight Farm",
@@ -280,7 +280,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p601",
-                    MerchantId = "m007",
+                    StoreId = "m007",
                     Name = "Mangoes",
                     Category = "Fruits",
                     Description = "Juicy ripe mangoes from coastal farms.",
@@ -292,7 +292,7 @@ public static class MockData
                 new ProductX
                 {
                     Id = "p602",
-                    MerchantId = "m007",
+                    StoreId = "m007",
                     Name = "Pineapples",
                     Category = "Fruits",
                     Description = "Sweet pineapples.",
@@ -304,7 +304,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id = "m008",
             Name = "TechWorld Electronics",
@@ -314,7 +314,7 @@ public static class MockData
             Products = new List<ProductX> {
                 new ProductX {
                     Id = "p701",
-                    MerchantId = "m008",
+                    StoreId = "m008",
                     Name = "Wireless Headphones",
                     Category = "Audio",
                     Description = "Bluetooth noise-canceling headphones.",
@@ -330,7 +330,7 @@ public static class MockData
                 },
                 new ProductX {
                     Id = "p702",
-                    MerchantId = "m008",
+                    StoreId = "m008",
                     Name = "Smartphone Charger",
                     Category = "Accessories",
                     Description = "Fast-charging USB-C charger.",
@@ -341,7 +341,7 @@ public static class MockData
                 },
                 new ProductX {
                     Id = "p703",
-                    MerchantId = "m008",
+                    StoreId = "m008",
                     Name = "4K LED TV",
                     Category = "TV & Home",
                     Description = "Ultra HD 50-inch smart TV.",
@@ -353,7 +353,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id = "m009",
             Name = "UrbanStyle Clothing",
@@ -363,7 +363,7 @@ public static class MockData
             Products = new List<ProductX> {
                 new ProductX {
                     Id = "p801",
-                    MerchantId = "m009",
+                    StoreId = "m009",
                     Name = "Men's T-Shirts",
                     Category = "Apparel",
                     Description = "100% cotton premium tees.",
@@ -380,7 +380,7 @@ public static class MockData
                 },
                 new ProductX {
                     Id = "p802",
-                    MerchantId = "m009",
+                    StoreId = "m009",
                     Name = "Women's Jeans",
                     Category = "Apparel",
                     Description = "Stretch denim, premium quality.",
@@ -392,7 +392,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id = "m010",
             Name = "HomeLiving Furniture",
@@ -402,7 +402,7 @@ public static class MockData
             Products = new List<ProductX>{
                 new ProductX {
                     Id = "p901",
-                    MerchantId = "m010",
+                    StoreId = "m010",
                     Name = "Wooden Coffee Table",
                     Category = "Furniture",
                     Description = "Solid oak handcrafted table.",
@@ -413,7 +413,7 @@ public static class MockData
                 },
                 new ProductX {
                     Id = "p902",
-                    MerchantId = "m010",
+                    StoreId = "m010",
                     Name = "Office Chair",
                     Category = "Furniture",
                     Description = "Ergonomic office chair with lumbar support.",
@@ -430,7 +430,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id = "m011",
             Name = "Glow Beauty Essentials",
@@ -440,7 +440,7 @@ public static class MockData
             Products = new List<ProductX>{
                 new ProductX {
                     Id = "p1001",
-                    MerchantId = "m011",
+                    StoreId = "m011",
                     Name = "Face Serum",
                     Category = "Skincare",
                     Description = "Vitamin C brightening serum.",
@@ -451,7 +451,7 @@ public static class MockData
                 },
                 new ProductX {
                     Id = "p1002",
-                    MerchantId = "m011",
+                    StoreId = "m011",
                     Name = "Lipstick",
                     Category = "Cosmetics",
                     Description = "Matte finish lipstick.",
@@ -467,7 +467,7 @@ public static class MockData
                 },
                 new ProductX {
                     Id = "p1003",
-                    MerchantId = "m011",
+                    StoreId = "m011",
                     Name = "Face Cleanser",
                     Category = "Skincare",
                     Description = "Gentle daily cleansing foam.",
@@ -479,7 +479,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id = "m012",
             Name = "PowerFit Sports",
@@ -489,7 +489,7 @@ public static class MockData
             Products = new List<ProductX>{
                 new ProductX {
                     Id = "p1101",
-                    MerchantId = "m012",
+                    StoreId = "m012",
                     Name = "Yoga Mat",
                     Category = "Fitness",
                     Description = "Non-slip thick yoga mat.",
@@ -503,7 +503,7 @@ public static class MockData
                 },
                 new ProductX {
                     Id = "p1102",
-                    MerchantId = "m012",
+                    StoreId = "m012",
                     Name = "Dumbbell Set",
                     Category = "Fitness",
                     Description = "20kg adjustable dumbbells.",
@@ -515,7 +515,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id = "m013",
             Name = "PetCare Supplies",
@@ -525,7 +525,7 @@ public static class MockData
             Products = new List<ProductX>{
                 new ProductX{
                     Id="p1201",
-                    MerchantId="m013",
+                    StoreId="m013",
                     Name="Dog Food - Chicken Flavor",
                     Category="Pet Food",
                     Description="Nutritious dry dog food.",
@@ -536,7 +536,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1202",
-                    MerchantId="m013",
+                    StoreId="m013",
                     Name="Cat Toy Set",
                     Category="Pet Accessories",
                     Description="Interactive toys for cats.",
@@ -548,7 +548,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id="m014",
             Name="AutoGear Shop",
@@ -558,7 +558,7 @@ public static class MockData
             Products=new(){
                 new ProductX{
                     Id="p1301",
-                    MerchantId="m014",
+                    StoreId="m014",
                     Name="Car Vacuum Cleaner",
                     Category="Car Accessories",
                     Description="Portable car cleaner.",
@@ -569,7 +569,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1302",
-                    MerchantId="m014",
+                    StoreId="m014",
                     Name="Car Seat Covers",
                     Category="Car Accessories",
                     Description="Waterproof leather covers.",
@@ -584,7 +584,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id="m015",
             Name="PaperTrail Books",
@@ -594,7 +594,7 @@ public static class MockData
             Products=new(){
                 new ProductX{
                     Id="p1401",
-                    MerchantId="m015",
+                    StoreId="m015",
                     Name="Mystery Novel",
                     Category="Books",
                     Description="Thrilling detective story.",
@@ -605,7 +605,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1402",
-                    MerchantId="m015",
+                    StoreId="m015",
                     Name="Notebook Set",
                     Category="Stationery",
                     Description="Pack of 3 premium notebooks.",
@@ -617,7 +617,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id="m016",
             Name="Organic Health Store",
@@ -627,7 +627,7 @@ public static class MockData
             Products=new(){
                 new ProductX{
                     Id="p1501",
-                    MerchantId="m016",
+                    StoreId="m016",
                     Name="Organic Honey",
                     Category="Food",
                     Description="Raw unprocessed honey.",
@@ -638,7 +638,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1502",
-                    MerchantId="m016",
+                    StoreId="m016",
                     Name="Herbal Tea Mix",
                     Category="Beverages",
                     Description="Relaxing herbal infusion.",
@@ -650,7 +650,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id="m017",
             Name="KitchenPro Supplies",
@@ -660,7 +660,7 @@ public static class MockData
             Products=new(){
                 new ProductX{
                     Id="p1601",
-                    MerchantId="m017",
+                    StoreId="m017",
                     Name="Stainless Steel Knife Set",
                     Category="Kitchen",
                     Description="Professional chef knives.",
@@ -671,7 +671,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1602",
-                    MerchantId="m017",
+                    StoreId="m017",
                     Name="Cutting Board",
                     Category="Kitchen",
                     Description="Bamboo cutting board.",
@@ -683,7 +683,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id="m018",
             Name="HandyTools Hardware",
@@ -693,7 +693,7 @@ public static class MockData
             Products=new(){
                 new ProductX{
                     Id="p1701",
-                    MerchantId="m018",
+                    StoreId="m018",
                     Name="Electric Drill",
                     Category="Tools",
                     Description="Cordless drill set.",
@@ -704,7 +704,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1702",
-                    MerchantId="m018",
+                    StoreId="m018",
                     Name="Hammer",
                     Category="Tools",
                     Description="Steel claw hammer.",
@@ -716,7 +716,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id="m019",
             Name="FunLand Toys",
@@ -726,7 +726,7 @@ public static class MockData
             Products=new(){
                 new ProductX{
                     Id="p1801",
-                    MerchantId="m019",
+                    StoreId="m019",
                     Name="Remote Control Car",
                     Category="Toys",
                     Description="High-speed RC car.",
@@ -737,7 +737,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1802",
-                    MerchantId="m019",
+                    StoreId="m019",
                     Name="Puzzle Set",
                     Category="Kids",
                     Description="500-piece puzzle.",
@@ -749,7 +749,7 @@ public static class MockData
             }
         },
 
-        new Merchant 
+        new Store 
         {
             Id="m020",
             Name="SweetTreats Bakery",
@@ -759,7 +759,7 @@ public static class MockData
             Products=new(){
                 new ProductX{
                     Id="p1901",
-                    MerchantId="m020",
+                    StoreId="m020",
                     Name="Cupcake Box",
                     Category="Bakery",
                     Description="Box of 6 assorted cupcakes.",
@@ -770,7 +770,7 @@ public static class MockData
                 },
                 new ProductX{
                     Id="p1902",
-                    MerchantId="m020",
+                    StoreId="m020",
                     Name="Chocolate Cake",
                     Category="Bakery",
                     Description="Rich chocolate cake.",
@@ -784,15 +784,15 @@ public static class MockData
     };
 
     /// <summary>
-    /// Flatten all products across all merchants into a ProductListItem view
+    /// Flatten all products across all Stores into a ProductListItem view
     /// </summary>
     public static List<ProductListItem> GetAllProducts()
     {
         var products = new List<ProductListItem>();
 
-        foreach (var merchant in Merchants)
+        foreach (var Store in Stores)
         {
-            foreach (var p in merchant.Products)
+            foreach (var p in Store.Products)
             {
                 products.Add(new ProductListItem
                 {
@@ -805,9 +805,9 @@ public static class MockData
                     Price = p.Price,
                     MinPrice = p.MinPrice,
                     MaxPrice = p.MaxPrice,
-                    MerchantId = merchant.Id,
-                    MerchantName = merchant.Name,
-                    Rating = merchant.Rating,
+                    StoreId = Store.Id,
+                    StoreName = Store.Name,
+                    Rating = Store.Rating,
                     TotalSold = new Random().Next(10, 200) // mock sold count
                 });
             }

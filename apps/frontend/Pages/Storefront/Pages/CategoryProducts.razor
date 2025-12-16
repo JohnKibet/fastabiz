@@ -7,10 +7,10 @@
 <div class="flex mb-6">
     <!-- Sidebar: Merchant Filter -->
     <aside class="w-1/4 pr-4">
-        <h4 class="font-semibold mb-2">Merchants</h4>
+        <h4 class="font-semibold mb-2">Stores</h4>
         <MerchantFilter 
-            Merchants="@Merchants" 
-            SelectedMerchantId="@SelectedMerchantId" 
+            Merchants="@Stores" 
+            SelectedMerchantId="@SelectedStoreId" 
             OnMerchantSelected="@FilterByMerchant" />
     </aside>
 
@@ -32,8 +32,8 @@
     [Parameter] public string Category { get; set; } = string.Empty;
 
     private List<ProductX> FilteredProducts = new();
-    private List<Merchant> Merchants = MockData.Merchants;
-    private string? SelectedMerchantId;
+    private List<Store> Stores = MockData.Stores;
+    private string? SelectedStoreId;
 
     private int CurrentPage = 1;
     private int TotalPages = 1;
@@ -46,23 +46,23 @@
 
     private void FilterByMerchant(string merchantId)
     {
-        SelectedMerchantId = merchantId;
+        SelectedStoreId = merchantId;
         ApplyFilters();
     }
 
     private void ApplyFilters()
     {
         // Start with all products in this category
-        FilteredProducts = MockData.Merchants
+        FilteredProducts = MockData.Stores
             .SelectMany(m => m.Products)
             .Where(p => p.Category.Equals(Category, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         // Filter by merchant if selected
-        if (!string.IsNullOrEmpty(SelectedMerchantId))
+        if (!string.IsNullOrEmpty(SelectedStoreId))
         {
             FilteredProducts = FilteredProducts
-                .Where(p => p.MerchantId == SelectedMerchantId)
+                .Where(p => p.StoreId == SelectedStoreId)
                 .ToList();
         }
 
@@ -90,7 +90,7 @@
     // Helper: convert ProductX → ProductListItem for ProductCard
     private ProductListItem ConvertToListItem(ProductX p)
     {
-        var merchant = Merchants.FirstOrDefault(m => m.Id == p.MerchantId);
+        var merchant = Stores.FirstOrDefault(m => m.Id == p.StoreId);
         return new ProductListItem
         {
             Id = p.Id,
@@ -101,8 +101,8 @@
             Price = p.Price,
             MinPrice = p.MinPrice,
             MaxPrice = p.MaxPrice,
-            MerchantId = merchant?.Id ?? "",
-            MerchantName = merchant?.Name ?? "",
+            StoreId = merchant?.Id ?? "",
+            StoreName = merchant?.Name ?? "",
             Rating = merchant?.Rating ?? 0,
             TotalSold = new Random().Next(10, 200)
         };

@@ -43,14 +43,14 @@
                 </ul>
             </div>
             <div class="mb-4">
-                <label class="block font-medium mb-1">Shop by Merchant</label>
+                <label class="block font-medium mb-1">Shop by Store</label>
                 <ul>
-                    @foreach (var merchant in Merchants)
+                    @foreach (var store in Stores)
                     {
                         <li class="flex justify-between items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
-                            @onclick="(() => OpenMerchantDrawer(merchant))">
-                            <span>@merchant.Name</span>
-                            @if (Products.Any(p => p.MerchantId == merchant.Id))
+                            @onclick="(() => OpenStoreDrawer(store))">
+                            <span>@store.Name</span>
+                            @if (Products.Any(p => p.StoreId == store.Id))
                             {
                                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -97,10 +97,10 @@
                         }
                     </ul>
                 }
-                else if (SelectedMerchant != null && MerchantProducts.Any())
+                else if (SelectedStore != null && StoreProducts.Any())
                 {
                     <ul>
-                        @foreach (var p in MerchantProducts)
+                        @foreach (var p in StoreProducts)
                         {
                             <li class="p-2 flex items-center gap-3 hover:bg-gray-100 rounded cursor-pointer">
                                 <img src="@p.Thumbnail" class="w-10 h-10 rounded object-cover" />
@@ -126,12 +126,12 @@
 
     private List<ProductListItem> Products = MockData.GetAllProducts();
     private List<string> Categories = MockData.GetAllCategories();
-    private List<Merchant> Merchants = MockData.Merchants;
+    private List<Store> Stores = MockData.Stores;
 
     private List<ProductListItem> CategoryProducts = new(); // second drawer items
-    private List<ProductListItem> MerchantProducts = new();
+    private List<ProductListItem> StoreProducts = new();
     private string? SelectedCategory;
-    private string? SelectedMerchant;
+    private string? SelectedStore;
     private bool IsSecondOpen = false;
 
     protected override async Task OnParametersSetAsync()
@@ -151,15 +151,15 @@
         IsSecondOpen = true;
     }
 
-    private void OpenMerchantDrawer(Merchant merchant)
+    private void OpenStoreDrawer(Store store)
     {
-        SelectedMerchant = merchant.Id;
+        SelectedStore = store.Id;
         SelectedCategory = null;          // reset category selection
         CategoryProducts.Clear();         // clear category products
 
         // get products for that merchant
-        MerchantProducts = Products
-            .Where(p => p.MerchantId == merchant.Id)
+        StoreProducts = Products
+            .Where(p => p.StoreId == store.Id)
             .ToList();
 
         IsSecondOpen = true;

@@ -128,3 +128,7 @@ public class StoreService
         }
     }
 }
+
+public class CreateStoreRequest
+{
+}
