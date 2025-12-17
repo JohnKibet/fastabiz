@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
 	"backend/internal/domain/invite"
 	usecase "backend/internal/usecase/invite"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -43,9 +43,7 @@ func (h *InviteHandler) CreateMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":         i.ID,
 		"email":      i.Email,
 		"role":       i.Role,
@@ -78,8 +76,7 @@ func (h *InviteHandler) GetMemberByToken(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(invite)
+	writeJSON(w, http.StatusOK, invite)
 }
 
 // ListPendingMembers godoc
@@ -97,8 +94,7 @@ func (h *InviteHandler) ListPendingMembers(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(invites)
+	writeJSON(w, http.StatusOK, invites)
 }
 
 // DeleteMember godoc
@@ -125,7 +121,5 @@ func (h *InviteHandler) DeleteMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "New Invite deleted"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "New Invite deleted"})
 }

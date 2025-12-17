@@ -46,9 +46,7 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":           p.ID,
 		"merchant_id":  p.MerchantID,
 		"name":         p.Name,
@@ -92,8 +90,7 @@ func (h *ProductHandler) GetProductByID(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(p)
+	writeJSON(w, http.StatusOK, p)
 }
 
 // UpdateProductDetails godoc
@@ -123,9 +120,7 @@ func (h *ProductHandler) UpdateProductDetails(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"message": "Product updated successfully",
 	})
 }
@@ -147,8 +142,7 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(products)
+	writeJSON(w, http.StatusOK, products)
 }
 
 // DeleteProduct godoc
@@ -178,9 +172,9 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Product deleted"})
+	writeJSON(w, http.StatusOK, map[string]any{
+		"message": "Product deleted",
+	})
 }
 
 // AddImage godoc
@@ -210,8 +204,9 @@ func (h *ProductHandler) AddImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Image added"})
+	writeJSON(w, http.StatusOK, map[string]any{
+		"message": "Image added",
+	})
 }
 
 // DeleteImage godoc
@@ -241,7 +236,7 @@ func (h *ProductHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Image deleted"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Image deleted"})
 }
 
 // ReorderImages godoc
@@ -271,7 +266,7 @@ func (h *ProductHandler) ReorderImages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Images reordered"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Images reordered"})
 }
 
 // AddOptionName godoc
@@ -302,8 +297,7 @@ func (h *ProductHandler) AddOptionName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"option_id": optionID,
 	})
 }
@@ -335,7 +329,7 @@ func (h *ProductHandler) DeleteOptionName(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Option deleted"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Option deleted"})
 }
 
 // AddOptionValue godoc
@@ -365,8 +359,7 @@ func (h *ProductHandler) AddOptionValue(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Option value added"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Option value added"})
 }
 
 // DeleteOptionValue godoc
@@ -396,7 +389,7 @@ func (h *ProductHandler) DeleteOptionValue(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Option value deleted"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Option value deleted"})
 }
 
 // CreateVariant godoc
@@ -428,8 +421,7 @@ func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(v)
+	writeJSON(w, http.StatusCreated, v)
 }
 
 // UpdateVariantStock godoc
@@ -459,7 +451,7 @@ func (h *ProductHandler) UpdateVariantStock(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Variant stock updated"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Variant stock updated"})
 }
 
 // UpdateVariantPrice godoc
@@ -489,7 +481,7 @@ func (h *ProductHandler) UpdateVariantPrice(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Variant price updated"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Variant price updated"})
 }
 
 // DeleteVariant godoc
@@ -519,5 +511,5 @@ func (h *ProductHandler) DeleteVariant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Variant deleted"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Variant deleted"})
 }

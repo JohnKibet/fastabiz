@@ -83,9 +83,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":         u.ID,
 		"fullName":   u.FullName,
 		"password":   u.PasswordHash,
@@ -131,10 +129,7 @@ func (h *UserHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User(driver) profile updated"})
-
+	writeJSON(w, http.StatusOK, map[string]string{"message": "User(driver) profile updated"})
 }
 
 // UpdateUserProfile godoc
@@ -170,10 +165,7 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User profile updated"})
-
+	writeJSON(w, http.StatusOK, map[string]string{"message": "User profile updated"})
 }
 
 // UpdateUserStatus godoc
@@ -207,10 +199,7 @@ func (h *UserHandler) UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User status updated"})
-
+	writeJSON(w, http.StatusOK, map[string]string{"message": "User status updated"})
 }
 
 // UpdateUser godoc
@@ -245,9 +234,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("user %s updated successfully", req.Column),
 	})
 }
@@ -287,9 +274,7 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": "password updated successfully",
 	})
 }
@@ -320,8 +305,7 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(u)
+	writeJSON(w, http.StatusOK, u)
 }
 
 // GetUserByEmail godoc
@@ -349,8 +333,7 @@ func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(u)
+	writeJSON(w, http.StatusOK, u)
 }
 
 // ListUsers godoc
@@ -368,8 +351,7 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(users)
+	writeJSON(w, http.StatusOK, users)
 }
 
 // LoginUser godoc
@@ -447,8 +429,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 		Token:    signedToken,
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	writeJSON(w, http.StatusOK, response)
 }
 
 // DeleteUser godoc
@@ -477,7 +458,5 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "User profile deleted"})
+	writeJSON(w, http.StatusOK, map[string]string{"message": "User profile deleted"})
 }

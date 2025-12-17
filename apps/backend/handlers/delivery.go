@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
 	"backend/internal/application"
 	"backend/internal/domain/delivery"
 	middleware "backend/internal/middleware"
+	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -48,8 +48,7 @@ func (h *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(d)
+	writeJSON(w, http.StatusOK, d)
 }
 
 // UpdateDelivery godoc
@@ -91,12 +90,9 @@ func (h *DeliveryHandler) UpdateDelivery(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("delivery %s updated successfully", column),
 	})
-
 }
 
 // ListDeliveries godoc
@@ -114,8 +110,7 @@ func (h *DeliveryHandler) ListDeliveries(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(deliveries)
+	writeJSON(w, http.StatusOK, deliveries)
 }
 
 // DeleteDelivery godoc
@@ -143,9 +138,7 @@ func (h *DeliveryHandler) DeleteDelivery(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("delivery %s deleted", deliveryID),
 	})
 }
@@ -194,9 +187,7 @@ func (h *DeliveryHandler) AcceptDelivery(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"message":  fmt.Sprintf("delivery %s accepted", deliveryID),
 		"delivery": d,
 	})
