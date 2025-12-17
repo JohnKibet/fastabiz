@@ -2728,22 +2728,51 @@ const docTemplate = `{
                 }
             }
         },
-        "/stores/by-id/{id}": {
+        "/stores/all_stores": {
             "get": {
-                "description": "Fetches a single store using UUID",
+                "description": "Returns all stores (admin view or public)",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "stores"
                 ],
-                "summary": "Get store by id",
+                "summary": "List all stores",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store.Store"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/by-id/{id}": {
+            "get": {
+                "description": "Fetch a single store by its UUID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stores"
+                ],
+                "summary": "Get a store by ID",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Store ID",
-                        "name": "slug",
-                        "in": "query",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -2756,47 +2785,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Invalid ID",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not found",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/stores/by-slug": {
-            "get": {
-                "description": "Fetches a single store by its slug",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "stores"
-                ],
-                "summary": "Get store by slug",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Store slug",
-                        "name": "slug",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/store.Store"
-                        }
-                    },
-                    "400": {
-                        "description": "Missing slug",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -2817,7 +2805,7 @@ const docTemplate = `{
                         "JWT": []
                     }
                 ],
-                "description": "Creates a new store for an owner and returns the created store",
+                "description": "Creates a new store for the authenticated owner",
                 "consumes": [
                     "application/json"
                 ],
@@ -2841,13 +2829,20 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Created store",
                         "schema": {
-                            "$ref": "#/definitions/store.Store"
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     },
                     "400": {
                         "description": "Invalid request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -2861,16 +2856,21 @@ const docTemplate = `{
                 }
             }
         },
-        "/stores/public": {
+        "/stores/me": {
             "get": {
-                "description": "Returns all stores marked as public",
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Returns all stores owned by the current user",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "stores"
                 ],
-                "summary": "List all public stores",
+                "summary": "List authenticated owner's stores",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2879,6 +2879,66 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/store.Store"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/me/paged": {
+            "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
+                "description": "Returns stores owned by authenticated user with limit and offset",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stores"
+                ],
+                "summary": "List stores with pagination",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Maximum number of items to return",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items to skip",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/store.StoreSummary"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
@@ -2897,10 +2957,7 @@ const docTemplate = `{
                         "JWT": []
                     }
                 ],
-                "description": "Deletes a store by its ID",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Deletes a store owned by the authenticated user",
                 "produces": [
                     "application/json"
                 ],
@@ -2919,7 +2976,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Store deleted",
+                        "description": "Deletion message",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2933,8 +2990,55 @@ const docTemplate = `{
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
                     "500": {
-                        "description": "Failed to delete store",
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/stores/{id}/summary": {
+            "get": {
+                "description": "Fetch summarized info about a store",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "stores"
+                ],
+                "summary": "Get store summary",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Store ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/store.StoreSummary"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Store not found",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -2949,7 +3053,7 @@ const docTemplate = `{
                         "JWT": []
                     }
                 ],
-                "description": "Update a specific field of an existing store",
+                "description": "Update details of a store owned by the authenticated user",
                 "consumes": [
                     "application/json"
                 ],
@@ -2959,7 +3063,7 @@ const docTemplate = `{
                 "tags": [
                     "stores"
                 ],
-                "summary": "Update store",
+                "summary": "Update a store",
                 "parameters": [
                     {
                         "type": "string",
@@ -2969,7 +3073,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Field and value to update",
+                        "description": "Update request",
                         "name": "update",
                         "in": "body",
                         "required": true,
@@ -2980,7 +3084,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Store updated successfully",
+                        "description": "Update message",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2989,13 +3093,13 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Invalid store ID or request body",
+                        "description": "Invalid request",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
-                    "404": {
-                        "description": "Store not found",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -3831,7 +3935,6 @@ const docTemplate = `{
                 "delivery_address",
                 "delivery_point",
                 "image_url",
-                "inventory_id",
                 "merchant_id",
                 "pickup_address",
                 "pickup_point",
@@ -3860,10 +3963,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/order.Point"
                 },
                 "image_url": {
-                    "type": "string"
-                },
-                "inventory_id": {
-                    "description": "replaced with product/variant id",
                     "type": "string"
                 },
                 "merchant_id": {
@@ -3924,9 +4023,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "image_url": {
-                    "type": "string"
-                },
-                "inventory_id": {
                     "type": "string"
                 },
                 "merchant_id": {
@@ -4367,23 +4463,13 @@ const docTemplate = `{
         "store.CreateStoreRequest": {
             "type": "object",
             "required": [
-                "description",
-                "isPublic",
+                "location",
                 "name",
-                "ownerID",
-                "slug"
+                "ownerID"
             ],
             "properties": {
-                "banner_url": {
-                    "description": "example:\"https://cdn.fastabiz.com/banners/kevins-banner.png\"",
+                "location": {
                     "type": "string"
-                },
-                "description": {
-                    "description": "example:\"Best electronics and accessories in Nairobi.\"",
-                    "type": "string"
-                },
-                "isPublic": {
-                    "type": "boolean"
                 },
                 "logo_url": {
                     "description": "example:\"https://cdn.fastabiz.com/logos/kevins.png\"",
@@ -4395,29 +4481,17 @@ const docTemplate = `{
                 },
                 "ownerID": {
                     "type": "string"
-                },
-                "slug": {
-                    "type": "string"
                 }
             }
         },
         "store.Store": {
             "type": "object",
             "properties": {
-                "banner_url": {
-                    "type": "string"
-                },
                 "created_at": {
-                    "type": "string"
-                },
-                "description": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
-                },
-                "is_public": {
-                    "type": "boolean"
                 },
                 "location": {
                     "description": "optional",
@@ -4433,25 +4507,43 @@ const docTemplate = `{
                     "description": "FK to users",
                     "type": "string"
                 },
-                "slug": {
-                    "type": "string"
-                },
                 "updated_at": {
                     "type": "string"
                 }
             }
         },
-        "store.UpdateStoreRequest": {
+        "store.StoreSummary": {
             "type": "object",
-            "required": [
-                "column",
-                "value"
-            ],
             "properties": {
-                "column": {
+                "id": {
                     "type": "string"
                 },
-                "value": {}
+                "location": {
+                    "type": "string"
+                },
+                "logoURL": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "number"
+                }
+            }
+        },
+        "store.UpdateStoreRequest": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string"
+                },
+                "logo": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
             }
         },
         "user.ChangePasswordRequest": {

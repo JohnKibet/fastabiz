@@ -11,6 +11,7 @@ import (
 	notificationadapter "backend/internal/adapters/notification"
 	orderadapter "backend/internal/adapters/order"
 	productadapter "backend/internal/adapters/product"
+	storeadapter "backend/internal/adapters/store"
 	useradapter "backend/internal/adapters/user"
 	"backend/internal/repository/postgres"
 	"backend/internal/router"
@@ -91,6 +92,7 @@ func main() {
 		&deliveryadapter.UseCaseAdapter{UseCase: deliveryUC},
 		&notificationadapter.UseCaseAdapter{UseCase: notificationUC},
 		&productadapter.UseCaseAdapter{UseCase: productUC},
+		&storeadapter.UseCaseAdapter{UseCase: storeUC},
 	)
 
 	// Other usecases
@@ -106,7 +108,7 @@ func main() {
 	feedbackHandler := handlers.NewFeedbackHandler(feedbackUC)
 	notificationHandler := handlers.NewNotificationHandler(orderService)
 	inviteHandler := handlers.NewInviteHandler(inviteUC)
-	storeHandler := handlers.NewStoreHandler(storeUC)
+	storeHandler := handlers.NewStoreHandler(orderService)
 	productHandler := handlers.NewProductHandler(orderService)
 
 	// Start server

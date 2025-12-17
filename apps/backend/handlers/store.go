@@ -1,35 +1,46 @@
 package handlers
 
 import (
+	"backend/internal/application"
+	"backend/internal/domain/store"
+	"backend/internal/middleware"
 	"encoding/json"
 	"fmt"
-	"backend/internal/domain/store"
-	usecase "backend/internal/usecase/store"
+	"log"
 	"net/http"
-	"strings"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
 type StoreHandler struct {
-	UC *usecase.UseCase
+	UC *application.OrderService
 }
 
-func NewStoreHandler(uc *usecase.UseCase) *StoreHandler {
+func NewStoreHandler(uc *application.OrderService) *StoreHandler {
 	return &StoreHandler{UC: uc}
+}
+
+func writeJSON(w http.ResponseWriter, status int, payload any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if err := json.NewEncoder(w).Encode(payload); err != nil {
+		log.Printf("failed to write json response: %v", err)
+	}
 }
 
 // CreateStore godoc
 // @Summary Create a new store
 // @Security JWT
-// @Description Creates a new store for an owner and returns the created store
+// @Description Creates a new store for the authenticated owner
 // @Tags stores
 // @Accept json
 // @Produce json
 // @Param store body store.CreateStoreRequest true "Store input"
-// @Success 201 {object} store.Store
+// @Success 201 {object} map[string]any "Created store"
 // @Failure 400 {object} handlers.ErrorResponse "Invalid request"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /stores/create [post]
 func (h *StoreHandler) CreateStore(w http.ResponseWriter, r *http.Request) {
@@ -39,37 +50,40 @@ func (h *StoreHandler) CreateStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := req.ToStore()
-
-	if err := h.UC.CreateStore(r.Context(), s); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not create order", err)
+	ownerID, err := middleware.GetOwnerIDFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
-		"id":          s.ID,
-		"owner_id":    s.OwnerID,
-		"name":        s.Name,
-		"slug":        s.Slug,
-		"description": s.Description,
-		"logo_url":    s.LogoURL,
-		"banner_url":  s.BannerURL,
-		"is_public":   s.IsPublic,
-		"created_at":  s.CreatedAt,
-		"updated_at":  s.UpdatedAt,
+	s := req.ToStore()
+	s.OwnerID = ownerID
+
+	if err := h.UC.Stores.UseCase.CreateStore(r.Context(), s); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Could not create order", err)
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"id":         s.ID,
+		"owner_id":   s.OwnerID,
+		"name":       s.Name,
+		"logo_url":   s.LogoURL,
+		"location":   s.Location,
+		"created_at": s.CreatedAt,
+		"updated_at": s.UpdatedAt,
 	})
 }
 
-// GetStore godoc
-// @Summary Get store by id
-// @Description Fetches a single store using UUID
+// GetStoreByID godoc
+// @Summary Get a store by ID
+// @Description Fetch a single store by its UUID
 // @Tags stores
 // @Produce json
-// @Param slug query string true "Store ID"
+// @Param id path string true "Store ID"
 // @Success 200 {object} store.Store
 // @Failure 400 {object} handlers.ErrorResponse "Invalid ID"
-// @Failure 404 {object} handlers.ErrorResponse "Not found"
+// @Failure 404 {object} handlers.ErrorResponse "Store not found"
 // @Router /stores/by-id/{id} [get]
 func (h *StoreHandler) GetStoreByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
@@ -79,55 +93,54 @@ func (h *StoreHandler) GetStoreByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s, err := h.UC.GetStoreByID(r.Context(), id)
+	s, err := h.UC.Stores.UseCase.GetStoreByID(r.Context(), id)
 	if err != nil {
 		writeJSONError(w, http.StatusNotFound, "Store not found", err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(s)
+	writeJSON(w, http.StatusOK, s)
 }
 
-// GetStore godoc
-// @Summary Get store by slug
-// @Description Fetches a single store by its slug
+// GetStoreSummary godoc
+// @Summary Get store summary
+// @Description Fetch summarized info about a store
 // @Tags stores
 // @Produce json
-// @Param slug query string true "Store slug"
-// @Success 200 {object} store.Store
-// @Failure 400 {object} handlers.ErrorResponse "Missing slug"
+// @Param id path string true "Store ID"
+// @Success 200 {object} store.StoreSummary
+// @Failure 400 {object} handlers.ErrorResponse "Invalid ID"
 // @Failure 404 {object} handlers.ErrorResponse "Store not found"
-// @Router /stores/by-slug [get]
-func (h *StoreHandler) GetStoreBySlug(w http.ResponseWriter, r *http.Request) {
-	slug := r.URL.Query().Get("slug")
-	if slug == "" {
-		writeJSONError(w, http.StatusBadRequest, "Slug query parameter is required", nil)
+// @Router /stores/{id}/summary [get]
+func (h *StoreHandler) GetStoreSummary(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	storeID, err := uuid.Parse(idStr)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid store ID", nil)
 		return
 	}
 
-	s, err := h.UC.GetStoreBySlug(r.Context(), slug)
+	summary, err := h.UC.Stores.UseCase.GetStoreSummary(r.Context(), storeID)
 	if err != nil {
 		writeJSONError(w, http.StatusNotFound, "Store not found", err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(s)
+	writeJSON(w, http.StatusOK, summary)
 }
 
 // UpdateStore godoc
-// @Summary Update store
+// @Summary Update a store
 // @Security JWT
-// @Description Update a specific field of an existing store
+// @Description Update details of a store owned by the authenticated user
 // @Tags stores
 // @Accept json
 // @Produce json
 // @Param id path string true "Store ID"
-// @Param update body store.UpdateStoreRequest true "Field and value to update"
-// @Success 200 {object} map[string]string "Store updated successfully"
-// @Failure 400 {object} handlers.ErrorResponse "Invalid store ID or request body"
-// @Failure 404 {object} handlers.ErrorResponse "Store not found"
+// @Param update body store.UpdateStoreRequest true "Update request"
+// @Success 200 {object} map[string]string "Update message"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid request"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /stores/{id}/update [put]
 func (h *StoreHandler) UpdateStore(w http.ResponseWriter, r *http.Request) {
@@ -144,54 +157,127 @@ func (h *StoreHandler) UpdateStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	column := strings.TrimSpace(strings.ToLower(req.Column))
-	if column == "" {
-		writeJSONError(w, http.StatusBadRequest, "Missing or invalid column name", err)
+	ownerID, err := middleware.GetOwnerIDFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "Unauthorized", err)
 		return
 	}
 
-	if err := h.UC.UpdateStore(r.Context(), storeID, column, req.Value); err != nil {
+	if err := h.UC.Stores.UseCase.UpdateStore(r.Context(), storeID, ownerID, &req); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "Failed to update store", err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": fmt.Sprintf("store %s updated successfully", column),
+	writeJSON(w, http.StatusOK, map[string]any{
+		"message": "store updated successfully",
 	})
 }
 
-// GetPublicStores godoc
-// @Summary List all public stores
-// @Description Returns all stores marked as public
+// ListStores godoc
+// @Summary List all stores
+// @Description Returns all stores (admin view or public)
 // @Tags stores
 // @Produce json
 // @Success 200 {array} store.Store
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /stores/public [get]
-func (h *StoreHandler) GetPublicStores(w http.ResponseWriter, r *http.Request) {
-	stores, err := h.UC.GetPublicStores(r.Context())
+// @Router /stores/all_stores [get]
+func (h *StoreHandler) ListStores(w http.ResponseWriter, r *http.Request) {
+	stores, err := h.UC.Stores.UseCase.ListAllStores(r.Context())
 	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not fetch stores", err)
+		writeJSONError(w, http.StatusInternalServerError, "Failed to list stores", err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(stores)
+	writeJSON(w, http.StatusOK, stores)
+}
+
+// ListOwnerStores godoc
+// @Summary List authenticated owner's stores
+// @Security JWT
+// @Description Returns all stores owned by the current user
+// @Tags stores
+// @Produce json
+// @Success 200 {array} store.Store
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
+// @Router /stores/me [get]
+func (h *StoreHandler) ListOwnerStores(w http.ResponseWriter, r *http.Request) {
+	ownerID, err := middleware.GetOwnerIDFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
+	stores, err := h.UC.Stores.UseCase.ListOwnerStores(r.Context(), ownerID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to list stores", err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, stores)
+}
+
+// ListStoresPaged godoc
+// @Summary List stores with pagination
+// @Security JWT
+// @Description Returns stores owned by authenticated user with limit and offset
+// @Tags stores
+// @Produce json
+// @Param limit query int false "Maximum number of items to return"
+// @Param offset query int false "Number of items to skip"
+// @Success 200 {array} store.StoreSummary
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
+// @Router /stores/me/paged [get]
+func (h *StoreHandler) ListStoresPaged(w http.ResponseWriter, r *http.Request) {
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		limit = 20 // default
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	ownerID, err := middleware.GetOwnerIDFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
+	var filter = &store.StoreFilter{
+		OwnerID: &ownerID,
+		Limit:   limit,
+		Offset:  offset,
+	}
+
+	stores, err := h.UC.Stores.UseCase.ListStoresPaged(r.Context(), *filter)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to list stores", err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, stores)
 }
 
 // DeleteStore godoc
 // @Summary Delete a store
 // @Security JWT
-// @Description Deletes a store by its ID
+// @Description Deletes a store owned by the authenticated user
 // @Tags stores
-// @Accept json
 // @Produce json
 // @Param id path string true "Store ID"
-// @Success 200 {object} map[string]string "Store deleted"
+// @Success 200 {object} map[string]string "Deletion message"
 // @Failure 400 {object} handlers.ErrorResponse "Invalid store ID"
-// @Failure 500 {object} handlers.ErrorResponse "Failed to delete store"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /stores/{id} [delete]
 func (h *StoreHandler) DeleteStore(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
@@ -201,14 +287,18 @@ func (h *StoreHandler) DeleteStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.UC.DeleteStore(r.Context(), storeID); err != nil {
+	ownerID, err := middleware.GetOwnerIDFromContext(r.Context())
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
+	if err := h.UC.Stores.UseCase.DeleteStore(r.Context(), storeID, ownerID); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "Failed to delete store", err)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"message": fmt.Sprintf("store %s deleted", storeID),
 	})
 }

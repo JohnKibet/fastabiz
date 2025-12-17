@@ -68,6 +68,20 @@ func JWTAuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func GetOwnerIDFromContext(ctx context.Context) (uuid.UUID, error) {
+	role, ok := ctx.Value(ContextRole).(string)
+	if !ok || role != "merchant" {
+		return uuid.Nil, errors.New("not authorized as merchant")
+	}
+
+	idStr, ok := ctx.Value(ContextUserID).(string)
+	if !ok {
+		return uuid.Nil, errors.New("missing merchant ID in context")
+	}
+
+	return uuid.Parse(idStr)
+}
+
 func GetAdminIDFromContext(ctx context.Context) (uuid.UUID, error) {
 	role, ok := ctx.Value(ContextRole).(string)
 	if !ok || role != "admin" {
