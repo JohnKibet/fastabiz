@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"context"
-	"fmt"
 	"backend/internal/application"
 	"backend/internal/domain/driver"
+	"context"
+	"fmt"
 
 	"github.com/cridenour/go-postgis"
 	"github.com/google/uuid"

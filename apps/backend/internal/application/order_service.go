@@ -6,6 +6,7 @@ import (
 	notificationadapter "backend/internal/adapters/notification"
 	orderadapter "backend/internal/adapters/order"
 	productadapter "backend/internal/adapters/product"
+	storeadapter "backend/internal/adapters/store"
 	useradapter "backend/internal/adapters/user"
 	"context"
 	"database/sql"
@@ -32,6 +33,7 @@ type OrderService struct {
 	Deliveries    *deliveryadapter.UseCaseAdapter
 	Notifications *notificationadapter.UseCaseAdapter
 	Products      *productadapter.UseCaseAdapter
+	Stores        *storeadapter.UseCaseAdapter
 }
 
 func NewOrderService(
@@ -41,6 +43,7 @@ func NewOrderService(
 	deliveryUC *deliveryadapter.UseCaseAdapter,
 	notificationUC *notificationadapter.UseCaseAdapter,
 	productUC *productadapter.UseCaseAdapter,
+	storeUC *storeadapter.UseCaseAdapter,
 ) *OrderService {
 	return &OrderService{
 		Users:         userUC,
@@ -49,6 +52,7 @@ func NewOrderService(
 		Deliveries:    deliveryUC,
 		Notifications: notificationUC,
 		Products:      productUC,
+		Stores:        storeUC,
 	}
 }
 

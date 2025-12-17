@@ -57,9 +57,7 @@ func NewRouter(
 			r.Post("/login", u.LoginUser)
 
 			// Public store pages
-			r.Route("/stores", func(r chi.Router) {
-				r.Get("/public", s.GetPublicStores)
-			})
+
 		})
 
 		// Protected Routes (auth required)
@@ -145,9 +143,11 @@ func NewRouter(
 			// Stores
 			r.Route("/stores", func(r chi.Router) {
 				r.Post("/create", s.CreateStore)
-				r.Get("/by-slug", s.GetStoreBySlug)
-				r.Get("/public", s.GetPublicStores)
+				r.Get("/all_stores", s.ListStores)
+				r.Get("/me", s.ListOwnerStores)
+				r.Get("/me/paged", s.ListStoresPaged)
 				r.Get("/by-id/{id}", s.GetStoreByID)
+				r.Get("/{id}/summary", s.GetStoreSummary)
 				r.Put("/{id}/update", s.UpdateStore)
 				r.Delete("/{id}", s.DeleteStore)
 			})
