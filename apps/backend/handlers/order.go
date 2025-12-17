@@ -58,9 +58,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":               o.ID,
 		"merchant_id":      o.MerchantID,
 		"admin_id":         o.AdminID,
@@ -106,8 +104,7 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(o)
+	writeJSON(w, http.StatusOK, o)
 }
 
 // GetOrderByCustomer godoc
@@ -135,8 +132,7 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(o)
+	writeJSON(w, http.StatusOK, o)
 }
 
 // UpdateOrder godoc
@@ -178,9 +174,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("order %s updated successfully", column),
 	})
 }
@@ -201,8 +195,7 @@ func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(orders)
+	writeJSON(w, http.StatusOK, orders)
 }
 
 // DeleteOrder godoc
@@ -230,9 +223,7 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("order %s deleted", orderID),
 	})
 }
@@ -252,8 +243,7 @@ func (h *OrderHandler) AutoAssignOrders(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"message":     "Auto-assignment complete",
 		"assignments": assignments,
 		"count":       len(assignments),

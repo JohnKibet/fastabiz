@@ -53,10 +53,7 @@ func (h *DriverHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Driver profile updated"})
-
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Driver profile updated"})
 }
 
 // UpdateDriver godoc
@@ -91,9 +88,7 @@ func (h *DriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("driver %s updated successfully", req.Column),
 	})
 }
@@ -123,8 +118,7 @@ func (h *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(d)
+	writeJSON(w, http.StatusOK, d)
 }
 
 // GetUserByDriver godoc
@@ -152,8 +146,7 @@ func (h *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(d)
+	writeJSON(w, http.StatusOK, d)
 }
 
 // ListDrivers godoc
@@ -171,8 +164,7 @@ func (h *DriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(drivers)
+	writeJSON(w, http.StatusOK, drivers)
 }
 
 // DeleteDriver godoc
@@ -200,9 +192,7 @@ func (h *DriverHandler) DeleteDriver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("driver %s deleted", driverID),
 	})
 }
