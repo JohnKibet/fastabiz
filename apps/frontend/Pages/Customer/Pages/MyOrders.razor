@@ -1,7 +1,6 @@
 @page "/customer/myorders"
 @layout CustomerLayout
 @inject OrderService OrderService
-@inject DropdownDataService DropdownDataService
 @inject ToastService ToastService
 @inject UserService UserService
 @inject AuthenticationStateProvider AuthProvider
@@ -160,12 +159,12 @@ else
 
     private void ViewOrder(Guid id)
     {
-        selectedOrder = orders?.FirstOrDefault(o => o.ID == id);
+        selectedOrder = orders?.FirstOrDefault(o => o.Id == id);
         if (selectedOrder is not null)
         {
             editableOrder = new Order
             {
-                ID = selectedOrder.ID,
+                Id = selectedOrder.Id,
                 PickupAddress = selectedOrder.PickupAddress,
                 DeliveryAddress = selectedOrder.DeliveryAddress,
                 Status = selectedOrder.Status
@@ -179,12 +178,12 @@ else
 
     private void EditOrder(Guid id)
     {
-        selectedOrder = orders?.FirstOrDefault(o => o.ID == id);
+        selectedOrder = orders?.FirstOrDefault(o => o.Id == id);
         if (selectedOrder is not null)
         {
             editableOrder = new Order
             {
-                ID = selectedOrder.ID,
+                Id = selectedOrder.Id,
                 PickupAddress = selectedOrder.PickupAddress,
                 DeliveryAddress = selectedOrder.DeliveryAddress,
                 Status = selectedOrder.Status
@@ -207,7 +206,7 @@ else
         selectedOrder = order;
         editableOrder = new Order
         {
-            ID = order.ID,
+            Id = order.Id,
             PickupAddress = order.PickupAddress,
             DeliveryAddress = order.DeliveryAddress,
             Status = order.Status,
@@ -280,15 +279,15 @@ else
         bool updated = false;
 
         if (editableOrder.PickupAddress != selectedOrder.PickupAddress)
-            await OrderService.UpdateOrder(selectedOrder.ID, "PickupLocation", editableOrder.PickupAddress);
+            await OrderService.UpdateOrder(selectedOrder.Id, "PickupLocation", editableOrder.PickupAddress);
             updated = true;
 
         if (editableOrder.DeliveryAddress != selectedOrder.DeliveryAddress)
-            await OrderService.UpdateOrder(selectedOrder.ID, "DeliveryLocation", editableOrder.DeliveryAddress);
+            await OrderService.UpdateOrder(selectedOrder.Id, "DeliveryLocation", editableOrder.DeliveryAddress);
             updated = true;
 
         if (editableOrder.Status != selectedOrder.Status)
-            await OrderService.UpdateOrder(selectedOrder.ID, "OrderStatus", editableOrder.Status);
+            await OrderService.UpdateOrder(selectedOrder.Id, "OrderStatus", editableOrder.Status);
             updated = true;
 
         if (updated)

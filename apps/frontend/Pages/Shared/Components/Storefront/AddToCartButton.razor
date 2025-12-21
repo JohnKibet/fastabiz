@@ -48,8 +48,8 @@
 
     public class CartRequest
     {
-        public string ProductId { get; set; } = string.Empty;
-        public string? VariantId { get; set; }
+        public Guid ProductId { get; set; }
+        public Guid? VariantId { get; set; }
         public int Quantity { get; set; }
     }
 }

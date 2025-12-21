@@ -8,7 +8,7 @@ public static class MockData
     {
         new Store
         {
-            Id = "m001",
+            Id = Guid.NewGuid(),
             Name = "Green Valley Farms",
             Logo = "green_valley_logo.jpg",
             Rating = 4.7,
@@ -17,8 +17,8 @@ public static class MockData
             {
                 new ProductX
                 {
-                    Id = "p001",
-                    StoreId = "m001",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Fresh Apples",
                     Category = "Fruits",
                     Description = "Crisp, sweet organic apples harvested this season.",
@@ -30,15 +30,15 @@ public static class MockData
                     },
                     Variants = new List<Variant>
                     {
-                        new Variant { Id = "v001", SKU = "APP-SM-001", Price = 1.20, Stock = 120, Image = "apple_small.jpg", Options = new Dictionary<string,string>{{"Size","Small"}} },
-                        new Variant { Id = "v002", SKU = "APP-MD-001", Price = 1.50, Stock = 200, Image = "apple_medium.jpg", Options = new Dictionary<string,string>{{"Size","Medium"}} },
-                        new Variant { Id = "v003", SKU = "APP-LG-001", Price = 1.80, Stock = 80, Image = "apple_large.jpg", Options = new Dictionary<string,string>{{"Size","Large"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "APP-SM-001", Price = 1.20, Stock = 120, Image = "apple_small.jpg", Options = new Dictionary<string,string>{{"Size","Small"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "APP-MD-001", Price = 1.50, Stock = 200, Image = "apple_medium.jpg", Options = new Dictionary<string,string>{{"Size","Medium"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "APP-LG-001", Price = 1.80, Stock = 80, Image = "apple_large.jpg", Options = new Dictionary<string,string>{{"Size","Large"}} },
                     }
                 },
                 new ProductX
                 {
-                    Id = "p002",
-                    StoreId = "m001",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Bananas",
                     Category = "Fruits",
                     Description = "Sweet ripe bananas grown locally.",
@@ -49,8 +49,8 @@ public static class MockData
                 },
                 new ProductX
                 {
-                    Id = "p003",
-                    StoreId = "m001",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Carrots",
                     Category = "Vegetables",
                     Description = "Fresh organic carrots.",
@@ -64,7 +64,7 @@ public static class MockData
 
         new Store
         {
-            Id = "m002",
+            Id = Guid.NewGuid(),
             Name = "Sunrise Orchard",
             Logo = "sunrise_logo.jpg",
             Rating = 4.5,
@@ -73,8 +73,8 @@ public static class MockData
             {
                 new ProductX
                 {
-                    Id = "p101",
-                    StoreId = "m002",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Oranges",
                     Category = "Fruits",
                     Description = "Juicy oranges rich in vitamin C.",
@@ -86,14 +86,14 @@ public static class MockData
                     },
                     Variants = new List<Variant>
                     {
-                        new Variant { Id = "v101", SKU = "ORG-SW-101", Price = 0.95, Stock = 180, Image = "orange_sweet.jpg", Options = new Dictionary<string,string>{{"Type","Sweet"}} },
-                        new Variant { Id = "v102", SKU = "ORG-TG-101", Price = 1.00, Stock = 150, Image = "orange_tangy.jpg", Options = new Dictionary<string,string>{{"Type","Tangy"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "ORG-SW-101", Price = 0.95, Stock = 180, Image = "orange_sweet.jpg", Options = new Dictionary<string,string>{{"Type","Sweet"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "ORG-TG-101", Price = 1.00, Stock = 150, Image = "orange_tangy.jpg", Options = new Dictionary<string,string>{{"Type","Tangy"}} },
                     }
                 },
                 new ProductX
                 {
-                    Id = "p102",
-                    StoreId = "m002",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Limes",
                     Category = "Fruits",
                     Description = "Fresh and zesty limes.",
@@ -107,7 +107,7 @@ public static class MockData
 
         new Store
         {
-            Id = "m003",
+            Id = Guid.NewGuid(),
             Name = "Highland Fresh Produce",
             Logo = "highland_logo.jpg",
             Rating = 4.6,
@@ -116,8 +116,8 @@ public static class MockData
             {
                 new ProductX
                 {
-                    Id = "p201",
-                    StoreId = "m003",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Strawberries",
                     Category = "Berries",
                     Description = "Fresh, sweet strawberries delivered daily.",
@@ -128,8 +128,8 @@ public static class MockData
                 },
                 new ProductX
                 {
-                    Id = "p202",
-                    StoreId = "m003",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Blueberries",
                     Category = "Berries",
                     Description = "Antioxidant-rich fresh blueberries.",
@@ -143,7 +143,7 @@ public static class MockData
 
         new Store
         {
-            Id = "m004",
+            Id = Guid.NewGuid(),
             Name = "Coastal Citrus Co.",
             Logo = "coastal_logo.jpg",
             Rating = 4.8,
@@ -152,8 +152,8 @@ public static class MockData
             {
                 new ProductX
                 {
-                    Id = "p301",
-                    StoreId = "m004",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Lemons",
                     Category = "Citrus",
                     Description = "Fresh lemons with strong aroma.",
@@ -164,8 +164,8 @@ public static class MockData
                 },
                 new ProductX
                 {
-                    Id = "p302",
-                    StoreId = "m004",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Grapefruits",
                     Category = "Citrus",
                     Description = "Juicy grapefruits.",
@@ -176,8 +176,8 @@ public static class MockData
                 },
                 new ProductX
                 {
-                    Id = "p303",
-                    StoreId = "m004",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Oranges",
                     Category = "Fruits",
                     Description = "Tangy oranges from coastal farms.",
@@ -191,7 +191,7 @@ public static class MockData
 
         new Store
         {
-            Id = "m005",
+            Id = Guid.NewGuid(),
             Name = "Happy Harvest Market",
             Logo = "happy_harvest.jpg",
             Rating = 4.3,
@@ -200,8 +200,8 @@ public static class MockData
             {
                 new ProductX
                 {
-                    Id = "p401",
-                    StoreId = "m005",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Pineapples",
                     Category = "Fruits",
                     Description = "Sweet tropical pineapples.",
@@ -212,8 +212,8 @@ public static class MockData
                 },
                 new ProductX
                 {
-                    Id = "p402",
-                    StoreId = "m005",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Papayas",
                     Category = "Fruits",
                     Description = "Sweet and soft papayas.",
@@ -227,7 +227,7 @@ public static class MockData
 
         new Store
         {
-            Id = "m006",
+            Id = Guid.NewGuid(),
             Name = "Farm Direct Foods",
             Logo = "farm_direct.jpg",
             Rating = 4.6,
@@ -236,8 +236,8 @@ public static class MockData
             {
                 new ProductX
                 {
-                    Id = "p501",
-                    StoreId = "m006",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Grapes",
                     Category = "Fruits",
                     Description = "Seedless grapes, red or green.",
@@ -249,14 +249,14 @@ public static class MockData
                     },
                     Variants = new List<Variant>
                     {
-                        new Variant { Id = "v501", SKU = "GRP-RD-501", Price = 2.40, Stock = 110, Options = new Dictionary<string,string>{{"Color","Red"}} },
-                        new Variant { Id = "v502", SKU = "GRP-GR-501", Price = 2.30, Stock = 95, Options = new Dictionary<string,string>{{"Color","Green"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "GRP-RD-501", Price = 2.40, Stock = 110, Options = new Dictionary<string,string>{{"Color","Red"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "GRP-GR-501", Price = 2.30, Stock = 95, Options = new Dictionary<string,string>{{"Color","Green"}} },
                     }
                 },
                 new ProductX
                 {
-                    Id = "p502",
-                    StoreId = "m006",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Avocados",
                     Category = "Fruits",
                     Description = "Fresh organic avocados.",
@@ -270,7 +270,7 @@ public static class MockData
 
         new Store
         {
-            Id = "m007",
+            Id = Guid.NewGuid(),
             Name = "Tropical Delight Farm",
             Logo = "tropical_delight.jpg",
             Rating = 4.9,
@@ -279,8 +279,8 @@ public static class MockData
             {
                 new ProductX
                 {
-                    Id = "p601",
-                    StoreId = "m007",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Mangoes",
                     Category = "Fruits",
                     Description = "Juicy ripe mangoes from coastal farms.",
@@ -291,8 +291,8 @@ public static class MockData
                 },
                 new ProductX
                 {
-                    Id = "p602",
-                    StoreId = "m007",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Pineapples",
                     Category = "Fruits",
                     Description = "Sweet pineapples.",
@@ -306,15 +306,15 @@ public static class MockData
 
         new Store 
         {
-            Id = "m008",
+            Id = Guid.NewGuid(),
             Name = "TechWorld Electronics",
             Logo = "techworld.jpg",
             Rating = 4.4,
             TotalProducts = 3,
             Products = new List<ProductX> {
                 new ProductX {
-                    Id = "p701",
-                    StoreId = "m008",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Wireless Headphones",
                     Category = "Audio",
                     Description = "Bluetooth noise-canceling headphones.",
@@ -324,13 +324,13 @@ public static class MockData
                         new Option { Name = "Color", Values = new List<string>{ "Black", "White" } }
                     },
                     Variants = new List<Variant>{
-                        new Variant { Id = "v701", SKU = "HD-BLK-701", Price = 59.99, Stock = 40, Options = new Dictionary<string,string>{{"Color","Black"}} },
-                        new Variant { Id = "v702", SKU = "HD-WHT-701", Price = 59.99, Stock = 30, Options = new Dictionary<string,string>{{"Color","White"}} }
+                        new Variant { Id = Guid.NewGuid(), SKU = "HD-BLK-701", Price = 59.99, Stock = 40, Options = new Dictionary<string,string>{{"Color","Black"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "HD-WHT-701", Price = 59.99, Stock = 30, Options = new Dictionary<string,string>{{"Color","White"}} }
                     }
                 },
                 new ProductX {
-                    Id = "p702",
-                    StoreId = "m008",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Smartphone Charger",
                     Category = "Accessories",
                     Description = "Fast-charging USB-C charger.",
@@ -340,8 +340,8 @@ public static class MockData
                     Stock = 120
                 },
                 new ProductX {
-                    Id = "p703",
-                    StoreId = "m008",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "4K LED TV",
                     Category = "TV & Home",
                     Description = "Ultra HD 50-inch smart TV.",
@@ -355,15 +355,15 @@ public static class MockData
 
         new Store 
         {
-            Id = "m009",
+            Id = Guid.NewGuid(),
             Name = "UrbanStyle Clothing",
             Logo = "urbanstyle.jpg",
             Rating = 4.2,
             TotalProducts = 2,
             Products = new List<ProductX> {
                 new ProductX {
-                    Id = "p801",
-                    StoreId = "m009",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Men's T-Shirts",
                     Category = "Apparel",
                     Description = "100% cotton premium tees.",
@@ -374,13 +374,13 @@ public static class MockData
                         new Option { Name = "Color", Values = new List<string>{ "Black","Blue","Gray" } }
                     },
                     Variants = new List<Variant>{
-                        new Variant { Id = "v801", SKU="TS-M-BLK", Price=12.99, Stock=100, Options = new(){{"Size","M"},{"Color","Black"}}},
-                        new Variant { Id = "v802", SKU="TS-L-GRY", Price=12.99, Stock=80, Options = new(){{"Size","L"},{"Color","Gray"}}}
+                        new Variant { Id = Guid.NewGuid(), SKU="TS-M-BLK", Price=12.99, Stock=100, Options = new(){{"Size","M"},{"Color","Black"}}},
+                        new Variant { Id = Guid.NewGuid(), SKU="TS-L-GRY", Price=12.99, Stock=80, Options = new(){{"Size","L"},{"Color","Gray"}}}
                     }
                 },
                 new ProductX {
-                    Id = "p802",
-                    StoreId = "m009",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Women's Jeans",
                     Category = "Apparel",
                     Description = "Stretch denim, premium quality.",
@@ -394,15 +394,15 @@ public static class MockData
 
         new Store 
         {
-            Id = "m010",
+            Id = Guid.NewGuid(),
             Name = "HomeLiving Furniture",
             Logo = "homeliving.jpg",
             Rating = 4.7,
             TotalProducts = 2,
             Products = new List<ProductX>{
                 new ProductX {
-                    Id = "p901",
-                    StoreId = "m010",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Wooden Coffee Table",
                     Category = "Furniture",
                     Description = "Solid oak handcrafted table.",
@@ -412,8 +412,8 @@ public static class MockData
                     Stock = 20
                 },
                 new ProductX {
-                    Id = "p902",
-                    StoreId = "m010",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Office Chair",
                     Category = "Furniture",
                     Description = "Ergonomic office chair with lumbar support.",
@@ -423,8 +423,8 @@ public static class MockData
                         new Option { Name="Color", Values = new(){"Black","Brown"} }
                     },
                     Variants = new List<Variant>{
-                        new Variant { Id="v901", SKU="CH-BLK-01", Price=89.99, Stock=40, Options=new(){{"Color","Black"}}},
-                        new Variant { Id="v902", SKU="CH-BRN-01", Price=89.99, Stock=30, Options=new(){{"Color","Brown"}}}
+                        new Variant { Id=Guid.NewGuid(), SKU="CH-BLK-01", Price=89.99, Stock=40, Options=new(){{"Color","Black"}}},
+                        new Variant { Id=Guid.NewGuid(), SKU="CH-BRN-01", Price=89.99, Stock=30, Options=new(){{"Color","Brown"}}}
                     }
                 }
             }
@@ -432,15 +432,15 @@ public static class MockData
 
         new Store 
         {
-            Id = "m011",
+            Id = Guid.NewGuid(),
             Name = "Glow Beauty Essentials",
             Logo = "glowbeauty.jpg",
             Rating = 4.5,
             TotalProducts = 3,
             Products = new List<ProductX>{
                 new ProductX {
-                    Id = "p1001",
-                    StoreId = "m011",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Face Serum",
                     Category = "Skincare",
                     Description = "Vitamin C brightening serum.",
@@ -450,8 +450,8 @@ public static class MockData
                     Stock = 150
                 },
                 new ProductX {
-                    Id = "p1002",
-                    StoreId = "m011",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Lipstick",
                     Category = "Cosmetics",
                     Description = "Matte finish lipstick.",
@@ -461,13 +461,13 @@ public static class MockData
                         new Option { Name="Shade", Values=new(){"Red","Nude","Rose"}}
                     },
                     Variants = new List<Variant>{
-                        new Variant{ Id="v1001", SKU="LS-RED-01", Price=7.99, Stock=60, Options=new(){{"Shade","Red"}}},
-                        new Variant{ Id="v1002", SKU="LS-NUD-01", Price=7.99, Stock=70, Options=new(){{"Shade","Nude"}}}
+                        new Variant{ Id=Guid.NewGuid(), SKU="LS-RED-01", Price=7.99, Stock=60, Options=new(){{"Shade","Red"}}},
+                        new Variant{ Id=Guid.NewGuid(), SKU="LS-NUD-01", Price=7.99, Stock=70, Options=new(){{"Shade","Nude"}}}
                     }
                 },
                 new ProductX {
-                    Id = "p1003",
-                    StoreId = "m011",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Face Cleanser",
                     Category = "Skincare",
                     Description = "Gentle daily cleansing foam.",
@@ -481,15 +481,15 @@ public static class MockData
 
         new Store 
         {
-            Id = "m012",
+            Id = Guid.NewGuid(),
             Name = "PowerFit Sports",
             Logo = "powerfit.jpg",
             Rating = 4.6,
             TotalProducts = 2,
             Products = new List<ProductX>{
                 new ProductX {
-                    Id = "p1101",
-                    StoreId = "m012",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Yoga Mat",
                     Category = "Fitness",
                     Description = "Non-slip thick yoga mat.",
@@ -497,13 +497,13 @@ public static class MockData
                     HasVariants = true,
                     Options = new(){ new Option{Name="Color", Values=new(){"Purple","Blue","Black"}} },
                     Variants = new List<Variant>{
-                        new Variant{ Id="v1101", SKU="YM-PUR-01", Price=22.99, Stock=80, Options=new(){{"Color","Purple"}}},
-                        new Variant{ Id="v1102", SKU="YM-BLU-01", Price=22.99, Stock=90, Options=new(){{"Color","Blue"}}}
+                        new Variant{ Id=Guid.NewGuid(), SKU="YM-PUR-01", Price=22.99, Stock=80, Options=new(){{"Color","Purple"}}},
+                        new Variant{ Id=Guid.NewGuid(), SKU="YM-BLU-01", Price=22.99, Stock=90, Options=new(){{"Color","Blue"}}}
                     }
                 },
                 new ProductX {
-                    Id = "p1102",
-                    StoreId = "m012",
+                    Id = Guid.NewGuid(),
+                    StoreId = Guid.NewGuid(),
                     Name = "Dumbbell Set",
                     Category = "Fitness",
                     Description = "20kg adjustable dumbbells.",
@@ -517,15 +517,15 @@ public static class MockData
 
         new Store 
         {
-            Id = "m013",
+            Id = Guid.NewGuid(),
             Name = "PetCare Supplies",
             Logo = "petcare.jpg",
             Rating = 4.4,
             TotalProducts = 2,
             Products = new List<ProductX>{
                 new ProductX{
-                    Id="p1201",
-                    StoreId="m013",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Dog Food - Chicken Flavor",
                     Category="Pet Food",
                     Description="Nutritious dry dog food.",
@@ -535,8 +535,8 @@ public static class MockData
                     Stock=90
                 },
                 new ProductX{
-                    Id="p1202",
-                    StoreId="m013",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Cat Toy Set",
                     Category="Pet Accessories",
                     Description="Interactive toys for cats.",
@@ -550,15 +550,15 @@ public static class MockData
 
         new Store 
         {
-            Id="m014",
+            Id=Guid.NewGuid(),
             Name="AutoGear Shop",
             Logo="autogear.jpg",
             Rating=4.3,
             TotalProducts=2,
             Products=new(){
                 new ProductX{
-                    Id="p1301",
-                    StoreId="m014",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Car Vacuum Cleaner",
                     Category="Car Accessories",
                     Description="Portable car cleaner.",
@@ -568,8 +568,8 @@ public static class MockData
                     Stock=60
                 },
                 new ProductX{
-                    Id="p1302",
-                    StoreId="m014",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Car Seat Covers",
                     Category="Car Accessories",
                     Description="Waterproof leather covers.",
@@ -577,8 +577,8 @@ public static class MockData
                     HasVariants=true,
                     Options=new(){ new Option { Name="Color", Values=new(){"Black","Beige"} } },
                     Variants=new(){
-                        new Variant{Id="v1301", SKU="SC-BLK-01", Price=59.99, Stock=20, Options=new(){{"Color","Black"}}},
-                        new Variant{Id="v1302", SKU="SC-BGE-01", Price=59.99, Stock=30, Options=new(){{"Color","Beige"}}}
+                        new Variant{Id=Guid.NewGuid(), SKU="SC-BLK-01", Price=59.99, Stock=20, Options=new(){{"Color","Black"}}},
+                        new Variant{Id=Guid.NewGuid(), SKU="SC-BGE-01", Price=59.99, Stock=30, Options=new(){{"Color","Beige"}}}
                     }
                 }
             }
@@ -586,15 +586,15 @@ public static class MockData
 
         new Store 
         {
-            Id="m015",
+            Id=Guid.NewGuid(),
             Name="PaperTrail Books",
             Logo="papertrail.jpg",
             Rating=4.8,
             TotalProducts=2,
             Products=new(){
                 new ProductX{
-                    Id="p1401",
-                    StoreId="m015",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Mystery Novel",
                     Category="Books",
                     Description="Thrilling detective story.",
@@ -604,8 +604,8 @@ public static class MockData
                     Stock=150
                 },
                 new ProductX{
-                    Id="p1402",
-                    StoreId="m015",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Notebook Set",
                     Category="Stationery",
                     Description="Pack of 3 premium notebooks.",
@@ -619,15 +619,15 @@ public static class MockData
 
         new Store 
         {
-            Id="m016",
+            Id=Guid.NewGuid(),
             Name="Organic Health Store",
             Logo="organic.jpg",
             Rating=4.7,
             TotalProducts=2,
             Products=new(){
                 new ProductX{
-                    Id="p1501",
-                    StoreId="m016",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Organic Honey",
                     Category="Food",
                     Description="Raw unprocessed honey.",
@@ -637,8 +637,8 @@ public static class MockData
                     Stock=80
                 },
                 new ProductX{
-                    Id="p1502",
-                    StoreId="m016",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Herbal Tea Mix",
                     Category="Beverages",
                     Description="Relaxing herbal infusion.",
@@ -652,15 +652,15 @@ public static class MockData
 
         new Store 
         {
-            Id="m017",
+            Id=Guid.NewGuid(),
             Name="KitchenPro Supplies",
             Logo="kitchenpro.jpg",
             Rating=4.4,
             TotalProducts=2,
             Products=new(){
                 new ProductX{
-                    Id="p1601",
-                    StoreId="m017",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Stainless Steel Knife Set",
                     Category="Kitchen",
                     Description="Professional chef knives.",
@@ -670,8 +670,8 @@ public static class MockData
                     Stock=50
                 },
                 new ProductX{
-                    Id="p1602",
-                    StoreId="m017",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Cutting Board",
                     Category="Kitchen",
                     Description="Bamboo cutting board.",
@@ -685,15 +685,15 @@ public static class MockData
 
         new Store 
         {
-            Id="m018",
+            Id=Guid.NewGuid(),
             Name="HandyTools Hardware",
             Logo="handytools.jpg",
             Rating=4.5,
             TotalProducts=2,
             Products=new(){
                 new ProductX{
-                    Id="p1701",
-                    StoreId="m018",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Electric Drill",
                     Category="Tools",
                     Description="Cordless drill set.",
@@ -703,8 +703,8 @@ public static class MockData
                     Stock=40
                 },
                 new ProductX{
-                    Id="p1702",
-                    StoreId="m018",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Hammer",
                     Category="Tools",
                     Description="Steel claw hammer.",
@@ -718,15 +718,15 @@ public static class MockData
 
         new Store 
         {
-            Id="m019",
+            Id=Guid.NewGuid(),
             Name="FunLand Toys",
             Logo="funland.jpg",
             Rating=4.3,
             TotalProducts=2,
             Products=new(){
                 new ProductX{
-                    Id="p1801",
-                    StoreId="m019",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Remote Control Car",
                     Category="Toys",
                     Description="High-speed RC car.",
@@ -736,8 +736,8 @@ public static class MockData
                     Stock=70
                 },
                 new ProductX{
-                    Id="p1802",
-                    StoreId="m019",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Puzzle Set",
                     Category="Kids",
                     Description="500-piece puzzle.",
@@ -751,15 +751,15 @@ public static class MockData
 
         new Store 
         {
-            Id="m020",
+            Id=Guid.NewGuid(),
             Name="SweetTreats Bakery",
             Logo="sweettreats.jpg",
             Rating=4.9,
             TotalProducts=2,
             Products=new(){
                 new ProductX{
-                    Id="p1901",
-                    StoreId="m020",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Cupcake Box",
                     Category="Bakery",
                     Description="Box of 6 assorted cupcakes.",
@@ -769,8 +769,8 @@ public static class MockData
                     Stock=60
                 },
                 new ProductX{
-                    Id="p1902",
-                    StoreId="m020",
+                    Id=Guid.NewGuid(),
+                    StoreId=Guid.NewGuid(),
                     Name="Chocolate Cake",
                     Category="Bakery",
                     Description="Rich chocolate cake.",

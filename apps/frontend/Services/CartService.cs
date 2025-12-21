@@ -43,7 +43,7 @@ public class CartService
             items.Add(new CartItem
             {
                 ProductId = product.Id,
-                VariantId = variantId ?? "",
+                VariantId = variantId!.Value,
                 Name = product.Name,
                 VariantName = variant != null 
                     ? string.Join(", ", variant.Options.Select(o => $"{o.Key}: {o.Value}")) 
@@ -61,14 +61,14 @@ public class CartService
         NotifyStateChanged();
     }
 
-    public bool IsInCart(string productId, string? variantId)
+    public bool IsInCart(Guid productId, Guid? variantId)
     {
         return Items.Any(i =>
             i.ProductId == productId &&
             i.VariantId == variantId);
     }
 
-    public async Task RemoveItem(string productId, string? variantId)
+    public async Task RemoveItem(Guid productId, Guid? variantId)
     {
         var item = Items.FirstOrDefault(i =>
             i.ProductId == productId &&
@@ -123,8 +123,8 @@ public class CartService
 
 public class CartItem
 {
-    public string ProductId { get; set; } = string.Empty;
-    public string VariantId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; }
+    public Guid VariantId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? VariantName { get; set; }
     public string Thumbnail { get; set; } = string.Empty;
@@ -133,6 +133,6 @@ public class CartItem
     public string Description { get; set; } = string.Empty;
 
     // Optional but recommended:
-    public string StoreId { get; set; } = string.Empty;
+    public Guid StoreId { get; set; }
     public string? SKU { get; set; }
 }

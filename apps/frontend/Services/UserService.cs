@@ -4,15 +4,13 @@ using System.Text.Json;
 public class UserService
 {
     private readonly HttpClient _http;
-    private readonly DropdownDataService _dropdownService;
     private readonly ToastService _toastService;
     private List<User>? _cachedUsers;
     private DateTime _lastFetchTime;
     private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
-    public UserService(IHttpClientFactory httpClientFactory, DropdownDataService dropdownService, ToastService toastService)
+    public UserService(IHttpClientFactory httpClientFactory, ToastService toastService)
     {
         _http = httpClientFactory.CreateClient("AuthenticatedApi");;
-        _dropdownService = dropdownService;
         _toastService = toastService;
     }
 
@@ -24,7 +22,6 @@ public class UserService
             if (response.IsSuccessStatusCode)
             {
                 InvalidateCache();
-                _dropdownService.InvalidateCache();
                 return ServiceResult2<HttpResponseMessage>.Ok(response);
             }
 

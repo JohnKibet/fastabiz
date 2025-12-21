@@ -6,7 +6,6 @@
             <th class="px-4 py-3">No.</th>
             <th class="px-4 py-3">Customers</th>
             <th class="px-4 py-3">Quantity</th>
-            <th class="px-4 py-3">Inventory</th>
             <th class="px-4 py-3">Pickup</th>
             <th class="px-4 py-3">Delivery</th>
             <th class="px-4 py-3">Status</th>
@@ -22,12 +21,9 @@
                 <tr class="border-b hover:bg-gray-50">
                     <td class="px-4 py-2">@((index + 1) + (CurrentPage - 1) * PageSize)</td>
                     <td class="px-4 py-2">
-                        @CustomerNames.GetValueOrDefault(order.CustomerID, "Customer")
+                        @CustomerNames.GetValueOrDefault(order.CustomerId, "Customer")
                     </td>
                     <td class="px-4 py-2">@order.Quantity</td>
-                    <td class="px-4 py-2">
-                        @InventoryCategories.GetValueOrDefault(order.InventoryID, "Uknown")
-                    </td>
                     <td class="px-4 py-2">@order.PickupAddress</td>
                     <td class="px-4 py-2">@order.DeliveryAddress</td>
                     <td class="px-4 py-2">
@@ -38,7 +34,7 @@
                     <td class="px-4 py-2">@order.CreatedAt.ToString("g")</td>
                     <td class="px-4 py-2 text-right">
                         <TableRowActions
-                            ColumnValueId="@order.ID"
+                            ColumnValueId="@order.Id"
                             OnView="OnView"
                             OnEdit="OnEdit"
                             OnDelete="OnDelete"

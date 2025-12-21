@@ -63,7 +63,7 @@
 </div>
 
 @code {
-    [Parameter] public string StoreId { get; set; } = string.Empty;
+    [Parameter] public Guid StoreId { get; set; }
     [CascadingParameter] StorefrontLayout? Layout { get; set; }
 
     private Store? Store;
@@ -144,7 +144,7 @@
             Price = p.Price,
             MinPrice = p.MinPrice,
             MaxPrice = p.MaxPrice,
-            StoreId = Store?.Id ?? "",
+            StoreId = Store!.Id,
             StoreName = Store?.Name ?? "",
             Rating = Store?.Rating ?? 0,
             TotalSold = new Random().Next(10, 200) // mock sold count

@@ -76,7 +76,6 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-4 py-2">Order ID</th>
-                    <th class="px-4 py-2">Item</th>
                     <th class="px-4 py-2">Quantity</th>
                     <th class="px-4 py-2">Status</th>
                     <th class="px-4 py-2">Date</th>
@@ -86,8 +85,7 @@
                 @foreach (var order in RecentOrders.OrderByDescending(o => o.CreatedAt).Take(5))
                 {
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2">@order.ID.ToString().Substring(0,8)</td>
-                        <td class="px-4 py-2">@order.Category</td>
+                        <td class="px-4 py-2">@order.Id.ToString().Substring(0,8)</td>
                         <td class="px-4 py-2">@order.Quantity</td>
                         <td class="px-4 py-2">@order.Status</td>
                         <td class="px-4 py-2">@order.CreatedAt.ToString("MMM dd, yyyy")</td>

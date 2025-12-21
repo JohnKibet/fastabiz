@@ -3,7 +3,7 @@ namespace frontend.Models;
 // Represents a Store
 public class Store
 {
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Logo { get; set; } = string.Empty;
     public double Rating { get; set; }
@@ -16,8 +16,8 @@ public class Store
 // Represents a product (variant or simple)
 public class ProductX
 {
-    public string Id { get; set; } = string.Empty;
-    public string StoreId { get; set; } = string.Empty;
+    public Guid Id { get; set; }
+    public Guid StoreId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
@@ -49,7 +49,7 @@ public class Option
 // Variant of a product
 public class Variant
 {
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
     public string SKU { get; set; } = string.Empty;
 
     public double Price { get; set; }
@@ -64,7 +64,7 @@ public class Variant
 // Lightweight version for list/grid views
 public class ProductListItem
 {
-    public string Id { get; set; } = string.Empty;
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
@@ -75,7 +75,7 @@ public class ProductListItem
     public double? MinPrice { get; set; }
     public double? MaxPrice { get; set; }
 
-    public string StoreId { get; set; } = string.Empty;
+    public Guid StoreId { get; set; }
     public string StoreName { get; set; } = string.Empty;
     public double Rating { get; set; }
     public int TotalSold { get; set; }

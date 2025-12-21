@@ -33,7 +33,7 @@
 
     private List<ProductX> FilteredProducts = new();
     private List<Store> Stores = MockData.Stores;
-    private string? SelectedStoreId;
+    private Guid? SelectedStoreId;
 
     private int CurrentPage = 1;
     private int TotalPages = 1;
@@ -44,7 +44,7 @@
         ApplyFilters();
     }
 
-    private void FilterByMerchant(string merchantId)
+    private void FilterByMerchant(Guid merchantId)
     {
         SelectedStoreId = merchantId;
         ApplyFilters();
@@ -59,7 +59,7 @@
             .ToList();
 
         // Filter by merchant if selected
-        if (!string.IsNullOrEmpty(SelectedStoreId))
+        if (SelectedStoreId!.Value != Guid.Empty)
         {
             FilteredProducts = FilteredProducts
                 .Where(p => p.StoreId == SelectedStoreId)
@@ -101,7 +101,7 @@
             Price = p.Price,
             MinPrice = p.MinPrice,
             MaxPrice = p.MaxPrice,
-            StoreId = merchant?.Id ?? "",
+            StoreId = merchant!.Id,
             StoreName = merchant?.Name ?? "",
             Rating = merchant?.Rating ?? 0,
             TotalSold = new Random().Next(10, 200)
