@@ -48,7 +48,7 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":           p.ID,
-		"merchant_id":  p.MerchantID,
+		"store_id":     p.StoreID,
 		"name":         p.Name,
 		"description":  p.Description,
 		"category":     p.Category,

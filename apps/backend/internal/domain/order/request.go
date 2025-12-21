@@ -6,7 +6,7 @@ import (
 )
 
 type CreateOrderRequest struct {
-	MerchantID uuid.UUID `json:"merchant_id" binding:"required"`
+	StoreID    uuid.UUID `json:"store_id" binding:"required"`
 	AdminID    uuid.UUID `json:"admin_id" binding:"required"`
 	CustomerID uuid.UUID `json:"customer_id" binding:"required"`
 
@@ -37,7 +37,7 @@ type UpdateOrderRequest struct {
 
 func (r *CreateOrderRequest) ToOrder() *Order {
 	return &Order{
-		MerchantID: r.MerchantID,
+		StoreID:    r.StoreID,
 		AdminID:    r.AdminID,
 		CustomerID: r.CustomerID,
 

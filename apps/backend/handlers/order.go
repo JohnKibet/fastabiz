@@ -60,7 +60,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":               o.ID,
-		"merchant_id":      o.MerchantID,
+		"store_id":         o.StoreID,
 		"admin_id":         o.AdminID,
 		"customer_id":      o.CustomerID,
 		"product_id":       o.ProductID,
