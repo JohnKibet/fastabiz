@@ -19,8 +19,8 @@ const (
 
 type Order struct {
 	ID         uuid.UUID `db:"id" json:"id"`
-	MerchantID uuid.UUID `db:"merchant_id" json:"merchant_id"` // owner
-	AdminID    uuid.UUID `db:"admin_id" json:"admin_id"`       // manager
+	StoreID    uuid.UUID `db:"store_id" json:"store_id"` // owner
+	AdminID    uuid.UUID `db:"admin_id" json:"admin_id"` // manager
 	CustomerID uuid.UUID `db:"user_id" json:"customer_id"`
 
 	ProductID uuid.UUID  `db:"product_id" json:"product_id"`

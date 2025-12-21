@@ -12,7 +12,7 @@ type CreateVariantRequest struct {
 }
 
 type CreateProductRequest struct {
-	MerchantID  uuid.UUID `json:"merchant_id" binding:"required"`
+	StoreID     uuid.UUID `json:"store_id" binding:"required"`
 	Name        string    `json:"name" binding:"required"`
 	Description string    `json:"description" binding:"required"`
 	Category    string    `json:"category" binding:"required"`
@@ -58,7 +58,7 @@ type UpdateVariantPriceRequest struct {
 
 func (r CreateProductRequest) ToProduct() *Product {
 	return &Product{
-		MerchantID:  r.MerchantID,
+		StoreID:     r.StoreID,
 		Name:        r.Name,
 		Description: r.Description,
 		Category:    r.Category,
