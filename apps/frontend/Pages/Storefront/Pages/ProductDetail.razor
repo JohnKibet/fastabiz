@@ -91,8 +91,8 @@ else
 }
 
 @code {
-    [Parameter] public string? VariantId { get; set; }
-    [Parameter] public string ProductId { get; set; } = string.Empty;
+    [Parameter] public Guid? VariantId { get; set; }
+    [Parameter] public Guid ProductId { get; set; }
     [CascadingParameter] StorefrontLayout? Layout { get; set; }
     [Inject] private CartService CartService { get; set; } = default!;
 
@@ -104,10 +104,23 @@ else
 
     protected override void OnInitialized()
     {
-        // prefill from cart for changes to be made 
-        if(!string.IsNullOrEmpty(VariantId) && Product.HasVariants)
+        // 1. Load product
+        Product = MockData.Stores
+            .SelectMany(m => m.Products)
+            .FirstOrDefault(p => p.Id == ProductId);
+
+        if (Product == null)
+            return;
+
+        // 2. Load store
+        Store = MockData.Stores.First(m => m.Id == Product.StoreId);
+
+        // 3. Prefill variant from URL (if provided)
+        if (VariantId.HasValue && Product.HasVariants)
         {
-            SelectedVariant = Product.Variants.FirstOrDefault(v => v.Id == VariantId);
+            SelectedVariant = Product.Variants
+                .FirstOrDefault(v => v.Id == VariantId.Value);
+
             if (SelectedVariant != null)
             {
                 foreach (var opt in SelectedVariant.Options)
@@ -117,21 +130,13 @@ else
             }
         }
 
-        Product = MockData.Stores
-            .SelectMany(m => m.Products)
-            .FirstOrDefault(p => p.Id == ProductId);
-
-        if (Product != null)
-        {
-            Store = MockData.Stores.First(m => m.Id == Product.StoreId);
-        }
-
+        // 4. Breadcrumbs
         Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
         {
             new() { Title = "Home", Url = "/" },
             new() { Title = "Stores", Url = "/stores" },
-            new() { Title = Store?.Name ?? "", Url = $"/store/{Store?.Id}" },
-            new() { Title = Product?.Name ?? "", Url = $"/product/{ProductId}" }
+            new() { Title = Store.Name, Url = $"/store/{Store.Id}" },
+            new() { Title = Product.Name, Url = $"/product/{ProductId}" }
         });
     }
 
@@ -188,7 +193,7 @@ else
         return min == max ? min.ToString() : $"{min} - {max}";
     }
 
-    private void ViewStore(string id) => Nav.NavigateTo($"/store/{id}");
+    private void ViewStore(Guid id) => Nav.NavigateTo($"/store/{id}");
 
     private void SelectVariant(Variant v)
     {

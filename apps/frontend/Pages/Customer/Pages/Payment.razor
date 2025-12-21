@@ -144,6 +144,8 @@
 @using frontend.Models
 @using Microsoft.AspNetCore.WebUtilities
 @inject CartService CartService
+@inject OrderService OrderService
+@inject ToastService ToastService
 @inject NavigationManager Navigation
 
 <h1 class="text-2xl font-bold mb-6">Payment</h1>
@@ -272,7 +274,7 @@ else
     private string SelectedMethod { get; set; } = "cod";
     private string? SuccessMessage { get; set; }
     private string? ErrorMessage { get; set; }
-    private string? CustomerID { get; set; }
+    private Guid? CustomerID { get; set; }
 
     private void GoShop() => Navigation.NavigateTo("/storefront");
 
@@ -300,30 +302,84 @@ else
         double.TryParse(query["pickLat"], out var pickLat);
         double.TryParse(query["pickLng"], out var pickLng);
 
-        // Construct temporary NewOrder for logging
-        var tempOrder = new NewCreateOrderRequest
+        var storeId = CartService.Items.First().StoreId;
+        if (storeId == Guid.Empty)
         {
-            CustomerId = UserId.Value,
-            DeliveryAddress = delAddress,
-            DeliveryLatitude = delLat,
-            DeliveryLongitude = delLng,
-            PickupAddress = pickAddress,
-            PickupLatitude = pickLat,
-            PickupLongitude = pickLng,
-            PaymentMethod = SelectedMethod,
-            Items = CartService.Items.Select(i => new OrderLineItem
+            ErrorMessage = "Invalid store reference in cart.";
+            return;
+        }
+
+        var items = new List<CreateOrderItemDto>();
+
+        foreach (var i in CartService.Items)
+        {
+            var productId = i.ProductId;
+            if (productId == Guid.Empty)
             {
-                ProductId = i.ProductId,
-                VariantId = i.VariantId,
-                Quantity = i.Quantity,
-                Price = i.Price
-            }).ToList()
+                ErrorMessage = "Invalid product reference in cart.";
+                return;
+            }
+
+            Guid? variantId = i.VariantId == Guid.Empty
+            ? null
+            : i.VariantId;
+
+            items.Add(new CreateOrderItemDto
+            {
+                ProductId = productId,
+                VariantId = variantId,
+                Quantity = i.Quantity
+            });
+        }
+
+        var request = new CreateOrderRequest
+        {
+            StoreId = storeId,
+            CustomerId = UserId!.Value,
+            PaymentMethod = SelectedMethod,
+
+            Delivery = new LocationDto
+            {
+                Address = delAddress,
+                Lat = delLat,
+                Lng = delLng
+            },
+
+            Pickup = new LocationDto
+            {
+                Address = pickAddress,
+                Lat = pickLat,
+                Lng = pickLng
+            },
+
+            Items = items
         };
 
-        Console.WriteLine($"ORDER TEST OBJECT: {System.Text.Json.JsonSerializer.Serialize(tempOrder)}");
+        var result = await OrderService.AddOrder(request);
+        Console.WriteLine($"ORDER TEST OBJECT: {System.Text.Json.JsonSerializer.Serialize(request)}");
+        if (result.Success)
+        {
+            ToastService.ShowToast("Order created successfully!", ToastService.ToastLevel.Success);
+            @* Navigation.NavigateTo("admin/users"); *@
+            return;
+        }
 
-        SuccessMessage = "Payment successful (test only)";
-        ErrorMessage = null;
-        Navigation.NavigateTo("/orders/confirmation");
+        var errMessage = result.Error;
+
+        if (errMessage == null)
+        {
+            ToastService.ShowToast("Failed to create order (unknown error)", ToastService.ToastLevel.Error);
+            return;
+        }
+
+        if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+        {
+            ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+            return;
+        }
+
+        ToastService.ShowToast("Failed to create order.", ToastService.ToastLevel.Error);
+
+        @* Navigation.NavigateTo("/orders/confirmation"); *@
     }
 }

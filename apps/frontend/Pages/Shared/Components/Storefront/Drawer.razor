@@ -131,7 +131,7 @@
     private List<ProductListItem> CategoryProducts = new(); // second drawer items
     private List<ProductListItem> StoreProducts = new();
     private string? SelectedCategory;
-    private string? SelectedStore;
+    private Guid? SelectedStore;
     private bool IsSecondOpen = false;
 
     protected override async Task OnParametersSetAsync()
