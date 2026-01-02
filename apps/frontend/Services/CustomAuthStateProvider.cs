@@ -55,6 +55,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     public async Task SignOutAsync()
     {
         await _jSRuntime.InvokeVoidAsync("localStorage.removeItem", TokenStorageKey);
+        await _jSRuntime.InvokeVoidAsync("localStorage.removeItem", "cart");
         _cachedUser = null;
 
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());

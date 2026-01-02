@@ -1,0 +1,109 @@
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Storefront
+
+@if (Options?.Any() == true && Variants?.Any() == true && Options.Count > 0 && Variants.Count > 1)
+{
+    <div class="space-y-4">
+        @foreach (var option in Options)
+        {
+            <div>
+                <label class="block font-semibold mb-2">@option.Name</label>
+                <div class="flex gap-2 flex-wrap">
+                    @foreach (var val in option.Values)
+                    {
+                        bool unavailable = IsValueUnavailable(option.Name, val);
+
+                        <button
+                            disabled="@unavailable"
+                            class="@GetValueClass(option.Name, val, unavailable)"
+                            @onclick="() => SelectOption(option.Name, val)">
+                            @val
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (Selected.Values.Any(v => !string.IsNullOrEmpty(v)))
+        {
+            <button class="mt-2 px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
+                    @onclick="ClearSelections">
+                Clear Selection
+            </button>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public List<Option> Options { get; set; } = new();
+    [Parameter] public List<Variant> Variants { get; set; } = new();
+
+    [Parameter] public EventCallback<Variant?> OnVariantSelected { get; set; }
+    [Parameter] public EventCallback<Dictionary<string, string?>> OnSelectionChanged { get; set; }
+
+    private Dictionary<string, string?> Selected = new();
+
+    protected override void OnInitialized()
+    {
+        // Initialize selections only if multiple options exist
+        if (Options?.Any() == true)
+        {
+            foreach (var opt in Options)
+                Selected[opt.Name] = null;
+        }
+
+        EmitSelectedVariant();
+    }
+
+    private void SelectOption(string optionName, string value)
+    {
+        Selected[optionName] = value;
+        EmitSelectedVariant();
+        OnSelectionChanged.InvokeAsync(Selected);
+    }
+
+    private void ClearSelections()
+    {
+        foreach (var opt in Options)
+            Selected[opt.Name] = null;
+
+        EmitSelectedVariant();
+        OnSelectionChanged.InvokeAsync(Selected);
+    }
+
+    private void EmitSelectedVariant()
+    {
+        Variant? match = Variants.FirstOrDefault(v =>
+            v.Options.All(kv =>
+                Selected.ContainsKey(kv.Key) &&
+                Selected[kv.Key] == kv.Value));
+
+        OnVariantSelected.InvokeAsync(match);
+    }
+
+    private bool IsValueUnavailable(string optionName, string value)
+    {
+        var temp = new Dictionary<string, string?>(Selected)
+        {
+            [optionName] = value
+        };
+
+        return !Variants.Any(v =>
+            v.Options.All(kv =>
+                temp.ContainsKey(kv.Key) &&
+                (temp[kv.Key] == null || temp[kv.Key] == kv.Value)));
+    }
+
+    private string GetValueClass(string optionName, string value, bool unavailable)
+    {
+        bool isActive = Selected.TryGetValue(optionName, out var current) && current == value;
+
+        if (unavailable)
+            return "px-3 py-1 rounded-lg border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed";
+
+        if (isActive)
+            return "px-3 py-1 rounded-lg border border-blue-600 bg-blue-50 text-blue-700";
+
+        return "px-3 py-1 rounded-lg border border-gray-300 hover:border-gray-600 cursor-pointer";
+    }
+}

@@ -24,7 +24,7 @@
     <nav class="flex-1 overflow-y-auto mt-3 px-1 space-y-3">
         @if (Role == "admin")
         {
-            <SidebarSection Title="Dashboard" Icon="todo" 
+            <SidebarSection Title="Dashboard" Icon="dashboard" 
                             SectionKey="AdminDashboard"
                             IsCollapsed="IsCollapsed" Items="AdminDashboard"
                             IsOpen="@IsSectionOpen(nameof(AdminDashboard))"
@@ -76,10 +76,22 @@
                             IsOpen="@IsSectionOpen(nameof(CustomerDashboard))"
                             OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Operations" Icon="todo"
-                            SectionKey="CustomerOperations"
-                            IsCollapsed="IsCollapsed" Items="CustomerOperations"
-                            IsOpen="@IsSectionOpen(nameof(CustomerOperations))"
+            <SidebarSection Title="Orders" Icon="todo"
+                            SectionKey="CustomerOrders"
+                            IsCollapsed="IsCollapsed" Items="CustomerOrders"
+                            IsOpen="@IsSectionOpen(nameof(CustomerOrders))"
+                            OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Checkout" Icon=""
+                            SectionKey="CustomerCheckout"
+                            IsCollapsed="IsCollapsed" Items="CustomerCheckout"
+                            IsOpen="@IsSectionOpen(nameof(CustomerCheckout))"
+                            OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Payment" Icon=""
+                            SectionKey="CustomerPayment"
+                            IsCollapsed="IsCollapsed" Items="CustomerPayment"
+                            IsOpen="@IsSectionOpen(nameof(CustomerPayment))"
                             OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Feedback" Icon="shopping-bag"
@@ -88,10 +100,10 @@
                             IsOpen="@IsSectionOpen(nameof(CustomerFeedback))"
                             OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="History" Icon=""
-                            SectionKey="CustomerHistory"
-                            IsCollapsed="IsCollapsed" Items="CustomerHistory"
-                            IsOpen="@IsSectionOpen(nameof(CustomerHistory))"
+            <SidebarSection Title="Track Order" Icon=""
+                            SectionKey="CustomerTrackOrder"
+                            IsCollapsed="IsCollapsed" Items="CustomerTrackOrder"
+                            IsOpen="@IsSectionOpen(nameof(CustomerTrackOrder))"
                             OnToggle="@ToggleSection" />
         }
         else
@@ -164,7 +176,6 @@
     private List<SidebarMenuItem> AdminInventory => new()
     {
         new("Inventories", "/admin/inventories", "box-open"),
-        new("Create Inventory", "/admin/createinventory", "folder-plus")
     };
 
     private List<SidebarMenuItem> AdminUsers => new()
@@ -175,7 +186,6 @@
 
     private List<SidebarMenuItem> AdminStores => new()
     {
-        new("My Store", "/admin/my-store", "map-pin-store"),
         new("Create Store", "/admin/createstore", "create-store"),
         new("Map", "/admin/map", "map")
     };
@@ -196,23 +206,30 @@
 
     private List<SidebarMenuItem> CustomerDashboard => new()
     {
-        new("Dashboard", "/customer/dashboard", "layout-dashboard"),
+        new("Dashboard", "/customer/dashboard", "dashboard"),
+    };
+    private List<SidebarMenuItem> CustomerTrackOrder => new()
+    {
+        new("Track Order", "/customer/trackorder", "map"),
+    };
+    private List<SidebarMenuItem> CustomerOrders => new()
+    {
+        new("My Orders", "/customer/myorders", "package"),
     };
 
-    private List<SidebarMenuItem> CustomerOperations => new()
-    {
-        new("New Order", "/customer/neworder", "file-plus"),
-        new("Track Order", "/customer/trackorder", "route"),
-    }; 
     private List<SidebarMenuItem> CustomerFeedback => new()
     {
-        new("Rate Delivery", "/customer/feedback", "star"),
+        new("Rate Delivery", "/customer/feedback", "thumbs-up"),
     }; 
 
-    private List<SidebarMenuItem> CustomerHistory => new()
+    private List<SidebarMenuItem> CustomerPayment => new()
     {
-        new("My Orders", "/customer/myorders", "files"),
-        new("Payments", "/customer/payments", "credit-card")
+        new("Payment", "/customer/payment", "credit-card")
+    };
+
+    private List<SidebarMenuItem> CustomerCheckout => new()
+    {
+        new("Checkout", "/customer/checkout", "cart")
     };
 
     #endregion

@@ -30,7 +30,7 @@ func NewOrderHandler(uc *application.OrderService) *OrderHandler {
 // @Tags orders
 // @Accept json
 // @Produce json
-// @Param order body order.CreateOrderRequest true "Order input"
+// @Param order body order.CreateOrderRequestDoc true "Order input"
 // @Success 201 {object} order.OrderDoc
 // @Failure 400 {string} handlers.ErrorResponse "Bad request"
 // @Failure 500 {string} handlers.ErrorResponse "Internal server error"
@@ -58,14 +58,20 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":               o.ID,
+		"store_id":         o.StoreID,
 		"admin_id":         o.AdminID,
 		"customer_id":      o.CustomerID,
-		"inventory_id":     o.InventoryID,
+		"product_id":       o.ProductID,
+		"variant_id":       o.VariantID,
 		"quantity":         o.Quantity,
+		"unit_price":       o.UnitPrice,
+		"currency":         o.UnitPrice,
+		"total":            o.Total,
+		"product_name":     o.ProductName,
+		"variant_name":     o.VariantName,
+		"image_url":        o.ImageURL,
 		"pickup_address":   o.PickupAddress,
 		"delivery_address": o.DeliveryAddress,
 		"order_status":     o.Status,
@@ -98,8 +104,7 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(o)
+	writeJSON(w, http.StatusOK, o)
 }
 
 // GetOrderByCustomer godoc
@@ -127,8 +132,7 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(o)
+	writeJSON(w, http.StatusOK, o)
 }
 
 // UpdateOrder godoc
@@ -170,9 +174,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("order %s updated successfully", column),
 	})
 }
@@ -193,8 +195,7 @@ func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(orders)
+	writeJSON(w, http.StatusOK, orders)
 }
 
 // DeleteOrder godoc
@@ -222,29 +223,9 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": fmt.Sprintf("order %s deleted", orderID),
 	})
-}
-
-// GetOrderFormData godoc
-// @Summary      Get data for order form dropdowns
-// @Description  Returns a list of customers and inventories for populating order form dropdowns.
-// @Tags         orders
-// @Produce      json
-// @Success      200  {object}  order.DropdownDataRequest
-// @Failure      500  {object}  ErrorResponse "Failed to fetch customers or inventories"
-// @Router       /orders/form-data [get]
-func (h *OrderHandler) GetOrderFormData(w http.ResponseWriter, r *http.Request) {
-	data, err := h.UC.GetCustomersAndInventories(r.Context())
-	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to fetch form data", err)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(data)
 }
 
 // @Summary Run auto-assignment for pending orders
@@ -262,8 +243,7 @@ func (h *OrderHandler) AutoAssignOrders(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusOK, map[string]any{
 		"message":     "Auto-assignment complete",
 		"assignments": assignments,
 		"count":       len(assignments),

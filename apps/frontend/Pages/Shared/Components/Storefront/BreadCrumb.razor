@@ -1,0 +1,29 @@
+@namespace frontend.Pages.Shared.Components.Storefront
+@using Microsoft.AspNetCore.Components.Routing
+@inject NavigationManager Nav
+
+<nav aria-label="Breadcrumb">
+    <ol class="flex space-x-2 text-gray-600 text-sm">
+        @for (int i = 0; i < Items.Count; i++)
+        {
+            var item = Items[i];
+            <li class="flex items-center">
+                @if (i < Items.Count - 1)
+                {
+                    <a href="@item.Url" class="hover:text-blue-600">@item.Title</a>
+                    <svg class="w-4 h-4 mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                }
+                else
+                {
+                    <span class="font-semibold text-gray-800">@item.Title</span>
+                }
+            </li>
+        }
+    </ol>
+</nav>
+
+@code {
+    [Parameter] public List<BreadcrumbItem> Items { get; set; } = new();
+}

@@ -1,0 +1,144 @@
+@page "/customer/dashboard"
+@layout CustomerLayout
+@using frontend.Models
+@using frontend.Pages.Shared.Components.Icons
+@inject CartService CartService
+@inject NavigationManager Navigation
+
+<h1 class="text-2xl font-bold mb-6">Welcome back, @UserName!</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+    <!-- Quick Stats Cards -->
+    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
+        <div>
+            <h2 class="text-sm font-medium text-gray-500">Total Orders</h2>
+            <p class="text-2xl font-bold">@RecentOrders.Count()</p>
+        </div>
+        <LucideIcon Name="file-text" Size="8" class="text-stoneblue mt-2" />
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
+        <div>
+            <h2 class="text-sm font-medium text-gray-500">Items in Cart</h2>
+            <p class="text-2xl font-bold">@CartService.Count</p>
+        </div>
+        <LucideIcon Name="cart" Size="8" class="text-stoneblue mt-2" />
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
+        <div>
+            <h2 class="text-sm font-medium text-gray-500">Pending Orders</h2>
+            <p class="text-2xl font-bold">@RecentOrders.Count(o => o.Status == OrderStatus.Pending)</p>
+        </div>
+        <LucideIcon Name="clock" Size="8" class="text-stoneblue mt-2" />
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
+        <div>
+            <h2 class="text-sm font-medium text-gray-500">Delivered Orders</h2>
+            <p class="text-2xl font-bold">@RecentOrders.Count(o => o.Status == OrderStatus.Delivered)</p>
+        </div>
+        <LucideIcon Name="package-check" Size="8" class="text-stoneblue mt-2" />
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="mt-8 flex flex-wrap gap-4">
+    <button class="px-6 py-3 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
+            @onclick='() => Navigation.NavigateTo("/storefront")'>
+        Shop More
+    </button>
+    <button class="px-6 py-3 bg-green-600 text-white rounded shadow hover:bg-green-700"
+            @onclick='() => Navigation.NavigateTo("/customer/myorders")'>
+        View Orders
+    </button>
+    <button class="px-6 py-3 bg-orange-500 text-white rounded shadow hover:bg-orange-600"
+            @onclick='() => Navigation.NavigateTo("/customer/trackorder")'>
+        Track Order
+    </button>
+    <button class="px-6 py-3 bg-gray-700 text-white rounded shadow hover:bg-gray-800"
+            @onclick='() => Navigation.NavigateTo("/customer/feedback")'>
+        Give Feedback
+    </button>
+</div>
+
+<!-- Recent Orders Table -->
+<div class="mt-8 bg-white shadow rounded-lg p-4">
+    <h2 class="text-xl font-bold mb-4">Recent Orders</h2>
+    @if (!RecentOrders.Any())
+    {
+        <p class="text-gray-500">You haven't placed any orders yet.</p>
+    }
+    else
+    {
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2">Order ID</th>
+                    <th class="px-4 py-2">Quantity</th>
+                    <th class="px-4 py-2">Status</th>
+                    <th class="px-4 py-2">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in RecentOrders.OrderByDescending(o => o.CreatedAt).Take(5))
+                {
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-2">@order.Id.ToString().Substring(0,8)</td>
+                        <td class="px-4 py-2">@order.Quantity</td>
+                        <td class="px-4 py-2">@order.Status</td>
+                        <td class="px-4 py-2">@order.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<!-- Featured Products -->
+<div class="mt-8">
+    <h2 class="text-xl font-bold mb-4">Recommended Products</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        @foreach (var product in FeaturedProducts)
+        {
+            <div class="bg-white rounded-lg shadow p-4 flex flex-col">
+                <img src="@product.Thumbnail" class="w-full h-48 object-cover rounded-md mb-3" />
+                <h3 class="font-semibold text-lg">@product.Name</h3>
+                <p class="text-gray-500 text-sm mb-2">@product.StoreName</p>
+                <p class="font-bold text-stoneblue">@((product.HasVariants ? product.MinPrice : product.Price)?.ToString("C"))</p>
+                <button class="mt-auto px-4 py-2 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
+                        @onclick='() => Navigation.NavigateTo($"/product/{product.Id}")'>
+                    View
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] public string UserName { get; set; } = "Customer";
+    private List<Order> RecentOrders { get; set; } = new();
+    private List<ProductListItem> FeaturedProducts { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // TODO: Load orders & products from API
+        // Example placeholders
+        RecentOrders = await LoadRecentOrdersAsync();
+        FeaturedProducts = await LoadFeaturedProductsAsync();
+    }
+
+    private Task<List<Order>> LoadRecentOrdersAsync()
+    {
+        // Fetch last 10 orders for the user
+        return Task.FromResult(new List<Order>());
+    }
+
+    private Task<List<ProductListItem>> LoadFeaturedProductsAsync()
+    {
+        // Fetch featured products for the dashboard
+        return Task.FromResult(new List<ProductListItem>());
+    }
+}
+

@@ -1,0 +1,89 @@
+@page "/admin/dashboard"
+@layout AdminLayout
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+@inject ToastService ToastService
+@attribute [Authorize(Roles = "admin")]
+
+<!-- Metric Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <MetricCard Title="Active Orders" Value="@activeOrders.ToString()" Icon="box" />
+    <MetricCard Title="Deliveries This Week" Value="@deliveriesThisWeek.ToString()" Icon="truck" />
+    <MetricCard Title="Delayed Shipments" Value="@delayedShipments.ToString()" Icon="clock" Highlight="danger" />
+    <MetricCard Title="Revenue This Week" Value="@revenueThisWeek.ToString("C")" Icon="dollar-sign" />
+</div>
+
+<!-- Trends & Live Map -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Trends Chart -->
+    <DashboardPanel Title="Order Trends (Last 7 Days)">
+        <div class="h-64 bg-gray-100 rounded flex items-center justify-center text-gray-400">
+            [Chart Component Placeholder]
+        </div>
+    </DashboardPanel>
+
+    <!-- Live Map -->
+    <DashboardPanel Title="Live Driver Locations" Class="lg:col-span-2">
+        <div style="height: 16rem; width: 100%; border-radius: 0.5rem; overflow: hidden;"> 
+            <LiveMap />
+        </div>
+    </DashboardPanel>
+</div>
+
+<!-- Notifications & Recent Activity -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Notifications -->
+    <DashboardPanel Title="Notifications">
+        <ul class="space-y-2 text-sm max-h-64 overflow-y-auto bg-white">
+            @if (notifications.Any())
+            {
+                @foreach (var note in notifications)
+                {
+                    <li class="flex gap-2 items-start">
+                        <i class="fas fa-info-circle text-blue-500 mt-1"></i>
+                        <div>
+                            <p>@note</p>
+                            <span class="text-xs text-gray-400">Just now</span>
+                        </div>
+                    </li>
+                }
+            }
+            else
+            {
+                <li class="text-gray-500">No notifications available.</li>
+            }
+        </ul>
+    </DashboardPanel>
+
+    <!-- Recent Activity -->
+    <DashboardPanel Title="Recent Activity" Class="lg:col-span-2">
+        <ul class="space-y-3 text-sm text-gray-700">
+            <li>📦 Order #1832 delivered by Sarah – <span class="text-gray-500">10 mins ago</span></li>
+            <li>⚠️ Shipment #774 delayed – <span class="text-gray-500">2 hours ago</span></li>
+            <li>🚚 New driver registered: Alex – <span class="text-gray-500">Yesterday</span></li>
+        </ul>
+    </DashboardPanel>
+</div>
+
+<!-- Quick Actions -->
+<DashboardPanel Title="Quick Actions">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <ActionCard Title="Create Order" Icon="plus" OnClick="CreateOrder" />
+        <ActionCard Title="Assign Driver" Icon="user-check" OnClick="AssignDriver" />
+        <ActionCard Title="Generate Invoice" Icon="file-invoice" OnClick="GenerateInvoice" />
+        <ActionCard Title="New Inventory" Icon="boxes" OnClick="CreateInventory" />
+    </div>
+</DashboardPanel>
+
+@code {
+    private int activeOrders = 12;
+    private int deliveriesThisWeek = 34;
+    private int delayedShipments = 3;
+    private decimal revenueThisWeek = 15700.50m;
+    private List<string> notifications = new() { "Driver Mike marked delivery as delayed", "Inventory level low in Warehouse A" };
+
+    private void CreateOrder() => Navigation.NavigateTo("/admin/createorder");
+    private void AssignDriver() => Console.WriteLine("TODO: Assign driver modal");
+    private void GenerateInvoice() => Console.WriteLine("TODO: Invoice generation logic");
+    private void CreateInventory() => Navigation.NavigateTo("/admin/createinventory");
+}

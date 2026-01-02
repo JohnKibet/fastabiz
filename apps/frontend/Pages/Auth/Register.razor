@@ -5,8 +5,11 @@
 <main class="flex flex-col items-center justify-center min-h-screen bg-white px-4">
     <!-- Top Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-3">
-            <h1 class="font-bold text-2xl text-black">FastaBiz</h1>
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center">
+            <h1 class="font-bold text-2xl text-black cursor-pointer" 
+                @onclick='() => Navigation.NavigateTo("/")'>
+                FastaBiz
+            </h1>
         </div>
     </nav>
 
@@ -78,6 +81,11 @@
     <p class="text-center mt-6 text-sm text-gray-600">
         Already have an account?
         <a href="/auth/login" class="text-green-600 font-medium hover:underline">Log In</a>
+    </p>
+
+    <p class="text-center text-sm text-gray-600 mt-3">
+        Just browsing?
+        <a href="/" class="text-green-600 hover:underline">Back to Home</a>
     </p>
 </main>
 

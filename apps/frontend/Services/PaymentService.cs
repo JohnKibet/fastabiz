@@ -35,41 +35,41 @@
 // }
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using frontend.Models;
+// using System;
+// using System.Collections.Generic;
+// using System.Linq;
+// using System.Threading.Tasks;
+// using frontend.Models;
 
-namespace frontend.Services
-{
-    public class PaymentService
-    {
-        private readonly InvoiceService _invoiceService;
+// namespace frontend.Services
+// {
+//     public class PaymentService
+//     {
+//         private readonly InvoiceService _invoiceService;
 
-        public PaymentService(InvoiceService invoiceService)
-        {
-            _invoiceService = invoiceService;
-        }
+//         public PaymentService(InvoiceService invoiceService)
+//         {
+//             _invoiceService = invoiceService;
+//         }
 
-        public Task<Invoice?> GetInvoiceAsync(Guid invoiceId)
-        {
-            return _invoiceService.GetByIdAsync(invoiceId);
-        }
+//         public Task<Invoice?> GetInvoiceAsync(Guid invoiceId)
+//         {
+//             return _invoiceService.GetByIdAsync(invoiceId);
+//         }
 
-        public async Task<string> ProcessPaymentAsync(Guid invoiceId, string? method)
-        {
-            var invoice = await _invoiceService.GetByIdAsync(invoiceId);
-            if (invoice == null)
-                return "failed";
+//         public async Task<string> ProcessPaymentAsync(Guid invoiceId, string? method)
+//         {
+//             var invoice = await _invoiceService.GetByIdAsync(invoiceId);
+//             if (invoice == null)
+//                 return "failed";
 
-            // Simulate processing
-            await Task.Delay(1000);
+//             // Simulate processing
+//             await Task.Delay(1000);
 
-            // Mock logic: mark invoice as paid for demonstration
-            await _invoiceService.MarkAsPaidAsync(invoiceId);
+//             // Mock logic: mark invoice as paid for demonstration
+//             await _invoiceService.MarkAsPaidAsync(invoiceId);
 
-            return "success";
-        }
-    }
-}
+//             return "success";
+//         }
+//     }
+// }

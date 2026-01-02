@@ -6,14 +6,26 @@ import (
 )
 
 type CreateOrderRequest struct {
-	AdminID     uuid.UUID `json:"admin_id" binding:"required"`
-	Quantity    int       `json:"quantity" binding:"required"`
-	InventoryID uuid.UUID `json:"inventory_id" binding:"required"`
-	CustomerID  uuid.UUID `json:"customer_id" binding:"required"`
+	StoreID    uuid.UUID `json:"store_id" binding:"required"`
+	AdminID    uuid.UUID `json:"admin_id" binding:"required"`
+	CustomerID uuid.UUID `json:"customer_id" binding:"required"`
 
-	PickupAddress string         `json:"pickup_address" binding:"required"`
-	PickupPoint   postgis.PointS `json:"pickup_point" binding:"required"`
+	ProductID uuid.UUID  `json:"product_id" binding:"required"`
+	VariantID *uuid.UUID `json:"variant_id" binding:"required"`
 
+	Quantity int `json:"quantity" binding:"required"`
+
+	UnitPrice int64  `json:"unit_price" binding:"required"`
+	Currency  string `json:"currency" binding:"required"`
+	Total     int64  `json:"total" binding:"required"`
+
+	// snapshot at purchase time
+	ProductName string `json:"product_name" binding:"required"`
+	VariantName string `json:"variant_name" binding:"required"`
+	ImageURL    string `json:"image_url" binding:"required"`
+
+	PickupAddress   string         `json:"pickup_address" binding:"required"`
+	PickupPoint     postgis.PointS `json:"pickup_point" binding:"required"`
 	DeliveryAddress string         `json:"delivery_address" binding:"required"`
 	DeliveryPoint   postgis.PointS `json:"delivery_point" binding:"required"`
 }
@@ -25,13 +37,24 @@ type UpdateOrderRequest struct {
 
 func (r *CreateOrderRequest) ToOrder() *Order {
 	return &Order{
-		AdminID:         r.AdminID,
-		Quantity:        r.Quantity,
-		InventoryID:     r.InventoryID,
-		CustomerID:      r.CustomerID,
+		StoreID:    r.StoreID,
+		AdminID:    r.AdminID,
+		CustomerID: r.CustomerID,
+
+		ProductID: r.ProductID,
+		VariantID: r.VariantID,
+
+		Quantity:  r.Quantity,
+		UnitPrice: r.UnitPrice,
+		Currency:  r.Currency,
+		Total:     r.Total,
+
+		ProductName: r.ProductName,
+		VariantName: r.VariantName,
+		ImageURL:    r.ImageURL,
+
 		PickupAddress:   r.PickupAddress,
 		DeliveryAddress: r.DeliveryAddress,
-		Status:          Pending,
 	}
 }
 
@@ -52,4 +75,31 @@ type Inventory struct {
 	Name     string    `db:"name" json:"name"`
 	AdminID  uuid.UUID `db:"admin_id" json:"admin_id"`
 	Category string    `db:"category" json:"category"`
+}
+
+// Point represents a simple GeoJSON-style point for Swagger only.
+// swagger:model Point
+type CreateOrderRequestDoc struct {
+	MerchantID uuid.UUID `json:"merchant_id" binding:"required"`
+	AdminID    uuid.UUID `json:"admin_id" binding:"required"`
+	CustomerID uuid.UUID `json:"customer_id" binding:"required"`
+
+	ProductID uuid.UUID  `json:"product_id" binding:"required"`
+	VariantID *uuid.UUID `json:"variant_id" binding:"required"`
+
+	Quantity int `json:"quantity" binding:"required"`
+
+	UnitPrice int64  `json:"unit_price" binding:"required"`
+	Currency  string `json:"currency" binding:"required"`
+	Total     int64  `json:"total" binding:"required"`
+
+	// snapshot at purchase time
+	ProductName string `json:"product_name" binding:"required"`
+	VariantName string `json:"variant_name" binding:"required"`
+	ImageURL    string `json:"image_url" binding:"required"`
+
+	PickupAddress   string `json:"pickup_address" binding:"required"`
+	PickupPoint     Point  `json:"pickup_point" binding:"required"`
+	DeliveryAddress string `json:"delivery_address" binding:"required"`
+	DeliveryPoint   Point  `json:"delivery_point" binding:"required"`
 }

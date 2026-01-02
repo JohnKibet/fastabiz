@@ -1,0 +1,133 @@
+@page "/customer/checkout"
+@layout CustomerLayout
+@using frontend.Models
+@using frontend.Pages.Shared.Components.Cart
+@inject CartService CartService
+@inject NavigationManager Navigation
+
+<div class="p-0">
+    <h1 class="text-2xl font-bold mb-6">Checkout</h1>
+
+    @if (!CartService.Items.Any())
+    {
+        <p class="text-gray-500">
+            Your cart is empty. 
+            <button class="text-stoneblue font-medium" @onclick="GoShop">Shop Now</button>
+        </p>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <CartCard />
+
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="font-semibold text-lg mb-4">Delivery Info</h2>
+
+                <!-- Delivery Selection -->
+                <div class="flex items-center gap-2 mb-4">
+                    <button class="px-4 py-2 rounded text-white @DeliveryBtnClass"
+                            @onclick="() => SetMode(CustomerMap.MapClickMode.Delivery)">
+                        Delivery
+                    </button>
+
+                    <input type="text" class="border rounded px-2 py-1 flex-1"
+                           placeholder="Delivery address"
+                           @bind-value="DeliveryAddress"
+                           disabled="@(!IsDeliveryMode)" />
+                </div>
+
+                <!-- Pickup Selection -->
+                <div class="flex items-center gap-2 mb-6">
+                    <button class="px-4 py-2 rounded text-white @PickupBtnClass"
+                            @onclick="() => SetMode(CustomerMap.MapClickMode.Pickup)">
+                        Pickup
+                    </button>
+
+                    <input type="text" class="border rounded px-2 py-1 flex-1"
+                           placeholder="Pickup location"
+                           @bind-value="PickupAddress"
+                           disabled="@(!IsPickupMode)" />
+                </div>
+
+                <!-- Map Component -->
+                <CustomerMap 
+                    CurrentMode="@mapClickMode"
+                    OnDeliverySelected="HandleDeliverySelected"
+                    OnPickupSelected="HandlePickupSelected" 
+                />
+
+                <button class="mt-6 w-full px-6 py-3 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
+                        @onclick="GoToPayment">
+                    Proceed to Payment
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private CustomerMap.MapClickMode mapClickMode = CustomerMap.MapClickMode.Delivery;
+    private string DeliveryAddress { get; set; } = "";
+    private string PickupAddress { get; set; } = "";
+
+    private bool IsDeliveryMode => mapClickMode == CustomerMap.MapClickMode.Delivery;
+    private bool IsPickupMode   => mapClickMode == CustomerMap.MapClickMode.Pickup;
+
+    private string DeliveryBtnClass => IsDeliveryMode ? "bg-blue-600 opacity-100" : "bg-blue-400 opacity-60 hover:opacity-90";
+    private string PickupBtnClass   => IsPickupMode ? "bg-green-600 opacity-100" : "bg-green-400 opacity-60 hover:opacity-90";
+
+    private void SetMode(CustomerMap.MapClickMode mode)
+    {
+        mapClickMode = mode;
+        StateHasChanged(); // update when switching mode
+    }
+
+    private Task HandleDeliverySelected(string addr)
+    {
+        DeliveryAddress = addr;
+        Console.WriteLine($"Delivery Address: {DeliveryAddress}");
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private Task HandlePickupSelected(string addr)
+    {
+        PickupAddress = addr;
+        Console.WriteLine($"Pickup Address: {PickupAddress}");
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void GoShop() => Navigation.NavigateTo("/storefront");
+
+    private void GoToPayment()
+    {
+        if (string.IsNullOrWhiteSpace(DeliveryAddress) && string.IsNullOrWhiteSpace(PickupAddress))
+        {
+            // Temporary hardcoded fallback
+            DeliveryAddress = "Kenyatta Avenue, CBD division, Nairobi, Kenya";
+            PickupAddress   = "Accra Road, CBD division, Nairobi, Kenya";
+
+            // Hardcoded coords
+            var delLat = "-1.2848242046310998";
+            var delLng = "36.82204128701168";
+            var pickLat = "-1.2829256773845723";
+            var pickLng = "36.827309307951396";
+
+            // Forward to payment with all values for now
+            Navigation.NavigateTo(
+                $"/customer/payment" +
+                $"?delivery={Uri.EscapeDataString(DeliveryAddress)}" +
+                $"&pickup={Uri.EscapeDataString(PickupAddress)}" +
+                $"&delLat={delLat}&delLng={delLng}&pickLat={pickLat}&pickLng={pickLng}"
+            );
+            return;
+        }
+
+        // Normal (non-hardcoded)
+        Navigation.NavigateTo(
+            $"/customer/payment?delivery={Uri.EscapeDataString(DeliveryAddress)}&pickup={Uri.EscapeDataString(PickupAddress)}"
+        );
+    }
+}

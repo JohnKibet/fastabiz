@@ -1,0 +1,245 @@
+@inherits LayoutComponentBase
+@using System.Security.Claims
+@using frontend.Models
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject CustomAuthStateProvider AuthStateProvider 
+
+<nav id="scrollNav" class="fixed top-0 left-0 right-0 z-50 bg-white shadow transition-transform duration-300 ease-in-out">
+
+    <!-- MAIN NAVBAR -->
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <a href="/" class="flex items-center space-x-2">
+            <img src="/Images/logo.png" alt="logo" class="h-8 w-8" />
+            <span class="font-bold text-xl">FastaBiz</span>
+        </a>
+
+        <div class="hidden md:flex items-center space-x-4">
+            <button 
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
+                @onclick="ToProducts">
+                <LucideIcon Name="package" Size="6" />
+                <span class="text-sm font-medium">Products</span>
+            </button>
+
+            <button 
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
+                @onclick="ToStores">
+                <LucideIcon Name="store" Size="6" />
+                <span class="text-sm font-medium">Stores</span>
+            </button>
+
+            <button 
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow"
+                @onclick="ToggleMiniCart">
+                <LucideIcon Name="cart" Size="6" />
+                <span class="text-sm font-medium">Cart (@CartService.Count)</span>
+            </button>
+
+            @if (ShowMiniCart)
+            {
+                <MiniCart OnClose="ToggleMiniCart" OnCheckout="ToCheckout" />
+            }
+
+            @if (!IsLoggedIn)
+            {
+                <a href="/auth/login" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Login</a>
+            }
+            else
+            {
+                <div class="flex items-center gap-2 px-3 py-2 border rounded bg-gray-50 shadow">
+                    <LucideIcon Name="user-icon" Size="6" />
+                    <span class="text-sm font-medium">Hello @UserName</span>
+                </div>
+            }
+        </div>
+
+        <button class="md:hidden focus:outline-none" @onclick="ToggleMobile">
+            <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
+
+   <!-- MINI NAVBAR -->
+    <div class="border-t bg-white p-0">
+        <div class="max-w-7xl mx-auto px-2 h-12 flex items-center space-x-6 overflow-x-auto">
+            <!-- Filters button -->
+            <button 
+                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
+                @onclick="ToggleFiltersOpen">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <span class="text-sm font-medium">All</span>
+            </button>
+
+            <!-- Breadcrumb -->
+            <div class="ml-auto flex items-center">
+                <BreadCrumb Items="Breadcrumbs" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Drawer Component -->
+    <Drawer IsOpen="IsFiltersOpen" OnClose="ToggleFiltersOpen" />
+
+    <!-- MOBILE MENU -->
+    <div class="@MobileMenuCss md:hidden bg-white shadow-inner px-6 pt-2 pb-4 space-y-3">
+        <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
+                @onclick="() => { ToggleMobile(); ToProducts(); }">
+            <LucideIcon Name="package" Size="6" />
+            Products
+        </button>
+
+        <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
+                @onclick="() => { ToggleMobile(); ToStores(); }">
+            <LucideIcon Name="store" Size="6" />
+            Stores
+        </button>
+
+        <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
+                @onclick="() => { ToggleMobile(); ToggleMiniCart(); }">
+            <LucideIcon Name="cart" Size="6" />
+            Cart (@CartService.Count)
+        </button>
+
+        @if (!IsLoggedIn)
+        {
+            <button class="block w-full bg-blue-600 text-white text-center py-2 rounded mt-3 hover:bg-blue-700"
+                    @onclick="() => { ToggleMobile(); ToCheckout(); }">
+                Login
+            </button>
+        }
+        else
+        {
+            <div class="flex items-center gap-2 px-3 py-2 border rounded bg-gray-50 shadow mt-3">
+                <LucideIcon Name="user-icon" Size="6" />
+                <span class="text-sm font-medium">@UserName</span>
+            </div>
+        }
+
+    </div>
+
+</nav>
+
+<!-- PAGE BODY -->
+<CascadingValue Value="this">
+    <div class="min-h-screen bg-gray-50 pb-10 pt-[calc(64px+60px)]">
+        @Body
+    </div>
+</CascadingValue>
+
+@code {
+    private DotNetObjectReference<StorefrontLayout>? objRef;
+    private string? clickOutsideToken;
+    [Inject] private CartService CartService { get; set; } = default!;
+    private bool ShowMiniCart = false;
+    
+    private void ToggleMiniCart()
+    {
+        ShowMiniCart = !ShowMiniCart;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void CloseMiniCart()
+    {
+        if (ShowMiniCart)
+        {
+            ShowMiniCart = false;
+            StateHasChanged();
+        }
+    }
+
+    private bool mobileOpen = false;
+    private bool IsFiltersOpen = false;
+    private void ToggleMobile() => mobileOpen = !mobileOpen;
+    private string MobileMenuCss => mobileOpen ? "block" : "hidden";
+    private void ToggleFiltersOpen() => IsFiltersOpen = !IsFiltersOpen;
+
+    private List<BreadcrumbItem> Breadcrumbs { get; set; } = new();
+    public void SetBreadcrumbs(List<BreadcrumbItem> crumbs)
+    {
+        Breadcrumbs = crumbs;
+        StateHasChanged();
+    }
+    private void ToProducts()
+    {
+        Nav.NavigateTo("/storefront");
+    }
+    private void ToStores()
+    {
+        Nav.NavigateTo("/stores");
+    }
+
+    private string? UserName;
+    private bool IsLoggedIn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CartService.LoadCartAsync();
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        IsLoggedIn = user.Identity?.IsAuthenticated ?? false;
+
+        if (IsLoggedIn) UserName = user.Identity!.Name;
+
+        CartService.OnChange += StateHasChanged;
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // create the DotNet reference (needed by JS to call back)
+            objRef = DotNetObjectReference.Create(this);
+
+            // register click outside handler and keep the token
+            try
+            {
+                clickOutsideToken = await JS.InvokeAsync<string>("miniCartClickOutside.register", objRef);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("Failed to register miniCartClickOutside: " + ex.Message);
+            }
+        }
+    }
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+
+        // Unregister the JS handler (fire-and-forget is fine here)
+        if (!string.IsNullOrEmpty(clickOutsideToken))
+        {
+            _ = JS.InvokeVoidAsync("miniCartClickOutside.unregister", clickOutsideToken);
+        }
+
+        objRef?.Dispose();
+    }
+    private void ToCheckout()
+    {
+        if (!IsLoggedIn)
+        {
+            Nav.NavigateTo("/auth/login?returnUrl=/customer/checkout");
+            return;
+        }
+
+        Nav.NavigateTo("/customer/checkout");
+    }
+}
+
+@* 💡 Bonus: When Login Happens, Sync Cart With Backend
+
+If your backend supports merging anonymous cart with user cart later, you’ll want to:
+
+Send local cart to server after login.
+
+Server merges or attaches cart to user.
+
+Replace local cart with server cart.
+
+For now, local storage persistence is enough. *@

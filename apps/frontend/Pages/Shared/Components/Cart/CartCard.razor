@@ -1,0 +1,173 @@
+@* @using frontend.Models
+@using frontend.Pages.Shared.Components.Icons
+@namespace frontend.Pages.Shared.Components.Cart
+@inject CartService CartService
+
+<div class="bg-white shadow rounded-lg p-6 space-y-4">
+    <h2 class="font-semibold text-lg mb-4">Your Cart</h2>
+
+    @foreach (var item in CartService.Items)
+    {
+        <div class="group flex items-start p-4 bg-gray-50 hover:bg-gray-100
+                    shadow-sm rounded-lg border border-transparent hover:border-gray-200
+                    transition-all duration-150 ease-in-out cursor-pointer relative">
+
+            <!-- LEFT: Product block -->
+            <div class="flex items-start gap-4 flex-1">
+
+                <!-- Thumbnail -->
+                <img src="@item.Thumbnail"
+                    class="w-16 h-16 rounded-md object-cover shadow-sm" />
+
+                <!-- Text -->
+                <div class="flex flex-col gap-1">
+
+                    <!-- Name -->
+                    <p class="font-medium text-gray-800 line-clamp-1">@item.Name</p>
+
+                    <!-- Variant + Qty -->
+                    <p class="text-gray-500 text-sm">
+                        @if (!string.IsNullOrEmpty(item.VariantName))
+                        {
+                            <span>@item.VariantName</span>
+                        }
+                        <span> × @item.Quantity</span>
+                    </p>
+
+                    <!-- Description -->
+                    @if (!string.IsNullOrWhiteSpace(item.Description))
+                    {
+                        <p class="text-xs text-gray-400 line-clamp-2 max-w-xs">@item.Description</p>
+                    }
+                </div>
+            </div>
+
+            <!-- CENTER: Price -->
+            <div class="flex items-center font-semibold px-4 text-gray-900">
+                @((item.Price * item.Quantity).ToString("C"))
+            </div>
+
+            <!-- RIGHT: Remove -->
+            <button class="text-red-500 hover:text-red-600 opacity-75 hover:opacity-100 flex items-center"
+                    @onclick="() => Remove(item)">
+                <LucideIcon Name="trash" Size="6" Class="bg-white"/>
+            </button>
+        </div>
+    }
+
+    <!-- Total -->
+    <div class="pt-3 flex justify-between font-bold text-xl border-t">
+        <span>Total:</span>
+        <span>@CartService.Items.Sum(i => i.Price * i.Quantity).ToString("C")</span>
+    </div>
+</div>
+
+@code {
+    private async Task Remove(CartItem item)
+    {
+        await CartService.RemoveItem(item.ProductId, item.VariantId);
+    }
+} *@
+
+@using frontend.Models
+@using frontend.Pages.Shared.Components.Icons
+@namespace frontend.Pages.Shared.Components.Cart
+@inject CartService CartService
+@inject NavigationManager Nav
+
+<div class="space-y-4">
+    @foreach (var item in CartService.Items)
+    {
+        <div class="p-4 border rounded-lg bg-white shadow-sm hover:bg-gray-50 transition-all flex gap-4">
+
+            <!-- Product Image -->
+            <img src="@item.Thumbnail"
+                 class="w-20 h-20 rounded-md object-cover shadow-sm" />
+
+            <div class="flex-1">
+                <!-- Name + Variant -->
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-semibold text-gray-900">@item.Name</p>
+
+                        @* Variant name with a link to change *@
+                        @if (!string.IsNullOrEmpty(item.VariantName))
+                        {
+                            <p class="text-sm text-gray-500">
+                                <span class="font-medium">@item.VariantName</span>
+                                <span class="text-blue-600 cursor-pointer hover:underline ml-2"
+                                @onclick='() => Nav.NavigateTo($"/product/{item.ProductId}?variantId={item.VariantId}")'>
+                                    change
+                                </span>
+                            </p>
+                        }
+                    </div>
+
+                    <!-- Remove -->
+                    <button class="text-gray-400 hover:text-red-500"
+                            title="Remove item"
+                            @onclick="() => Remove(item)">
+                        <LucideIcon Name="close" Size="5" />
+                    </button>
+                </div>
+
+                @* Short description snippet *@
+                @if (!string.IsNullOrEmpty(item.Description))
+                {
+                    <p class="text-xs text-gray-500 mt-1 line-clamp-2">
+                        @item.Description
+                    </p>
+                }
+
+                <!-- Quantity + Price Row -->
+                <div class="flex justify-between items-center mt-3">
+                    
+                    <!-- Quantity Controls -->
+                    <div class="flex items-center gap-2">
+                        <button class="px-2 py-1 border rounded hover:bg-gray-100"
+                                @onclick="() => Decrement(item)">-</button>
+                        <span class="font-semibold w-6 text-center">@item.Quantity</span>
+                        <button class="px-2 py-1 border rounded hover:bg-gray-100"
+                                @onclick="() => Increment(item)">+</button>
+                    </div>
+
+                    <!-- Price -->
+                    <p class="font-bold text-gray-800">
+                        @((item.Price * item.Quantity).ToString("0.00"))
+                    </p>
+                </div>
+
+                <!-- View details -->
+                <p class="text-sm mt-1">
+                    <span class="text-blue-600 hover:underline cursor-pointer"
+                          @onclick='() => Nav.NavigateTo($"/product/{item.ProductId}")'>
+                        View details
+                    </span>
+                </p>
+            </div>
+        </div>
+    }
+
+    <!-- Total -->
+    <div class="p-4 border rounded-lg bg-white shadow-sm flex justify-between font-bold text-lg">
+        <span>Total:</span>
+        <span>@CartService.Items.Sum(i => i.Price * i.Quantity).ToString("0.00")</span>
+    </div>
+</div>
+
+@code {
+    private async Task Remove(CartItem item)
+    {
+        await CartService.RemoveItem(item.ProductId, item.VariantId);
+    }
+    
+    private async Task Increment(CartItem item)
+    {
+        await CartService.IncrementItem(item);
+    }
+
+    private async Task Decrement(CartItem item)
+    {
+        await CartService.DecrementItem(item);
+    }
+}

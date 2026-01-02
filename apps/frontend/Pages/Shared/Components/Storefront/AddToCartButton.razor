@@ -1,0 +1,55 @@
+@namespace frontend.Pages.Shared.Components.Storefront
+
+<button 
+    class="@ButtonClass"
+    @onclick="AddToCart"
+    disabled="@IsDisabled">
+
+    @if (IsDisabled)
+    {
+        <span>Select options first</span>
+    }
+    else
+    {
+        <span>Add to Cart</span>
+    }
+</button>
+
+@code {
+    [Parameter] public ProductX? Product { get; set; }
+    [Parameter] public Variant? SelectedVariant { get; set; }
+    [Parameter] public int Quantity { get; set; } = 1;
+
+    // Result emitted to parent (ProductDetail)
+    [Parameter] public EventCallback<CartRequest> OnAddToCart { get; set; }
+
+    private bool IsDisabled =>
+        Product is null ||
+        (Product.HasVariants && SelectedVariant is null);
+
+    private string ButtonClass =>
+        IsDisabled
+            ? "w-1/2 bg-gray-300 text-gray-600 px-4 py-3 rounded-lg cursor-not-allowed"
+            : "w-1/2 bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-lg font-semibold";
+
+    private void AddToCart()
+    {
+        if (IsDisabled) return;
+
+        var request = new CartRequest
+        {
+            ProductId = Product!.Id,
+            VariantId = SelectedVariant?.Id,
+            Quantity = Quantity
+        };
+
+        OnAddToCart.InvokeAsync(request);
+    }
+
+    public class CartRequest
+    {
+        public Guid ProductId { get; set; }
+        public Guid? VariantId { get; set; }
+        public int Quantity { get; set; }
+    }
+}

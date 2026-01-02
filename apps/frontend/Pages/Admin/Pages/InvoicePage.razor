@@ -1,0 +1,51 @@
+@page "/admin/invoices"
+@layout AdminLayout
+
+@* @inject InvoiceService InvoiceService *@
+
+<PageTitle>Invoices</PageTitle>
+
+<div class="p-6 space-y-6 bg-gray-50">
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <SummaryCard Title="Total Invoices" Value="@Summary.Total" />
+        <SummaryCard Title="Pending" Value="@Summary.Pending" />
+        <SummaryCard Title="Paid" Value="@Summary.Paid" />
+        <SummaryCard Title="Overdue" Value="@Summary.Overdue" />
+    </div>
+
+    <!-- Filters -->
+    <InvoiceFilters OnFilterChanged="LoadInvoices" />
+
+    <!-- Table -->
+    <InvoiceTable Invoices="@Invoices" OnViewClicked="ViewInvoice" />
+
+    <!-- Side Panel for Invoice Details -->
+    @if (SelectedInvoice is not null)
+    {
+        <InvoiceDetails Invoice="@SelectedInvoice" OnClose="() => SelectedInvoice = null" />
+    }
+</div>
+
+@code {
+    private List<Invoice> Invoices = new List<Invoice>();
+    private Invoice? SelectedInvoice;
+    private InvoiceSummary Summary = new InvoiceSummary();
+
+    protected override async Task OnInitializedAsync()
+    {
+        @* await LoadInvoices();
+        Summary = await InvoiceService.GetSummaryAsync(); *@
+    }
+
+    private async Task LoadInvoices()
+    {
+        @* Invoices = await InvoiceService.GetAllAsync(); *@
+    }
+
+    private void ViewInvoice(Invoice invoice)
+    {
+        SelectedInvoice = invoice;
+    }
+
+}

@@ -1,0 +1,177 @@
+@namespace frontend.Pages.Shared.Components.Storefront
+@using frontend.Pages.Shared.Components.Icons
+@inject IJSRuntime JS
+
+<div id="main-content" class="fixed inset-0 z-50" style="display:@(IsOpen ? "block" : "none")">
+
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-black bg-opacity-40 
+        @(IsOpen ? "animate-fade-in" : "animate-fade-out")"
+        @onclick="OnClose">
+    </div>
+
+
+    <!-- Main Drawer: Left -> Right -->
+    <div class="fixed top-0 left-0 h-full w-72 bg-white shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col
+        @(IsOpen ? "animate-drawer-in" : "animate-drawer-out")">        
+
+        <!-- Close button -->
+        <button class="absolute top-4 bg-black bg-opacity-60 rounded-full p-2 cursor-pointer z-50"
+                style="right:-1.5rem;"
+                @onclick="OnClose">
+            <LucideIcon Name="close" Size="24" Class="text-white w-6 h-6" />
+        </button>
+
+        <!-- Drawer body -->
+        <div id="main-drawer" class="mt-12 flex-1 overflow-y-auto p-4">
+            <div class="mb-4">
+                <label class="block font-medium mb-1">Shop by Category</label>
+                <ul>
+                    @foreach (var category in Categories)
+                    {
+                        <li class="flex justify-between items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
+                            @onclick="@(() => OpenCategoryDrawer(category))">
+                            <span>@category</span>
+                            @if (Products.Any(p => p.Category == category))
+                            {
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+            <div class="mb-4">
+                <label class="block font-medium mb-1">Shop by Store</label>
+                <ul>
+                    @foreach (var store in Stores)
+                    {
+                        <li class="flex justify-between items-center p-2 hover:bg-gray-100 rounded cursor-pointer"
+                            @onclick="(() => OpenStoreDrawer(store))">
+                            <span>@store.Name</span>
+                            @if (Products.Any(p => p.StoreId == store.Id))
+                            {
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            }
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- Second Drawer: Right -> Left -->
+        <div id="second-drawer" class="absolute top-0 right-0 h-full w-72 bg-white shadow-xl overflow-hidden
+            transform transition-transform duration-300 ease-in-out flex flex-col
+            @(IsSecondOpen ? "animate-drawer-secondary-in" : "animate-drawer-secondary-out")">
+
+            <!-- Back Header -->
+            <div class="flex items-center p-4 border-b cursor-pointer hover:bg-gray-100 transition"
+                @onclick="CloseCategoryDrawer">
+
+                <LucideIcon Name="chevrons-left" Size="6" class="mr-2" />
+
+                <span class="font-medium text-base">Main Menu</span>
+            </div>
+
+            <!-- Header with Back -->
+            <div class="flex items-center p-4 border-b">
+                <h3 class="font-semibold text-lg">
+                    @SelectedCategory
+                </h3>
+            </div>
+
+            <!-- Product List -->
+            <div class="flex-1 overflow-y-auto p-4">
+                @if (CategoryProducts.Any())
+                {
+                    <ul>
+                        @foreach (var p in CategoryProducts)
+                        {
+                            <li class="p-2 flex items-center gap-3 hover:bg-gray-100 rounded cursor-pointer">
+                                <img src="@p.Thumbnail" class="w-10 h-10 rounded object-cover" />
+                                <span>@p.Name</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else if (SelectedStore != null && StoreProducts.Any())
+                {
+                    <ul>
+                        @foreach (var p in StoreProducts)
+                        {
+                            <li class="p-2 flex items-center gap-3 hover:bg-gray-100 rounded cursor-pointer">
+                                <img src="@p.Thumbnail" class="w-10 h-10 rounded object-cover" />
+                                <span>@p.Name</span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-gray-500 text-sm">No products found.</p>
+                }
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private List<ProductListItem> Products = MockData.GetAllProducts();
+    private List<string> Categories = MockData.GetAllCategories();
+    private List<Store> Stores = MockData.Stores;
+
+    private List<ProductListItem> CategoryProducts = new(); // second drawer items
+    private List<ProductListItem> StoreProducts = new();
+    private string? SelectedCategory;
+    private Guid? SelectedStore;
+    private bool IsSecondOpen = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await JS.InvokeVoidAsync("toggleBodyScroll", IsOpen);
+    }
+
+    private void OpenCategoryDrawer(string category)
+    {
+        SelectedCategory = category;
+
+        // get products for that category
+        CategoryProducts = Products
+            .Where(p => p.Category == category)
+            .ToList();
+
+        IsSecondOpen = true;
+    }
+
+    private void OpenStoreDrawer(Store store)
+    {
+        SelectedStore = store.Id;
+        SelectedCategory = null;          // reset category selection
+        CategoryProducts.Clear();         // clear category products
+
+        // get products for that merchant
+        StoreProducts = Products
+            .Where(p => p.StoreId == store.Id)
+            .ToList();
+
+        IsSecondOpen = true;
+    }
+
+    private void CloseCategoryDrawer()
+    {
+        IsSecondOpen = false;
+    }
+
+    private void GoBackToMainDrawer()
+    {
+        IsSecondOpen = false;   // Close this drawer
+    }
+}

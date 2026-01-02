@@ -1,10 +1,10 @@
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
 	"backend/internal/domain/feedback"
 	usecase "backend/internal/usecase/feedback"
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -47,9 +47,7 @@ func (fh *FeedbackHandler) CreateFeedback(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.WriteHeader(http.StatusAccepted)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":           f.ID,
 		"order_id":     f.OrderID,
 		"customer_id":  f.CustomerID,
@@ -85,8 +83,7 @@ func (fh *FeedbackHandler) GetFeedbackByID(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(f)
+	writeJSON(w, http.StatusOK, f)
 }
 
 // ListFeedbacks godoc
@@ -104,6 +101,5 @@ func (fh *FeedbackHandler) ListFeedback(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(feedbacks)
+	writeJSON(w, http.StatusOK, feedbacks)
 }

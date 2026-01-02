@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"context"
-	"fmt"
 	"backend/internal/application"
 	"backend/internal/domain/store"
+	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -27,78 +27,85 @@ func (r *StoreRepository) execFromCtx(ctx context.Context) sqlx.ExtContext {
 
 func (r *StoreRepository) Create(ctx context.Context, s *store.Store) error {
 	query := `
-        INSERT INTO stores (id, owner_id, name, slug, description, logo_url, banner_url, is_public)
-        VALUES (:id, :owner_id, :name, :slug, :description, :logo_url, :banner_url, :is_public)
+        INSERT INTO stores (owner_id, name, location, logo_url)
+		VALUES (:owner_id, :name, :location, :logo_url)
+		RETURNING id
 	`
 
-	_, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, s)
+	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, s)
 	if err != nil {
-		return fmt.Errorf("insert user: %w", err)
+		return fmt.Errorf("insert store: %w", err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.Scan(&s.ID); err != nil {
+			return fmt.Errorf("scanning new store id: %w", err)
+		}
+	} else {
+		return fmt.Errorf("no id returned after insert")
 	}
 
-	return err
+	return nil
 }
 
-func (r *StoreRepository) GetByID(ctx context.Context, id uuid.UUID) (*store.Store, error) {
+func (r *StoreRepository) GetByID(ctx context.Context, storeID uuid.UUID) (*store.Store, error) {
 	query := `
 		SELECT * FROM stores 
 		WHERE id =  $1
 	`
 
 	var s store.Store
-	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &s, query, id)
+	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &s, query, storeID)
 	return &s, err
 }
 
-func (r *StoreRepository) GetBySlug(ctx context.Context, slug string) (*store.Store, error) {
+func (r *StoreRepository) GetBasicByID(ctx context.Context, storeID uuid.UUID) (*store.StoreBasic, error) {
 	query := `
-		SELECT * FROM stores 
-		WHERE slug =  $1
+		SELECT id, name, logo_url, rating FROM stores 
+		WHERE id = $1
 	`
 
-	var s store.Store
-	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &s, query, slug)
+	var s store.StoreBasic
+	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &s, query, storeID)
 	return &s, err
 }
 
-func (r *StoreRepository) GetByOwner(ctx context.Context, ownerID uuid.UUID) (*store.Store, error) {
+func (r *StoreRepository) GetStoreSummary(ctx context.Context, storeID uuid.UUID) (*store.StoreSummary, error) {
 	query := `
-		SELECT * FROM stores 
-		WHERE owner_id = $1
+		SELECT id, name, logo_url, location, rating
+		FROM stores
+		WHERE id = $1
 	`
 
-	var s store.Store
-	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &s, query, ownerID)
-	return &s, err
-}
-
-func (r *StoreRepository) Update(ctx context.Context, storeID uuid.UUID, column string, value any) error {
-	allowed := map[string]bool{
-		"name":        true,
-		"description": true,
-		"logo_url":    true,
-		"banner_url":  true,
-		"slug":        true,
-		"is_public":   true,
-	}
-
-	if !allowed[column] {
-		return fmt.Errorf("attempted to update disallowed column: %s", column)
-	}
-
-	query := fmt.Sprintf(`
-		UPDATE orders SET %s = :value, updated_at = NOW() 
-		WHERE id = :id
-	`, column)
-
-	args := map[string]interface{}{
-		"value": value,
-		"id":    storeID,
-	}
-
-	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, args)
+	var summary store.StoreSummary
+	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &summary, query, storeID)
 	if err != nil {
-		return fmt.Errorf("update order: %w", err)
+		return nil, err
+	}
+
+	return &summary, nil
+}
+
+func (r *StoreRepository) UpdateStoreDetails(ctx context.Context, storeID uuid.UUID, name string, logo string, location string) error {
+	params := map[string]interface{}{
+		"store_id": storeID,
+		"name":     name,
+		"logo_url": logo,
+		"location": location,
+	}
+
+	query := `
+		UPDATE stores
+		SET name = :name,
+			logo_url = :logo_url,
+			location = :location,
+			updated_at = NOW()
+		WHERE id = :store_id
+	`
+	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
+	if err != nil {
+		return fmt.Errorf("update store details: %w", err)
 	}
 
 	rows, err := res.RowsAffected()
@@ -113,14 +120,45 @@ func (r *StoreRepository) Update(ctx context.Context, storeID uuid.UUID, column 
 	return nil
 }
 
-func (r *StoreRepository) ListPublic(ctx context.Context) ([]*store.Store, error) {
+func (r *StoreRepository) ListStores(ctx context.Context) ([]*store.Store, error) {
 	query := `
-		SELECT * FROM stores 
-		WHERE is_public = true
+		SELECT * FROM stores
 	`
 
 	var stores []*store.Store
 	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &stores, query)
+	return stores, err
+}
+
+func (r *StoreRepository) ListStoresByOwner(ctx context.Context, ownerID uuid.UUID) ([]*store.Store, error) {
+	query := `
+		SELECT * FROM stores
+		WHERE owner_id = $1
+	`
+
+	var stores []*store.Store
+	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &stores, query, ownerID)
+	return stores, err
+}
+
+func (r *StoreRepository) ListStoresPaged(ctx context.Context, filter store.StoreFilter) ([]*store.StoreSummary, error) {
+	query := `
+		SELECT id, name, logo_url, location, rating
+		FROM stores
+		WHERE (:owner_id IS NULL OR owner_id = :owner_id)
+		ORDER BY created_at DESC
+		LIMIT :limit
+		OFFSET :offset
+	`
+
+	params := map[string]interface{}{
+		"owner_id": filter.OwnerID,
+		"limit":    filter.Limit,
+		"offset":   filter.Offset,
+	}
+
+	var stores []*store.StoreSummary
+	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &stores, query, params)
 	return stores, err
 }
 
@@ -130,7 +168,7 @@ func (r *StoreRepository) Delete(ctx context.Context, id uuid.UUID) error {
 		WHERE id = $1
 	`
 
-	res, err := r.exec.ExecContext(ctx, query, id)
+	res, err := r.execFromCtx(ctx).ExecContext(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete store: %w", err)
 	}
@@ -145,4 +183,30 @@ func (r *StoreRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	}
 
 	return nil
+}
+
+func (r *StoreRepository) Exists(ctx context.Context, storeID uuid.UUID) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1 FROM stores WHERE id = $1
+		)
+	`
+
+	var exists bool
+	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &exists, query, storeID)
+	return exists, err
+}
+
+func (r *StoreRepository) IsOwnedBy(ctx context.Context, storeID uuid.UUID, ownerID uuid.UUID) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM stores
+			WHERE id = $1 AND owner_id = $2
+		)
+	`
+
+	var owned bool
+	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &owned, query, storeID, ownerID)
+	return owned, err
 }

@@ -48,11 +48,6 @@ public class OrderService
     {
         return await GetFromJsonSafe<List<Order>>($"orders/by-customer/{customerId}");
     }
-
-    public async Task<ServiceResult2<DropdownData>> GetDropdownMenuData()
-    {
-        return await GetFromJsonSafe<DropdownData>("orders/form-data");
-    }
     
     public async Task<Order?> UpdateOrder(Guid orderId, string column, object value)
     {
