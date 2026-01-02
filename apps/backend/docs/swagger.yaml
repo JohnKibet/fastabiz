@@ -108,73 +108,6 @@ definitions:
         example: Invalid request
         type: string
     type: object
-  inventory.CreateInventoryRequest:
-    properties:
-      admin_id:
-        description: Foreign key
-        type: string
-      category:
-        description: e.g. “Dairy”
-        type: string
-      description:
-        type: string
-      images:
-        description: could be JSON array or URLs
-        type: string
-      packaging:
-        description: “Bucket/Single”
-        type: string
-      price_amount:
-        type: integer
-      price_currency:
-        type: string
-      stock:
-        type: integer
-      unit:
-        description: '"per litre", "per bucket"'
-        type: string
-    required:
-    - category
-    - description
-    - images
-    - packaging
-    - price_amount
-    - price_currency
-    - stock
-    - unit
-    type: object
-  inventory.Inventory:
-    properties:
-      category:
-        description: e.g. “Dairy” - "name" field equivalent
-        type: string
-      created_at:
-        type: string
-      description:
-        type: string
-      id:
-        type: string
-      images:
-        description: could be JSON array or URLs
-        type: string
-      packaging:
-        description: “Bucket/Single”
-        type: string
-      price_amount:
-        type: integer
-      price_currency:
-        type: string
-      stock:
-        type: integer
-      store_id:
-        description: FK to stores.id
-        type: string
-      unit:
-        description: '"per litre", "per bucket"'
-        type: string
-      updated_at:
-        type: string
-    type: object
   invite.CreateInviteRequest:
     properties:
       email:
@@ -290,42 +223,66 @@ definitions:
       status:
         $ref: '#/definitions/notification.NotificationStatus'
     type: object
-  order.CreateOrderRequest:
-    type: object
-  order.Customer:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-    type: object
-  order.DropdownDataRequest:
-    properties:
-      customers:
-        items:
-          $ref: '#/definitions/order.Customer'
-        type: array
-      inventories:
-        items:
-          $ref: '#/definitions/order.Inventory'
-        type: array
-    type: object
-  order.Inventory:
+  order.CreateOrderRequestDoc:
     properties:
       admin_id:
         type: string
-      category:
+      currency:
         type: string
-      id:
+      customer_id:
         type: string
-      name:
+      delivery_address:
         type: string
+      delivery_point:
+        $ref: '#/definitions/order.Point'
+      image_url:
+        type: string
+      merchant_id:
+        type: string
+      pickup_address:
+        type: string
+      pickup_point:
+        $ref: '#/definitions/order.Point'
+      product_id:
+        type: string
+      product_name:
+        description: snapshot at purchase time
+        type: string
+      quantity:
+        type: integer
+      total:
+        type: integer
+      unit_price:
+        type: integer
+      variant_id:
+        type: string
+      variant_name:
+        type: string
+    required:
+    - admin_id
+    - currency
+    - customer_id
+    - delivery_address
+    - delivery_point
+    - image_url
+    - merchant_id
+    - pickup_address
+    - pickup_point
+    - product_id
+    - product_name
+    - quantity
+    - total
+    - unit_price
+    - variant_id
+    - variant_name
     type: object
   order.OrderDoc:
     properties:
       admin_id:
         type: string
       created_at:
+        type: string
+      currency:
         type: string
       customer_id:
         type: string
@@ -335,17 +292,31 @@ definitions:
         $ref: '#/definitions/order.Point'
       id:
         type: string
-      inventory_id:
+      image_url:
+        type: string
+      merchant_id:
         type: string
       pickup_address:
         type: string
       pickup_point:
         $ref: '#/definitions/order.Point'
+      product_id:
+        type: string
+      product_name:
+        type: string
       quantity:
         type: integer
       status:
         $ref: '#/definitions/order.OrderStatus'
+      total:
+        type: integer
+      unit_price:
+        type: integer
       updated_at:
+        type: string
+      variant_id:
+        type: string
+      variant_name:
         type: string
     type: object
   order.OrderStatus:
@@ -432,16 +403,199 @@ definitions:
     - StatusPending
     - StatusCompleted
     - StatusFailed
-  store.CreateStoreRequest:
+  product.AddImageRequest:
     properties:
-      banner_url:
-        description: example:"https://cdn.fastabiz.com/banners/kevins-banner.png"
+      is_primary:
+        type: boolean
+      product_id:
+        type: string
+      url:
+        type: string
+    required:
+    - product_id
+    - url
+    type: object
+  product.AddOptionNameRequest:
+    properties:
+      name:
+        type: string
+      product_id:
+        type: string
+    required:
+    - name
+    - product_id
+    type: object
+  product.AddOptionValueRequest:
+    properties:
+      option_id:
+        type: string
+      value:
+        type: string
+    required:
+    - option_id
+    - value
+    type: object
+  product.CreateProductRequest:
+    properties:
+      category:
         type: string
       description:
-        description: example:"Best electronics and accessories in Nairobi."
         type: string
-      isPublic:
+      merchant_id:
+        type: string
+      name:
+        type: string
+    required:
+    - category
+    - description
+    - merchant_id
+    - name
+    type: object
+  product.CreateVariantRequest:
+    properties:
+      image_url:
+        type: string
+      options:
+        additionalProperties:
+          type: string
+        description: optionID -> optionValueID
+        type: object
+      price:
+        type: number
+      product_id:
+        type: string
+      sku:
+        type: string
+      stock:
+        type: integer
+    required:
+    - image_url
+    - options
+    - price
+    - product_id
+    - sku
+    - stock
+    type: object
+  product.Option:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      values:
+        items:
+          type: string
+        type: array
+    type: object
+  product.Product:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      has_variants:
         type: boolean
+      id:
+        type: string
+      images:
+        description: Stored as JSON/JSONB array in DB
+        items:
+          type: string
+        type: array
+      merchant_id:
+        type: string
+      name:
+        type: string
+      options:
+        description: Stored as JSON/JSONB
+        items:
+          $ref: '#/definitions/product.Option'
+        type: array
+      price:
+        description: Used only when HasVariants == false
+        type: number
+      stock:
+        type: integer
+      updated_at:
+        type: string
+      variants:
+        items:
+          $ref: '#/definitions/product.Variant'
+        type: array
+    type: object
+  product.ReorderImagesRequest:
+    properties:
+      image_ids:
+        items:
+          type: string
+        type: array
+      product_id:
+        type: string
+    required:
+    - image_ids
+    - product_id
+    type: object
+  product.UpdateProductDetailsRequest:
+    properties:
+      category:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      product_id:
+        type: string
+    required:
+    - category
+    - description
+    - name
+    - product_id
+    type: object
+  product.UpdateVariantPriceRequest:
+    properties:
+      price:
+        type: number
+      variant_id:
+        type: string
+    required:
+    - price
+    - variant_id
+    type: object
+  product.UpdateVariantStockRequest:
+    properties:
+      stock:
+        type: integer
+      variant_id:
+        type: string
+    required:
+    - stock
+    - variant_id
+    type: object
+  product.Variant:
+    properties:
+      id:
+        type: string
+      image_url:
+        type: string
+      options:
+        additionalProperties:
+          type: string
+        type: object
+      price:
+        type: number
+      product_id:
+        type: string
+      sku:
+        type: string
+      stock:
+        type: integer
+    type: object
+  store.CreateStoreRequest:
+    properties:
+      location:
+        type: string
       logo_url:
         description: example:"https://cdn.fastabiz.com/logos/kevins.png"
         type: string
@@ -450,27 +604,17 @@ definitions:
         type: string
       ownerID:
         type: string
-      slug:
-        type: string
     required:
-    - description
-    - isPublic
+    - location
     - name
     - ownerID
-    - slug
     type: object
   store.Store:
     properties:
-      banner_url:
-        type: string
       created_at:
-        type: string
-      description:
         type: string
       id:
         type: string
-      is_public:
-        type: boolean
       location:
         description: optional
         type: string
@@ -481,19 +625,30 @@ definitions:
       owner_id:
         description: FK to users
         type: string
-      slug:
-        type: string
       updated_at:
         type: string
     type: object
+  store.StoreSummary:
+    properties:
+      id:
+        type: string
+      location:
+        type: string
+      logoURL:
+        type: string
+      name:
+        type: string
+      rating:
+        type: number
+    type: object
   store.UpdateStoreRequest:
     properties:
-      column:
+      location:
         type: string
-      value: {}
-    required:
-    - column
-    - value
+      logo:
+        type: string
+      name:
+        type: string
     type: object
   user.ChangePasswordRequest:
     properties:
@@ -552,12 +707,14 @@ definitions:
     type: object
   user.Role:
     enum:
+    - merchant
     - admin
     - driver
     - customer
     - guest
     type: string
     x-enum-varnames:
+    - Merchant
     - Admin
     - Driver
     - Customer
@@ -590,6 +747,13 @@ definitions:
     required:
     - column
     - value
+    type: object
+  user.UpdateUserStatusRequest:
+    properties:
+      status:
+        $ref: '#/definitions/user.UserStatus'
+    required:
+    - status
     type: object
   user.User:
     properties:
@@ -1062,242 +1226,6 @@ paths:
       summary: Create a new feedback
       tags:
       - feedbacks
-  /inventories/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Permanently deletes an inventory by their ID
-      parameters:
-      - description: Inventory ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Inventory deleted
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "400":
-          description: Invalid inventory ID
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Delete an inventory
-      tags:
-      - inventories
-  /inventories/all_inventories:
-    get:
-      description: List all inventories with optional pagination
-      parameters:
-      - description: Limit number of items
-        in: query
-        name: limit
-        type: integer
-      - description: Offset for pagination
-        in: query
-        name: offset
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/inventory.Inventory'
-            type: array
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: List all inventories
-      tags:
-      - inventories
-  /inventories/by-category:
-    get:
-      description: Get all inventory items in a specific category
-      parameters:
-      - description: Category Name
-        in: query
-        name: category
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/inventory.Inventory'
-            type: array
-        "400":
-          description: Invalid Category
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventories by category
-      tags:
-      - inventories
-  /inventories/by-id/{id}:
-    get:
-      description: Get a specific inventory item by UUID
-      parameters:
-      - description: Inventory ID
-        in: query
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "400":
-          description: Invalid inventory ID or request body
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventory by ID
-      tags:
-      - inventories
-  /inventories/by-name:
-    get:
-      description: Search inventory by item name (exact match)
-      parameters:
-      - description: Inventory Name
-        in: query
-        name: name
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "400":
-          description: Invalid inventory ID or request body
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventory by name
-      tags:
-      - inventories
-  /inventories/by-store/{id}:
-    get:
-      description: Fetch all inventory items belonging to a specific store
-      parameters:
-      - description: Store ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/inventory.Inventory'
-            type: array
-        "400":
-          description: Invalid store ID
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: No inventories found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Get inventories by Store ID
-      tags:
-      - inventories
-  /inventories/categories:
-    get:
-      description: Get all unique categories that belong to existing inventories
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: List all categories
-      tags:
-      - inventories
-  /inventories/create:
-    post:
-      consumes:
-      - application/json
-      description: Creates an inventory and returns the created object
-      parameters:
-      - description: Inventory input
-        in: body
-        name: inventory
-        required: true
-        schema:
-          $ref: '#/definitions/inventory.CreateInventoryRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/inventory.Inventory'
-        "400":
-          description: Invalid inventory ID or request body
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      security:
-      - JWT: []
-      summary: Create a new inventory
-      tags:
-      - inventories
   /invites/{id}:
     delete:
       description: Delete an invite by ID
@@ -1784,7 +1712,7 @@ paths:
         name: order
         required: true
         schema:
-          $ref: '#/definitions/order.CreateOrderRequest'
+          $ref: '#/definitions/order.CreateOrderRequestDoc'
       produces:
       - application/json
       responses:
@@ -1803,24 +1731,6 @@ paths:
       security:
       - JWT: []
       summary: Create a new order
-      tags:
-      - orders
-  /orders/form-data:
-    get:
-      description: Returns a list of customers and inventories for populating order
-        form dropdowns.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/order.DropdownDataRequest'
-        "500":
-          description: Failed to fetch customers or inventories
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Get data for order form dropdowns
       tags:
       - orders
   /payments/{id}:
@@ -1932,6 +1842,632 @@ paths:
       summary: Create new payment
       tags:
       - payments
+  /products/{id}/product:
+    delete:
+      description: Permanently deletes a product by its ID.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete a product
+      tags:
+      - products
+  /products/{id}/product_details:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the core details of a product (name, description, category).
+      parameters:
+      - description: Product update payload
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/product.UpdateProductDetailsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Update product details
+      tags:
+      - products
+  /products/all_products:
+    get:
+      description: Retrieves all products available to the merchant/admin.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of products
+          schema:
+            items:
+              $ref: '#/definitions/product.Product'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: List all products
+      tags:
+      - products
+  /products/by-id/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a product by its ID, including images, options, and variants.
+      parameters:
+      - description: Product ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/product.Product'
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get product by ID
+      tags:
+      - products
+  /products/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new product for a merchant, including optional images,
+        options, and variants.
+      parameters:
+      - description: Product creation payload
+        in: body
+        name: product
+        required: true
+        schema:
+          $ref: '#/definitions/product.CreateProductRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/product.Product'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Create a new product
+      tags:
+      - products
+  /products/images/{imageId}:
+    delete:
+      description: Deletes a product image by its ID.
+      parameters:
+      - description: Image ID
+        in: path
+        name: imageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Image deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid image ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Image not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete product image
+      tags:
+      - products
+  /products/images/add:
+    post:
+      consumes:
+      - application/json
+      description: Adds an image to a product. Optionally marks it as the primary
+        image.
+      parameters:
+      - description: Add product image payload
+        in: body
+        name: image
+        required: true
+        schema:
+          $ref: '#/definitions/product.AddImageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Image added successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Add product image
+      tags:
+      - products
+  /products/images/reorder:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the display order of product images using an ordered list
+        of image IDs.
+      parameters:
+      - description: Reorder images payload
+        in: body
+        name: reorder
+        required: true
+        schema:
+          $ref: '#/definitions/product.ReorderImagesRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Images reordered successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Product or images not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Reorder product images
+      tags:
+      - products
+  /products/options/{optionId}:
+    delete:
+      description: Deletes an option name from a product.
+      parameters:
+      - description: Option ID
+        in: path
+        name: optionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Option deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid option ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Option not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete product option
+      tags:
+      - products
+  /products/options/add:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new option name (e.g. Size, Color) to a product.
+      parameters:
+      - description: Add option name payload
+        in: body
+        name: option
+        required: true
+        schema:
+          $ref: '#/definitions/product.AddOptionNameRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Option created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Product not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Add product option
+      tags:
+      - products
+  /products/options/values/{valueId}:
+    delete:
+      description: Deletes a value from a product option.
+      parameters:
+      - description: Option Value ID
+        in: path
+        name: valueId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Option value deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid option value ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Option value not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete option value
+      tags:
+      - products
+  /products/options/values/add:
+    post:
+      consumes:
+      - application/json
+      description: Adds a value to an existing product option (e.g. Red, Large).
+      parameters:
+      - description: Add option value payload
+        in: body
+        name: value
+        required: true
+        schema:
+          $ref: '#/definitions/product.AddOptionValueRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Option value added successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Option not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Add option value
+      tags:
+      - products
+  /products/variants/{variantId}:
+    delete:
+      description: Permanently deletes a product variant.
+      parameters:
+      - description: Variant ID
+        in: path
+        name: variantId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Variant deleted successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid variant ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Variant not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Delete product variant
+      tags:
+      - products
+  /products/variants/add:
+    post:
+      consumes:
+      - application/json
+      description: Creates a purchasable variant for a product based on option values.
+      parameters:
+      - description: Create variant payload
+        in: body
+        name: variant
+        required: true
+        schema:
+          $ref: '#/definitions/product.CreateVariantRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/product.Variant'
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Product or option values not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Create product variant
+      tags:
+      - products
+  /products/variants/price/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the price of a product variant.
+      parameters:
+      - description: Update variant price payload
+        in: body
+        name: price
+        required: true
+        schema:
+          $ref: '#/definitions/product.UpdateVariantPriceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Variant price updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Variant not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Update variant price
+      tags:
+      - products
+  /products/variants/stock/update:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the stock quantity of a product variant.
+      parameters:
+      - description: Update variant stock payload
+        in: body
+        name: stock
+        required: true
+        schema:
+          $ref: '#/definitions/product.UpdateVariantStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Variant stock updated successfully
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Variant not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: Update variant stock
+      tags:
+      - products
   /public/create:
     post:
       consumes:
@@ -1999,9 +2535,7 @@ paths:
       - public
   /stores/{id}:
     delete:
-      consumes:
-      - application/json
-      description: Deletes a store by its ID
+      description: Deletes a store owned by the authenticated user
       parameters:
       - description: Store ID
         in: path
@@ -2012,7 +2546,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: Store deleted
+          description: Deletion message
           schema:
             additionalProperties:
               type: string
@@ -2021,8 +2555,12 @@ paths:
           description: Invalid store ID
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
-          description: Failed to delete store
+          description: Internal server error
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
@@ -2030,18 +2568,45 @@ paths:
       summary: Delete a store
       tags:
       - stores
-  /stores/{id}/update:
-    put:
-      consumes:
-      - application/json
-      description: Update a specific field of an existing store
+  /stores/{id}/summary:
+    get:
+      description: Fetch summarized info about a store
       parameters:
       - description: Store ID
         in: path
         name: id
         required: true
         type: string
-      - description: Field and value to update
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/store.StoreSummary'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Store not found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Get store summary
+      tags:
+      - stores
+  /stores/{id}/update:
+    put:
+      consumes:
+      - application/json
+      description: Update details of a store owned by the authenticated user
+      parameters:
+      - description: Store ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Update request
         in: body
         name: update
         required: true
@@ -2051,17 +2616,17 @@ paths:
       - application/json
       responses:
         "200":
-          description: Store updated successfully
+          description: Update message
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: Invalid store ID or request body
+          description: Invalid request
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
-          description: Store not found
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
         "500":
@@ -2070,16 +2635,35 @@ paths:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - JWT: []
-      summary: Update store
+      summary: Update a store
+      tags:
+      - stores
+  /stores/all_stores:
+    get:
+      description: Returns all stores (admin view or public)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.Store'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: List all stores
       tags:
       - stores
   /stores/by-id/{id}:
     get:
-      description: Fetches a single store using UUID
+      description: Fetch a single store by its UUID
       parameters:
       - description: Store ID
-        in: query
-        name: slug
+        in: path
+        name: id
         required: true
         type: string
       produces:
@@ -2094,44 +2678,17 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
         "404":
-          description: Not found
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Get store by id
-      tags:
-      - stores
-  /stores/by-slug:
-    get:
-      description: Fetches a single store by its slug
-      parameters:
-      - description: Store slug
-        in: query
-        name: slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/store.Store'
-        "400":
-          description: Missing slug
-          schema:
-            $ref: '#/definitions/handlers.ErrorResponse'
-        "404":
           description: Store not found
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: Get store by slug
+      summary: Get a store by ID
       tags:
       - stores
   /stores/create:
     post:
       consumes:
       - application/json
-      description: Creates a new store for an owner and returns the created store
+      description: Creates a new store for the authenticated owner
       parameters:
       - description: Store input
         in: body
@@ -2143,11 +2700,16 @@ paths:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Created store
           schema:
-            $ref: '#/definitions/store.Store'
+            additionalProperties: true
+            type: object
         "400":
           description: Invalid request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
         "500":
@@ -2159,9 +2721,9 @@ paths:
       summary: Create a new store
       tags:
       - stores
-  /stores/public:
+  /stores/me:
     get:
-      description: Returns all stores marked as public
+      description: Returns all stores owned by the current user
       produces:
       - application/json
       responses:
@@ -2171,11 +2733,51 @@ paths:
             items:
               $ref: '#/definitions/store.Store'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
-      summary: List all public stores
+      security:
+      - JWT: []
+      summary: List authenticated owner's stores
+      tags:
+      - stores
+  /stores/me/paged:
+    get:
+      description: Returns stores owned by authenticated user with limit and offset
+      parameters:
+      - description: Maximum number of items to return
+        in: query
+        name: limit
+        type: integer
+      - description: Number of items to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/store.StoreSummary'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - JWT: []
+      summary: List stores with pagination
       tags:
       - stores
   /users/{id}:
@@ -2340,6 +2942,44 @@ paths:
       security:
       - JWT: []
       summary: Update user profile
+      tags:
+      - users
+  /users/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the status (e.g., active, inactive, suspended) of a specific
+        user.
+      parameters:
+      - description: User ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User status update payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/user.UpdateUserStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User status updated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid ID or request body
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Update a user's status
       tags:
       - users
   /users/{id}/update:

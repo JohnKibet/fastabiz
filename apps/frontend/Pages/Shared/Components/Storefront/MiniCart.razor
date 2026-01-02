@@ -1,0 +1,55 @@
+@using frontend.Services
+@using frontend.Pages.Shared.Components.Icons
+@inject CartService CartService
+@inject NavigationManager Nav
+
+<div id="mini-cart-dropdown" class="fixed right-4 top-[80px] w-72 bg-white shadow-lg border rounded-lg z-[60] animate-slide-down">
+    @if (CartService.Items.Count == 0)
+    {
+        <p class="p-4 text-center text-gray-500 text-sm">Your cart is empty</p>
+    }
+    else
+    {
+        @foreach (var item in CartService.Items.Take(5))
+        {
+            <div class="flex gap-2 p-2 border-b items-center">
+                <img src="@item.Thumbnail" class="h-12 w-12 rounded object-cover" />
+                <div class="flex flex-col text-sm flex-1">
+                    <span class="font-medium line-clamp-1">@item.Name</span>
+                    <span class="text-gray-600">KES @item.Price x @item.Quantity</span>
+                </div>
+
+                <!-- X remove icon -->
+                <button class="text-gray-400 hover:text-red-600"
+                        @onclick="() => RemoveItem(item)">
+                    <LucideIcon Name="close" Size="6" />
+                </button>
+            </div>
+        }
+
+        @if (CartService.Items.Count > 5)
+        {
+            <button class="text-blue-600 w-full text-sm py-2 hover:bg-gray-50" @onclick="GoToCart">
+                See more…
+            </button>
+        }
+
+        <div class="p-3">
+            <button class="bg-blue-600 text-white w-full py-2 rounded hover:bg-blue-700"
+                    @onclick="@OnCheckout">
+                Checkout
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback OnClose { get; set; }
+    [Parameter] public EventCallback OnCheckout { get; set; }
+
+    private void GoToCart() => Nav.NavigateTo("/customer/checkout");
+    private async void RemoveItem(CartItem item)
+    {
+        await CartService.RemoveItem(item.ProductId, item.VariantId);
+    }
+}

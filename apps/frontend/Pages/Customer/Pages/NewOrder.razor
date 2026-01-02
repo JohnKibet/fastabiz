@@ -1,0 +1,6 @@
+@page "/customer/neworder"
+@layout CustomerLayout
+
+@attribute [Authorize(Roles = "customer")]
+
+<CustOrderForm />

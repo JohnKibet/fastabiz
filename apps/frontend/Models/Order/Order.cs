@@ -1,95 +1,39 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace frontend.Models
+namespace frontend.Models;
+
+public class Order
 {
-    public class Order
-    {
-        [JsonPropertyName("id")]
-        public Guid ID { get; set; }
+    public Guid Id { get; set; }
+    public Guid StoreId { get; set; }
+    public Guid CustomerId { get; set; }
 
-        [JsonPropertyName("quantity")]
-        public int Quantity { get; set; }
+    // temp: string instead of Guid
+    public string ProductId { get; set; } = string.Empty;
+    public string VariantId { get; set; } = string.Empty;
 
-        [JsonPropertyName("customer_id")]
-        public Guid CustomerID { get; set; }
+    public int Quantity { get; set; }
 
-        [JsonPropertyName("inventory_id")]
-        public Guid InventoryID { get; set; }
+    public double UnitPrice { get; set; }
+    public string Currency { get; set; } = "KES";
+    public int Total { get; set; }
 
-        [JsonPropertyName("pickup_address")]
-        public string PickupAddress { get; set; } = string.Empty;
+    public string PickupAddress { get; set; } = string.Empty;
+    public double PickupLat { get; set; }
+    public double PickupLng { get; set; }
 
-        [JsonPropertyName("pickup_lat")]
-        public double PickupLat { get; set; }
+    public string DeliveryAddress { get; set; } = string.Empty;
+    public double DeliveryLat { get; set; }
+    public double DeliveryLng { get; set; }
 
-        [JsonPropertyName("pickup_lng")]
-        public double PickupLng { get; set; } 
+    public OrderStatus Status { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
-        [JsonPropertyName("delivery_address")]
-        public string DeliveryAddress { get; set; } = string.Empty;
+}
 
-        [JsonPropertyName("delivery_lat")]
-        public double DeliveryLat { get; set; }
-
-        [JsonPropertyName("delivery_lng")]
-        public double DeliveryLng { get; set; }
-
-        [JsonPropertyName("status")]
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public OrderStatus Status { get; set; }
-
-        [JsonPropertyName("created_at")]
-        public DateTime CreatedAt { get; set; }
-
-        [JsonPropertyName("updated_at")]
-        public DateTime UpdatedAt { get; set; }
-
-        [JsonPropertyName("category")]
-        public string Category { get; set; } = string.Empty;
-    }
-
-    public class CreateOrderRequest
-    {
-        [Required]
-        [JsonPropertyName("admin_id")]
-        public Guid AdminID { get; set; }
-
-        [Required(ErrorMessage = "Pickup location is required.")]
-        [JsonPropertyName("pickup_address")]
-        public string PickupAddress { get; set; } = string.Empty;
-
-        [JsonPropertyName("pickup_lat")]
-        public double PickupLat { get; set; }
-
-        [JsonPropertyName("pickup_lng")]
-        public double PickupLng { get; set; }
-
-        [Required(ErrorMessage = "Delivery location is required.")]
-        [JsonPropertyName("delivery_address")]
-        public string DeliveryAddress { get; set; } = string.Empty;
-
-        [JsonPropertyName("delivery_lat")]
-        public double DeliveryLat { get; set; }
-
-        [JsonPropertyName("delivery_lng")]
-        public double DeliveryLng { get; set; }
-
-        [Required]
-        [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
-        [JsonPropertyName("quantity")]
-        public int Quantity { get; set; }
-
-        [Required(ErrorMessage = "Customer is required.")]
-        [JsonPropertyName("customer_id")]
-        public Guid CustomerID { get; set; }
-
-        [Required(ErrorMessage = "Inventory is required.")]
-        [JsonPropertyName("inventory_id")]
-        public Guid InventoryID { get; set; }
-    }
-
-    public enum OrderStatus
+public enum OrderStatus
     {
         Pending,
         Assigned,
@@ -98,34 +42,50 @@ namespace frontend.Models
         Cancelled
     }
 
-    public class DropdownData
-    {
-        public List<Customer> Customers { get; set; } = new();
-        public List<AllInventory> Inventories { get; set; } = new();
+public sealed class CreateOrderRequest
+{
+    [Required]
+    [JsonPropertyName("store_id")]
+    public Guid StoreId { get; set; }
 
-    }
+    [Required]
+    [JsonPropertyName("customer_id")]
+    public Guid CustomerId { get; set; }
 
-    public class Customer
-    {
-        [JsonPropertyName("id")]
-        public Guid ID { get; set; }
+    [Required]
+    [JsonPropertyName("payment_method")]
+    public string PaymentMethod { get; set; } = "cash";
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
-    }
+    [Required]
+    [JsonPropertyName("delivery")]
+    public LocationDto Delivery { get; set; } = new();
 
-    public class AllInventory
-    {
-        [JsonPropertyName("id")]
-        public Guid ID { get; set; }
+    [Required]
+    [JsonPropertyName("pickup")]
+    public LocationDto Pickup { get; set; } = new();
 
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
+    [Required]
+    [JsonPropertyName("items")]
+    public List<CreateOrderItemDto> Items { get; set; } = new();
+}
 
-        [JsonPropertyName("admin_id")]
-        public Guid AdminID { get; set; }
+public sealed class CreateOrderItemDto
+{
+    [Required]
+    [JsonPropertyName("product_id")]
+    public Guid ProductId { get; set; }
 
-        [JsonPropertyName("category")]
-        public string Category { get; set; } = string.Empty;
-    }
+    [JsonPropertyName("variant_id")]
+    public Guid? VariantId { get; set; }
+
+    [Required]
+    [JsonPropertyName("quantity")]
+    public int Quantity { get; set; }
+}
+
+public sealed class LocationDto
+{
+    public string Address { get; set; } = string.Empty;
+    public double Lat { get; set; }
+    public double Lng { get; set; }
 }

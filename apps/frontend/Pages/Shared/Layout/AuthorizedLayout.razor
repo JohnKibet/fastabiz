@@ -1,0 +1,119 @@
+@using frontend.Pages.Shared.Components
+@using frontend.Services
+@using System.Security.Claims
+@using frontend.Pages.Shared.Sidebars
+@inject NavigationManager Navigation
+@inject CustomAuthStateProvider AuthProvider
+@inject CartService CartService
+
+<CascadingAuthenticationState>
+    <AuthorizeView>
+        <Authorized>
+            @if (IsReady)
+            {
+                <div class="flex min-h-screen bg-gray-50 text-gray-800 mt-0">
+                    <!-- Sidebar -->
+                    <Sidebar OnCollapseChanged="OnSidebarCollapseChanged" />
+
+                    <!-- Main Section -->
+                    <div class="flex flex-col flex-1 min-h-screen">
+                        <!-- Navbar -->
+                        <CascadingValue Value="UserRole">
+                            <Navbar UserName="@UserName" />
+                        </CascadingValue>
+
+                        <!-- Scrollable Page Content -->
+                        <main class="flex-1 overflow-auto p-6 md:p-8 max-w-7xl mx-auto w-full">
+                            <CascadingValue Value="UserId">
+                                @ChildContent
+                            </CascadingValue>
+                        </main>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="p-6 text-center text-gray-600">Loading...</p>
+            }
+        </Authorized>
+        <NotAuthorized>
+            @if (RedirectToLogin && IsReady && !Navigation.Uri.Contains("/auth/login"))
+            {
+                Navigation.NavigateTo("/auth/login", forceLoad: true);
+            }
+        </NotAuthorized>
+    </AuthorizeView>
+</CascadingAuthenticationState>
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool RedirectToLogin { get; set; } = true;
+    private bool IsReady;
+    private bool IsSidebarCollapsed;
+    private string? UserName;
+    private string? UserRole;
+    private Guid? UserId;
+
+    private void OnSidebarCollapseChanged(bool isCollapsed)
+    {
+        IsSidebarCollapsed = isCollapsed;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartService.OnChange += StateHasChanged;
+
+        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            // Get ID claim
+            var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)
+                   ?? user.FindFirst("sub"); // fallback if JWT style
+            
+            if (Guid.TryParse(idClaim?.Value, out var parsedGuid))
+            {
+                UserId = parsedGuid;
+            }
+
+            // Get Role claim
+            var roleClaim = user.FindFirst(ClaimTypes.Role) ?? user.FindFirst("role");
+            UserRole = roleClaim?.Value;
+
+            // Try multiple claim types as fallbacks
+            var nameClaim = user.FindFirst(ClaimTypes.Name)
+                        ?? user.FindFirst("name")  // JWT/common alternative
+                        ?? user.FindFirst(ClaimTypes.Email)
+                        ?? idClaim;
+
+            var displayName = nameClaim?.Value?.Trim();
+
+            // Extract first name, or fallback to a default
+            if (!string.IsNullOrEmpty(displayName))
+            {
+                var firstName = displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                                        .FirstOrDefault()?
+                                        .Trim();
+
+                UserName = !string.IsNullOrEmpty(firstName) ? firstName : "User";
+            }
+            else
+            {
+                UserName = "User";
+                UserId = null;
+            }
+        }
+        else
+        {
+            UserName = "Guest"; 
+        }
+
+        IsReady = true;
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= StateHasChanged;
+    }
+}

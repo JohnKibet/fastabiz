@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
 	"backend/internal/domain/payment"
 	usecase "backend/internal/usecase/payment"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -46,9 +46,7 @@ func (ph *PaymentHandler) CreatePayment(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.WriteHeader(http.StatusAccepted)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":       p.ID,
 		"order_id": p.OrderID,
 		"amount":   p.Amount,
@@ -83,8 +81,7 @@ func (ph *PaymentHandler) GetPaymentByID(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(p)
+	writeJSON(w, http.StatusOK, p)
 }
 
 // GetPaymentByOrder godoc
@@ -112,8 +109,7 @@ func (ph *PaymentHandler) GetPaymentByOrderID(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(p)
+	writeJSON(w, http.StatusOK, p)
 }
 
 // ListPayments godoc
@@ -131,6 +127,5 @@ func (ph *PaymentHandler) ListPayments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(payments)
+	writeJSON(w, http.StatusOK, payments)
 }

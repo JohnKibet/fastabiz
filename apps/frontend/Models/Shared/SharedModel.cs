@@ -35,4 +35,18 @@ namespace frontend.Models
                 await ValueChanged.InvokeAsync(typedValue);
         }
     }
+    public class BreadcrumbItem
+    {
+        public string Title { get; set; } = "";
+        public string Url { get; set; } = "";
+    }
+
+    public class NavbarMenuItem
+    {
+        public string Text { get; set; } = "";
+        public string? Link { get; set; } // Optional navigation URL
+        public string? Icon { get; set; } // For LucideIcon or SVG
+        public Action? OnClick { get; set; } // Optional action (like navigation or event)
+        public Func<bool>? Visible { get; set; } // Optional visibility condition
+    }
 }

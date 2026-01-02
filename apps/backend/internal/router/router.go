@@ -22,10 +22,10 @@ func NewRouter(
 	e *handlers.DeliveryHandler,
 	p *handlers.PaymentHandler, f *handlers.FeedbackHandler,
 	n *handlers.NotificationHandler,
-	i *handlers.InventoryHandler,
 	publicApiBaseUrl string,
 	c *handlers.InviteHandler,
 	s *handlers.StoreHandler,
+	pr *handlers.ProductHandler,
 	db *sqlx.DB,
 ) http.Handler {
 	r := chi.NewRouter()
@@ -57,9 +57,7 @@ func NewRouter(
 			r.Post("/login", u.LoginUser)
 
 			// Public store pages
-			r.Route("/stores", func(r chi.Router) {
-				r.Get("/public", s.GetPublicStores)
-			})
+
 		})
 
 		// Protected Routes (auth required)
@@ -91,24 +89,11 @@ func NewRouter(
 			r.Route("/orders", func(r chi.Router) {
 				r.Post("/create", o.CreateOrder)
 				r.Get("/all_orders", o.ListOrders)
-				r.Get("/form-data", o.GetOrderFormData)
 				r.Post("/assign", o.AutoAssignOrders)
 				r.Get("/by-id/{id}", o.GetOrderByID)
 				r.Get("/by-customer/{customer_id}", o.GetOrderByCustomer)
 				r.Put("/{id}/update", o.UpdateOrder)
 				r.Delete("/{id}", o.DeleteOrder)
-			})
-
-			// Inventories
-			r.Route("/inventories", func(r chi.Router) {
-				r.Post("/create", i.CreateInventory)
-				r.Get("/by-name", i.GetByInventoryName)
-				r.Get("/all_inventories", i.ListInventories)
-				r.Get("/by-category", i.GetInventoryByCategory)
-				r.Get("/categories", i.ListCategories)
-				r.Get("/by-id/{id}", i.GetByInventoryID)
-				r.Get("/by-store/{id}", i.GetInventoryByStore)
-				r.Delete("/{id}", i.DeleteInventory)
 			})
 
 			// Drivers
@@ -158,15 +143,35 @@ func NewRouter(
 			// Stores
 			r.Route("/stores", func(r chi.Router) {
 				r.Post("/create", s.CreateStore)
-				r.Get("/by-slug", s.GetStoreBySlug)
-				r.Get("/public", s.GetPublicStores)
+				r.Get("/all_stores", s.ListStores)
+				r.Get("/me", s.ListOwnerStores)
+				r.Get("/me/paged", s.ListStoresPaged)
 				r.Get("/by-id/{id}", s.GetStoreByID)
+				r.Get("/{id}/summary", s.GetStoreSummary)
 				r.Put("/{id}/update", s.UpdateStore)
 				r.Delete("/{id}", s.DeleteStore)
 			})
 
+			// Products
+			r.Route("/products", func(r chi.Router) {
+				r.Post("/create", pr.CreateProduct)
+				r.Get("/all_products", pr.ListProducts)
+				r.Post("/images/add", pr.AddImage)
+				r.Post("/options/add", pr.AddOptionName)
+				r.Post("/options/values/add", pr.AddOptionValue)
+				r.Post("/variants/add", pr.CreateVariant)
+				r.Patch("/variants/stock/update", pr.UpdateVariantStock)
+				r.Patch("/variants/price/update", pr.UpdateVariantPrice)
+				r.Patch("/images/reorder", pr.ReorderImages)
+				r.Patch("/{id}/product_details", pr.UpdateProductDetails)
+				r.Get("/by-id/{id}", pr.GetProductByID)
+				r.Delete("/{id}/product", pr.DeleteProduct)
+				r.Delete("/images/{imageId}", pr.DeleteImage)
+				r.Delete("/options/{optionId}", pr.DeleteOptionName)
+				r.Delete("/options/values/{valueId}", pr.DeleteOptionValue)
+				r.Delete("/variants/{variantId}", pr.DeleteVariant)
+			})
 		})
-
 	})
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {

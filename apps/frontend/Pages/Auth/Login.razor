@@ -17,10 +17,14 @@
 <main id="login" class="flex justify-center items-center min-h-screen bg-white relative">
     <!-- Top Navigation -->
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-3">
-            <h1 class="font-bold text-2xl text-black">FastaBiz</h1>
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center">
+            <h1 class="font-bold text-2xl text-black cursor-pointer" 
+                @onclick='() => Navigation.NavigateTo("/")'>
+                FastaBiz
+            </h1>
         </div>
     </nav>
+
 
     <!-- Login Card -->
     <div id="card" class="w-full max-w-md mt-10 p-8 border border-gray-200 shadow-md rounded-md bg-white mb-10">
@@ -148,6 +152,11 @@
             Don't have a FastaBiz account?
             <a href="/auth/register" class="text-green-600 hover:underline">Sign Up</a>
         </p>
+
+        <p class="text-center text-sm text-gray-600 mt-3">
+            Just browsing?
+            <a href="/" class="text-green-600 hover:underline">Back to Home</a>
+        </p>
     </div>
 
     <!-- Footer -->
@@ -158,8 +167,16 @@
 
 
 @code {
+    private string? returnUrl;
     private LoginModel loginModel = new();
     private string? errorMessage;
+
+    protected override void OnInitialized()
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        returnUrl = query["returnUrl"];
+    }
     private void SelectRole(string role)
     {
         loginModel.Role = role;
@@ -216,7 +233,8 @@
                 await AuthProvider.SignInAsync(tokenResponse.Token);
 
                 await JS.InvokeVoidAsync("localStorage.setItem", "showLoginSuccess", "true");
-                Navigation.NavigateTo($"/{claimsUser.Role}/dashboard", forceLoad: true);
+                var target = returnUrl ?? $"/{claimsUser.Role}/dashboard";
+                Navigation.NavigateTo(target, forceLoad: true);
             }
             else
             {

@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
 	"backend/internal/application"
 	"backend/internal/domain/notification"
+	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -46,9 +46,7 @@ func (h *NotificationHandler) CreateNotification(w http.ResponseWriter, r *http.
 		return
 	}
 
-	w.WriteHeader(http.StatusAccepted)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]any{
+	writeJSON(w, http.StatusCreated, map[string]any{
 		"id":      n.ID,
 		"user_id": n.UserID,
 		"message": n.Message,
@@ -90,7 +88,7 @@ func (h *NotificationHandler) UpdateNotificationStatus(w http.ResponseWriter, r 
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": "Notification status updated successfully",
 	})
 }
@@ -111,8 +109,7 @@ func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(n)
+	writeJSON(w, http.StatusOK, n)
 }
 
 // ListUserNotifications godoc
@@ -149,8 +146,7 @@ func (h *NotificationHandler) ListUserNotifications(w http.ResponseWriter, r *ht
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(n)
+	writeJSON(w, http.StatusOK, n)
 }
 
 // MarkAsRead godoc
@@ -178,8 +174,7 @@ func (h *NotificationHandler) MarkAsRead(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": "Notification marked as read",
 	})
 }
@@ -208,8 +203,7 @@ func (h *NotificationHandler) MarkAllAsRead(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	writeJSON(w, http.StatusOK, map[string]string{
 		"message": "All notifications marked as read",
 	})
 }

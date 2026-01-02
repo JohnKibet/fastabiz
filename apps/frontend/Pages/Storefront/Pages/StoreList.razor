@@ -1,0 +1,37 @@
+@page "/stores"
+@layout StorefrontLayout
+@inject NavigationManager NavigationManager
+
+<div class="px-4">
+    <h3 class="text-2xl font-bold mb-0">All Stores</h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        @foreach (var store in Stores)
+        {
+            <StoreCard Store="@store" OnSelected="@NavigateToStore" />
+        }
+    </div>
+</div>
+
+@code {
+    // For now, use mock data
+    private List<Store> Stores = MockData.Stores;
+    [CascadingParameter] StorefrontLayout Layout { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Layout is StorefrontLayout layout)
+        {
+            layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+            {
+                new() { Title = "Home", Url = "/" },
+                new() { Title = "Stores", Url = "/stores" }
+            });
+        }
+    }
+
+    private void NavigateToStore(Store store)
+    {
+        NavigationManager.NavigateTo($"/store/{store.Id}");
+    }
+}

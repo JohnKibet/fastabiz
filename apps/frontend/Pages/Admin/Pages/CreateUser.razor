@@ -1,0 +1,6 @@
+@page "/admin/createuser"
+@layout AdminLayout
+
+@attribute [Authorize(Roles = "admin")]
+
+<CreateUserForm />

@@ -1,24 +1,16 @@
 package order
 
 import (
-	"context"
 	"backend/internal/domain/driver"
-	"backend/internal/domain/inventory"
 	"backend/internal/domain/notification"
-	"backend/internal/domain/store"
+	"backend/internal/domain/product"
+	"context"
 
 	"github.com/cridenour/go-postgis"
 	"github.com/google/uuid"
 )
 
 // cross-domain DI using necessary interface
-
-// Access the inventory domain usecase methods.
-type InventoryReader interface {
-	GetInventoryByID(ctx context.Context, id uuid.UUID) (*inventory.Inventory, error)
-	UpdateInventory(ctx context.Context, inventoryId uuid.UUID, column string, value any) error
-	GetAllInventories(ctx context.Context) ([]Inventory, error)
-}
 
 // Access the user domain usecase method for getting users of role customers.
 type CustomerReader interface {
@@ -33,6 +25,10 @@ type NotificationReader interface {
 	Create(ctx context.Context, n *notification.Notification) error
 }
 
-type StoreReader interface {
-	GetByID(ctx context.Context, id uuid.UUID) (*store.Store, error)
+// new interfaces to replace store and inventory readers
+type ProductOrVariantReader interface {
+	GetProductByID(ctx context.Context, id uuid.UUID) (*product.Product, error)
+	GetVariantByID(ctx context.Context, id uuid.UUID) (*product.Variant, error)
+	UpdateProductStock(ctx context.Context, productID uuid.UUID, newStock int) error
+	UpdateVariantStock(ctx context.Context, variantID uuid.UUID, newStock int) error
 }

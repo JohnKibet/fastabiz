@@ -1,16 +1,17 @@
 package application
 
 import (
+	deliveryadapter "backend/internal/adapters/delivery"
+	driveradapter "backend/internal/adapters/driver"
+	notificationadapter "backend/internal/adapters/notification"
+	orderadapter "backend/internal/adapters/order"
+	productadapter "backend/internal/adapters/product"
+	storeadapter "backend/internal/adapters/store"
+	useradapter "backend/internal/adapters/user"
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
-	deliveryadapter "backend/internal/adapters/delivery"
-	driveradapter "backend/internal/adapters/driver"
-	inventoryadapter "backend/internal/adapters/inventory"
-	notificationadapter "backend/internal/adapters/notification"
-	orderadapter "backend/internal/adapters/order"
-	useradapter "backend/internal/adapters/user"
 	"sort"
 
 	"backend/internal/domain/driver"
@@ -30,8 +31,9 @@ type OrderService struct {
 	Orders        *orderadapter.UseCaseAdapter
 	Drivers       *driveradapter.UseCaseAdapter
 	Deliveries    *deliveryadapter.UseCaseAdapter
-	Inventories   *inventoryadapter.UseCaseAdapter
 	Notifications *notificationadapter.UseCaseAdapter
+	Products      *productadapter.UseCaseAdapter
+	Stores        *storeadapter.UseCaseAdapter
 }
 
 func NewOrderService(
@@ -39,16 +41,18 @@ func NewOrderService(
 	orderUC *orderadapter.UseCaseAdapter,
 	driverUC *driveradapter.UseCaseAdapter,
 	deliveryUC *deliveryadapter.UseCaseAdapter,
-	inventoryUC *inventoryadapter.UseCaseAdapter,
 	notificationUC *notificationadapter.UseCaseAdapter,
+	productUC *productadapter.UseCaseAdapter,
+	storeUC *storeadapter.UseCaseAdapter,
 ) *OrderService {
 	return &OrderService{
 		Users:         userUC,
 		Orders:        orderUC,
 		Drivers:       driverUC,
 		Deliveries:    deliveryUC,
-		Inventories:   inventoryUC,
 		Notifications: notificationUC,
+		Products:      productUC,
+		Stores:        storeUC,
 	}
 }
 
@@ -89,26 +93,6 @@ func (s *OrderService) GetOrderWithDriver(ctx context.Context, orderID uuid.UUID
 		Delivery any
 		Driver   any
 	}{Order: order, Delivery: delivery, Driver: driver}, nil
-}
-
-func (s *OrderService) GetCustomersAndInventories(ctx context.Context) (any, error) {
-	customers, err := s.Users.GetAllCustomers(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("fetch customers: %w", err)
-	}
-
-	inventories, err := s.Inventories.GetAllInventories(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("fetch inventories: %w", err)
-	}
-
-	return struct {
-		Customers   any
-		Inventories any
-	}{
-		Customers:   customers,
-		Inventories: inventories,
-	}, nil
 }
 
 func (s *OrderService) OrderAssignment(ctx context.Context, maxDistance float64) ([]Assignment, error) {
