@@ -36,12 +36,6 @@
                             IsOpen="@IsSectionOpen(nameof(AdminOperations))"
                             OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Inventory" Icon="boxes"
-                            SectionKey="AdminInventory"
-                            IsCollapsed="IsCollapsed" Items="AdminInventory"
-                            IsOpen="@IsSectionOpen(nameof(AdminInventory))"
-                            OnToggle="@ToggleSection" />
-
             <SidebarSection Title="Users" Icon="users"
                             SectionKey="AdminUsers"
                             IsCollapsed="IsCollapsed" Items="AdminUsers"
@@ -171,11 +165,6 @@
     {
         new("Orders", "/admin/orders", "file-stack"),
         new("Create Order", "/admin/createorder", "file-plus")
-    };
-
-    private List<SidebarMenuItem> AdminInventory => new()
-    {
-        new("Inventories", "/admin/inventories", "box-open"),
     };
 
     private List<SidebarMenuItem> AdminUsers => new()

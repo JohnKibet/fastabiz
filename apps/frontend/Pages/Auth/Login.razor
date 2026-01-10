@@ -58,13 +58,13 @@
 
             <!-- Role Selector -->
             <div class="mb-6 flex justify-center items-center space-x-4">
-                <!-- Admin -->
-                <div @onclick="@(() => SelectRole("admin"))"
+                <!-- Merchant -->
+                <div @onclick="@(() => SelectRole("merchant"))"
                     class="relative cursor-pointer border rounded-lg px-6 py-4 text-center w-40 transition duration-200 ease-in-out
-                            @(loginModel.Role == "admin" 
+                            @(loginModel.Role == "merchant" 
                                 ? "border-green-600 border-2 bg-gray-50 shadow-md" 
                                 : "hover:shadow-md hover:border-gray-600 border-gray-300")">
-                    @if (loginModel.Role == "admin")
+                    @if (loginModel.Role == "merchant")
                     {
                         <div class="absolute top-2 right-2 text-green-600">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -73,7 +73,7 @@
                         </div>
                     }
                     <div class="text-3xl">👩‍🌾</div>
-                    <div class="mt-2 font-medium text-black">Admin</div>
+                    <div class="mt-2 font-medium text-black">Merchant</div>
                 </div>
 
                 <!-- Customer -->
