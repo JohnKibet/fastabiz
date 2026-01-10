@@ -441,15 +441,15 @@ definitions:
         type: string
       description:
         type: string
-      merchant_id:
-        type: string
       name:
+        type: string
+      store_id:
         type: string
     required:
     - category
     - description
-    - merchant_id
     - name
+    - store_id
     type: object
   product.CreateVariantRequest:
     properties:
@@ -504,8 +504,6 @@ definitions:
         items:
           type: string
         type: array
-      merchant_id:
-        type: string
       name:
         type: string
       options:
@@ -518,6 +516,8 @@ definitions:
         type: number
       stock:
         type: integer
+      store_id:
+        type: string
       updated_at:
         type: string
       variants:
@@ -594,6 +594,8 @@ definitions:
     type: object
   store.CreateStoreRequest:
     properties:
+      admin_id:
+        type: string
       location:
         type: string
       logo_url:
@@ -602,15 +604,16 @@ definitions:
       name:
         description: example:"Kevin's Electronics"
         type: string
-      ownerID:
-        type: string
     required:
+    - admin_id
     - location
     - name
-    - ownerID
     type: object
   store.Store:
     properties:
+      admin_id:
+        description: FK to users
+        type: string
       created_at:
         type: string
       id:
@@ -621,9 +624,6 @@ definitions:
       logo_url:
         type: string
       name:
-        type: string
-      owner_id:
-        description: FK to users
         type: string
       updated_at:
         type: string
@@ -829,7 +829,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete a delivery
       tags:
       - deliveries
@@ -864,7 +864,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Accept order assignment and create delivery
       tags:
       - deliveries
@@ -907,7 +907,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update Delivery
       tags:
       - deliveries
@@ -924,7 +924,7 @@ paths:
               $ref: '#/definitions/delivery.Delivery'
             type: array
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all deliveries
       tags:
       - deliveries
@@ -953,7 +953,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get delivery by ID
       tags:
       - deliveries
@@ -986,7 +986,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete a driver
       tags:
       - drivers
@@ -1029,7 +1029,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update driver profile
       tags:
       - drivers
@@ -1069,7 +1069,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update a specific driver field
       tags:
       - drivers
@@ -1086,7 +1086,7 @@ paths:
               $ref: '#/definitions/driver.DriverDoc'
             type: array
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all drivers
       tags:
       - drivers
@@ -1115,7 +1115,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get driver by Email
       tags:
       - drivers
@@ -1144,7 +1144,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get driver by ID
       tags:
       - drivers
@@ -1173,7 +1173,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get feedback by ID
       tags:
       - feedbacks
@@ -1190,7 +1190,7 @@ paths:
               $ref: '#/definitions/feedback.Feedback'
             type: array
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all feedbacks
       tags:
       - feedbacks
@@ -1222,7 +1222,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Create a new feedback
       tags:
       - feedbacks
@@ -1361,7 +1361,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Mark a single notification as read
       tags:
       - notifications
@@ -1404,7 +1404,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update a notification's status (e.g. mark as sent or read)
       tags:
       - notifications
@@ -1440,7 +1440,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List notifications by user
       tags:
       - notifications
@@ -1461,7 +1461,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all pending notifications
       tags:
       - notifications
@@ -1493,7 +1493,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Create a new notification
       tags:
       - notifications
@@ -1524,7 +1524,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Mark all user notifications as read
       tags:
       - notifications
@@ -1557,7 +1557,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete a order
       tags:
       - orders
@@ -1600,7 +1600,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update Order
       tags:
       - orders
@@ -1621,7 +1621,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all orders
       tags:
       - orders
@@ -1637,7 +1637,7 @@ paths:
             additionalProperties: true
             type: object
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Run auto-assignment for pending orders
       tags:
       - orders
@@ -1668,7 +1668,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get order by Customer ID
       tags:
       - orders
@@ -1697,7 +1697,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get order by ID
       tags:
       - orders
@@ -1729,7 +1729,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Create a new order
       tags:
       - orders
@@ -1758,7 +1758,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get payment by ID
       tags:
       - payments
@@ -1789,7 +1789,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get payment by Order ID
       tags:
       - payments
@@ -1806,7 +1806,7 @@ paths:
               $ref: '#/definitions/payment.Payment'
             type: array
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all payments
       tags:
       - payments
@@ -1838,7 +1838,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Create new payment
       tags:
       - payments
@@ -1877,7 +1877,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete a product
       tags:
       - products
@@ -1919,7 +1919,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update product details
       tags:
       - products
@@ -1944,7 +1944,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all products
       tags:
       - products
@@ -2014,7 +2014,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Create a new product
       tags:
       - products
@@ -2053,7 +2053,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete product image
       tags:
       - products
@@ -2096,7 +2096,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Add product image
       tags:
       - products
@@ -2139,7 +2139,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Reorder product images
       tags:
       - products
@@ -2178,7 +2178,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete product option
       tags:
       - products
@@ -2220,7 +2220,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Add product option
       tags:
       - products
@@ -2259,7 +2259,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete option value
       tags:
       - products
@@ -2301,7 +2301,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Add option value
       tags:
       - products
@@ -2340,7 +2340,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete product variant
       tags:
       - products
@@ -2380,7 +2380,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Create product variant
       tags:
       - products
@@ -2422,7 +2422,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update variant price
       tags:
       - products
@@ -2464,7 +2464,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update variant stock
       tags:
       - products
@@ -2564,7 +2564,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete a store
       tags:
       - stores
@@ -2634,7 +2634,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update a store
       tags:
       - stores
@@ -2717,7 +2717,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Create a new store
       tags:
       - stores
@@ -2742,7 +2742,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List authenticated owner's stores
       tags:
       - stores
@@ -2776,7 +2776,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List stores with pagination
       tags:
       - stores
@@ -2809,7 +2809,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Delete a user
       tags:
       - users
@@ -2853,7 +2853,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update user (driver) phone number
       tags:
       - users
@@ -2896,7 +2896,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Change a user's password
       tags:
       - users
@@ -2940,7 +2940,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update user profile
       tags:
       - users
@@ -3018,7 +3018,7 @@ paths:
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Update a specific user field
       tags:
       - users
@@ -3035,7 +3035,7 @@ paths:
               $ref: '#/definitions/user.User'
             type: array
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: List all users
       tags:
       - users
@@ -3064,7 +3064,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get user by Email
       tags:
       - users
@@ -3093,7 +3093,7 @@ paths:
           schema:
             type: string
       security:
-      - JWT: []
+      - BearerAuth: []
       summary: Get user by ID
       tags:
       - users

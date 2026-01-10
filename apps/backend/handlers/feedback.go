@@ -21,7 +21,7 @@ func NewFeedbackHandler(fh *usecase.UseCase) *FeedbackHandler {
 
 // CreateFeedback godoc
 // @Summary Create a new feedback
-// @Security JWT
+// @Security BearerAuth
 // @Description Create a new feedback with order_id, customer_id, etc.
 // @Tags feedbacks
 // @Accept  json
@@ -59,7 +59,7 @@ func (fh *FeedbackHandler) CreateFeedback(w http.ResponseWriter, r *http.Request
 
 // GetFeedbackByID godoc
 // @Summary Get feedback by ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Retrieve a feedback by their ID
 // @Tags feedbacks
 // @Produce  json
@@ -88,7 +88,7 @@ func (fh *FeedbackHandler) GetFeedbackByID(w http.ResponseWriter, r *http.Reques
 
 // ListFeedbacks godoc
 // @Summary List all feedbacks
-// @Security JWT
+// @Security BearerAuth
 // @Description Get a list of all feedbacks
 // @Tags feedbacks
 // @Produce  json

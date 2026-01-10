@@ -19,7 +19,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all deliveries",
@@ -47,7 +47,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a delivery by their ID",
@@ -93,7 +93,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a delivery by their ID",
@@ -145,7 +145,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "When a driver accepts an order assignment, this endpoint creates the delivery record, marks the order as in-transit, sets the pickup timestamp, and marks the driver as unavailable. Only callable by authenticated drivers.",
@@ -197,7 +197,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update any delivery struct field of an existing delivery",
@@ -264,7 +264,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all registered drivers",
@@ -292,7 +292,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a driver by their Email",
@@ -338,7 +338,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a driver by their ID",
@@ -384,7 +384,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a driver by their ID",
@@ -436,7 +436,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the vehicle information and current location of a driver",
@@ -503,7 +503,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates a driver's specific field (e.g., VehicleInfo, CurrentLocation) based on driver ID",
@@ -564,7 +564,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all feedbacks",
@@ -592,7 +592,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Create a new feedback with order_id, customer_id, etc.",
@@ -643,7 +643,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a feedback by their ID",
@@ -850,7 +850,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get all notifications belonging to a user (optionally filtered by status)",
@@ -905,7 +905,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of notifications not yet sent",
@@ -939,7 +939,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Create a new notification with user_id, message, etc.",
@@ -990,7 +990,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Mark all unread notifications for a given user ID as \"read\"",
@@ -1039,7 +1039,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update notification status to \"read\" by ID",
@@ -1091,7 +1091,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update notification status by ID",
@@ -1158,7 +1158,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all orders",
@@ -1192,7 +1192,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Assign nearest available drivers to pending orders",
@@ -1218,7 +1218,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch order(s) using Customer ID",
@@ -1267,7 +1267,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch a single order using UUID",
@@ -1313,7 +1313,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates an order and returns the new object",
@@ -1364,7 +1364,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes an order by their ID",
@@ -1416,7 +1416,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update any order struct field of an existing order",
@@ -1483,7 +1483,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all payments",
@@ -1511,7 +1511,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Register new payment with order_id, amount, etc.",
@@ -1562,7 +1562,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch a single payment using payment ID",
@@ -1608,7 +1608,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch payment(s) using Order ID",
@@ -1657,7 +1657,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieves all products available to the merchant/admin.",
@@ -1747,7 +1747,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates a new product for a merchant, including optional images, options, and variants.",
@@ -1804,7 +1804,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Adds an image to a product. Optionally marks it as the primary image.",
@@ -1870,7 +1870,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the display order of product images using an ordered list of image IDs.",
@@ -1936,7 +1936,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes a product image by its ID.",
@@ -1997,7 +1997,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Adds a new option name (e.g. Size, Color) to a product.",
@@ -2063,7 +2063,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Adds a value to an existing product option (e.g. Red, Large).",
@@ -2129,7 +2129,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes a value from a product option.",
@@ -2190,7 +2190,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes an option name from a product.",
@@ -2251,7 +2251,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates a purchasable variant for a product based on option values.",
@@ -2314,7 +2314,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the price of a product variant.",
@@ -2380,7 +2380,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the stock quantity of a product variant.",
@@ -2446,7 +2446,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a product variant.",
@@ -2507,7 +2507,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a product by its ID.",
@@ -2568,7 +2568,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the core details of a product (name, description, category).",
@@ -2802,7 +2802,7 @@ const docTemplate = `{
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates a new store for the authenticated owner",
@@ -2860,7 +2860,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Returns all stores owned by the current user",
@@ -2900,7 +2900,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Returns stores owned by authenticated user with limit and offset",
@@ -2954,7 +2954,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes a store owned by the authenticated user",
@@ -3050,7 +3050,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update details of a store owned by the authenticated user",
@@ -3117,7 +3117,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all registered users",
@@ -3145,7 +3145,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a user by their Email",
@@ -3191,7 +3191,7 @@ const docTemplate = `{
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a user by their ID",
@@ -3237,7 +3237,7 @@ const docTemplate = `{
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a user by their ID",
@@ -3289,7 +3289,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates only the phone number of a driver (commonly used after onboarding)",
@@ -3356,7 +3356,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Verifies the user's current password and updates it to a new password",
@@ -3423,7 +3423,7 @@ const docTemplate = `{
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the user's name, email, and/or phone number. Partial updates allowed.",
@@ -3546,7 +3546,7 @@ const docTemplate = `{
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates a user's specific field (e.g., FullName, Email) based on user ID",
@@ -4234,8 +4234,8 @@ const docTemplate = `{
             "required": [
                 "category",
                 "description",
-                "merchant_id",
-                "name"
+                "name",
+                "store_id"
             ],
             "properties": {
                 "category": {
@@ -4244,10 +4244,10 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "merchant_id": {
+                "name": {
                     "type": "string"
                 },
-                "name": {
+                "store_id": {
                     "type": "string"
                 }
             }
@@ -4329,9 +4329,6 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "merchant_id": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -4348,6 +4345,9 @@ const docTemplate = `{
                 },
                 "stock": {
                     "type": "integer"
+                },
+                "store_id": {
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
@@ -4463,11 +4463,14 @@ const docTemplate = `{
         "store.CreateStoreRequest": {
             "type": "object",
             "required": [
+                "admin_id",
                 "location",
-                "name",
-                "ownerID"
+                "name"
             ],
             "properties": {
+                "admin_id": {
+                    "type": "string"
+                },
                 "location": {
                     "type": "string"
                 },
@@ -4478,15 +4481,16 @@ const docTemplate = `{
                 "name": {
                     "description": "example:\"Kevin's Electronics\"",
                     "type": "string"
-                },
-                "ownerID": {
-                    "type": "string"
                 }
             }
         },
         "store.Store": {
             "type": "object",
             "properties": {
+                "admin_id": {
+                    "description": "FK to users",
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -4501,10 +4505,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "description": "FK to users",
                     "type": "string"
                 },
                 "updated_at": {

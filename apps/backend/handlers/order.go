@@ -25,7 +25,7 @@ func NewOrderHandler(uc *application.OrderService) *OrderHandler {
 
 // CreateOrder godoc
 // @Summary Create a new order
-// @Security JWT
+// @Security BearerAuth
 // @Description Creates an order and returns the new object
 // @Tags orders
 // @Accept json
@@ -82,7 +82,7 @@ func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 
 // GetOrderByID godoc
 // @Summary Get order by ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Fetch a single order using UUID
 // @Tags orders
 // @Produce json
@@ -109,7 +109,7 @@ func (h *OrderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 
 // GetOrderByCustomer godoc
 // @Summary Get order by Customer ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Fetch order(s) using Customer ID
 // @Tags orders
 // @Produce json
@@ -137,7 +137,7 @@ func (h *OrderHandler) GetOrderByCustomer(w http.ResponseWriter, r *http.Request
 
 // UpdateOrder godoc
 // @Summary Update Order
-// @Security JWT
+// @Security BearerAuth
 // @Description Update any order struct field of an existing order
 // @Tags orders
 // @Accept json
@@ -181,7 +181,7 @@ func (h *OrderHandler) UpdateOrder(w http.ResponseWriter, r *http.Request) {
 
 // ListOrders godoc
 // @Summary List all orders
-// @Security JWT
+// @Security BearerAuth
 // @Description Get a list of all orders
 // @Tags orders
 // @Produce  json
@@ -204,7 +204,7 @@ func (h *OrderHandler) ListOrders(w http.ResponseWriter, r *http.Request) {
 // @Tags orders
 // @Accept json
 // @Produce json
-// @Security JWT
+// @Security BearerAuth
 // @Param id path string true "Order ID"
 // @Success 200 {object} map[string]string "Order deleted"
 // @Failure 400 {object} handlers.ErrorResponse "Invalid order ID"
@@ -229,7 +229,7 @@ func (h *OrderHandler) DeleteOrder(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Run auto-assignment for pending orders
-// @Security JWT
+// @Security BearerAuth
 // @Description Assign nearest available drivers to pending orders
 // @Tags orders
 // @Produce json

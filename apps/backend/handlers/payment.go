@@ -20,7 +20,7 @@ func NewPaymentHandler(ph *usecase.UseCase) *PaymentHandler {
 
 // CreatePayment godoc
 // @Summary Create new payment
-// @Security JWT
+// @Security BearerAuth
 // @Description Register new payment with order_id, amount, etc.
 // @Tags payments
 // @Accept  json
@@ -58,7 +58,7 @@ func (ph *PaymentHandler) CreatePayment(w http.ResponseWriter, r *http.Request) 
 
 // GetPaymentByID godoc
 // @Summary Get payment by ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Fetch a single payment using payment ID
 // @Tags payments
 // @Produce json
@@ -86,7 +86,7 @@ func (ph *PaymentHandler) GetPaymentByID(w http.ResponseWriter, r *http.Request)
 
 // GetPaymentByOrder godoc
 // @Summary Get payment by Order ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Fetch payment(s) using Order ID
 // @Tags payments
 // @Produce json
@@ -114,7 +114,7 @@ func (ph *PaymentHandler) GetPaymentByOrderID(w http.ResponseWriter, r *http.Req
 
 // ListPayments godoc
 // @Summary List all payments
-// @Security JWT
+// @Security BearerAuth
 // @Description Get a list of all payments
 // @Tags payments
 // @Produce  json

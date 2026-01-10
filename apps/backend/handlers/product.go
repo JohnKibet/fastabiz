@@ -22,7 +22,7 @@ func NewProductHandler(uc *application.OrderService) *ProductHandler {
 // @Summary Create a new product
 // @Description Creates a new product for a merchant, including optional images, options, and variants.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param product body product.CreateProductRequest true "Product creation payload"
@@ -97,7 +97,7 @@ func (h *ProductHandler) GetProductByID(w http.ResponseWriter, r *http.Request) 
 // @Summary Update product details
 // @Description Updates the core details of a product (name, description, category).
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param product body product.UpdateProductDetailsRequest true "Product update payload"
@@ -129,7 +129,7 @@ func (h *ProductHandler) UpdateProductDetails(w http.ResponseWriter, r *http.Req
 // @Summary List all products
 // @Description Retrieves all products available to the merchant/admin.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Produce json
 // @Success 200 {array} product.Product "List of products"
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
@@ -149,7 +149,7 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 // @Summary Delete a product
 // @Description Permanently deletes a product by its ID.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Produce json
 // @Param id path string true "Product ID"
 // @Success 200 {object} map[string]string "Product deleted successfully"
@@ -181,7 +181,7 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 // @Summary Add product image
 // @Description Adds an image to a product. Optionally marks it as the primary image.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param image body product.AddImageRequest true "Add product image payload"
@@ -213,7 +213,7 @@ func (h *ProductHandler) AddImage(w http.ResponseWriter, r *http.Request) {
 // @Summary Delete product image
 // @Description Deletes a product image by its ID.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Produce json
 // @Param imageId path string true "Image ID"
 // @Success 200 {object} map[string]string "Image deleted successfully"
@@ -243,7 +243,7 @@ func (h *ProductHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 // @Summary Reorder product images
 // @Description Updates the display order of product images using an ordered list of image IDs.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param reorder body product.ReorderImagesRequest true "Reorder images payload"
@@ -273,7 +273,7 @@ func (h *ProductHandler) ReorderImages(w http.ResponseWriter, r *http.Request) {
 // @Summary Add product option
 // @Description Adds a new option name (e.g. Size, Color) to a product.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param option body product.AddOptionNameRequest true "Add option name payload"
@@ -306,7 +306,7 @@ func (h *ProductHandler) AddOptionName(w http.ResponseWriter, r *http.Request) {
 // @Summary Delete product option
 // @Description Deletes an option name from a product.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Produce json
 // @Param optionId path string true "Option ID"
 // @Success 200 {object} map[string]string "Option deleted successfully"
@@ -336,7 +336,7 @@ func (h *ProductHandler) DeleteOptionName(w http.ResponseWriter, r *http.Request
 // @Summary Add option value
 // @Description Adds a value to an existing product option (e.g. Red, Large).
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param value body product.AddOptionValueRequest true "Add option value payload"
@@ -366,7 +366,7 @@ func (h *ProductHandler) AddOptionValue(w http.ResponseWriter, r *http.Request) 
 // @Summary Delete option value
 // @Description Deletes a value from a product option.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Produce json
 // @Param valueId path string true "Option Value ID"
 // @Success 200 {object} map[string]string "Option value deleted successfully"
@@ -396,7 +396,7 @@ func (h *ProductHandler) DeleteOptionValue(w http.ResponseWriter, r *http.Reques
 // @Summary Create product variant
 // @Description Creates a purchasable variant for a product based on option values.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param variant body product.CreateVariantRequest true "Create variant payload"
@@ -428,7 +428,7 @@ func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 // @Summary Update variant stock
 // @Description Updates the stock quantity of a product variant.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param stock body product.UpdateVariantStockRequest true "Update variant stock payload"
@@ -458,7 +458,7 @@ func (h *ProductHandler) UpdateVariantStock(w http.ResponseWriter, r *http.Reque
 // @Summary Update variant price
 // @Description Updates the price of a product variant.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param price body product.UpdateVariantPriceRequest true "Update variant price payload"
@@ -488,7 +488,7 @@ func (h *ProductHandler) UpdateVariantPrice(w http.ResponseWriter, r *http.Reque
 // @Summary Delete product variant
 // @Description Permanently deletes a product variant.
 // @Tags products
-// @Security JWT
+// @Security BearerAuth
 // @Produce json
 // @Param variantId path string true "Variant ID"
 // @Success 200 {object} map[string]string "Variant deleted successfully"

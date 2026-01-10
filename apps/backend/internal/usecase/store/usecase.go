@@ -5,6 +5,7 @@ import (
 	"backend/internal/usecase/common"
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -19,12 +20,10 @@ func NewUseCase(repo store.Repository, txm common.TxManager) *UseCase {
 }
 
 func (uc *UseCase) CreateStore(ctx context.Context, s *store.Store) error {
-	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.Create(txCtx, s); err != nil {
-			return fmt.Errorf("could not create order: %w", err)
-		}
+	s.NameNormalized = NormalizeName(s.Name)
 
-		return nil
+	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
+		return uc.repo.Create(txCtx, s)
 	})
 }
 
@@ -96,4 +95,8 @@ func (uc *UseCase) StoreExists(ctx context.Context, storeID uuid.UUID) (bool, er
 
 func (uc *UseCase) IsStoreOwnedBy(ctx context.Context, storeID uuid.UUID, ownerID uuid.UUID) (bool, error) {
 	return uc.repo.IsOwnedBy(ctx, storeID, ownerID)
+}
+
+func NormalizeName(s string) string {
+	return strings.ToLower(strings.TrimSpace(s))
 }

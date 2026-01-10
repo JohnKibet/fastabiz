@@ -20,7 +20,7 @@ func NewNotificationHandler(uc *application.OrderService) *NotificationHandler {
 
 // CreateNotification godoc
 // @Summary Create a new notification
-// @Security JWT
+// @Security BearerAuth
 // @Description Create a new notification with user_id, message, etc.
 // @Tags notifications
 // @Accept  json
@@ -57,7 +57,7 @@ func (h *NotificationHandler) CreateNotification(w http.ResponseWriter, r *http.
 
 // UpdateNotificationStatus godoc
 // @Summary Update a notification's status (e.g. mark as sent or read)
-// @Security JWT
+// @Security BearerAuth
 // @Description Update notification status by ID
 // @Tags notifications
 // @Accept json
@@ -95,7 +95,7 @@ func (h *NotificationHandler) UpdateNotificationStatus(w http.ResponseWriter, r 
 
 // ListPendingNotifications godoc
 // @Summary List all pending notifications
-// @Security JWT
+// @Security BearerAuth
 // @Description Get a list of notifications not yet sent
 // @Tags notifications
 // @Produce json
@@ -114,7 +114,7 @@ func (h *NotificationHandler) ListNotifications(w http.ResponseWriter, r *http.R
 
 // ListUserNotifications godoc
 // @Summary List notifications by user
-// @Security JWT
+// @Security BearerAuth
 // @Description Get all notifications belonging to a user (optionally filtered by status)
 // @Tags notifications
 // @Produce json
@@ -151,7 +151,7 @@ func (h *NotificationHandler) ListUserNotifications(w http.ResponseWriter, r *ht
 
 // MarkAsRead godoc
 // @Summary Mark a single notification as read
-// @Security JWT
+// @Security BearerAuth
 // @Description Update notification status to "read" by ID
 // @Tags notifications
 // @Accept json
@@ -181,7 +181,7 @@ func (h *NotificationHandler) MarkAsRead(w http.ResponseWriter, r *http.Request)
 
 // MarkAllAsRead godoc
 // @Summary Mark all user notifications as read
-// @Security JWT
+// @Security BearerAuth
 // @Description Mark all unread notifications for a given user ID as "read"
 // @Tags notifications
 // @Produce json

@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type StoreRepository struct {
@@ -27,23 +28,27 @@ func (r *StoreRepository) execFromCtx(ctx context.Context) sqlx.ExtContext {
 
 func (r *StoreRepository) Create(ctx context.Context, s *store.Store) error {
 	query := `
-        INSERT INTO stores (owner_id, name, location, logo_url)
-		VALUES (:owner_id, :name, :location, :logo_url)
-		RETURNING id
+    INSERT INTO stores (owner_id, name, name_normalized, location, logo_url)
+		VALUES (:owner_id, :name, :name_normalized, :location, :logo_url)
+		RETURNING id, created_at, updated_at
 	`
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, s)
 	if err != nil {
-		return fmt.Errorf("insert store: %w", err)
+		if pgErr, ok := err.(*pq.Error); ok {
+			if pgErr.Code == "23505" {
+				return store.ErrStoreNameAlreadyExists
+			}
+		}
+		return fmt.Errorf("inserting store: %w", err)
 	}
+
 	defer rows.Close()
 
 	if rows.Next() {
-		if err := rows.Scan(&s.ID); err != nil {
+		if err := rows.Scan(&s.ID, &s.CreatedAt, &s.UpdatedAt); err != nil {
 			return fmt.Errorf("scanning new store id: %w", err)
 		}
-	} else {
-		return fmt.Errorf("no id returned after insert")
 	}
 
 	return nil

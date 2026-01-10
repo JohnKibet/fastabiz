@@ -24,7 +24,7 @@ func NewDriverHandler(uc *application.OrderService) *DriverHandler {
 // @Summary Update driver profile
 // @Description Updates the vehicle information and current location of a driver
 // @Tags drivers
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param driver_id path string true "Driver ID"
@@ -62,7 +62,7 @@ func (h *DriverHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Reque
 // @Tags drivers
 // @Accept json
 // @Produce json
-// @Security JWT
+// @Security BearerAuth
 // @Param id path string true "Driver ID"
 // @Param data body driver.UpdateDriverRequest true "Field and value to update"
 // @Success 200 {object} map[string]string
@@ -95,7 +95,7 @@ func (h *DriverHandler) UpdateDriver(w http.ResponseWriter, r *http.Request) {
 
 // GetDriverByID godoc
 // @Summary Get driver by ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Retrieve a driver by their ID
 // @Tags drivers
 // @Produce  json
@@ -123,7 +123,7 @@ func (h *DriverHandler) GetDriverByID(w http.ResponseWriter, r *http.Request) {
 
 // GetUserByDriver godoc
 // @Summary Get driver by Email
-// @Security JWT
+// @Security BearerAuth
 // @Description Retrieve a driver by their Email
 // @Tags drivers
 // @Produce  json
@@ -151,7 +151,7 @@ func (h *DriverHandler) GetDriverByEmail(w http.ResponseWriter, r *http.Request)
 
 // ListDrivers godoc
 // @Summary List all drivers
-// @Security JWT
+// @Security BearerAuth
 // @Description Get a list of all registered drivers
 // @Tags drivers
 // @Produce  json
@@ -173,7 +173,7 @@ func (h *DriverHandler) ListDrivers(w http.ResponseWriter, r *http.Request) {
 // @Tags drivers
 // @Accept json
 // @Produce json
-// @Security JWT
+// @Security BearerAuth
 // @Param id path string true "Driver ID"
 // @Success 200 {object} map[string]string "Driver deleted"
 // @Failure 400 {object} handlers.ErrorResponse "Invalid driver ID"

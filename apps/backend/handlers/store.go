@@ -5,6 +5,7 @@ import (
 	"backend/internal/domain/store"
 	"backend/internal/middleware"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -32,7 +33,7 @@ func writeJSON(w http.ResponseWriter, status int, payload any) {
 
 // CreateStore godoc
 // @Summary Create a new store
-// @Security JWT
+// @Security BearerAuth
 // @Description Creates a new store for the authenticated owner
 // @Tags stores
 // @Accept json
@@ -60,7 +61,12 @@ func (h *StoreHandler) CreateStore(w http.ResponseWriter, r *http.Request) {
 	s.OwnerID = ownerID
 
 	if err := h.UC.Stores.UseCase.CreateStore(r.Context(), s); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Could not create order", err)
+		if errors.Is(err, store.ErrStoreNameAlreadyExists) {
+			writeJSONError(w, http.StatusConflict, "A store with this name already exists", nil)
+			return
+		}
+
+		writeJSONError(w, http.StatusInternalServerError, "Could not create store", err)
 		return
 	}
 
@@ -131,7 +137,7 @@ func (h *StoreHandler) GetStoreSummary(w http.ResponseWriter, r *http.Request) {
 
 // UpdateStore godoc
 // @Summary Update a store
-// @Security JWT
+// @Security BearerAuth
 // @Description Update details of a store owned by the authenticated user
 // @Tags stores
 // @Accept json
@@ -193,7 +199,7 @@ func (h *StoreHandler) ListStores(w http.ResponseWriter, r *http.Request) {
 
 // ListOwnerStores godoc
 // @Summary List authenticated owner's stores
-// @Security JWT
+// @Security BearerAuth
 // @Description Returns all stores owned by the current user
 // @Tags stores
 // @Produce json
@@ -219,7 +225,7 @@ func (h *StoreHandler) ListOwnerStores(w http.ResponseWriter, r *http.Request) {
 
 // ListStoresPaged godoc
 // @Summary List stores with pagination
-// @Security JWT
+// @Security BearerAuth
 // @Description Returns stores owned by authenticated user with limit and offset
 // @Tags stores
 // @Produce json
@@ -269,7 +275,7 @@ func (h *StoreHandler) ListStoresPaged(w http.ResponseWriter, r *http.Request) {
 
 // DeleteStore godoc
 // @Summary Delete a store
-// @Security JWT
+// @Security BearerAuth
 // @Description Deletes a store owned by the authenticated user
 // @Tags stores
 // @Produce json

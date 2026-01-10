@@ -100,7 +100,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 // @Summary Update user (driver) phone number
 // @Description Updates only the phone number of a driver (commonly used after onboarding)
 // @Tags users
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
@@ -136,7 +136,7 @@ func (h *UserHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Request
 // @Summary Update user profile
 // @Description Updates the user's name, email, and/or phone number. Partial updates allowed.
 // @Tags users
-// @Security JWT
+// @Security BearerAuth
 // @Accept json
 // @Produce json
 // @Param id path string true "User ID"
@@ -208,7 +208,7 @@ func (h *UserHandler) UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Security JWT
+// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Param data body user.UpdateUserRequest true "Field and value to update"
 // @Success 200 {object} map[string]string
@@ -245,7 +245,7 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Security JWT
+// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Param data body user.ChangePasswordRequest true "Current and new passwords"
 // @Success 200 {object} map[string]string "Password updated successfully"
@@ -281,7 +281,7 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 
 // GetUserByID godoc
 // @Summary Get user by ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Retrieve a user by their ID
 // @Tags users
 // @Produce  json
@@ -310,7 +310,7 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 // GetUserByEmail godoc
 // @Summary Get user by Email
-// @Security JWT
+// @Security BearerAuth
 // @Description Retrieve a user by their Email
 // @Tags users
 // @Produce  json
@@ -338,7 +338,7 @@ func (h *UserHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 
 // ListUsers godoc
 // @Summary List all users
-// @Security JWT
+// @Security BearerAuth
 // @Description Get a list of all registered users
 // @Tags users
 // @Produce  json
@@ -438,7 +438,7 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Security JWT
+// @Security BearerAuth
 // @Param id path string true "User ID"
 // @Success 200 {object} map[string]string "User profile deleted"
 // @Failure 400 {object} handlers.ErrorResponse "Invalid user ID"

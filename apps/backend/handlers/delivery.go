@@ -25,7 +25,7 @@ func NewDeliveryHandler(uc *application.OrderService) *DeliveryHandler {
 
 // GetDeliveryByID godoc
 // @Summary Get delivery by ID
-// @Security JWT
+// @Security BearerAuth
 // @Description Retrieve a delivery by their ID
 // @Tags deliveries
 // @Produce  json
@@ -53,7 +53,7 @@ func (h *DeliveryHandler) GetDeliveryByID(w http.ResponseWriter, r *http.Request
 
 // UpdateDelivery godoc
 // @Summary Update Delivery
-// @Security JWT
+// @Security BearerAuth
 // @Description Update any delivery struct field of an existing delivery
 // @Tags deliveries
 // @Accept json
@@ -97,7 +97,7 @@ func (h *DeliveryHandler) UpdateDelivery(w http.ResponseWriter, r *http.Request)
 
 // ListDeliveries godoc
 // @Summary List all deliveries
-// @Security JWT
+// @Security BearerAuth
 // @Description Get a list of all deliveries
 // @Tags deliveries
 // @Produce  json
@@ -119,7 +119,7 @@ func (h *DeliveryHandler) ListDeliveries(w http.ResponseWriter, r *http.Request)
 // @Tags deliveries
 // @Accept json
 // @Produce json
-// @Security JWT
+// @Security BearerAuth
 // @Param id path string true "Delivery ID"
 // @Success 200 {object} map[string]string "Delivery deleted"
 // @Failure 400 {object} handlers.ErrorResponse "Invalid Delivery ID"
@@ -147,7 +147,7 @@ func (h *DeliveryHandler) DeleteDelivery(w http.ResponseWriter, r *http.Request)
 // @Summary Accept order assignment and create delivery
 // @Description When a driver accepts an order assignment, this endpoint creates the delivery record, marks the order as in-transit, sets the pickup timestamp, and marks the driver as unavailable. Only callable by authenticated drivers.
 // @Tags deliveries
-// @Security JWT
+// @Security BearerAuth
 // @Produce json
 // @Param id path string true "Delivery ID (corresponds to the order assignment)"
 // @Success 200 {object} delivery.Delivery "Created and accepted delivery"

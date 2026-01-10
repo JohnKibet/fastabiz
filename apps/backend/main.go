@@ -43,7 +43,7 @@ import (
 // @BasePath /api
 // @schemes http
 
-// @securityDefinitions.apikey JWT
+// @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
 func main() {

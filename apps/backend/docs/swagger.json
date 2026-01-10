@@ -16,7 +16,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all deliveries",
@@ -44,7 +44,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a delivery by their ID",
@@ -90,7 +90,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a delivery by their ID",
@@ -142,7 +142,7 @@
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "When a driver accepts an order assignment, this endpoint creates the delivery record, marks the order as in-transit, sets the pickup timestamp, and marks the driver as unavailable. Only callable by authenticated drivers.",
@@ -194,7 +194,7 @@
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update any delivery struct field of an existing delivery",
@@ -261,7 +261,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all registered drivers",
@@ -289,7 +289,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a driver by their Email",
@@ -335,7 +335,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a driver by their ID",
@@ -381,7 +381,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a driver by their ID",
@@ -433,7 +433,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the vehicle information and current location of a driver",
@@ -500,7 +500,7 @@
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates a driver's specific field (e.g., VehicleInfo, CurrentLocation) based on driver ID",
@@ -561,7 +561,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all feedbacks",
@@ -589,7 +589,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Create a new feedback with order_id, customer_id, etc.",
@@ -640,7 +640,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a feedback by their ID",
@@ -847,7 +847,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get all notifications belonging to a user (optionally filtered by status)",
@@ -902,7 +902,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of notifications not yet sent",
@@ -936,7 +936,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Create a new notification with user_id, message, etc.",
@@ -987,7 +987,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Mark all unread notifications for a given user ID as \"read\"",
@@ -1036,7 +1036,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update notification status to \"read\" by ID",
@@ -1088,7 +1088,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update notification status by ID",
@@ -1155,7 +1155,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all orders",
@@ -1189,7 +1189,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Assign nearest available drivers to pending orders",
@@ -1215,7 +1215,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch order(s) using Customer ID",
@@ -1264,7 +1264,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch a single order using UUID",
@@ -1310,7 +1310,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates an order and returns the new object",
@@ -1361,7 +1361,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes an order by their ID",
@@ -1413,7 +1413,7 @@
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update any order struct field of an existing order",
@@ -1480,7 +1480,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all payments",
@@ -1508,7 +1508,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Register new payment with order_id, amount, etc.",
@@ -1559,7 +1559,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch a single payment using payment ID",
@@ -1605,7 +1605,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Fetch payment(s) using Order ID",
@@ -1654,7 +1654,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieves all products available to the merchant/admin.",
@@ -1744,7 +1744,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates a new product for a merchant, including optional images, options, and variants.",
@@ -1801,7 +1801,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Adds an image to a product. Optionally marks it as the primary image.",
@@ -1867,7 +1867,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the display order of product images using an ordered list of image IDs.",
@@ -1933,7 +1933,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes a product image by its ID.",
@@ -1994,7 +1994,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Adds a new option name (e.g. Size, Color) to a product.",
@@ -2060,7 +2060,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Adds a value to an existing product option (e.g. Red, Large).",
@@ -2126,7 +2126,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes a value from a product option.",
@@ -2187,7 +2187,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes an option name from a product.",
@@ -2248,7 +2248,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates a purchasable variant for a product based on option values.",
@@ -2311,7 +2311,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the price of a product variant.",
@@ -2377,7 +2377,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the stock quantity of a product variant.",
@@ -2443,7 +2443,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a product variant.",
@@ -2504,7 +2504,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a product by its ID.",
@@ -2565,7 +2565,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the core details of a product (name, description, category).",
@@ -2799,7 +2799,7 @@
             "post": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Creates a new store for the authenticated owner",
@@ -2857,7 +2857,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Returns all stores owned by the current user",
@@ -2897,7 +2897,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Returns stores owned by authenticated user with limit and offset",
@@ -2951,7 +2951,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Deletes a store owned by the authenticated user",
@@ -3047,7 +3047,7 @@
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Update details of a store owned by the authenticated user",
@@ -3114,7 +3114,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Get a list of all registered users",
@@ -3142,7 +3142,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a user by their Email",
@@ -3188,7 +3188,7 @@
             "get": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Retrieve a user by their ID",
@@ -3234,7 +3234,7 @@
             "delete": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Permanently deletes a user by their ID",
@@ -3286,7 +3286,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates only the phone number of a driver (commonly used after onboarding)",
@@ -3353,7 +3353,7 @@
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Verifies the user's current password and updates it to a new password",
@@ -3420,7 +3420,7 @@
             "patch": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates the user's name, email, and/or phone number. Partial updates allowed.",
@@ -3543,7 +3543,7 @@
             "put": {
                 "security": [
                     {
-                        "JWT": []
+                        "BearerAuth": []
                     }
                 ],
                 "description": "Updates a user's specific field (e.g., FullName, Email) based on user ID",
@@ -4231,8 +4231,8 @@
             "required": [
                 "category",
                 "description",
-                "merchant_id",
-                "name"
+                "name",
+                "store_id"
             ],
             "properties": {
                 "category": {
@@ -4241,10 +4241,10 @@
                 "description": {
                     "type": "string"
                 },
-                "merchant_id": {
+                "name": {
                     "type": "string"
                 },
-                "name": {
+                "store_id": {
                     "type": "string"
                 }
             }
@@ -4326,9 +4326,6 @@
                         "type": "string"
                     }
                 },
-                "merchant_id": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -4345,6 +4342,9 @@
                 },
                 "stock": {
                     "type": "integer"
+                },
+                "store_id": {
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
@@ -4460,11 +4460,14 @@
         "store.CreateStoreRequest": {
             "type": "object",
             "required": [
+                "admin_id",
                 "location",
-                "name",
-                "ownerID"
+                "name"
             ],
             "properties": {
+                "admin_id": {
+                    "type": "string"
+                },
                 "location": {
                     "type": "string"
                 },
@@ -4475,15 +4478,16 @@
                 "name": {
                     "description": "example:\"Kevin's Electronics\"",
                     "type": "string"
-                },
-                "ownerID": {
-                    "type": "string"
                 }
             }
         },
         "store.Store": {
             "type": "object",
             "properties": {
+                "admin_id": {
+                    "description": "FK to users",
+                    "type": "string"
+                },
                 "created_at": {
                     "type": "string"
                 },
@@ -4498,10 +4502,6 @@
                     "type": "string"
                 },
                 "name": {
-                    "type": "string"
-                },
-                "owner_id": {
-                    "description": "FK to users",
                     "type": "string"
                 },
                 "updated_at": {

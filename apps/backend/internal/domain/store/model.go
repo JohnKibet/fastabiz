@@ -7,13 +7,14 @@ import (
 )
 
 type Store struct {
-	ID        uuid.UUID `db:"id" json:"id"`
-	OwnerID   uuid.UUID `db:"owner_id" json:"owner_id"` // FK to users
-	Name      string    `db:"name" json:"name"`
-	LogoURL   string    `db:"logo_url" json:"logo_url"`
-	Location  string    `db:"location" json:"location"` // optional
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+	ID             uuid.UUID `db:"id" json:"id"`
+	OwnerID        uuid.UUID `db:"owner_id" json:"admin_id"` // FK to users
+	Name           string    `db:"name" json:"name"`
+	NameNormalized string    `db:"name_normalized" json:"-"`
+	LogoURL        string    `db:"logo_url" json:"logo_url"`
+	Location       string    `db:"location" json:"location"` // optional
+	CreatedAt      time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt      time.Time `db:"updated_at" json:"updated_at"`
 }
 
 // Store analytics (derived data)
