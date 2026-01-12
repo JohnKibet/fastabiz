@@ -152,6 +152,20 @@ func (r *ProductRepository) AddOption(ctx context.Context, productID uuid.UUID, 
 	return optionID, nil
 }
 
+func (r *ProductRepository) GetOptionIDByName(ctx context.Context, productID uuid.UUID, name string) (uuid.UUID, error) {
+	query := `
+		SELECT id FROM product_options
+		WHERE product_id = $1 AND name = $2
+	`
+
+	var optionID uuid.UUID
+	if err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &optionID, query, productID, name); err != nil {
+		return uuid.Nil, fmt.Errorf("get option id by name: %w", err)
+	}
+
+	return optionID, nil
+}
+
 func (r *ProductRepository) RemoveOption(ctx context.Context, optionID uuid.UUID) error {
 	query := `
 		DELETE FROM product_options
@@ -201,6 +215,20 @@ func (r *ProductRepository) AddOptionValue(ctx context.Context, optionID uuid.UU
 	}
 
 	return nil
+}
+
+func (r *ProductRepository) GetOptionValueID(ctx context.Context, optionID uuid.UUID, value string) (uuid.UUID, error) {
+	query := `
+		SELECT id FROM product_option_values
+		WHERE option_id = $1 AND value = $2
+	`
+
+	var optionValueID uuid.UUID
+	if err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &optionValueID, query, optionID, value); err != nil {
+		return uuid.Nil, fmt.Errorf("get option value id: %w", err)
+	}
+
+	return optionValueID, nil
 }
 
 func (r *ProductRepository) RemoveOptionValue(ctx context.Context, optionValueID uuid.UUID) error {
@@ -352,25 +380,33 @@ func (r *ProductRepository) RemoveVariant(ctx context.Context, variantID uuid.UU
 func (r *ProductRepository) Create(ctx context.Context, p *product.Product) error {
 	query := `
 		INSERT INTO products (
-		merchant_id, name, description, category
+		store_id, name, description, category
 	) VALUES (
-		:merchant_id, :name, :description, :category
+		:store_id, :name, :description, :category
 	)
 	RETURNING id
 	`
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, p)
 	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503": // foreign_key_violation
+				return product.ErrProductInvalidStore
+			case "23505": // unique_violation
+				return product.ErrProductAlreadyExists
+			case "23502": // not_null_violation
+				return product.ErrProductInvalidInput
+			}
+		}
 		return fmt.Errorf("insert product: %w", err)
 	}
 	defer rows.Close()
 
 	if rows.Next() {
 		if err := rows.Scan(&p.ID); err != nil {
-			return fmt.Errorf("scanning new product id: %w", err)
+			return fmt.Errorf("scan product id: %w", err)
 		}
-	} else {
-		return fmt.Errorf("no id returned after insert")
 	}
 
 	// 2. Insert images (optional)
@@ -425,7 +461,7 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 
 func (r *ProductRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*product.Product, error) {
 	query := `
-		SELECT id, merchant_id, name, description, category
+		SELECT id, store_id, name, description, category
 		FROM products 
 		WHERE id = $1
 	`
@@ -503,7 +539,7 @@ func (r *ProductRepository) UpdateDetails(ctx context.Context, productID uuid.UU
 
 func (r *ProductRepository) List(ctx context.Context) ([]product.Product, error) {
 	query := `
-		SELECT id, merchant_id, name, description, category
+		SELECT id, store_id, name, description, category
 		FROM products
 	`
 

@@ -8,7 +8,7 @@ import (
 
 type Store struct {
 	ID             uuid.UUID `db:"id" json:"id"`
-	OwnerID        uuid.UUID `db:"owner_id" json:"admin_id"` // FK to users
+	OwnerID        uuid.UUID `db:"owner_id" json:"merchant_id"` // FK to users
 	Name           string    `db:"name" json:"name"`
 	NameNormalized string    `db:"name_normalized" json:"-"`
 	LogoURL        string    `db:"logo_url" json:"logo_url"`
@@ -35,10 +35,10 @@ type StoreSummary struct {
 // Loading full store rows
 // Repeating JOIN logic across repositories
 type StoreBasic struct {
-	ID     uuid.UUID `json:"id"`
-	Name   string    `json:"name"`
-	Logo   string    `json:"logo_url"`
-	Rating float64   `json:"rating"`
+	ID     uuid.UUID `db:"id" json:"id"`
+	Name   string    `db:"name" json:"name"`
+	Logo   string    `db:"logo_url" json:"logo_url"`
+	Rating float64   `db:"rating" json:"rating"`
 }
 
 // Marketplace listing (paged + ordered)

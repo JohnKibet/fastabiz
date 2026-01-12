@@ -1,6 +1,6 @@
 -- Multiple images per product
 CREATE TABLE product_images (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
     is_primary BOOLEAN DEFAULT FALSE,

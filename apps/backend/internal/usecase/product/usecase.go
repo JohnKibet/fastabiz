@@ -20,10 +20,7 @@ func NewUseCase(repo product.Repository, txm common.TxManager) *UseCase {
 
 func (uc *UseCase) CreateProduct(ctx context.Context, p *product.Product) (err error) {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.Create(txCtx, p); err != nil {
-			return fmt.Errorf("could not create product: %w", err)
-		}
-		return nil
+		return uc.repo.Create(txCtx, p)
 	})
 }
 
@@ -48,10 +45,12 @@ func (uc *UseCase) DeleteProduct(ctx context.Context, productID uuid.UUID) error
 	return uc.repo.Delete(ctx, productID)
 }
 
-func (uc *UseCase) AddImage(ctx context.Context, productID uuid.UUID, url string, isPrimary bool) error {
+func (uc *UseCase) AddImage(ctx context.Context, productID uuid.UUID, images []product.Image) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.AddImage(txCtx, productID, url, isPrimary); err != nil {
-			return fmt.Errorf("image upload failed: %w", err)
+		for _, image := range images {
+			if err := uc.repo.AddImage(txCtx, productID, image.URL, image.IsPrimary); err != nil {
+				return fmt.Errorf("image upload failed: %w", err)
+			}
 		}
 		return nil
 	})
@@ -97,10 +96,12 @@ func (uc *UseCase) DeleteOptionName(ctx context.Context, optionID uuid.UUID) err
 	})
 }
 
-func (uc *UseCase) AddOptionValue(ctx context.Context, optionID uuid.UUID, value string) error {
+func (uc *UseCase) AddOptionValue(ctx context.Context, optionID uuid.UUID, values []string) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.AddOptionValue(txCtx, optionID, value); err != nil {
-			return fmt.Errorf("add option value failed: %w", err)
+		for _, value := range values {
+			if err := uc.repo.AddOptionValue(txCtx, optionID, value); err != nil {
+				return fmt.Errorf("add option value failed: %w", err)
+			}
 		}
 		return nil
 	})
@@ -115,12 +116,34 @@ func (uc *UseCase) DeleteOptionValue(ctx context.Context, optionValueID uuid.UUI
 	})
 }
 
-func (uc *UseCase) CreateVariant(ctx context.Context, variant *product.Variant) error {
+func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantRequest) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.CreateVariant(txCtx, variant); err != nil {
-			return fmt.Errorf("create new variant failed: %w", err)
+		optionMap := make(map[uuid.UUID]uuid.UUID)
+
+		for optName, optValue := range req.Options {
+			optionID, err := uc.repo.GetOptionIDByName(txCtx, req.ProductID, optName)
+			if err != nil {
+				return product.ErrOptionNotFound
+			}
+
+			valueID, err := uc.repo.GetOptionValueID(txCtx, optionID, optValue)
+			if err != nil {
+				return product.ErrOptionValueNotFound
+			}
+
+			optionMap[optionID] = valueID
 		}
-		return nil
+
+		variant := &product.Variant{
+			ProductID: req.ProductID,
+			SKU:       req.SKU,
+			Price:     req.Price,
+			Stock:     req.Stock,
+			ImageURL:  req.ImageURL,
+			Options:   optionMap,
+		}
+
+		return uc.repo.CreateVariant(txCtx, variant)
 	})
 }
 

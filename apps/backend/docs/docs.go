@@ -4487,10 +4487,6 @@ const docTemplate = `{
         "store.Store": {
             "type": "object",
             "properties": {
-                "admin_id": {
-                    "description": "FK to users",
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
@@ -4502,6 +4498,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "logo_url": {
+                    "type": "string"
+                },
+                "merchant_id": {
+                    "description": "FK to users",
                     "type": "string"
                 },
                 "name": {
@@ -4756,7 +4756,7 @@ const docTemplate = `{
         }
     },
     "securityDefinitions": {
-        "JWT": {
+        "BearerAuth": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

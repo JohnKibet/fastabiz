@@ -299,12 +299,13 @@ func (h *StoreHandler) DeleteStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.UC.Stores.UseCase.DeleteStore(r.Context(), storeID, ownerID); err != nil {
+	name, err := h.UC.Stores.UseCase.DeleteStore(r.Context(), storeID, ownerID)
+	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "Failed to delete store", err)
 		return
 	}
 
 	writeJSON(w, http.StatusOK, map[string]any{
-		"message": fmt.Sprintf("store %s deleted", storeID),
+		"message": fmt.Sprintf("Store '%q' deleted successfully", name),
 	})
 }

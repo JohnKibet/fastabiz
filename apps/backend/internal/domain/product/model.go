@@ -45,3 +45,8 @@ type Variant struct {
 	ImageURL  string                  `db:"image_url" json:"image_url"`
 	Options   map[uuid.UUID]uuid.UUID `db:"options" json:"options"`
 }
+
+type Image struct {
+	URL       string
+	IsPrimary bool
+}

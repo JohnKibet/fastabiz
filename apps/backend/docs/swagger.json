@@ -4484,10 +4484,6 @@
         "store.Store": {
             "type": "object",
             "properties": {
-                "admin_id": {
-                    "description": "FK to users",
-                    "type": "string"
-                },
                 "created_at": {
                     "type": "string"
                 },
@@ -4499,6 +4495,10 @@
                     "type": "string"
                 },
                 "logo_url": {
+                    "type": "string"
+                },
+                "merchant_id": {
+                    "description": "FK to users",
                     "type": "string"
                 },
                 "name": {
@@ -4753,7 +4753,7 @@
         }
     },
     "securityDefinitions": {
-        "JWT": {
+        "BearerAuth": {
             "type": "apiKey",
             "name": "Authorization",
             "in": "header"

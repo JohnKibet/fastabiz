@@ -3,12 +3,12 @@ package product
 import "github.com/google/uuid"
 
 type CreateVariantRequest struct {
-	ProductID uuid.UUID               `json:"product_id" binding:"required"`
-	SKU       string                  `json:"sku" binding:"required"`
-	Price     float64                 `json:"price" binding:"required"`
-	Stock     int                     `json:"stock" binding:"required"`
-	ImageURL  *string                 `json:"image_url" binding:"required"`
-	Options   map[uuid.UUID]uuid.UUID `json:"options" binding:"required"` // optionID -> optionValueID
+	ProductID uuid.UUID         `json:"product_id" binding:"required"`
+	SKU       string            `json:"sku" binding:"required"`
+	Price     float64           `json:"price" binding:"required"`
+	Stock     int               `json:"stock" binding:"required"`
+	ImageURL  string            `json:"image_url" binding:"required"`
+	Options   map[string]string `json:"options" binding:"required"` // name → value
 }
 
 type CreateProductRequest struct {
@@ -27,8 +27,10 @@ type UpdateProductDetailsRequest struct {
 
 type AddImageRequest struct {
 	ProductID uuid.UUID `json:"product_id" binding:"required"`
-	URL       string    `json:"url" binding:"required"`
-	IsPrimary bool      `json:"is_primary"`
+	Images    []struct {
+		URL       string `json:"url" binding:"required"`
+		IsPrimary bool   `json:"is_primary" binding:"required"`
+	} `json:"images" binding:"required"`
 }
 
 type ReorderImagesRequest struct {
@@ -41,9 +43,9 @@ type AddOptionNameRequest struct {
 	Name      string    `json:"name" binding:"required"`
 }
 
-type AddOptionValueRequest struct {
+type AddOptionValuesRequest struct {
 	OptionID uuid.UUID `json:"option_id" binding:"required"`
-	Value    string    `json:"value" binding:"required"`
+	Values   []string  `json:"values" binding:"required,min=1"`
 }
 
 type UpdateVariantStockRequest struct {
@@ -71,7 +73,7 @@ func (r CreateVariantRequest) ToVariant() *Variant {
 		SKU:       r.SKU,
 		Price:     r.Price,
 		Stock:     r.Stock,
-		ImageURL:  *r.ImageURL,
-		Options:   r.Options,
+		ImageURL:  r.ImageURL,
+		Options:   r.ToVariant().Options,
 	}
 }

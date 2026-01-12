@@ -1,6 +1,6 @@
 -- Actual purchasable units
 CREATE TABLE variants (
-    id UUID PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
     sku TEXT UNIQUE NOT NULL,
     price NUMERIC(10,2) NOT NULL,

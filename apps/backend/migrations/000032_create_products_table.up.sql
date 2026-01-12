@@ -1,7 +1,7 @@
 -- Main product record
 CREATE TABLE products (
-    id UUID PRIMARY KEY,
-    merchant_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    store_id UUID NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     description TEXT,
     category TEXT,
@@ -9,5 +9,5 @@ CREATE TABLE products (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Index to quickly find all products for a merchant
-CREATE INDEX idx_products_merchant_id ON products(merchant_id);
+-- Index to quickly find all products for a store
+CREATE INDEX idx_products_store_id ON products(store_id);

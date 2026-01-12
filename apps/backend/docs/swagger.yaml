@@ -611,9 +611,6 @@ definitions:
     type: object
   store.Store:
     properties:
-      admin_id:
-        description: FK to users
-        type: string
       created_at:
         type: string
       id:
@@ -622,6 +619,9 @@ definitions:
         description: optional
         type: string
       logo_url:
+        type: string
+      merchant_id:
+        description: FK to users
         type: string
       name:
         type: string
@@ -3100,7 +3100,7 @@ paths:
 schemes:
 - http
 securityDefinitions:
-  JWT:
+  BearerAuth:
     in: header
     name: Authorization
     type: apiKey

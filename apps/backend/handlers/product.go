@@ -4,6 +4,7 @@ import (
 	"backend/internal/application"
 	"backend/internal/domain/product"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -42,7 +43,20 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	p := req.ToProduct()
 
 	if err := h.UC.Products.UseCase.CreateProduct(r.Context(), p); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to create product", err)
+		switch {
+		case errors.Is(err, product.ErrProductInvalidStore):
+			writeJSONError(w, http.StatusBadRequest, "Invalid store", nil)
+
+		case errors.Is(err, product.ErrProductInvalidInput):
+			writeJSONError(w, http.StatusBadRequest, "Invalid product data", nil)
+
+		case errors.Is(err, product.ErrProductAlreadyExists):
+			writeJSONError(w, http.StatusConflict, "Product already exists", nil)
+
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Failed to create product", nil)
+		}
+
 		return
 	}
 
@@ -199,7 +213,15 @@ func (h *ProductHandler) AddImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.UC.Products.UseCase.AddImage(r.Context(), req.ProductID, req.URL, req.IsPrimary); err != nil {
+	images := make([]product.Image, 0, len(req.Images))
+	for _, img := range req.Images {
+		images = append(images, product.Image{
+			URL:       img.URL,
+			IsPrimary: img.IsPrimary,
+		})
+	}
+
+	if err := h.UC.Products.UseCase.AddImage(r.Context(), req.ProductID, images); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "Failed to add image", err)
 		return
 	}
@@ -347,14 +369,14 @@ func (h *ProductHandler) DeleteOptionName(w http.ResponseWriter, r *http.Request
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /products/options/values/add [post]
 func (h *ProductHandler) AddOptionValue(w http.ResponseWriter, r *http.Request) {
-	var req product.AddOptionValueRequest
+	var req product.AddOptionValuesRequest
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeJSONError(w, http.StatusBadRequest, "Invalid request body", nil)
 		return
 	}
 
-	if err := h.UC.Products.UseCase.AddOptionValue(r.Context(), req.OptionID, req.Value); err != nil {
+	if err := h.UC.Products.UseCase.AddOptionValue(r.Context(), req.OptionID, req.Values); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "Failed to add option value", err)
 		return
 	}
@@ -414,14 +436,25 @@ func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	v := req.ToVariant()
+	if err := h.UC.Products.UseCase.CreateVariant(r.Context(), req); err != nil {
+		switch {
+		case errors.Is(err, product.ErrProductNotFound):
+			writeJSONError(w, http.StatusNotFound, "Product not found", err)
 
-	if err := h.UC.Products.UseCase.CreateVariant(r.Context(), v); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to create variant", err)
+		case errors.Is(err, product.ErrOptionNotFound):
+			writeJSONError(w, http.StatusNotFound, "Option not found", err)
+
+		case errors.Is(err, product.ErrOptionValueNotFound):
+			writeJSONError(w, http.StatusNotFound, "Option value not found", err)
+
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Failed to create variant", err)
+		}
+
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, v)
+	writeJSON(w, http.StatusCreated, req)
 }
 
 // UpdateVariantStock godoc

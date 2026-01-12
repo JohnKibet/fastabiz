@@ -85,4 +85,8 @@ type Repository interface {
 	// Delete permanently removes a product and all associated child records,
 	// including images, options, variants, and inventory.
 	Delete(ctx context.Context, productID uuid.UUID) error
+
+	GetOptionIDByName(ctx context.Context, productID uuid.UUID, name string) (uuid.UUID, error)
+
+	GetOptionValueID(ctx context.Context, optionID uuid.UUID, value string) (uuid.UUID, error)
 }

@@ -70,8 +70,10 @@ func (uc *UseCase) ListStoresPaged(ctx context.Context, filter store.StoreFilter
 	return uc.repo.ListStoresPaged(ctx, filter)
 }
 
-func (uc *UseCase) DeleteStore(ctx context.Context, storeID uuid.UUID, ownerID uuid.UUID) error {
-	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
+func (uc *UseCase) DeleteStore(ctx context.Context, storeID uuid.UUID, ownerID uuid.UUID) (string, error) {
+	var storeName string
+
+	err := uc.txManager.Do(ctx, func(txCtx context.Context) error {
 
 		owned, err := uc.repo.IsOwnedBy(txCtx, storeID, ownerID)
 		if err != nil {
@@ -81,12 +83,17 @@ func (uc *UseCase) DeleteStore(ctx context.Context, storeID uuid.UUID, ownerID u
 			return fmt.Errorf("store not owned by user")
 		}
 
-		if err := uc.repo.Delete(txCtx, storeID); err != nil {
-			return fmt.Errorf("delete store failed: %w", err)
+		store, err := uc.repo.GetBasicByID(txCtx, storeID)
+		if err != nil {
+			return err
 		}
 
-		return nil
+		storeName = store.Name
+
+		return uc.repo.Delete(txCtx, storeID)
 	})
+
+	return storeName, err
 }
 
 func (uc *UseCase) StoreExists(ctx context.Context, storeID uuid.UUID) (bool, error) {
