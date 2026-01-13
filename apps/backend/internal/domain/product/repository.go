@@ -39,6 +39,11 @@ type Repository interface {
 	// and associates it with the specified option values.
 	CreateVariant(ctx context.Context, variant *Variant) error
 
+	// AddVariantOptionValues associates option-value pairs with a specific variant.
+	AddVariantOptionValues(ctx context.Context, variantID uuid.UUID, valueID uuid.UUID) error
+
+	// GetVariantByID retrieves a specific variant by its ID,
+	// including its associated option-value mappings.
 	GetVariantByID(ctx context.Context, variantID uuid.UUID) (*Variant, error)
 
 	// UpdateVariantStock updates the available inventory quantity
@@ -76,7 +81,7 @@ type Repository interface {
 
 	// AddOptionValue adds a selectable value to an existing product option
 	// (e.g., Small, Medium, Large).
-	AddOptionValue(ctx context.Context, optionID uuid.UUID, value string) error
+	AddOptionValue(ctx context.Context, productID uuid.UUID, optionID uuid.UUID, value string) error
 
 	// RemoveOptionValue deletes a specific option value and removes
 	// any variant associations that depend on it.
@@ -86,7 +91,9 @@ type Repository interface {
 	// including images, options, variants, and inventory.
 	Delete(ctx context.Context, productID uuid.UUID) error
 
+	// GetOptionIDByName retrieves the ID of a product option by its name.
 	GetOptionIDByName(ctx context.Context, productID uuid.UUID, name string) (uuid.UUID, error)
 
+	// GetOptionValueID retrieves the ID of a product option value by its value.
 	GetOptionValueID(ctx context.Context, optionID uuid.UUID, value string) (uuid.UUID, error)
 }

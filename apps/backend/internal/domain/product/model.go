@@ -37,13 +37,13 @@ type Option struct {
 }
 
 type Variant struct {
-	ID        uuid.UUID               `db:"id" json:"id"`
-	ProductID uuid.UUID               `db:"product_id" json:"product_id"`
-	SKU       string                  `db:"sku" json:"sku"`
-	Price     float64                 `db:"price" json:"price"`
-	Stock     int                     `db:"stock" json:"stock"`
-	ImageURL  string                  `db:"image_url" json:"image_url"`
-	Options   map[uuid.UUID]uuid.UUID `db:"options" json:"options"`
+	ID        uuid.UUID `db:"id" json:"id"`
+	ProductID uuid.UUID `db:"product_id" json:"product_id"`
+	SKU       string    `db:"sku" json:"sku"`
+	Price     float64   `db:"price" json:"price"`
+	Stock     int       `db:"stock" json:"stock"`
+	ImageURL  string    `db:"image_url" json:"image_url"`
+	// Options   map[uuid.UUID]uuid.UUID `db:"options" json:"options"`
 }
 
 type Image struct {

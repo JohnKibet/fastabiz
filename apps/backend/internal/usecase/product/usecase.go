@@ -4,7 +4,9 @@ import (
 	"backend/internal/domain/product"
 	"backend/internal/usecase/common"
 	"context"
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 )
@@ -96,10 +98,14 @@ func (uc *UseCase) DeleteOptionName(ctx context.Context, optionID uuid.UUID) err
 	})
 }
 
-func (uc *UseCase) AddOptionValue(ctx context.Context, optionID uuid.UUID, values []string) error {
+func (uc *UseCase) AddOptionValue(ctx context.Context, productID uuid.UUID, optionID uuid.UUID, values []string) error {
+	if len(values) == 0 {
+		return errors.New("no option values provided")
+	}
+
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		for _, value := range values {
-			if err := uc.repo.AddOptionValue(txCtx, optionID, value); err != nil {
+			if err := uc.repo.AddOptionValue(txCtx, productID, optionID, value); err != nil {
 				return fmt.Errorf("add option value failed: %w", err)
 			}
 		}
@@ -122,6 +128,7 @@ func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantR
 
 		for optName, optValue := range req.Options {
 			optionID, err := uc.repo.GetOptionIDByName(txCtx, req.ProductID, optName)
+			log.Printf("Option Name: %s, Option ID: %v", optName, optionID)
 			if err != nil {
 				return product.ErrOptionNotFound
 			}
@@ -140,7 +147,7 @@ func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantR
 			Price:     req.Price,
 			Stock:     req.Stock,
 			ImageURL:  req.ImageURL,
-			Options:   optionMap,
+			// Options:   optionMap,
 		}
 
 		return uc.repo.CreateVariant(txCtx, variant)

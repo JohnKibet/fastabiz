@@ -188,16 +188,17 @@ func (r *ProductRepository) RemoveOption(ctx context.Context, optionID uuid.UUID
 	return nil
 }
 
-func (r *ProductRepository) AddOptionValue(ctx context.Context, optionID uuid.UUID, value string) error {
+func (r *ProductRepository) AddOptionValue(ctx context.Context, productID uuid.UUID, optionID uuid.UUID, value string) error {
 	params := map[string]interface{}{
-		"option_id": optionID,
-		"value":     value,
+		"product_option_id": optionID,
+		"product_id":        productID,
+		"value":             value,
 	}
 
 	query := `
-		INSERT INTO product_option_values (option_id, value)
-        VALUES (:option_id, :value)
-        RETURNING id
+		INSERT INTO product_option_values (product_option_id, product_id, value)
+    VALUES (:product_option_id, :product_id, :value)
+    RETURNING id
 	`
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
@@ -220,7 +221,7 @@ func (r *ProductRepository) AddOptionValue(ctx context.Context, optionID uuid.UU
 func (r *ProductRepository) GetOptionValueID(ctx context.Context, optionID uuid.UUID, value string) (uuid.UUID, error) {
 	query := `
 		SELECT id FROM product_option_values
-		WHERE option_id = $1 AND value = $2
+		WHERE product_option_id = $1 AND value = $2
 	`
 
 	var optionValueID uuid.UUID
@@ -275,6 +276,20 @@ func (r *ProductRepository) CreateVariant(ctx context.Context, variant *product.
 		}
 	} else {
 		return fmt.Errorf("no id returned after scan")
+	}
+
+	return nil
+}
+
+func (r *ProductRepository) AddVariantOptionValues(ctx context.Context, variantID uuid.UUID, valueID uuid.UUID) error {
+	query := `
+		INSERT INTO variant_option_values
+		(variant_id, option_value_id)
+		VALUES ($1, $2)
+	`
+	_, err := r.execFromCtx(ctx).ExecContext(ctx, query, variantID, valueID)
+	if err != nil {
+		return fmt.Errorf("insert variant option-value mapping: %w", err)
 	}
 
 	return nil
@@ -426,7 +441,7 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 
 		// insert each value
 		for _, val := range opt.Values {
-			if err := r.AddOptionValue(ctx, optionID, val); err != nil {
+			if err := r.AddOptionValue(ctx, p.ID, optionID, val); err != nil {
 				return err
 			}
 		}
@@ -442,7 +457,7 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 				SKU:       v.SKU,
 				Price:     v.Price,
 				Stock:     v.Stock,
-				Options:   v.Options,
+				// Options:   v.Options,
 			}
 
 			if v.ImageURL != "" {

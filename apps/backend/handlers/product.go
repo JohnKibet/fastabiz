@@ -376,7 +376,12 @@ func (h *ProductHandler) AddOptionValue(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := h.UC.Products.UseCase.AddOptionValue(r.Context(), req.OptionID, req.Values); err != nil {
+	if len(req.Values) == 0 {
+		writeJSONError(w, http.StatusBadRequest, "Values array cannot be empty", nil)
+		return
+	}
+
+	if err := h.UC.Products.UseCase.AddOptionValue(r.Context(), req.ProductID, req.OptionID, req.Values); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "Failed to add option value", err)
 		return
 	}

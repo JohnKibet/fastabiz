@@ -44,8 +44,9 @@ type AddOptionNameRequest struct {
 }
 
 type AddOptionValuesRequest struct {
-	OptionID uuid.UUID `json:"option_id" binding:"required"`
-	Values   []string  `json:"values" binding:"required,min=1"`
+	ProductID uuid.UUID `json:"product_id" binding:"required"`
+	OptionID  uuid.UUID `json:"option_id" binding:"required"`
+	Values    []string  `json:"values" binding:"required,min=1"`
 }
 
 type UpdateVariantStockRequest struct {
@@ -74,6 +75,6 @@ func (r CreateVariantRequest) ToVariant() *Variant {
 		Price:     r.Price,
 		Stock:     r.Stock,
 		ImageURL:  r.ImageURL,
-		Options:   r.ToVariant().Options,
+		// Options:   r.ToVariant().Options,
 	}
 }
