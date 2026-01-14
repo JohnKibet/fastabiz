@@ -64,6 +64,7 @@ builder.Services.AddScoped<StoreService>();
 builder.Services.AddSingleton<CartService>();
 builder.Services.AddSingleton<MapService>();
 builder.Services.AddSingleton<GeoService>();
+builder.Services.AddScoped<ProductService>();
 
 // Authentication & Authorization
 builder.Services.AddOptions();
