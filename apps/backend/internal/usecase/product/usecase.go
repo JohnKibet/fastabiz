@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/google/uuid"
 )
@@ -27,7 +26,20 @@ func (uc *UseCase) CreateProduct(ctx context.Context, p *product.Product) (err e
 }
 
 func (uc *UseCase) GetProductByID(ctx context.Context, id uuid.UUID) (*product.Product, error) {
-	return uc.repo.GetProductByID(ctx, id)
+	p, err := uc.repo.GetProductByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if p.HasVariants {
+		variants, err := uc.repo.ListVariantsByProductID(ctx, p.ID)
+		if err != nil {
+			return nil, err
+		}
+		p.Variants = variants
+	}
+
+	return p, nil
 }
 
 func (uc *UseCase) UpdateProductDetails(ctx context.Context, req *product.UpdateProductDetailsRequest) error {
@@ -39,7 +51,7 @@ func (uc *UseCase) UpdateProductDetails(ctx context.Context, req *product.Update
 	})
 }
 
-func (uc *UseCase) GetAllProducts(ctx context.Context) ([]product.Product, error) {
+func (uc *UseCase) GetAllProducts(ctx context.Context) ([]product.ProductListItem, error) {
 	return uc.repo.List(ctx)
 }
 
@@ -91,10 +103,16 @@ func (uc *UseCase) AddOptionName(ctx context.Context, productID uuid.UUID, name 
 
 func (uc *UseCase) DeleteOptionName(ctx context.Context, optionID uuid.UUID) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.RemoveOption(txCtx, optionID); err != nil {
-			return fmt.Errorf("delete option name failed: %w", err)
+		used, err := uc.repo.IsOptionUsed(txCtx, optionID)
+		if err != nil {
+			return err
 		}
-		return nil
+
+		if used {
+			return product.ErrOptionInUse
+		}
+
+		return uc.repo.RemoveOption(txCtx, optionID)
 	})
 }
 
@@ -113,22 +131,48 @@ func (uc *UseCase) AddOptionValue(ctx context.Context, productID uuid.UUID, opti
 	})
 }
 
+func (uc *UseCase) ListProductOptions(ctx context.Context, productID uuid.UUID) ([]product.Option, error) {
+	options, err := uc.repo.ListOptionsByProductID(ctx, productID)
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range options {
+		values, err := uc.repo.ListOptionValuesByOptionID(ctx, options[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		options[i].Values = values
+	}
+
+	return options, nil
+}
+
 func (uc *UseCase) DeleteOptionValue(ctx context.Context, optionValueID uuid.UUID) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		if err := uc.repo.RemoveOptionValue(txCtx, optionValueID); err != nil {
-			return fmt.Errorf("delete option value failed: %w", err)
+		used, err := uc.repo.IsOptionValueUsed(txCtx, optionValueID)
+		if err != nil {
+			return err
 		}
-		return nil
+
+		if used {
+			return product.ErrOptionValueInUse
+		}
+
+		return uc.repo.RemoveOptionValue(txCtx, optionValueID)
 	})
 }
 
-func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantRequest) error {
-	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
-		optionMap := make(map[uuid.UUID]uuid.UUID)
+func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantRequest) (*product.VariantWithOptions, error) {
+	var variantWithOptions *product.VariantWithOptions
+
+	err := uc.txManager.Do(ctx, func(txCtx context.Context) error {
+
+		// 1. Resolve option name → value ID
+		var optionvalueIDs []uuid.UUID
 
 		for optName, optValue := range req.Options {
 			optionID, err := uc.repo.GetOptionIDByName(txCtx, req.ProductID, optName)
-			log.Printf("Option Name: %s, Option ID: %v", optName, optionID)
 			if err != nil {
 				return product.ErrOptionNotFound
 			}
@@ -138,20 +182,48 @@ func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantR
 				return product.ErrOptionValueNotFound
 			}
 
-			optionMap[optionID] = valueID
+			optionvalueIDs = append(optionvalueIDs, valueID)
 		}
 
+		// 2. Create variant
 		variant := &product.Variant{
 			ProductID: req.ProductID,
 			SKU:       req.SKU,
 			Price:     req.Price,
 			Stock:     req.Stock,
 			ImageURL:  req.ImageURL,
-			// Options:   optionMap,
 		}
 
-		return uc.repo.CreateVariant(txCtx, variant)
+		if err := uc.repo.CreateVariant(txCtx, variant); err != nil {
+			return fmt.Errorf("create variant failed: %w", err)
+		}
+
+		// 3. Associate option values with variant
+		for _, valueID := range optionvalueIDs {
+			if err := uc.repo.AddVariantOptionValue(txCtx, variant.ID, valueID); err != nil {
+				return fmt.Errorf("associate option value with variant failed: %w", err)
+			}
+		}
+
+		// 4. Prepare response DTO
+		variantWithOptions = &product.VariantWithOptions{
+			ID:        variant.ID,
+			ProductID: variant.ProductID,
+			SKU:       variant.SKU,
+			Price:     variant.Price,
+			Stock:     variant.Stock,
+			ImageURL:  variant.ImageURL,
+			Options:   req.Options, // keep names for API
+		}
+
+		return nil
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return variantWithOptions, nil
 }
 
 func (uc *UseCase) UpdateVariantStock(ctx context.Context, variantID uuid.UUID, stock int) error {

@@ -75,6 +75,5 @@ func (r CreateVariantRequest) ToVariant() *Variant {
 		Price:     r.Price,
 		Stock:     r.Stock,
 		ImageURL:  r.ImageURL,
-		// Options:   r.ToVariant().Options,
 	}
 }

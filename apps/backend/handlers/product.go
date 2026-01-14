@@ -412,11 +412,46 @@ func (h *ProductHandler) DeleteOptionValue(w http.ResponseWriter, r *http.Reques
 	}
 
 	if err := h.UC.Products.UseCase.DeleteOptionValue(r.Context(), valueID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to delete option value", err)
+		switch {
+		case errors.Is(err, product.ErrOptionValueInUse):
+			writeJSONError(w, http.StatusConflict, "Option value is used by existing variants", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Failed to delete option value", err)
+		}
+
 		return
 	}
 
 	writeJSON(w, http.StatusOK, map[string]string{"message": "Option value deleted"})
+}
+
+// ListOptions godoc
+// @Summary List product options
+// @Description Returns all options and their values for a given product
+// @Tags products
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param productId path string true "Product ID (UUID)"
+// @Success 200 {array} product.Option
+// @Failure 400 {object} handlers.ErrorResponse "Invalid product ID"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 500 {object} handlers.ErrorResponse "Failed to list options"
+// @Router /products/{productId}/options [get]
+func (h *ProductHandler) ListOptions(w http.ResponseWriter, r *http.Request) {
+	productID, err := uuid.Parse(chi.URLParam(r, "productId"))
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid product ID", nil)
+		return
+	}
+
+	options, err := h.UC.Products.UseCase.ListProductOptions(r.Context(), productID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to list options", err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, options)
 }
 
 // CreateVariant godoc
@@ -441,25 +476,22 @@ func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.UC.Products.UseCase.CreateVariant(r.Context(), req); err != nil {
+	variant, err := h.UC.Products.UseCase.CreateVariant(r.Context(), req)
+	if err != nil {
 		switch {
 		case errors.Is(err, product.ErrProductNotFound):
 			writeJSONError(w, http.StatusNotFound, "Product not found", err)
-
 		case errors.Is(err, product.ErrOptionNotFound):
 			writeJSONError(w, http.StatusNotFound, "Option not found", err)
-
 		case errors.Is(err, product.ErrOptionValueNotFound):
 			writeJSONError(w, http.StatusNotFound, "Option value not found", err)
-
 		default:
 			writeJSONError(w, http.StatusInternalServerError, "Failed to create variant", err)
 		}
-
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, req)
+	writeJSON(w, http.StatusCreated, variant)
 }
 
 // UpdateVariantStock godoc

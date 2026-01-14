@@ -164,6 +164,7 @@ func NewRouter(
 				r.Patch("/variants/price/update", pr.UpdateVariantPrice)
 				r.Patch("/images/reorder", pr.ReorderImages)
 				r.Patch("/{id}/product_details", pr.UpdateProductDetails)
+				r.Get("/{productId}/options", pr.ListOptions)
 				r.Get("/by-id/{id}", pr.GetProductByID)
 				r.Delete("/{id}/product", pr.DeleteProduct)
 				r.Delete("/images/{imageId}", pr.DeleteImage)

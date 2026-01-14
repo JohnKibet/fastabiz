@@ -9,4 +9,6 @@ var (
 	ErrProductNotFound      = errors.New("product not found")
 	ErrOptionNotFound       = errors.New("option not found")
 	ErrOptionValueNotFound  = errors.New("option value not found")
+	ErrOptionValueInUse     = errors.New("option value is in use by existing variants")
+	ErrOptionInUse          = errors.New("option is in use by existing variants")
 )

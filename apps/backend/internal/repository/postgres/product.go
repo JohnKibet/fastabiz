@@ -166,6 +166,19 @@ func (r *ProductRepository) GetOptionIDByName(ctx context.Context, productID uui
 	return optionID, nil
 }
 
+func (r *ProductRepository) ListOptionsByProductID(ctx context.Context, productID uuid.UUID) ([]product.Option, error) {
+	query := `
+		SELECT id, name
+		FROM product_options
+		WHERE product_id = $1
+		ORDER BY position
+	`
+
+	var options []product.Option
+	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &options, query, productID)
+	return options, err
+}
+
 func (r *ProductRepository) RemoveOption(ctx context.Context, optionID uuid.UUID) error {
 	query := `
 		DELETE FROM product_options
@@ -232,6 +245,20 @@ func (r *ProductRepository) GetOptionValueID(ctx context.Context, optionID uuid.
 	return optionValueID, nil
 }
 
+func (r *ProductRepository) ListOptionValuesByOptionID(ctx context.Context, optionID uuid.UUID) ([]product.OptionValue, error) {
+
+	query := `
+		SELECT id, value
+		FROM product_option_values
+		WHERE product_option_id = $1
+		ORDER BY position
+	`
+
+	var values []product.OptionValue
+	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &values, query, optionID)
+	return values, err
+}
+
 func (r *ProductRepository) RemoveOptionValue(ctx context.Context, optionValueID uuid.UUID) error {
 	query := `
 		DELETE FROM product_option_values
@@ -257,9 +284,9 @@ func (r *ProductRepository) RemoveOptionValue(ctx context.Context, optionValueID
 func (r *ProductRepository) CreateVariant(ctx context.Context, variant *product.Variant) error {
 	query := `
 		INSERT INTO variants (
-			product_id, sku, price, stock, image_url, options
+			product_id, sku, price, stock, image_url
 		) VALUES (
-			:product_id, :sku, :price, :stock, :image_url, :options
+			:product_id, :sku, :price, :stock, :image_url
 		)
 		RETURNING id
 	`
@@ -281,7 +308,7 @@ func (r *ProductRepository) CreateVariant(ctx context.Context, variant *product.
 	return nil
 }
 
-func (r *ProductRepository) AddVariantOptionValues(ctx context.Context, variantID uuid.UUID, valueID uuid.UUID) error {
+func (r *ProductRepository) AddVariantOptionValue(ctx context.Context, variantID uuid.UUID, valueID uuid.UUID) error {
 	query := `
 		INSERT INTO variant_option_values
 		(variant_id, option_value_id)
@@ -370,6 +397,21 @@ func (r *ProductRepository) UpdateVariantPrice(ctx context.Context, variantID uu
 	return nil
 }
 
+func (r *ProductRepository) ListVariantsByProductID(ctx context.Context, productID uuid.UUID) ([]product.Variant, error) {
+	query := `
+		SELECT id, product_id, sku, price, stock, image_url
+		FROM variants
+		WHERE product_id = $1
+	`
+
+	var variants []product.Variant
+	if err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &variants, query, productID); err != nil {
+		return nil, fmt.Errorf("list variants by product id: %w", err)
+	}
+
+	return variants, nil
+}
+
 func (r *ProductRepository) RemoveVariant(ctx context.Context, variantID uuid.UUID) error {
 	query := `
 		DELETE FROM variants 
@@ -441,7 +483,7 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 
 		// insert each value
 		for _, val := range opt.Values {
-			if err := r.AddOptionValue(ctx, p.ID, optionID, val); err != nil {
+			if err := r.AddOptionValue(ctx, p.ID, optionID, val.Value); err != nil {
 				return err
 			}
 		}
@@ -452,12 +494,10 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 		for _, v := range p.Variants {
 			// mapping - mv top level later
 			vi := &product.Variant{
-				ID:        p.ID,
 				ProductID: p.ID,
 				SKU:       v.SKU,
 				Price:     v.Price,
 				Stock:     v.Stock,
-				// Options:   v.Options,
 			}
 
 			if v.ImageURL != "" {
@@ -476,9 +516,17 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 
 func (r *ProductRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*product.Product, error) {
 	query := `
-		SELECT id, store_id, name, description, category
-		FROM products 
-		WHERE id = $1
+		SELECT
+			p.id,
+			p.store_id,
+			p.name,
+			p.description,
+			p.category,
+			EXISTS (
+				SELECT 1 FROM variants v WHERE v.product_id = p.id
+			) AS has_variants
+		FROM products p
+		WHERE p.id = $1;
 	`
 
 	var p product.Product
@@ -552,13 +600,23 @@ func (r *ProductRepository) UpdateDetails(ctx context.Context, productID uuid.UU
 	return nil
 }
 
-func (r *ProductRepository) List(ctx context.Context) ([]product.Product, error) {
+func (r *ProductRepository) List(ctx context.Context) ([]product.ProductListItem, error) {
 	query := `
-		SELECT id, store_id, name, description, category
-		FROM products
+		SELECT
+			p.id,
+			p.store_id,
+			p.name,
+			p.description,
+			p.category,
+			p.created_at,
+			p.updated_at,
+			EXISTS (
+				SELECT 1 FROM variants v WHERE v.product_id = p.id
+			) AS has_variants
+		FROM products p
 	`
 
-	var products []product.Product
+	var products []product.ProductListItem
 	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &products, query)
 	return products, err
 }
@@ -584,4 +642,32 @@ func (r *ProductRepository) Delete(ctx context.Context, productID uuid.UUID) err
 	}
 
 	return nil
+}
+
+func (r *ProductRepository) IsOptionUsed(ctx context.Context, optionID uuid.UUID) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM variant_option_values vov
+			JOIN product_option_values pov
+				ON vov.option_value_id = pov.id
+			WHERE pov.product_option_id = $1
+		)
+	`
+	var exists bool
+	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &exists, query, optionID)
+	return exists, err
+}
+
+func (r *ProductRepository) IsOptionValueUsed(ctx context.Context, optionValueID uuid.UUID) (bool, error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM variant_option_values
+			WHERE option_value_id = $1
+		)
+	`
+	var exists bool
+	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &exists, query, optionValueID)
+	return exists, err
 }

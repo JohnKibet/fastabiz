@@ -21,7 +21,7 @@ type Repository interface {
 
 	// List returns all products accessible to the caller.
 	// Each product should be returned as a fully-hydrated aggregate.
-	List(ctx context.Context) ([]Product, error)
+	List(ctx context.Context) ([]ProductListItem, error)
 
 	// ListByStore()
 
@@ -39,8 +39,8 @@ type Repository interface {
 	// and associates it with the specified option values.
 	CreateVariant(ctx context.Context, variant *Variant) error
 
-	// AddVariantOptionValues associates option-value pairs with a specific variant.
-	AddVariantOptionValues(ctx context.Context, variantID uuid.UUID, valueID uuid.UUID) error
+	// AddVariantOptionValue associates an option-value pair with a specific variant.
+	AddVariantOptionValue(ctx context.Context, variantID uuid.UUID, valueID uuid.UUID) error
 
 	// GetVariantByID retrieves a specific variant by its ID,
 	// including its associated option-value mappings.
@@ -96,4 +96,43 @@ type Repository interface {
 
 	// GetOptionValueID retrieves the ID of a product option value by its value.
 	GetOptionValueID(ctx context.Context, optionID uuid.UUID, value string) (uuid.UUID, error)
+
+	// ListVariantsByProductID retrieves all variants associated with a specific product.
+	ListVariantsByProductID(ctx context.Context, productID uuid.UUID) ([]Variant, error)
+
+	// ListOptionsByProductID retrieves all options and their values for a specific product.
+	ListOptionsByProductID(ctx context.Context, productID uuid.UUID) ([]Option, error)
+
+	// ListOptionValuesByOptionID retrieves all values for a specific product option.
+	ListOptionValuesByOptionID(ctx context.Context, optionID uuid.UUID) ([]OptionValue, error)
+
+	// IsOptionUsed checks whether a product option (e.g. "Size", "Color") is currently
+	// used by any variant.
+	//
+	// NOTE:
+	// Variants do not reference product options directly.
+	// The relationship is indirect:
+	//
+	//   product_options
+	//        ↓
+	//   product_option_values
+	//        ↓
+	//   variant_option_values
+	//
+	// Because variants only store references to option *values*, we must JOIN
+	// `variant_option_values` with `product_option_values` to determine whether
+	// any variant uses *any value* belonging to the given option.
+	//
+	// This check is required to prevent deleting an option that is still in use
+	// by one or more variants, which would otherwise leave orphaned variant data
+	// and violate domain integrity.
+	IsOptionUsed(ctx context.Context, optionID uuid.UUID) (bool, error)
+
+	// IsOptionValueUsed checks whether a product option value (e.g. "Small", "Red") is currently
+	// used by any variant.
+	//
+	// This check is required to prevent deleting an option value that is still in use
+	// by one or more variants, which would otherwise leave orphaned variant data
+	// and violate domain integrity.
+	IsOptionValueUsed(ctx context.Context, optionValueID uuid.UUID) (bool, error)
 }
