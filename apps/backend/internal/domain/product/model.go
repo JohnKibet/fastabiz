@@ -53,8 +53,8 @@ type Variant struct {
 }
 
 type Image struct {
-	URL       string
-	IsPrimary bool
+	URL       string `db:"url" json:"url"`
+	IsPrimary bool   `db:"is_primary" json:"is_primary"`
 }
 
 type VariantWithOptions struct {

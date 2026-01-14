@@ -27,10 +27,7 @@ type UpdateProductDetailsRequest struct {
 
 type AddImageRequest struct {
 	ProductID uuid.UUID `json:"product_id" binding:"required"`
-	Images    []struct {
-		URL       string `json:"url" binding:"required"`
-		IsPrimary bool   `json:"is_primary" binding:"required"`
-	} `json:"images" binding:"required"`
+	Images    []Image   `json:"images" binding:"required"`
 }
 
 type ReorderImagesRequest struct {

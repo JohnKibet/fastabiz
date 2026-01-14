@@ -171,7 +171,7 @@ func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 404 {object} handlers.ErrorResponse "Product not found"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /products/{id}/product [delete]
+// @Router /products/{id}/delete [delete]
 func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	productID, err := uuid.Parse(idStr)
@@ -243,7 +243,7 @@ func (h *ProductHandler) AddImage(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 404 {object} handlers.ErrorResponse "Image not found"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /products/images/{imageId} [delete]
+// @Router /products/images/{imageId}/delete [delete]
 func (h *ProductHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "imageId")
 	imageID, err := uuid.Parse(idStr)
@@ -336,7 +336,7 @@ func (h *ProductHandler) AddOptionName(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 404 {object} handlers.ErrorResponse "Option not found"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /products/options/{optionId} [delete]
+// @Router /products/options/{optionId}/delete [delete]
 func (h *ProductHandler) DeleteOptionName(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "optionId")
 	optionID, err := uuid.Parse(idStr)
@@ -401,7 +401,7 @@ func (h *ProductHandler) AddOptionValue(w http.ResponseWriter, r *http.Request) 
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 404 {object} handlers.ErrorResponse "Option value not found"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /products/options/values/{valueId} [delete]
+// @Router /products/options/values/{valueId}/delete [delete]
 func (h *ProductHandler) DeleteOptionValue(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "valueId")
 	valueID, err := uuid.Parse(idStr)
@@ -566,7 +566,7 @@ func (h *ProductHandler) UpdateVariantPrice(w http.ResponseWriter, r *http.Reque
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 404 {object} handlers.ErrorResponse "Variant not found"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /products/variants/{variantId} [delete]
+// @Router /products/variants/{variantId}/delete [delete]
 func (h *ProductHandler) DeleteVariant(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "variantId")
 	variantID, err := uuid.Parse(idStr)
