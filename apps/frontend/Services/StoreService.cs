@@ -1,14 +1,15 @@
+using System;
+using System.Text.Json;
 using System.Net.Http.Json;
 using frontend.Models;
-using System.Text.Json;
-
 public class StoreService
 {
     private readonly HttpClient _http;
-
-    public StoreService(HttpClient http)
+    private readonly ToastService _toastService;
+    public StoreService(IHttpClientFactory httpClientFactory, ToastService toastService)
     {
-        _http = http;
+        _http = httpClientFactory.CreateClient("AuthenticatedApi");
+        _toastService = toastService;
     }
 
     public async Task<ServiceResult2<HttpResponseMessage>> CreateStore(CreateStoreRequest store)
@@ -34,41 +35,76 @@ public class StoreService
         }
     }
 
-    public async Task<ServiceResult2<Store>> GetStoreByID(Guid id)
+    public async Task<ServiceResult2<List<Store>>> GetAllStores()
     {
-        return await GetFromJsonSafe<Store>($"stores/by-id/{id}");
+        return await GetFromJsonSafe<List<Store>>("stores/all_stores");
     }
 
-    public async Task<Store?> GetStoreBySlug(string slug)
+    public async Task<ServiceResult2<List<Store>>> GetStoresByOwner()
     {
-        return await _http.GetFromJsonAsync<Store>($"stores/by-slug?slug={slug}");
+        return await GetFromJsonSafe<List<Store>>("stores/me");
     }
 
-    public async Task<Store?> GetStoreByOwner(Guid ownerId)
+    public async Task<ServiceResult2<List<Store>>> ListStoresPaginated()
     {
-        return await _http.GetFromJsonAsync<Store>($"stores/owner/{ownerId}");
+        return await GetFromJsonSafe<List<Store>>("stores/me/paged");
     }
 
-    public async Task<Store?> UpdateStore(Guid storeId, string column, object value)
+    public async Task<ServiceResult2<Store>> GetStoreById(Guid storeId)
     {
-        var requestBody = new
+        return await GetFromJsonSafe<Store>($"stores/by-id/{storeId}");
+    }
+
+    public async Task<ServiceResult2<Store>> GetStoreSummary(Guid storeId)
+    {
+        return await GetFromJsonSafe<Store>($"stores/{storeId}/summary");
+    }
+
+    public async Task<ServiceResult2<List<ProductX>>> UpdateStore(Guid StoreId, UpdateStoreRequest updateRequest)
+    {
+        try
         {
-            column,
-            value
-        };
+            var response = await _http.PutAsJsonAsync($"stores/{StoreId}/update", updateRequest);
+            if (response.IsSuccessStatusCode)
+            {
+                var updatedStore = await response.Content.ReadFromJsonAsync<Store>();
+                return ServiceResult2<List<ProductX>>.Ok(updatedStore?.Products ?? new List<ProductX>());
+            }
 
-        var response = await _http.PutAsJsonAsync($"stores/{storeId}/update", requestBody);
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<Store>() ?? new Store();
+            var error = await ParseError(response);
+            return ServiceResult2<List<ProductX>>.Fail(error);
         }
-
-        return null;
+        catch (HttpRequestException ex)
+        {
+            return ServiceResult2<List<ProductX>>.Fail($"Network error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult2<List<ProductX>>.Fail($"Unexpected error: {ex.Message}");
+        }
     }
 
-    public async Task<ServiceResult2<List<Store>>> GetAllPublicStores()
+    public async Task<ServiceResult2<HttpResponseMessage>> DeleteStore(Guid storeId)
     {
-        return await GetFromJsonSafe<List<Store>>("stores/public");
+        try
+        {
+            var response = await _http.DeleteAsync($"stores/{storeId}/delete");
+            if (response.IsSuccessStatusCode)
+            {
+                return ServiceResult2<HttpResponseMessage>.Ok(response);
+            }
+
+            var error = await ParseError(response);
+            return ServiceResult2<HttpResponseMessage>.Fail(error);
+        }
+        catch (HttpRequestException ex)
+        {
+            return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+        }
     }
 
     public async Task<string> ParseError(HttpResponseMessage response)
@@ -81,28 +117,13 @@ public class StoreService
                 PropertyNameCaseInsensitive = true
             });
 
-            if (error == null)
-                return $"HTTP {(int)response.StatusCode} - {response.ReasonPhrase}";
-
-            if (error.Errors != null && error.Errors.Any())
-            {
-                // Flatten field-level errors: "PickupAddress: Required"
-                var fieldErrors = error.Errors
-                    .SelectMany(kvp => kvp.Value.Select(v => $"{kvp.Key}: {v}"));
-                return string.Join("; ", fieldErrors);
-            }
-
-            // Fall back to detail or generic error
-            return !string.IsNullOrWhiteSpace(error.Detail)
-                ? error.Detail
-                : error.Error ?? $"HTTP {(int)response.StatusCode} - {response.ReasonPhrase}";
+            return error?.Detail ?? "Unknown error occurred.";
         }
         catch
         {
             return $"HTTP {(int)response.StatusCode} - {response.ReasonPhrase}";
         }
     }
-    
     private async Task<ServiceResult2<T>> GetFromJsonSafe<T>(string url)
     {
         try
@@ -127,8 +148,4 @@ public class StoreService
             return ServiceResult2<T>.Fail($"Unexpected error: {ex.Message}");
         }
     }
-}
-
-public class CreateStoreRequest
-{
 }

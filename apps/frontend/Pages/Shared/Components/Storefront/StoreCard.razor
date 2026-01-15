@@ -2,7 +2,7 @@
 @namespace frontend.Pages.Shared.Components.Storefront
 
 <div class="merchant-card border rounded-lg shadow hover:shadow-lg p-4 cursor-pointer"
-     @onclick="() => OnSelected.InvokeAsync(Store)">
+    @onclick="() => OnSelected.InvokeAsync(Store)">
     <div class="flex items-center space-x-4">
         @if (!string.IsNullOrEmpty(Store.Logo))
         {
@@ -14,6 +14,7 @@
             <p class="text-sm text-yellow-600">⭐ @Store.Rating.ToString("0.0")</p>
         </div>
     </div>
+
 </div>
 
 @code {

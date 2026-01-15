@@ -1,0 +1,9 @@
+@page "/merchant/products/create/{StoreId:guid}"
+@layout MerchantLayout
+@attribute [Authorize(Roles = "merchant")]
+
+<CreateProductForm StoreId="StoreId" />
+
+@code {
+  [Parameter] public Guid StoreId { get; set; }
+}

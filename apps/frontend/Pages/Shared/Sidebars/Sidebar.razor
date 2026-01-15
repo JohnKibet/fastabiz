@@ -24,81 +24,48 @@
     <nav class="flex-1 overflow-y-auto mt-3 px-1 space-y-3">
         @if (Role == "merchant")
         {
-            <SidebarSection Title="Dashboard" Icon="dashboard" 
-                            SectionKey="MerchantDashboard"
-                            IsCollapsed="IsCollapsed" Items="MerchantDashboard"
-                            IsOpen="@IsSectionOpen(nameof(MerchantDashboard))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Dashboard" Icon="dashboard" SectionKey="MerchantDashboard" IsCollapsed="IsCollapsed"
+                Items="MerchantDashboard" IsOpen="@IsSectionOpen(nameof(MerchantDashboard))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Operations" Icon="todo" 
-                            SectionKey="MerchantOperations"
-                            IsCollapsed="IsCollapsed" Items="MerchantOperations"
-                            IsOpen="@IsSectionOpen(nameof(MerchantOperations))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Operations" Icon="todo" SectionKey="MerchantOperations" IsCollapsed="IsCollapsed"
+                Items="MerchantOperations" IsOpen="@IsSectionOpen(nameof(MerchantOperations))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Users" Icon="users"
-                            SectionKey="MerchantUsers"
-                            IsCollapsed="IsCollapsed" Items="MerchantUsers"
-                            IsOpen="@IsSectionOpen(nameof(MerchantUsers))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Users" Icon="users" SectionKey="MerchantUsers" IsCollapsed="IsCollapsed"
+                Items="MerchantUsers" IsOpen="@IsSectionOpen(nameof(MerchantUsers))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Stores" Icon="store"
-                            SectionKey="MerchantStores"
-                            IsCollapsed="IsCollapsed" Items="MerchantStores"
-                            IsOpen="@IsSectionOpen(nameof(MerchantStores))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Stores" Icon="store" SectionKey="MerchantStores" IsCollapsed="IsCollapsed"
+                Items="MerchantStores" IsOpen="@IsSectionOpen(nameof(MerchantStores))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Reports" Icon="chart"
-                            SectionKey="MerchantReports"
-                            IsCollapsed="IsCollapsed" Items="MerchantReports"
-                            IsOpen="@IsSectionOpen(nameof(MerchantReports))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Products" Icon="" SectionKey="MerchantProducts" IsCollapsed="IsCollapsed"
+                Items="MerchantProducts" IsOpen="@IsSectionOpen(nameof(MerchantProducts))" OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Reports" Icon="chart" SectionKey="MerchantReports" IsCollapsed="IsCollapsed"
+                Items="MerchantReports" IsOpen="@IsSectionOpen(nameof(MerchantReports))" OnToggle="@ToggleSection" />
         }
         else if (Role == "driver")
         {
-            <SidebarSection Title="Driver Panel" Icon="truck"
-                            SectionKey="DriverMenu"
-                            IsCollapsed="IsCollapsed" Items="DriverMenu"
-                            IsOpen="@IsSectionOpen(nameof(DriverMenu))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Driver Panel" Icon="truck" SectionKey="DriverMenu" IsCollapsed="IsCollapsed"
+                Items="DriverMenu" IsOpen="@IsSectionOpen(nameof(DriverMenu))" OnToggle="@ToggleSection" />
         }
         else if (Role == "customer")
         {
-            <SidebarSection Title="Dashboard" Icon="shopping-bag"
-                            SectionKey="CustomerMenu"
-                            IsCollapsed="IsCollapsed" Items="CustomerDashboard"
-                            IsOpen="@IsSectionOpen(nameof(CustomerDashboard))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Dashboard" Icon="shopping-bag" SectionKey="CustomerMenu" IsCollapsed="IsCollapsed"
+                Items="CustomerDashboard" IsOpen="@IsSectionOpen(nameof(CustomerDashboard))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Orders" Icon="todo"
-                            SectionKey="CustomerOrders"
-                            IsCollapsed="IsCollapsed" Items="CustomerOrders"
-                            IsOpen="@IsSectionOpen(nameof(CustomerOrders))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Orders" Icon="todo" SectionKey="CustomerOrders" IsCollapsed="IsCollapsed"
+                Items="CustomerOrders" IsOpen="@IsSectionOpen(nameof(CustomerOrders))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Checkout" Icon=""
-                            SectionKey="CustomerCheckout"
-                            IsCollapsed="IsCollapsed" Items="CustomerCheckout"
-                            IsOpen="@IsSectionOpen(nameof(CustomerCheckout))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Checkout" Icon="" SectionKey="CustomerCheckout" IsCollapsed="IsCollapsed"
+                Items="CustomerCheckout" IsOpen="@IsSectionOpen(nameof(CustomerCheckout))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Payment" Icon=""
-                            SectionKey="CustomerPayment"
-                            IsCollapsed="IsCollapsed" Items="CustomerPayment"
-                            IsOpen="@IsSectionOpen(nameof(CustomerPayment))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Payment" Icon="" SectionKey="CustomerPayment" IsCollapsed="IsCollapsed"
+                Items="CustomerPayment" IsOpen="@IsSectionOpen(nameof(CustomerPayment))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Feedback" Icon="shopping-bag"
-                            SectionKey="CustomerFeedback"
-                            IsCollapsed="IsCollapsed" Items="CustomerFeedback"
-                            IsOpen="@IsSectionOpen(nameof(CustomerFeedback))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Feedback" Icon="shopping-bag" SectionKey="CustomerFeedback" IsCollapsed="IsCollapsed"
+                Items="CustomerFeedback" IsOpen="@IsSectionOpen(nameof(CustomerFeedback))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Track Order" Icon=""
-                            SectionKey="CustomerTrackOrder"
-                            IsCollapsed="IsCollapsed" Items="CustomerTrackOrder"
-                            IsOpen="@IsSectionOpen(nameof(CustomerTrackOrder))"
-                            OnToggle="@ToggleSection" />
+            <SidebarSection Title="Track Order" Icon="" SectionKey="CustomerTrackOrder" IsCollapsed="IsCollapsed"
+                Items="CustomerTrackOrder" IsOpen="@IsSectionOpen(nameof(CustomerTrackOrder))" OnToggle="@ToggleSection" />
         }
         else
         {
@@ -158,68 +125,74 @@
 
     #region menu definitions
     private List<SidebarMenuItem> MerchantDashboard => new()
-    {
-        new("Dashboard", "/merchant/dashboard", "house"),
-    };
+{
+new("Dashboard", "/merchant/dashboard", "house"),
+};
     private List<SidebarMenuItem> MerchantOperations => new()
-    {
-        new("Orders", "/merchant/orders", "file-stack"),
-        new("Create Order", "/merchant/createorder", "file-plus")
-    };
+{
+new("Orders", "/merchant/orders", "file-stack"),
+new("Create Order", "/merchant/createorder", "file-plus")
+};
 
     private List<SidebarMenuItem> MerchantUsers => new()
-    {
-        new("Users", "/merchant/users", "users"),
-        new("Create User", "/merchant/createuser", "user-plus")
-    };
+{
+new("Users", "/merchant/users", "users"),
+new("Create User", "/merchant/createuser", "user-plus")
+};
 
     private List<SidebarMenuItem> MerchantStores => new()
-    {
-        new("Create Store", "/merchant/createstore", "create-store"),
-        new("Map", "/merchant/map", "map")
-    };
+{
+new("Create Store", "/merchant/stores/create", "create-store"),
+new("Map", "/merchant/map", "map")
+};
+
+    private List<SidebarMenuItem> MerchantProducts => new()
+{
+new("Add Product", "/merchant/products/create", "layers-plus"),
+new("Products", "/merchant/products", "layers")
+};
 
     private List<SidebarMenuItem> MerchantReports => new()
-    {
-        new("Reports", "/merchant/reports", "chart-up"),
-        new("Invoices", "/merchant/invoices", "")
-    };
+{
+new("Reports", "/merchant/reports", "chart-up"),
+new("Invoices", "/merchant/invoices", "")
+};
 
     private List<SidebarMenuItem> DriverMenu => new()
-    {
-        new("Dashboard", "/driver/dashboard", "layout-dashboard"),
-        new("Deliveries", "/driver/deliveries", "package"),
-        new("Route", "/driver/route", "route"),
-        new("Proof", "/driver/proof", "package-check")
-    };
+{
+new("Dashboard", "/driver/dashboard", "layout-dashboard"),
+new("Deliveries", "/driver/deliveries", "package"),
+new("Route", "/driver/route", "route"),
+new("Proof", "/driver/proof", "package-check")
+};
 
     private List<SidebarMenuItem> CustomerDashboard => new()
-    {
-        new("Dashboard", "/customer/dashboard", "dashboard"),
-    };
+{
+new("Dashboard", "/customer/dashboard", "dashboard"),
+};
     private List<SidebarMenuItem> CustomerTrackOrder => new()
-    {
-        new("Track Order", "/customer/trackorder", "map"),
-    };
+{
+new("Track Order", "/customer/trackorder", "map"),
+};
     private List<SidebarMenuItem> CustomerOrders => new()
-    {
-        new("My Orders", "/customer/myorders", "package"),
-    };
+{
+new("My Orders", "/customer/myorders", "package"),
+};
 
     private List<SidebarMenuItem> CustomerFeedback => new()
-    {
-        new("Rate Delivery", "/customer/feedback", "thumbs-up"),
-    }; 
+{
+new("Rate Delivery", "/customer/feedback", "thumbs-up"),
+};
 
     private List<SidebarMenuItem> CustomerPayment => new()
-    {
-        new("Payment", "/customer/payment", "credit-card")
-    };
+{
+new("Payment", "/customer/payment", "credit-card")
+};
 
     private List<SidebarMenuItem> CustomerCheckout => new()
-    {
-        new("Checkout", "/customer/checkout", "cart")
-    };
+{
+new("Checkout", "/customer/checkout", "cart")
+};
 
     #endregion
 }

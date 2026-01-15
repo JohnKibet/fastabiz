@@ -1,0 +1,97 @@
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Merchant
+@inject ProductService ProductService
+@inject ToastService ToastService
+@inject NavigationManager Navigation
+
+<div class="min-h-screen bg-bgSoft p-6">
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
+    <h1 class="text-2xl font-poppins font-semibold text-textDark mb-2">Create Product</h1>
+    <p class="text-textLight mb-6">Add a product to your store</p>
+
+    <EditForm Model="product" OnValidSubmit="Submit">
+      <DataAnnotationsValidator />
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-textDark">Product Name</label>
+          <InputText @bind-Value="product.Name" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+          <ValidationMessage For="() => product.Name" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-textDark">Description</label>
+          <InputTextArea @bind-Value="product.Description" rows="4" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+          <ValidationMessage For="() => product.Description" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-textDark">Category</label>
+          <InputText @bind-Value="product.Category" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+          <ValidationMessage For="() => product.Category" />
+        </div>
+      </div>
+
+      <button type="submit" class="mt-6 w-full bg-primary text-white py-2 rounded-xl hover:bg-ctaHover transition">
+        Create Product
+      </button>
+    </EditForm>
+  </div>
+</div>
+
+@code {
+  [Parameter, EditorRequired]
+  public Guid StoreId { get; set; }
+
+  private CreateProductRequest product = new();
+  private bool isSubmitting = false;
+
+  protected override void OnParametersSet()
+  {
+    if (StoreId == Guid.Empty)
+    {
+      Navigation.NavigateTo("/merchant/stores/create", replace: true);
+      return;
+    }
+
+    product.StoreId = StoreId;
+  }
+
+  private async Task Submit()
+  {
+    try
+    {
+      isSubmitting = true;
+      var result = await ProductService.AddProduct(product);
+      if (result.Success)
+      {
+        ToastService.ShowToast("Product created successfully", ToastService.ToastLevel.Success);
+        Navigation.NavigateTo($"/merchant/products/{result.Data}", replace: true);
+        return;
+      }
+
+      var errMessage = result.Error;
+      if (errMessage == null)
+      {
+        ToastService.ShowToast("Failed to create product (unknown error)", ToastService.ToastLevel.Error);
+        return;
+      }
+
+      if (!string.IsNullOrWhiteSpace(errMessage.Detail))
+      {
+        ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+        return;
+      }
+
+      ToastService.ShowToast("Failed to create product", ToastService.ToastLevel.Error);
+    }
+    catch
+    {
+      ToastService.ShowToast("An error occurred while creating the product", ToastService.ToastLevel.Error);
+    }
+    finally
+    {
+      isSubmitting = false;
+    }
+  }
+}

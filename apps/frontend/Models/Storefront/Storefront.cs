@@ -12,7 +12,7 @@ public class Store
     public string Name { get; set; } = string.Empty;
     public string Logo { get; set; } = string.Empty;
     public double Rating { get; set; }
-    public int TotalProducts { get; set; }
+    public int? TotalProducts { get; set; }
 
     // Optional: Products found in Store (for Store detail page)
     public List<ProductX> Products { get; set; } = new();
@@ -34,6 +34,18 @@ public class CreateStoreRequest
     [Required]
     [JsonPropertyName("location")]
     public string Location { get; set; } = string.Empty;
+}
+
+public class UpdateStoreRequest
+{
+    [JsonPropertyName("name")]
+    public string? Name { get; set; }
+
+    [JsonPropertyName("logo_url")]
+    public string? Logo { get; set; }
+
+    [JsonPropertyName("location")]
+    public string? Location { get; set; }
 }
 
 // Represents a product (variant or simple)
