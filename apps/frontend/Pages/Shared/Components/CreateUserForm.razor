@@ -43,7 +43,7 @@
                     Value="@user.Role"
                     ValueChanged="((string v) => user.Role = v)"
                     ValueExpression="@(() => user.Role)"
-                    Placeholder="e.g., admin, customer, driver" 
+                    Placeholder="e.g., merchant, customer, driver" 
                 />
 
                 <InputField
@@ -89,7 +89,7 @@
             {
                 ClearForm();
                 ToastService.ShowToast("User successfully created!", ToastService.ToastLevel.Success);
-                Navigation.NavigateTo("admin/users");
+                Navigation.NavigateTo("merchant/users");
                 return;
             }
 

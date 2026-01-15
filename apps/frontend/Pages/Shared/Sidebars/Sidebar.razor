@@ -22,36 +22,36 @@
 
     <!-- Menu -->
     <nav class="flex-1 overflow-y-auto mt-3 px-1 space-y-3">
-        @if (Role == "admin")
+        @if (Role == "merchant")
         {
             <SidebarSection Title="Dashboard" Icon="dashboard" 
-                            SectionKey="AdminDashboard"
-                            IsCollapsed="IsCollapsed" Items="AdminDashboard"
-                            IsOpen="@IsSectionOpen(nameof(AdminDashboard))"
+                            SectionKey="MerchantDashboard"
+                            IsCollapsed="IsCollapsed" Items="MerchantDashboard"
+                            IsOpen="@IsSectionOpen(nameof(MerchantDashboard))"
                             OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Operations" Icon="todo" 
-                            SectionKey="AdminOperations"
-                            IsCollapsed="IsCollapsed" Items="AdminOperations"
-                            IsOpen="@IsSectionOpen(nameof(AdminOperations))"
+                            SectionKey="MerchantOperations"
+                            IsCollapsed="IsCollapsed" Items="MerchantOperations"
+                            IsOpen="@IsSectionOpen(nameof(MerchantOperations))"
                             OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Users" Icon="users"
-                            SectionKey="AdminUsers"
-                            IsCollapsed="IsCollapsed" Items="AdminUsers"
-                            IsOpen="@IsSectionOpen(nameof(AdminUsers))"
+                            SectionKey="MerchantUsers"
+                            IsCollapsed="IsCollapsed" Items="MerchantUsers"
+                            IsOpen="@IsSectionOpen(nameof(MerchantUsers))"
                             OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Stores" Icon="store"
-                            SectionKey="AdminStores"
-                            IsCollapsed="IsCollapsed" Items="AdminStores"
-                            IsOpen="@IsSectionOpen(nameof(AdminStores))"
+                            SectionKey="MerchantStores"
+                            IsCollapsed="IsCollapsed" Items="MerchantStores"
+                            IsOpen="@IsSectionOpen(nameof(MerchantStores))"
                             OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Reports" Icon="chart"
-                            SectionKey="AdminReports"
-                            IsCollapsed="IsCollapsed" Items="AdminReports"
-                            IsOpen="@IsSectionOpen(nameof(AdminReports))"
+                            SectionKey="MerchantReports"
+                            IsCollapsed="IsCollapsed" Items="MerchantReports"
+                            IsOpen="@IsSectionOpen(nameof(MerchantReports))"
                             OnToggle="@ToggleSection" />
         }
         else if (Role == "driver")
@@ -157,32 +157,32 @@
     private bool IsSectionOpen(string sectionKey) => openSections.Contains(sectionKey);
 
     #region menu definitions
-    private List<SidebarMenuItem> AdminDashboard => new()
+    private List<SidebarMenuItem> MerchantDashboard => new()
     {
-        new("Dashboard", "/admin/dashboard", "house"),
+        new("Dashboard", "/merchant/dashboard", "house"),
     };
-    private List<SidebarMenuItem> AdminOperations => new()
+    private List<SidebarMenuItem> MerchantOperations => new()
     {
-        new("Orders", "/admin/orders", "file-stack"),
-        new("Create Order", "/admin/createorder", "file-plus")
-    };
-
-    private List<SidebarMenuItem> AdminUsers => new()
-    {
-        new("Users", "/admin/users", "users"),
-        new("Create User", "/admin/createuser", "user-plus")
+        new("Orders", "/merchant/orders", "file-stack"),
+        new("Create Order", "/merchant/createorder", "file-plus")
     };
 
-    private List<SidebarMenuItem> AdminStores => new()
+    private List<SidebarMenuItem> MerchantUsers => new()
     {
-        new("Create Store", "/admin/createstore", "create-store"),
-        new("Map", "/admin/map", "map")
+        new("Users", "/merchant/users", "users"),
+        new("Create User", "/merchant/createuser", "user-plus")
     };
 
-    private List<SidebarMenuItem> AdminReports => new()
+    private List<SidebarMenuItem> MerchantStores => new()
     {
-        new("Reports", "/admin/reports", "chart-up"),
-        new("Invoices", "/admin/invoices", "")
+        new("Create Store", "/merchant/createstore", "create-store"),
+        new("Map", "/merchant/map", "map")
+    };
+
+    private List<SidebarMenuItem> MerchantReports => new()
+    {
+        new("Reports", "/merchant/reports", "chart-up"),
+        new("Invoices", "/merchant/invoices", "")
     };
 
     private List<SidebarMenuItem> DriverMenu => new()

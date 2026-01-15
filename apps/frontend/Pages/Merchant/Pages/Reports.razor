@@ -1,9 +1,8 @@
-@page "/admin/reports"
-@layout AdminLayout
+@page "/merchant/reports"
+@layout MerchantLayout
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
-@attribute [Authorize(Roles = "admin")]
-
+@attribute [Authorize(Roles = "merchant")]
 <div class="space-y-8">
     <!-- Header -->
     <div class="flex items-center justify-between">

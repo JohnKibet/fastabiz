@@ -5,7 +5,7 @@ namespace frontend.Models
 {
     public static class UserRoles
     {
-        public const string Admin = "admin";
+        public const string Merchant = "merchant";
         public const string Driver = "driver";
         public const string Customer = "customer";
 
@@ -90,7 +90,7 @@ namespace frontend.Models
         public string? ConfirmPassword { get; set; }
 
         [Required(ErrorMessage = "Role is required")]
-        [RegularExpression("admin|driver|customer", ErrorMessage = "Role must be admin, driver, or customer")]
+        [RegularExpression("merchant|driver|customer", ErrorMessage = "Role must be merchant, driver, or customer")]
         public string? Role { get; set; }
 
         [Required(ErrorMessage = "Phone number is required")]

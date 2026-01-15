@@ -1,9 +1,9 @@
-@page "/admin/dashboard"
-@layout AdminLayout
+@page "/merchant/dashboard"
+@layout MerchantLayout
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject ToastService ToastService
-@attribute [Authorize(Roles = "admin")]
+@attribute [Authorize(Roles = "merchant")]
 
 <!-- Metric Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -82,8 +82,8 @@
     private decimal revenueThisWeek = 15700.50m;
     private List<string> notifications = new() { "Driver Mike marked delivery as delayed", "Inventory level low in Warehouse A" };
 
-    private void CreateOrder() => Navigation.NavigateTo("/admin/createorder");
+    private void CreateOrder() => Navigation.NavigateTo("/merchant/createorder");
     private void AssignDriver() => Console.WriteLine("TODO: Assign driver modal");
     private void GenerateInvoice() => Console.WriteLine("TODO: Invoice generation logic");
-    private void CreateInventory() => Navigation.NavigateTo("/admin/createinventory");
+    private void CreateInventory() => Navigation.NavigateTo("/merchant/createinventory");
 }

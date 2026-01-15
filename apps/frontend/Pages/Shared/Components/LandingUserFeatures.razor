@@ -3,12 +3,12 @@
 
     <!-- Toggle Buttons -->
     <div class="flex justify-center mb-8">
-        <button class='@GetBtnClass("admin")' @onclick='() => Toggle("admin")'>For Admins</button>
+        <button class='@GetBtnClass("merchant")' @onclick='() => Toggle("merchant")'>For Merchants</button>
         <button class='@GetBtnClass("customer")' @onclick='() => Toggle("customer")'>For Customers</button>
     </div>
 
-    <!-- Admin Features -->
-    @if (selected == "admin")
+    <!-- Merchant Features -->
+    @if (selected == "merchant")
     {
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center fade-in transition-opacity duration-300">
             @FeatureCard("Smart Inventory Management", "Upload products, track stock levels, and get alerts when inventory runs low.", "data-trend.svg")
@@ -28,7 +28,7 @@
 </section>
 
 @code {
-    private string selected = "admin";
+    private string selected = "merchant";
 
     private void Toggle(string type)
     {

@@ -62,12 +62,12 @@
         {
           <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border p-2 z-50">
             <NavLink 
-              href="/admin/profile" 
+              href="/merchant/profile" 
               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
                 View Profile
             </NavLink>
             <NavLink 
-              href="/admin/settings" 
+              href="/merchant/settings" 
               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md">
                 Settings
             </NavLink>
@@ -99,16 +99,16 @@
   // Combine quick actions + sidebar-like items
   private List<SearchItem> SearchItems = new()
   {
-    new("Dashboard", "/admin/dashboard", "layout-dashboard"),
-    new("Orders", "/admin/orders", "file-stack"),
-    new("Create Order", "/admin/createorder", "file-plus"),
-    new("Inventories", "/admin/inventories", "box-open"),
-    new("Create Inventory", "/admin/createinventory", "folder-plus"),
-    new("Users", "/admin/users", "users"),
-    new("Settings", "/admin/settings", "settings"),
-    new("Notifications", "/admin/notifications", "bell"),
-    new("Profile", "/admin/profile", "user"),
-    new("Map", "/admin/map", "map")
+    new("Dashboard", "/merchant/dashboard", "layout-dashboard"),
+    new("Orders", "/merchant/orders", "file-stack"),
+    new("Create Order", "/merchant/createorder", "file-plus"),
+    new("Inventories", "/merchant/inventories", "box-open"),
+    new("Create Inventory", "/merchant/createinventory", "folder-plus"),
+    new("Users", "/merchant/users", "users"),
+    new("Settings", "/merchant/settings", "settings"),
+    new("Notifications", "/merchant/notifications", "bell"),
+    new("Profile", "/merchant/profile", "user"),
+    new("Map", "/merchant/map", "map")
   };
 
   private IEnumerable<SearchItem> FilteredResults =>

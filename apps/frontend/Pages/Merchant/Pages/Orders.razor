@@ -1,5 +1,5 @@
-@page "/admin/orders"
-@layout AdminLayout
+@page "/merchant/orders"
+@layout MerchantLayout
 @using System.Text.Json
 @inject OrderService OrderService
 @inject ToastService ToastService
@@ -7,8 +7,7 @@
 @inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
-@attribute [Authorize(Roles = "admin")]
-
+@attribute [Authorize(Roles = "merchant")]
 <h2 class="text-2xl font-semibold text-gray-800 mb-6">All Orders</h2>
 
 <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
