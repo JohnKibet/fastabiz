@@ -26,6 +26,7 @@ go.work.sum
 
 # env file
 .env
+/apps/backend/.env.docker
 
 # .NET build directories
 **bin/

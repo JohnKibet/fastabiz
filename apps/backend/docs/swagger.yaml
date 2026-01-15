@@ -405,15 +405,15 @@ definitions:
     - StatusFailed
   product.AddImageRequest:
     properties:
-      is_primary:
-        type: boolean
+      images:
+        items:
+          $ref: '#/definitions/product.Image'
+        type: array
       product_id:
         type: string
-      url:
-        type: string
     required:
+    - images
     - product_id
-    - url
     type: object
   product.AddOptionNameRequest:
     properties:
@@ -425,15 +425,21 @@ definitions:
     - name
     - product_id
     type: object
-  product.AddOptionValueRequest:
+  product.AddOptionValuesRequest:
     properties:
       option_id:
         type: string
-      value:
+      product_id:
         type: string
+      values:
+        items:
+          type: string
+        minItems: 1
+        type: array
     required:
     - option_id
-    - value
+    - product_id
+    - values
     type: object
   product.CreateProductRequest:
     properties:
@@ -458,7 +464,7 @@ definitions:
       options:
         additionalProperties:
           type: string
-        description: optionID -> optionValueID
+        description: name → value
         type: object
       price:
         type: number
@@ -476,6 +482,13 @@ definitions:
     - sku
     - stock
     type: object
+  product.Image:
+    properties:
+      is_primary:
+        type: boolean
+      url:
+        type: string
+    type: object
   product.Option:
     properties:
       id:
@@ -484,8 +497,15 @@ definitions:
         type: string
       values:
         items:
-          type: string
+          $ref: '#/definitions/product.OptionValue'
         type: array
+    type: object
+  product.OptionValue:
+    properties:
+      id:
+        type: string
+      value:
+        type: string
     type: object
   product.Product:
     properties:
@@ -575,14 +595,12 @@ definitions:
     type: object
   product.Variant:
     properties:
+      created_at:
+        type: string
       id:
         type: string
       image_url:
         type: string
-      options:
-        additionalProperties:
-          type: string
-        type: object
       price:
         type: number
       product_id:
@@ -591,6 +609,8 @@ definitions:
         type: string
       stock:
         type: integer
+      updated_at:
+        type: string
     type: object
   store.CreateStoreRequest:
     properties:
@@ -1842,7 +1862,7 @@ paths:
       summary: Create new payment
       tags:
       - payments
-  /products/{id}/product:
+  /products/{id}/delete:
     delete:
       description: Permanently deletes a product by its ID.
       parameters:
@@ -1921,6 +1941,43 @@ paths:
       security:
       - BearerAuth: []
       summary: Update product details
+      tags:
+      - products
+  /products/{productId}/options:
+    get:
+      consumes:
+      - application/json
+      description: Returns all options and their values for a given product
+      parameters:
+      - description: Product ID (UUID)
+        in: path
+        name: productId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/product.Option'
+            type: array
+        "400":
+          description: Invalid product ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Failed to list options
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List product options
       tags:
       - products
   /products/all_products:
@@ -2018,7 +2075,7 @@ paths:
       summary: Create a new product
       tags:
       - products
-  /products/images/{imageId}:
+  /products/images/{imageId}/delete:
     delete:
       description: Deletes a product image by its ID.
       parameters:
@@ -2143,7 +2200,7 @@ paths:
       summary: Reorder product images
       tags:
       - products
-  /products/options/{optionId}:
+  /products/options/{optionId}/delete:
     delete:
       description: Deletes an option name from a product.
       parameters:
@@ -2224,7 +2281,7 @@ paths:
       summary: Add product option
       tags:
       - products
-  /products/options/values/{valueId}:
+  /products/options/values/{valueId}/delete:
     delete:
       description: Deletes a value from a product option.
       parameters:
@@ -2267,19 +2324,19 @@ paths:
     post:
       consumes:
       - application/json
-      description: Adds a value to an existing product option (e.g. Red, Large).
+      description: Adds values to an existing product option (e.g. Red, Large).
       parameters:
-      - description: Add option value payload
+      - description: Add option values payload
         in: body
         name: value
         required: true
         schema:
-          $ref: '#/definitions/product.AddOptionValueRequest'
+          $ref: '#/definitions/product.AddOptionValuesRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: Option value added successfully
+          description: Option values added successfully
           schema:
             additionalProperties:
               type: string
@@ -2302,10 +2359,10 @@ paths:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Add option value
+      summary: Add option values
       tags:
       - products
-  /products/variants/{variantId}:
+  /products/variants/{variantId}/delete:
     delete:
       description: Permanently deletes a product variant.
       parameters:

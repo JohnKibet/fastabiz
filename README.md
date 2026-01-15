@@ -22,11 +22,11 @@ Many small and medium businesses struggle with:
 
 ## 🚀 Features
 
-- **Role-based access control**: Admin, Driver, Customer  
-- **Full CRUD APIs** for orders, deliveries, payments, feedback, notifications  
-- **Business storefronts**: Businesses get unique links to share their inventory  
-- **Customer tools**: Browse, order, track deliveries, review  
-- **Dockerized microservices**: Backend, DB, Kong API Gateway  
+- **Role-based access control**: Merchant/Admin, Driver, Customer  
+- **Full CRUD APIs** for orders, inventory products, deliveries, payments, feedback, notifications  
+- **Business storefronts**: Merchants get unique links to share their stores  
+- **Customer tools**: Browse stores, order, track deliveries, review  
+- **Dockerized microservices**: Go Backend, Postgres DB, Kong API Gateway  
 - **Security**: JWT authentication, rate limiting via Kong  
 - **CI/CD ready**: GitHub Actions with API tests 
 
@@ -36,7 +36,7 @@ Many small and medium businesses struggle with:
 
 | Layer       | Technologies                                 |
 |-------------|----------------------------------------------|
-| Frontend    | Blazor (C#), TailwindCSS                     |
+| Frontend    | Blazor Pages (C#), TailwindCSS               |
 | Backend     | Go (Chi, Clean Architecture, Swagger)        |
 | Gateway     | Kong (JWT auth + rate limiting)              |
 | Database    | PostgreSQL                                   |
@@ -97,7 +97,7 @@ git clone https://github.com/JohnKibet/fastabiz.git
 cd fastabiz
 
 # Start all services: DB, backend, Kong
-docker compose up --build
+docker compose up --env-file .env.docker --build
 ```
 
 - **API & Swagger:** `http://localhost:8000/api/swagger/index.html`

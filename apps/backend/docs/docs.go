@@ -1932,7 +1932,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/images/{imageId}": {
+        "/products/images/{imageId}/delete": {
             "delete": {
                 "security": [
                     {
@@ -2066,7 +2066,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Adds a value to an existing product option (e.g. Red, Large).",
+                "description": "Adds values to an existing product option (e.g. Red, Large).",
                 "consumes": [
                     "application/json"
                 ],
@@ -2076,21 +2076,21 @@ const docTemplate = `{
                 "tags": [
                     "products"
                 ],
-                "summary": "Add option value",
+                "summary": "Add option values",
                 "parameters": [
                     {
-                        "description": "Add option value payload",
+                        "description": "Add option values payload",
                         "name": "value",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/product.AddOptionValueRequest"
+                            "$ref": "#/definitions/product.AddOptionValuesRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Option value added successfully",
+                        "description": "Option values added successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -2125,7 +2125,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/options/values/{valueId}": {
+        "/products/options/values/{valueId}/delete": {
             "delete": {
                 "security": [
                     {
@@ -2186,7 +2186,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/options/{optionId}": {
+        "/products/options/{optionId}/delete": {
             "delete": {
                 "security": [
                     {
@@ -2442,7 +2442,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/variants/{variantId}": {
+        "/products/variants/{variantId}/delete": {
             "delete": {
                 "security": [
                     {
@@ -2503,7 +2503,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/{id}/product": {
+        "/products/{id}/delete": {
             "delete": {
                 "security": [
                     {
@@ -2623,6 +2623,64 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{productId}/options": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all options and their values for a given product",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "List product options",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID (UUID)",
+                        "name": "productId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/product.Option"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid product ID",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to list options",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -4184,17 +4242,17 @@ const docTemplate = `{
         "product.AddImageRequest": {
             "type": "object",
             "required": [
-                "product_id",
-                "url"
+                "images",
+                "product_id"
             ],
             "properties": {
-                "is_primary": {
-                    "type": "boolean"
+                "images": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/product.Image"
+                    }
                 },
                 "product_id": {
-                    "type": "string"
-                },
-                "url": {
                     "type": "string"
                 }
             }
@@ -4214,18 +4272,26 @@ const docTemplate = `{
                 }
             }
         },
-        "product.AddOptionValueRequest": {
+        "product.AddOptionValuesRequest": {
             "type": "object",
             "required": [
                 "option_id",
-                "value"
+                "product_id",
+                "values"
             ],
             "properties": {
                 "option_id": {
                     "type": "string"
                 },
-                "value": {
+                "product_id": {
                     "type": "string"
+                },
+                "values": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -4267,7 +4333,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "options": {
-                    "description": "optionID -\u003e optionValueID",
+                    "description": "name → value",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -4287,6 +4353,17 @@ const docTemplate = `{
                 }
             }
         },
+        "product.Image": {
+            "type": "object",
+            "properties": {
+                "is_primary": {
+                    "type": "boolean"
+                },
+                "url": {
+                    "type": "string"
+                }
+            }
+        },
         "product.Option": {
             "type": "object",
             "properties": {
@@ -4299,8 +4376,19 @@ const docTemplate = `{
                 "values": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/product.OptionValue"
                     }
+                }
+            }
+        },
+        "product.OptionValue": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
                 }
             }
         },
@@ -4434,17 +4522,14 @@ const docTemplate = `{
         "product.Variant": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
                 "image_url": {
                     "type": "string"
-                },
-                "options": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
                 },
                 "price": {
                     "type": "number"
@@ -4457,6 +4542,9 @@ const docTemplate = `{
                 },
                 "stock": {
                     "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },

@@ -355,14 +355,14 @@ func (h *ProductHandler) DeleteOptionName(w http.ResponseWriter, r *http.Request
 }
 
 // AddOptionValue godoc
-// @Summary Add option value
-// @Description Adds a value to an existing product option (e.g. Red, Large).
+// @Summary Add option values
+// @Description Adds values to an existing product option (e.g. Red, Large).
 // @Tags products
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param value body product.AddOptionValueRequest true "Add option value payload"
-// @Success 201 {object} map[string]string "Option value added successfully"
+// @Param value body product.AddOptionValuesRequest true "Add option values payload"
+// @Success 201 {object} map[string]string "Option values added successfully"
 // @Failure 400 {object} handlers.ErrorResponse "Invalid request body"
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 404 {object} handlers.ErrorResponse "Option not found"
