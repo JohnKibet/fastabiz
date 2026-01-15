@@ -149,7 +149,7 @@ func NewRouter(
 				r.Get("/by-id/{id}", s.GetStoreByID)
 				r.Get("/{id}/summary", s.GetStoreSummary)
 				r.Put("/{id}/update", s.UpdateStore)
-				r.Delete("/{id}", s.DeleteStore)
+				r.Delete("/{id}/delete", s.DeleteStore)
 			})
 
 			// Products

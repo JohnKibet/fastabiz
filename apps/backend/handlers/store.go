@@ -284,7 +284,7 @@ func (h *StoreHandler) ListStoresPaged(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} handlers.ErrorResponse "Invalid store ID"
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /stores/{id} [delete]
+// @Router /stores/{id}/delete [delete]
 func (h *StoreHandler) DeleteStore(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	storeID, err := uuid.Parse(idStr)
