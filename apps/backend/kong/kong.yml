@@ -74,4 +74,4 @@ consumers:
   - username: test-user
     jwt_secrets:
       - key: my-client
-        secret: EOMFIBdh90lpWGcuLQI2KbYWotc5nZBlFgB0FmbjyYM=
+        secret: /OdCMZ8dajc853B9/TiFMyFAH7Yoei7nq59Fe12oroqMamjfekfXGIHgmRG9oDfKrgD3kCE8DPCTypeOFCluUw==

@@ -10,7 +10,7 @@ public static class MockData
         {
             Id = Guid.NewGuid(),
             Name = "Green Valley Farms",
-            Logo = "green_valley_logo.jpg",
+            LogoUrl = "green_valley_logo.jpg",
             Rating = 4.7,
             TotalProducts = 3,
             Products = new List<ProductX>
@@ -66,7 +66,7 @@ public static class MockData
         {
             Id = Guid.NewGuid(),
             Name = "Sunrise Orchard",
-            Logo = "sunrise_logo.jpg",
+            LogoUrl = "sunrise_logo.jpg",
             Rating = 4.5,
             TotalProducts = 2,
             Products = new List<ProductX>
@@ -109,7 +109,7 @@ public static class MockData
         {
             Id = Guid.NewGuid(),
             Name = "Highland Fresh Produce",
-            Logo = "highland_logo.jpg",
+            LogoUrl = "highland_logo.jpg",
             Rating = 4.6,
             TotalProducts = 2,
             Products = new List<ProductX>
@@ -145,7 +145,7 @@ public static class MockData
         {
             Id = Guid.NewGuid(),
             Name = "Coastal Citrus Co.",
-            Logo = "coastal_logo.jpg",
+            LogoUrl = "coastal_logo.jpg",
             Rating = 4.8,
             TotalProducts = 3,
             Products = new List<ProductX>
@@ -193,7 +193,7 @@ public static class MockData
         {
             Id = Guid.NewGuid(),
             Name = "Happy Harvest Market",
-            Logo = "happy_harvest.jpg",
+            LogoUrl = "happy_harvest.jpg",
             Rating = 4.3,
             TotalProducts = 2,
             Products = new List<ProductX>
@@ -229,7 +229,7 @@ public static class MockData
         {
             Id = Guid.NewGuid(),
             Name = "Farm Direct Foods",
-            Logo = "farm_direct.jpg",
+            LogoUrl = "farm_direct.jpg",
             Rating = 4.6,
             TotalProducts = 2,
             Products = new List<ProductX>
@@ -272,7 +272,7 @@ public static class MockData
         {
             Id = Guid.NewGuid(),
             Name = "Tropical Delight Farm",
-            Logo = "tropical_delight.jpg",
+            LogoUrl = "tropical_delight.jpg",
             Rating = 4.9,
             TotalProducts = 2,
             Products = new List<ProductX>
@@ -304,11 +304,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id = Guid.NewGuid(),
             Name = "TechWorld Electronics",
-            Logo = "techworld.jpg",
+            LogoUrl = "techworld.jpg",
             Rating = 4.4,
             TotalProducts = 3,
             Products = new List<ProductX> {
@@ -353,11 +353,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id = Guid.NewGuid(),
             Name = "UrbanStyle Clothing",
-            Logo = "urbanstyle.jpg",
+            LogoUrl = "urbanstyle.jpg",
             Rating = 4.2,
             TotalProducts = 2,
             Products = new List<ProductX> {
@@ -392,11 +392,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id = Guid.NewGuid(),
             Name = "HomeLiving Furniture",
-            Logo = "homeliving.jpg",
+            LogoUrl = "homeliving.jpg",
             Rating = 4.7,
             TotalProducts = 2,
             Products = new List<ProductX>{
@@ -430,11 +430,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id = Guid.NewGuid(),
             Name = "Glow Beauty Essentials",
-            Logo = "glowbeauty.jpg",
+            LogoUrl = "glowbeauty.jpg",
             Rating = 4.5,
             TotalProducts = 3,
             Products = new List<ProductX>{
@@ -479,11 +479,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id = Guid.NewGuid(),
             Name = "PowerFit Sports",
-            Logo = "powerfit.jpg",
+            LogoUrl = "powerfit.jpg",
             Rating = 4.6,
             TotalProducts = 2,
             Products = new List<ProductX>{
@@ -515,11 +515,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id = Guid.NewGuid(),
             Name = "PetCare Supplies",
-            Logo = "petcare.jpg",
+            LogoUrl = "petcare.jpg",
             Rating = 4.4,
             TotalProducts = 2,
             Products = new List<ProductX>{
@@ -548,11 +548,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id=Guid.NewGuid(),
             Name="AutoGear Shop",
-            Logo="autogear.jpg",
+            LogoUrl="autogear.jpg",
             Rating=4.3,
             TotalProducts=2,
             Products=new(){
@@ -584,11 +584,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id=Guid.NewGuid(),
             Name="PaperTrail Books",
-            Logo="papertrail.jpg",
+            LogoUrl="papertrail.jpg",
             Rating=4.8,
             TotalProducts=2,
             Products=new(){
@@ -617,11 +617,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id=Guid.NewGuid(),
             Name="Organic Health Store",
-            Logo="organic.jpg",
+            LogoUrl="organic.jpg",
             Rating=4.7,
             TotalProducts=2,
             Products=new(){
@@ -650,11 +650,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id=Guid.NewGuid(),
             Name="KitchenPro Supplies",
-            Logo="kitchenpro.jpg",
+            LogoUrl="kitchenpro.jpg",
             Rating=4.4,
             TotalProducts=2,
             Products=new(){
@@ -683,11 +683,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id=Guid.NewGuid(),
             Name="HandyTools Hardware",
-            Logo="handytools.jpg",
+            LogoUrl="handytools.jpg",
             Rating=4.5,
             TotalProducts=2,
             Products=new(){
@@ -716,11 +716,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id=Guid.NewGuid(),
             Name="FunLand Toys",
-            Logo="funland.jpg",
+            LogoUrl="funland.jpg",
             Rating=4.3,
             TotalProducts=2,
             Products=new(){
@@ -749,11 +749,11 @@ public static class MockData
             }
         },
 
-        new Store 
+        new Store
         {
             Id=Guid.NewGuid(),
             Name="SweetTreats Bakery",
-            Logo="sweettreats.jpg",
+            LogoUrl="sweettreats.jpg",
             Rating=4.9,
             TotalProducts=2,
             Products=new(){

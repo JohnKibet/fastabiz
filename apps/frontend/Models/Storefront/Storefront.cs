@@ -10,12 +10,15 @@ public class Store
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string Logo { get; set; } = string.Empty;
+    public string LogoUrl { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
     public double Rating { get; set; }
     public int? TotalProducts { get; set; }
 
     // Optional: Products found in Store (for Store detail page)
     public List<ProductX> Products { get; set; } = new();
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
 
 public class CreateStoreRequest
@@ -42,7 +45,7 @@ public class UpdateStoreRequest
     public string? Name { get; set; }
 
     [JsonPropertyName("logo_url")]
-    public string? Logo { get; set; }
+    public string? LogoUrl { get; set; }
 
     [JsonPropertyName("location")]
     public string? Location { get; set; }

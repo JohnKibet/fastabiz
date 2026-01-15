@@ -8,9 +8,9 @@
     <div class="flex mb-6">
         <!-- Store Info -->
         <div class="flex items-center space-x-4">
-            @if (!string.IsNullOrEmpty(Store?.Logo))
+            @if (!string.IsNullOrEmpty(Store?.LogoUrl))
             {
-                <img src="@Store.Logo" alt="@Store.Name" class="w-16 h-16 rounded-full object-cover" />
+                <img src="@Store.LogoUrl" alt="@Store.Name" class="w-16 h-16 rounded-full object-cover" />
             }
             <div>
                 <p class="text-sm text-yellow-600">⭐ @Store?.Rating.ToString("0.0")</p>
@@ -25,17 +25,17 @@
             @foreach (var cat in Categories)
             {
                 <button class="px-3 py-1 rounded-full border text-sm whitespace-nowrap
-                                @(SelectedCategory == cat 
-                                    ? "bg-blue-600 text-white border-blue-600" 
-                                    : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200")"
-                        @onclick="() => FilterByCategory(cat)">
+                                    @(SelectedCategory == cat
+                                                            ? "bg-blue-600 text-white border-blue-600" 
+                                                            : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200")"
+                    @onclick="() => FilterByCategory(cat)">
                     @cat
                 </button>
             }
             @if (!string.IsNullOrEmpty(SelectedCategory))
             {
                 <button class="px-3 py-1 rounded-full border bg-red-100 text-red-600 text-sm"
-                        @onclick="() => FilterByCategory(null)">
+                    @onclick="() => FilterByCategory(null)">
                     Clear
                 </button>
             }
@@ -45,21 +45,14 @@
         <main class="w-3/4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             @foreach (var product in FilteredProducts)
             {
-                <ProductCard 
-                    Product="@ConvertToListItem(product)" 
-                    OnSelected="@ViewProductDetail" 
-                />
+                <ProductCard Product="@ConvertToListItem(product)" OnSelected="@ViewProductDetail" />
             }
         </main>
     </div>
 
     <!-- Pagination -->
-    <PaginationControl 
-        CurrentPage="@CurrentPage" 
-        TotalPages="@TotalPages"
-        OnPreviousPage="@LoadPreviousPage"
-        OnNextPage="@LoadNextPage" 
-    />
+    <PaginationControl CurrentPage="@CurrentPage" TotalPages="@TotalPages" OnPreviousPage="@LoadPreviousPage"
+        OnNextPage="@LoadNextPage" />
 </div>
 
 @code {
@@ -87,11 +80,11 @@
             TotalPages = (int)Math.Ceiling((double)FilteredProducts.Count / PageSize);
 
             Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
-            {
-                new() { Title = "Home", Url = "/" },
-                new() { Title = "Stores", Url = "/stores" },
-                new() { Title = $"{Store?.Name}", Url = $"/store{StoreId}" }
-            });
+{
+new() { Title = "Home", Url = "/" },
+new() { Title = "Stores", Url = "/stores" },
+new() { Title = $"{Store?.Name}", Url = $"/store{StoreId}" }
+});
         }
     }
 

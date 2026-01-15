@@ -4,9 +4,9 @@
 <div class="merchant-card border rounded-lg shadow hover:shadow-lg p-4 cursor-pointer"
     @onclick="() => OnSelected.InvokeAsync(Store)">
     <div class="flex items-center space-x-4">
-        @if (!string.IsNullOrEmpty(Store.Logo))
+        @if (!string.IsNullOrEmpty(Store.LogoUrl))
         {
-            <img src="@Store.Logo" alt="@Store.Name" class="w-12 h-12 rounded-full object-cover" />
+            <img src="@Store.LogoUrl" alt="@Store.Name" class="w-12 h-12 rounded-full object-cover" />
         }
         <div>
             <h4 class="font-semibold text-lg">@Store.Name</h4>
