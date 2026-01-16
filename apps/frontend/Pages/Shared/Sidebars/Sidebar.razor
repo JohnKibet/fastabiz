@@ -30,10 +30,7 @@
             <SidebarSection Title="Operations" Icon="todo" SectionKey="MerchantOperations" IsCollapsed="IsCollapsed"
                 Items="MerchantOperations" IsOpen="@IsSectionOpen(nameof(MerchantOperations))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Users" Icon="users" SectionKey="MerchantUsers" IsCollapsed="IsCollapsed"
-                Items="MerchantUsers" IsOpen="@IsSectionOpen(nameof(MerchantUsers))" OnToggle="@ToggleSection" />
-
-            <SidebarSection Title="Stores" Icon="store" SectionKey="MerchantStores" IsCollapsed="IsCollapsed"
+            <SidebarSection Title="Stores" Icon="warehouse" SectionKey="MerchantStores" IsCollapsed="IsCollapsed"
                 Items="MerchantStores" IsOpen="@IsSectionOpen(nameof(MerchantStores))" OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Products" Icon="" SectionKey="MerchantProducts" IsCollapsed="IsCollapsed"
@@ -41,6 +38,9 @@
 
             <SidebarSection Title="Reports" Icon="chart" SectionKey="MerchantReports" IsCollapsed="IsCollapsed"
                 Items="MerchantReports" IsOpen="@IsSectionOpen(nameof(MerchantReports))" OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Users" Icon="users" SectionKey="MerchantUsers" IsCollapsed="IsCollapsed"
+                Items="MerchantUsers" IsOpen="@IsSectionOpen(nameof(MerchantUsers))" OnToggle="@ToggleSection" />
         }
         else if (Role == "driver")
         {
@@ -143,7 +143,7 @@ new("Create User", "/merchant/createuser", "user-plus")
     private List<SidebarMenuItem> MerchantStores => new()
 {
 new("Create Store", "/merchant/stores/create", "create-store"),
-new("All Stores", "/merchant/stores", "store"),
+new("All Stores", "/merchant/stores", "warehouse"),
 new("Map", "/merchant/map", "map")
 };
 

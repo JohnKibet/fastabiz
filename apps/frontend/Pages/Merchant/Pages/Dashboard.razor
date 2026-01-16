@@ -24,7 +24,7 @@
 
     <!-- Live Map -->
     <DashboardPanel Title="Live Driver Locations" Class="lg:col-span-2">
-        <div style="height: 16rem; width: 100%; border-radius: 0.5rem; overflow: hidden;"> 
+        <div style="height: 16rem; width: 100%; border-radius: 0.5rem; overflow: hidden;">
             <LiveMap />
         </div>
     </DashboardPanel>
@@ -71,7 +71,7 @@
         <ActionCard Title="Create Order" Icon="plus" OnClick="CreateOrder" />
         <ActionCard Title="Assign Driver" Icon="user-check" OnClick="AssignDriver" />
         <ActionCard Title="Generate Invoice" Icon="file-invoice" OnClick="GenerateInvoice" />
-        <ActionCard Title="New Inventory" Icon="boxes" OnClick="CreateInventory" />
+        <ActionCard Title="New Product" Icon="boxes" OnClick="CreateProduct" />
     </div>
 </DashboardPanel>
 
@@ -80,10 +80,10 @@
     private int deliveriesThisWeek = 34;
     private int delayedShipments = 3;
     private decimal revenueThisWeek = 15700.50m;
-    private List<string> notifications = new() { "Driver Mike marked delivery as delayed", "Inventory level low in Warehouse A" };
+    private List<string> notifications = new() { "Driver Mike marked delivery as delayed", "Low stock in Warehouse A" };
 
     private void CreateOrder() => Navigation.NavigateTo("/merchant/createorder");
     private void AssignDriver() => Console.WriteLine("TODO: Assign driver modal");
     private void GenerateInvoice() => Console.WriteLine("TODO: Invoice generation logic");
-    private void CreateInventory() => Navigation.NavigateTo("/merchant/createinventory");
+    private void CreateProduct() => Navigation.NavigateTo("/merchant/products/create");
 }
