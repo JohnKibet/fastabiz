@@ -36,47 +36,15 @@ else if (!FilteredStores.Any())
 else
 {
   <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-          <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-        </tr>
-      </thead>
-
-      <tbody class="divide-y divide-gray-200">
-        @foreach (var store in FilteredStores)
-        {
-          <tr>
-            <td class="px-6 py-4 font-medium text-gray-800">
-              @store.Name
-            </td>
-
-            <td class="px-6 py-4 text-gray-600">
-              @store.Location
-            </td>
-
-            <td class="px-6 py-4 text-gray-500 text-sm">
-              @store.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")
-            </td>
-
-            <td class="px-6 py-4 text-right space-x-2">
-              <button class="btn btn-sm btn-outline" @onclick="() => ViewStore(store.Id)">
-                View
-              </button>
-              <button class="btn btn-sm btn-primary" @onclick="() => EditStore(store.Id)">
-                Edit
-              </button>
-              <button class="btn btn-sm btn-danger" @onclick="() => ConfirmDelete(store.Id)">
-                Delete
-              </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <!-- Stores Table -->
+    <StoreTable
+      PagedStores="FilteredStores.ToList()"
+      CurrentPage="currentPage"
+      PageSize="pageSize"
+      OnView="ViewStore"
+      OnEdit="EditStore"
+      OnDelete="ConfirmDelete"
+    />
   </div>
 }
 
@@ -91,6 +59,8 @@ else
 @code {
   private List<Store>? stores;
   private string searchTerm = "";
+  private int currentPage = 1;
+  private int pageSize = 10;
 
   private Store? selectedStore;
   private UpdateStoreRequest editableStore = new();

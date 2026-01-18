@@ -1,0 +1,46 @@
+@using frontend.Models
+
+<table class="min-w-full table-auto text-sm text-left text-gray-700">
+  <thead class="bg-gray-50 text-xs uppercase text-gray-500 border-b">
+    <tr>
+      <th class="px-4 py-3">No.</th>
+      <th class="px-4 py-3">Name</th>
+      <th class="px-4 py-3">Location</th>
+      <th class="px-4 py-3">Created</th>
+      <th class="px-4 py-3">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @if (PagedStores.Any() == true)
+    {
+      @foreach (var (store, index) in PagedStores.Select((s, i) => (s, i)))
+      {
+        <tr class="border-b hover:bg-gray-50">
+          <td class="px-4 py-2">@((index + 1) + (CurrentPage - 1) * PageSize)</td>
+          <td class="px-4 py-2">@store.Name</td>
+          <td class="px-4 py-2">@store.Location</td>
+          <td class="px-4 py-2">@store.CreatedAt</td>
+          <td class="px-4 py-2 text-right">
+            <TableRowActions ColumnValueId="@store.Id" OnView="OnView" OnEdit="OnEdit" OnDelete="OnDelete" />
+          </td>
+        </tr>
+      }
+    }
+    else
+    {
+      <tr>
+        <td colspan="5" class="text-center text-gray-500 py-4">No stores found.</td>
+      </tr>
+    }
+  </tbody>
+</table>
+
+@code {
+  [Parameter] public List<Store> PagedStores { get; set; } = new();
+  [Parameter] public int CurrentPage { get; set; }
+  [Parameter] public int PageSize { get; set; }
+
+  [Parameter] public EventCallback<Guid> OnView { get; set; }
+  [Parameter] public EventCallback<Guid> OnEdit { get; set; }
+  [Parameter] public EventCallback<Guid> OnDelete { get; set; }
+}
