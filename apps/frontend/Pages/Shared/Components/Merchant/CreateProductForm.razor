@@ -1,8 +1,43 @@
 @using frontend.Models
 @namespace frontend.Pages.Shared.Components.Merchant
 @inject ProductService ProductService
+@inject StoreService StoreService
 @inject ToastService ToastService
 @inject NavigationManager Navigation
+
+@if (!StoreId.HasValue)
+{
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-textDark mb-1">
+      Select Store
+    </label>
+
+    @if (isLoadingStores)
+    {
+      <p class="text-sm text-gray-500">Loading stores...</p>
+    }
+    else if (stores.Count == 0)
+    {
+      <p class="text-sm text-red-500">
+        You don’t have any stores yet.
+        <a href="/merchant/stores/create" class="text-primary underline ml-1">
+          Create one
+        </a>
+      </p>
+    }
+    else
+    {
+      <select class="w-full px-4 py-2 border rounded-lg" @bind="selectedStoreId" @bind:after="OnStoreSelected">
+        <option value="">-- Select a store --</option>
+        @foreach (var store in stores)
+        {
+          <option value="@store.Id">@store.Name</option>
+        }
+      </select>
+    }
+  </div>
+}
+
 
 <div class="min-h-screen bg-bgSoft p-6">
   <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
@@ -40,58 +75,81 @@
 </div>
 
 @code {
-  [Parameter, EditorRequired]
-  public Guid StoreId { get; set; }
+  [Parameter]
+  public Guid? StoreId { get; set; }
 
   private CreateProductRequest product = new();
+  private List<Store> stores = new();
+  private Guid? selectedStoreId;
+  private bool isLoadingStores = true;
   private bool isSubmitting = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var result = await StoreService.GetAllStores();
+    if (result.Success && result.Data != null)
+      stores = result.Data;
+
+    isLoadingStores = false;
+  }
 
   protected override void OnParametersSet()
   {
-    if (StoreId == Guid.Empty)
+    if (StoreId.HasValue && StoreId.Value != Guid.Empty)
     {
-      Navigation.NavigateTo("/merchant/stores/create", replace: true);
-      return;
+      selectedStoreId = StoreId;
+      product.StoreId = StoreId.Value;
     }
-
-    product.StoreId = StoreId;
   }
+
+  private void OnStoreSelected()
+  {
+    if (selectedStoreId.HasValue)
+    {
+      product.StoreId = selectedStoreId.Value;
+      Navigation.NavigateTo(
+      $"/merchant/products/create/{selectedStoreId}",
+      replace: true
+      );
+    }
+  }
+
 
   private async Task Submit()
   {
+    if (product.StoreId == Guid.Empty)
+    {
+      ToastService.ShowToast(
+      "Please select a store before creating a product",
+      ToastService.ToastLevel.Warning
+      );
+      return;
+    }
+
     try
     {
-      isSubmitting = true;
       var result = await ProductService.AddProduct(product);
+
       if (result.Success)
       {
         ToastService.ShowToast("Product created successfully", ToastService.ToastLevel.Success);
-        Navigation.NavigateTo($"/merchant/products/{result.Data}", replace: true);
-        return;
+        Navigation.NavigateTo($"/merchant/products/{result.Data}");
       }
-
-      var errMessage = result.Error;
-      if (errMessage == null)
+      else
       {
-        ToastService.ShowToast("Failed to create product (unknown error)", ToastService.ToastLevel.Error);
-        return;
+        ToastService.ShowToast(
+        result.Error?.Detail ?? "Failed to create product",
+        ToastService.ToastLevel.Error
+        );
       }
-
-      if (!string.IsNullOrWhiteSpace(errMessage.Detail))
-      {
-        ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
-        return;
-      }
-
-      ToastService.ShowToast("Failed to create product", ToastService.ToastLevel.Error);
     }
     catch
     {
-      ToastService.ShowToast("An error occurred while creating the product", ToastService.ToastLevel.Error);
-    }
-    finally
-    {
-      isSubmitting = false;
+      ToastService.ShowToast(
+      "An error occurred while creating the product",
+      ToastService.ToastLevel.Error
+      );
     }
   }
+
 }
