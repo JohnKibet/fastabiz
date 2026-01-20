@@ -600,24 +600,44 @@ func (r *ProductRepository) UpdateDetails(ctx context.Context, productID uuid.UU
 	return nil
 }
 
-func (r *ProductRepository) List(ctx context.Context) ([]product.ProductListItem, error) {
+func (r *ProductRepository) ListProductsByStore(ctx context.Context, storeID uuid.UUID) ([]product.ProductListItem, error) {
 	query := `
-		SELECT
-			p.id,
-			p.store_id,
-			p.name,
-			p.description,
-			p.category,
-			p.created_at,
-			p.updated_at,
-			EXISTS (
-				SELECT 1 FROM variants v WHERE v.product_id = p.id
-			) AS has_variants
-		FROM products p
+	SELECT
+		p.id,
+		p.store_id,
+		p.name,
+		p.description,
+		p.category,
+		p.created_at,
+
+		img.url        AS image_url,
+		img.is_primary AS is_primary,
+
+		EXISTS (
+			SELECT 1 FROM variants v WHERE v.product_id = p.id
+		) AS has_variants,
+
+		COUNT(v.id)  AS variant_count,
+		MIN(v.price) AS min_price,
+		MAX(v.price) AS max_price
+
+	FROM products p
+
+	LEFT JOIN LATERAL (
+		SELECT url, is_primary
+		FROM product_images pi
+		WHERE pi.product_id = p.id
+		ORDER BY pi.is_primary DESC, pi.position ASC
+		LIMIT 1
+	) img ON true
+
+	LEFT JOIN variants v ON v.product_id = p.id
+	WHERE p.store_id = $1
+	GROUP BY p.id, img.url, img.is_primary;
 	`
 
 	var products []product.ProductListItem
-	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &products, query)
+	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &products, query, storeID)
 	return products, err
 }
 

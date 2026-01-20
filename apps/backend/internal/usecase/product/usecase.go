@@ -51,8 +51,8 @@ func (uc *UseCase) UpdateProductDetails(ctx context.Context, req *product.Update
 	})
 }
 
-func (uc *UseCase) GetAllProducts(ctx context.Context) ([]product.ProductListItem, error) {
-	return uc.repo.List(ctx)
+func (uc *UseCase) GetAllProducts(ctx context.Context, storeID uuid.UUID) ([]product.ProductListItem, error) {
+	return uc.repo.ListProductsByStore(ctx, storeID)
 }
 
 func (uc *UseCase) DeleteProduct(ctx context.Context, productID uuid.UUID) error {

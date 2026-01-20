@@ -155,7 +155,7 @@ func NewRouter(
 			// Products
 			r.Route("/products", func(r chi.Router) {
 				r.Post("/create", pr.CreateProduct)
-				r.Get("/all_products", pr.ListProducts)
+				r.Get("/{store_id}/all_products", pr.ListProductsByStore)
 				r.Post("/images/add", pr.AddImage)
 				r.Post("/options/add", pr.AddOptionName)
 				r.Post("/options/values/add", pr.AddOptionValue)

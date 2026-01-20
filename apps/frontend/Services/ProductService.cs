@@ -35,27 +35,9 @@ public class ProductService
     }
   }
 
-  public async Task<ServiceResult2<HttpResponseMessage>> ListAllProducts()
+  public async Task<ServiceResult2<List<ProductListItem>>> ListAllStoreProducts(Guid StoreId)
   {
-    try
-    {
-      var response = await _http.GetAsync("products/all_products");
-      if (response.IsSuccessStatusCode)
-      {
-        return ServiceResult2<HttpResponseMessage>.Ok(response);
-      }
-
-      var error = await ParseError(response);
-      return ServiceResult2<HttpResponseMessage>.Fail(error);
-    }
-    catch (HttpRequestException ex)
-    {
-      return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
-    }
-    catch (Exception ex)
-    {
-      return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
-    }
+    return await GetFromJsonSafe<List<ProductListItem>>($"products/{StoreId}/all_products");
   }
 
   public async Task<ServiceResult2<List<ProductX>>> AddImagesToProduct(AddImageRequest request)

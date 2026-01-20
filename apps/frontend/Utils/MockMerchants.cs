@@ -800,13 +800,11 @@ public static class MockData
                     Name = p.Name,
                     Category = p.Category,
                     Description = p.Description,
-                    Thumbnail = p.Images.FirstOrDefault() ?? "https://via.placeholder.com/150",
                     HasVariants = p.HasVariants,
                     Price = p.Price,
                     MinPrice = p.MinPrice,
                     MaxPrice = p.MaxPrice,
                     StoreId = Store.Id,
-                    StoreName = Store.Name,
                     Rating = Store.Rating,
                     TotalSold = new Random().Next(10, 200) // mock sold count
                 });

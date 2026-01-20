@@ -1,7 +1,15 @@
 @inherits LayoutComponentBase
 @namespace frontend.Pages.Merchant
+@using frontend.Models
 @using frontend.Pages.Shared.Layout
 
-<AuthorizedLayout>
-    @Body
-</AuthorizedLayout>
+<CascadingValue Value="ActiveStore">
+    <AuthorizedLayout>
+        @Body
+    </AuthorizedLayout>
+</CascadingValue>
+
+@code {
+    private ActiveStoreContext ActiveStore = new();
+
+}

@@ -91,7 +91,7 @@
                         @foreach (var p in CategoryProducts)
                         {
                             <li class="p-2 flex items-center gap-3 hover:bg-gray-100 rounded cursor-pointer">
-                                <img src="@p.Thumbnail" class="w-10 h-10 rounded object-cover" />
+                                <img src="@p.ImageUrl" class="w-10 h-10 rounded object-cover" />
                                 <span>@p.Name</span>
                             </li>
                         }
@@ -103,7 +103,7 @@
                         @foreach (var p in StoreProducts)
                         {
                             <li class="p-2 flex items-center gap-3 hover:bg-gray-100 rounded cursor-pointer">
-                                <img src="@p.Thumbnail" class="w-10 h-10 rounded object-cover" />
+                                <img src="@p.ImageUrl" class="w-10 h-10 rounded object-cover" />
                                 <span>@p.Name</span>
                             </li>
                         }

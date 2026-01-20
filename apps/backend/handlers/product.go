@@ -139,18 +139,28 @@ func (h *ProductHandler) UpdateProductDetails(w http.ResponseWriter, r *http.Req
 	})
 }
 
-// ListProducts godoc
-// @Summary List all products
-// @Description Retrieves all products available to the merchant/admin.
+// ListProductsByStore godoc
+// @Summary List products by store
+// @Description Retrieves all products belonging to a specific store.
 // @Tags products
 // @Security BearerAuth
 // @Produce json
-// @Success 200 {array} product.Product "List of products"
+// @Param storeId path string true "Store ID"
+// @Success 200 {array} product.ProductListItem "List of products"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid store ID"
 // @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
 // @Failure 500 {object} handlers.ErrorResponse "Internal server error"
-// @Router /products/all_products [get]
-func (h *ProductHandler) ListProducts(w http.ResponseWriter, r *http.Request) {
-	products, err := h.UC.Products.UseCase.GetAllProducts(r.Context())
+// @Router /products/{store_id}/all_products [get]
+func (h *ProductHandler) ListProductsByStore(w http.ResponseWriter, r *http.Request) {
+	storeIDStr := chi.URLParam(r, "store_id")
+	storeID, err := uuid.Parse(storeIDStr)
+
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid store ID", err)
+		return
+	}
+
+	products, err := h.UC.Products.UseCase.GetAllProducts(r.Context(), storeID)
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "Could not fetch products", err)
 		return

@@ -1,0 +1,35 @@
+@page "/merchant/products"
+@layout MerchantLayout
+@using System.Text.Json
+@using frontend.Models
+@inject ProductService ProductService
+
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  @foreach (var product in products)
+  {
+    <MerchantProductCard Product="@product" />
+  }
+</div>
+
+@code {
+  [CascadingParameter] public ActiveStoreContext StoreCtx { get; set; } = default!;
+  private List<ProductListItem> products = new();
+
+  protected override async Task OnInitializedAsync()
+  {
+    // Get products
+    var result = await ProductService.ListAllStoreProducts(StoreCtx.StoreId);
+    if (result.Success && result.Data != null)
+    {
+      products = result.Data;
+      Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions
+      {
+        WriteIndented = true
+      }));
+    }
+    else
+    {
+      products = new List<ProductListItem>();
+    }
+  }
+}

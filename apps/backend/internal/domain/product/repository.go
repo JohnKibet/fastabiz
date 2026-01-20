@@ -19,11 +19,11 @@ type Repository interface {
 
 	UpdateProductStock(ctx context.Context, productID uuid.UUID, stock int) error
 
-	// List returns all products accessible to the caller.
+	// List returns all products from a specified store accessible to the caller.
 	// Each product should be returned as a fully-hydrated aggregate.
-	List(ctx context.Context) ([]ProductListItem, error)
+	ListProductsByStore(ctx context.Context, storeID uuid.UUID) ([]ProductListItem, error)
 
-	// ListByStore()
+	// ListAllProducts()
 
 	// UpdateDetails updates the core mutable fields of a product.
 	// This does not affect images, options, variants, or inventory.

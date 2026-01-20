@@ -96,13 +96,11 @@
             Id = p.Id,
             Name = p.Name,
             Category = p.Category,
-            Thumbnail = p.Images.FirstOrDefault() ?? "https://via.placeholder.com/150",
             HasVariants = p.HasVariants,
             Price = p.Price,
             MinPrice = p.MinPrice,
             MaxPrice = p.MaxPrice,
             StoreId = merchant!.Id,
-            StoreName = merchant?.Name ?? "",
             Rating = merchant?.Rating ?? 0,
             TotalSold = new Random().Next(10, 200)
         };

@@ -239,19 +239,50 @@ public class UpdateVariantPriceRequest
 // Lightweight version for list/grid views
 public class ProductListItem
 {
+    [JsonPropertyName("id")]
     public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Category { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
-    public string Thumbnail { get; set; } = string.Empty;
 
+    [JsonPropertyName("store_id")]
+    public Guid StoreId { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("category")]
+    public string Category { get; set; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = string.Empty;
+
+    [JsonPropertyName("image_url")]
+    public string ImageUrl { get; set; } = string.Empty;
+
+    [JsonPropertyName("has_variants")]
     public bool HasVariants { get; set; }
-    public double? Price { get; set; }
+
+    // simple variants
+    [JsonPropertyName("variant_count")]
+    public int VariantCount { get; set; }
+
+    [JsonPropertyName("min_price")]
     public double? MinPrice { get; set; }
+
+    [JsonPropertyName("max_price")]
     public double? MaxPrice { get; set; }
 
-    public Guid StoreId { get; set; }
-    public string StoreName { get; set; } = string.Empty;
+    // products
+    [JsonPropertyName("price")]
+    public double? Price { get; set; }
+
+    [JsonPropertyName("stock")]
+    public int Stock { get; set; }
+
     public double Rating { get; set; }
     public int TotalSold { get; set; }
+}
+
+public class ActiveStoreContext
+{
+    public Guid StoreId { get; set; }
+    public string StoreName { get; set; } = "";
 }

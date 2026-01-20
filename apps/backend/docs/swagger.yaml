@@ -484,10 +484,10 @@ definitions:
     type: object
   product.Image:
     properties:
+      image_url:
+        type: string
       is_primary:
         type: boolean
-      url:
-        type: string
     type: object
   product.Option:
     properties:
@@ -544,6 +544,39 @@ definitions:
         items:
           $ref: '#/definitions/product.Variant'
         type: array
+    type: object
+  product.ProductListItem:
+    properties:
+      category:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      has_variants:
+        type: boolean
+      id:
+        type: string
+      image_url:
+        type: string
+      is_primary:
+        type: boolean
+      max_price:
+        type: number
+      min_price:
+        type: number
+      name:
+        type: string
+      price:
+        description: Simple product
+        type: number
+      stock:
+        type: integer
+      store_id:
+        type: string
+      variant_count:
+        description: Variant products
+        type: integer
     type: object
   product.ReorderImagesRequest:
     properties:
@@ -1980,9 +2013,15 @@ paths:
       summary: List product options
       tags:
       - products
-  /products/all_products:
+  /products/{store_id}/all_products:
     get:
-      description: Retrieves all products available to the merchant/admin.
+      description: Retrieves all products belonging to a specific store.
+      parameters:
+      - description: Store ID
+        in: path
+        name: storeId
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1990,8 +2029,12 @@ paths:
           description: List of products
           schema:
             items:
-              $ref: '#/definitions/product.Product'
+              $ref: '#/definitions/product.ProductListItem'
             type: array
+        "400":
+          description: Invalid store ID
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "401":
           description: Unauthorized
           schema:
@@ -2002,7 +2045,7 @@ paths:
             $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: List all products
+      summary: List products by store
       tags:
       - products
   /products/by-id/{id}:
@@ -2590,7 +2633,7 @@ paths:
       summary: Login user
       tags:
       - public
-  /stores/{id}:
+  /stores/{id}/delete:
     delete:
       description: Deletes a store owned by the authenticated user
       parameters:

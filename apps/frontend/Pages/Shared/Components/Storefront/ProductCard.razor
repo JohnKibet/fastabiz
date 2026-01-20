@@ -4,11 +4,11 @@
 <div class="product-card border rounded shadow hover:shadow-lg cursor-pointer p-4 flex flex-col"
      @onclick="() => OnSelected.InvokeAsync(Product)">
     <!-- Product Image -->
-    <img src="@Product.Thumbnail" alt="@Product.Name" class="w-full h-48 object-cover mb-2 rounded" />
+    <img src="@Product.ImageUrl" alt="@Product.Name" class="w-full h-48 object-cover mb-2 rounded" />
 
     <!-- Product Info -->
     <h4 class="font-semibold text-lg">@Product.Name</h4>
-    <p class="text-sm text-gray-600">@Product.StoreName</p>
+    @* <p class="text-sm text-gray-600">@Product.Name</p> *@
 
     <!-- Price -->
     @if (!Product.HasVariants)

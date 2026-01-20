@@ -1653,46 +1653,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/all_products": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Retrieves all products available to the merchant/admin.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "products"
-                ],
-                "summary": "List all products",
-                "responses": {
-                    "200": {
-                        "description": "List of products",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/product.Product"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/handlers.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/products/by-id/{id}": {
             "get": {
                 "description": "Retrieves a product by its ID, including images, options, and variants.",
@@ -2688,6 +2648,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/products/{store_id}/all_products": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves all products belonging to a specific store.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "List products by store",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Store ID",
+                        "name": "storeId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of products",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/product.ProductListItem"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid store ID",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/public/create": {
             "post": {
                 "description": "Register a new user with name, email, etc.",
@@ -3008,7 +3023,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/stores/{id}": {
+        "/stores/{id}/delete": {
             "delete": {
                 "security": [
                     {
@@ -4356,11 +4371,11 @@ const docTemplate = `{
         "product.Image": {
             "type": "object",
             "properties": {
+                "image_url": {
+                    "type": "string"
+                },
                 "is_primary": {
                     "type": "boolean"
-                },
-                "url": {
-                    "type": "string"
                 }
             }
         },
@@ -4445,6 +4460,55 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/product.Variant"
                     }
+                }
+            }
+        },
+        "product.ProductListItem": {
+            "type": "object",
+            "properties": {
+                "category": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "has_variants": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image_url": {
+                    "type": "string"
+                },
+                "is_primary": {
+                    "type": "boolean"
+                },
+                "max_price": {
+                    "type": "number"
+                },
+                "min_price": {
+                    "type": "number"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "price": {
+                    "description": "Simple product",
+                    "type": "number"
+                },
+                "stock": {
+                    "type": "integer"
+                },
+                "store_id": {
+                    "type": "string"
+                },
+                "variant_count": {
+                    "description": "Variant products",
+                    "type": "integer"
                 }
             }
         },

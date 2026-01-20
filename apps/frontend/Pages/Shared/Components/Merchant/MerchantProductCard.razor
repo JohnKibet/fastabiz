@@ -1,0 +1,69 @@
+@using frontend.Models
+@namespace frontend.Pages.Shared.Components.Merchant
+
+@if (Product != null)
+{
+  <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow transition">
+    <div class="flex gap-4">
+      <!-- Image -->
+      <img src="@Product.ImageUrl.FirstOrDefault() ?? '/img/placeholder.png'" class="w-20 h-20 object-cover rounded" />
+
+      <!-- Info -->
+      <div class="flex-1">
+        <div class="flex justify-between items-start">
+          <h3 class="font-semibold text-lg">@Product.Name</h3>
+
+          <span class="text-xs px-2 py-1 rounded bg-gray-100">
+            @Product.Category
+          </span>
+        </div>
+
+        <p class="text-sm text-gray-500 line-clamp-2">
+          @Product.Description
+        </p>
+
+        <!-- Inventory / Variants -->
+        <div class="mt-2 text-sm">
+          @if (Product.HasVariants)
+          {
+            <span class="text-blue-600">
+              @Product.VariantCount variants
+            </span>
+            <span class="ml-3 text-gray-600">
+              Price: KES @Product.MinPrice – @Product.MaxPrice
+            </span>
+          }
+          else
+          {
+            <span class="text-gray-700">
+              Price: KES @Product.Price
+            </span>
+            <span class="ml-3 @(Product.Stock < 10 ? "text-red-600" : "text-green-600")">
+              Stock: @Product.Stock
+            </span>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="mt-4 flex justify-end gap-2">
+      <button class="btn-secondary" @onclick="Edit">Edit</button>
+      <button class="btn-outline" @onclick="ManageVariants">Variants</button>
+      <button class="btn-danger" @onclick="Delete">Delete</button>
+    </div>
+  </div>
+
+}
+
+@code {
+  private Guid productId;
+  [Parameter] public ProductListItem? Product { get; set; }
+  [Parameter] public EventCallback<Guid> OnEdit { get; set; }
+  [Parameter] public EventCallback<Guid> OnDelete { get; set; }
+  [Parameter] public EventCallback<Guid> OnManageVariants { get; set; }
+
+  private Task Edit() => OnEdit.InvokeAsync(productId);
+  private Task Delete() => OnDelete.InvokeAsync(productId);
+  private Task ManageVariants() => OnManageVariants.InvokeAsync(productId);
+}

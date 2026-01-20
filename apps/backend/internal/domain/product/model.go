@@ -53,7 +53,7 @@ type Variant struct {
 }
 
 type Image struct {
-	URL       string `db:"url" json:"url"`
+	URL       string `db:"image_url" json:"image_url"`
 	IsPrimary bool   `db:"is_primary" json:"is_primary"`
 }
 
@@ -69,13 +69,28 @@ type VariantWithOptions struct {
 	UpdatedAt time.Time         `json:"updated_at"`
 }
 
+// for merchants
 type ProductListItem struct {
 	ID          uuid.UUID `db:"id" json:"id"`
 	StoreID     uuid.UUID `db:"store_id" json:"store_id"`
 	Name        string    `db:"name" json:"name"`
 	Description string    `db:"description" json:"description"`
 	Category    string    `db:"category" json:"category"`
-	HasVariants bool      `db:"has_variants" json:"has_variants"`
-	CreatedAt   time.Time `db:"created_at" json:"created_at"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updated_at"`
+
+	ImageURL   *string `db:"image_url" json:"image_url,omitempty"`
+	IsPrimary  *bool   `db:"is_primary" json:"is_primary,omitempty"`
+
+	HasVariants bool `db:"has_variants" json:"has_variants"`
+
+	// Simple product
+	Price float64 `db:"price" json:"price,omitempty"`
+	Stock int     `db:"stock" json:"stock,omitempty"`
+
+	// Variant products
+	VariantCount int     `db:"variant_count" json:"variant_count,omitempty"`
+	MinPrice     float64 `db:"min_price" json:"min_price,omitempty"`
+	MaxPrice     float64 `db:"max_price" json:"max_price,omitempty"`
+
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
 }
+
