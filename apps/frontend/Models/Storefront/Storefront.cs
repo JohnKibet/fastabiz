@@ -75,7 +75,11 @@ public class ProductX
     // Optional frontend helpers
     public double? MinPrice => HasVariants && Variants.Any() ? Variants.Min(v => v.Price) : Price;
     public double? MaxPrice => HasVariants && Variants.Any() ? Variants.Max(v => v.Price) : Price;
+
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
+
 
 public class CreateProductRequest
 {

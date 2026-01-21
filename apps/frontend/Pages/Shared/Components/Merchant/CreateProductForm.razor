@@ -1,3 +1,4 @@
+@using System.Text.Json
 @using frontend.Models
 @namespace frontend.Pages.Shared.Components.Merchant
 @inject ProductService ProductService
@@ -53,16 +54,16 @@
           <ValidationMessage For="() => product.Name" />
         </div>
 
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-textDark">Description</label>
-          <InputTextArea @bind-Value="product.Description" rows="4" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-          <ValidationMessage For="() => product.Description" />
-        </div>
-
         <div>
           <label class="block text-sm font-medium text-textDark">Category</label>
           <InputText @bind-Value="product.Category" class="w-full mt-1 px-4 py-2 border rounded-lg" />
           <ValidationMessage For="() => product.Category" />
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-textDark">Description</label>
+          <InputTextArea @bind-Value="product.Description" rows="4" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+          <ValidationMessage For="() => product.Description" />
         </div>
       </div>
 

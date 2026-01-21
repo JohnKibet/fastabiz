@@ -1,0 +1,126 @@
+@page "/merchant/products/{ProductId:guid}"
+@layout MerchantLayout
+@namespace frontend.Pages.Shared.Components.Merchant
+@using frontend.Models
+@using frontend.Pages.Merchant
+@inject ToastService ToastService
+@inject ProductService ProductService
+@inject NavigationManager Navigation
+
+<div class="min-h-screen bg-bgSoft p-6">
+  <h1 class="text-2xl font-poppins font-semibold text-textDark mb-2">Manage Product</h1>
+  <p class="text-textLight mb-6">Add a variants, price, stock and more to your product</p>
+
+  @if (isLoading)
+  {
+    <p>Loading product...</p>
+  }
+  else if (product != null)
+  {
+    <div class="bg-white rounded-xl shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold">@product.Name</h2>
+      <p class="text-sm text-gray-500">@product.Category</p>
+      <p class="mt-2 text-gray-600">@product.Description</p>
+
+      <div class="mt-4 text-sm text-gray-500">
+        Created @product.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")
+      </div>
+    </div>
+
+    @if (isEditMode)
+    {
+      <div class="bg-white rounded-xl shadow p-6">
+        <h3 class="text-lg font-semibold mb-4">Edit Details</h3>
+        <EditForm Model="updateModel" OnValidSubmit="UpdateDetails">
+          <DataAnnotationsValidator />
+
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium">Name</label>
+              <InputText class="input" @bind-Value="updateModel.Name" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium">Description</label>
+              <InputTextArea class="input" rows="3" @bind-Value="updateModel.Description" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium">Category</label>
+              <InputText class="input" @bind-Value="updateModel.Category" />
+            </div>
+
+            <button type="submit" disabled="@isSubmitting" class="btn-primary">
+              Save Changes
+            </button>
+          </div>
+        </EditForm>
+      </div>
+    }
+  }
+</div>
+
+@code {
+  [Parameter] public Guid ProductId { get; set; }
+  private ProductX? product;
+  private UpdateProductDetailsRequest updateModel = new();
+  private bool isLoading = true;
+  private bool isSubmitting = false;
+  private bool isEditMode;
+
+  protected override async Task OnInitializedAsync()
+  {
+    var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+    var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+    isEditMode = query.Get("mode") == "edit";
+
+    var result = await ProductService.GetProductByID(ProductId);
+
+    if (!result.Success || result.Data == null)
+    {
+      ToastService.ShowToast("Failed to load product", ToastService.ToastLevel.Error);
+      Navigation.NavigateTo("/merchant/products");
+      return;
+    }
+
+    product = result.Data;
+
+    updateModel = new UpdateProductDetailsRequest
+    {
+      ProductId = product.Id,
+      Name = product.Name,
+      Description = product.Description,
+      Category = product.Category
+    };
+
+    isLoading = false;
+  }
+
+  private async Task UpdateDetails()
+  {
+
+    if (product != null)
+    {
+      updateModel = new UpdateProductDetailsRequest
+      {
+        ProductId = product.Id,
+        Name = product.Name,
+        Description = product.Description,
+        Category = product.Category
+      };
+
+      var res = await ProductService.UpdateProductDetails(updateModel);
+      isSubmitting = true;
+      if (res.Success && res.Data != null)
+      {
+        product = res.Data;
+        ToastService.ShowToast("update successful", ToastService.ToastLevel.Success);
+        return;
+      }
+
+      isSubmitting = false;
+    }
+    return;
+  }
+}

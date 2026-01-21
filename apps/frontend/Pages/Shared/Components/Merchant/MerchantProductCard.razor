@@ -74,9 +74,17 @@
   [Parameter] public EventCallback<Guid> OnDelete { get; set; }
   [Parameter] public EventCallback<Guid> OnManageVariants { get; set; }
 
-  private Task Edit() => OnEdit.InvokeAsync(productId);
+  [Inject] NavigationManager Navigation { get; set; } = default!;
+
   private Task Delete() => OnDelete.InvokeAsync(productId);
   private Task ManageVariants() => OnManageVariants.InvokeAsync(productId);
+
+  private void Edit()
+  {
+    if (Product == null) return;
+
+    Navigation.NavigateTo($"/merchant/products/{Product.Id}?mode=edit");
+  }
 
   private string TimeOnSale
   {

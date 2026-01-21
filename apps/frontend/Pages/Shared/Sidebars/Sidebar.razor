@@ -1,7 +1,9 @@
 @using System.Security.Claims
+@using Microsoft.AspNetCore.WebUtilities
 @using frontend.Models
 @using frontend.Pages.Shared.Components.Icons
 @inject AuthenticationStateProvider AuthProvider
+@inject NavigationManager Navigation
 
 <div class="flex flex-col min-h-screen bg-white border-r border-gray-200 shadow-sm
             transition-all duration-300 ease-in-out @(IsCollapsed ? "w-16" : "w-64")">
@@ -98,10 +100,31 @@
 
     [Parameter] public EventCallback<bool> OnCollapseChanged { get; set; }
 
+    private Guid? CurrentProductId;
+    private string? CurrentPath;
+    private string? CurrentMode;
+
+   private bool IsManageProductActive =>
+    CurrentProductId.HasValue &&
+    CurrentPath?.StartsWith("/merchant/products/", StringComparison.OrdinalIgnoreCase) == true &&
+    CurrentMode == "edit";  // only active if ?mode=edit
+
+
     protected override async Task OnInitializedAsync()
     {
         var state = await AuthProvider.GetAuthenticationStateAsync();
         Role = state.User.FindFirst(ClaimTypes.Role)?.Value ?? "guest";
+        Navigation.LocationChanged += HandleLocationChanged;
+        UpdateRouteState();
+    }
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateRouteState();
+        StateHasChanged();
+    }
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= HandleLocationChanged;
     }
 
     private void ToggleSidebar()
@@ -120,6 +143,41 @@
             openSections.Add(sectionKey);
         StateHasChanged();
     }
+
+    private void UpdateRouteState()
+{
+    var uri = new Uri(Navigation.Uri);
+    CurrentPath = uri.AbsolutePath;
+
+    // Parse product ID from path
+    var segments = uri.AbsolutePath
+        .Trim('/')
+        .Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+    if (segments.Length == 3 &&
+        segments[0] == "merchant" &&
+        segments[1] == "products" &&
+        Guid.TryParse(segments[2], out var id))
+    {
+        CurrentProductId = id;
+    }
+    else
+    {
+        CurrentProductId = null;
+    }
+
+    // Optional: parse mode from query string
+    var query = QueryHelpers.ParseQuery(uri.Query);
+    if (query.TryGetValue("mode", out var modeValue))
+    {
+        CurrentMode = modeValue.ToString(); // e.g. "edit"
+    }
+    else
+    {
+        CurrentMode = null;
+    }
+}
+
 
     private bool IsSectionOpen(string sectionKey) => openSections.Contains(sectionKey);
 
@@ -150,6 +208,14 @@ new("Map", "/merchant/map", "map")
     private List<SidebarMenuItem> MerchantProducts => new()
 {
 new("Add Product", "/merchant/products/create", "layers-plus"),
+new(
+    "Manage Product", 
+    CurrentProductId.HasValue 
+        ? $"/merchant/products/{CurrentProductId}?mode=edit"
+        : "/merchant/products/create",
+    "settings",
+    active: IsManageProductActive
+),
 new("Products", "/merchant/products", "layers")
 };
 
