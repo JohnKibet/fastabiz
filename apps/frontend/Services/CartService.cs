@@ -30,8 +30,8 @@ public class CartService
         );
 
         double price = (variant != null && variant.Price > 0) ? variant.Price : product.Price;
-        string thumbnail = (variant != null && !string.IsNullOrEmpty(variant.Image)) 
-                        ? variant.Image 
+        string thumbnail = (variant != null && !string.IsNullOrEmpty(variant.ImageUrl)) 
+                        ? variant.ImageUrl 
                         : product.Images.FirstOrDefault() ?? "placeholder.jpg";
 
         if (existing != null)

@@ -609,6 +609,7 @@ func (r *ProductRepository) ListProductsByStore(ctx context.Context, storeID uui
 		p.description,
 		p.category,
 		p.created_at,
+		p.updated_at,
 
 		img.url        AS image_url,
 		img.is_primary AS is_primary,

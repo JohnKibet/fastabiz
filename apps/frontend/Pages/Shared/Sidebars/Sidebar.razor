@@ -213,7 +213,7 @@ new(
     CurrentProductId.HasValue 
         ? $"/merchant/products/{CurrentProductId}?mode=edit"
         : "/merchant/products/create",
-    "settings",
+    "wrench",
     active: IsManageProductActive
 ),
 new("Products", "/merchant/products", "layers")

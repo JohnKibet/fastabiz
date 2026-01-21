@@ -22,10 +22,10 @@
     if (result.Success && result.Data != null)
     {
       products = result.Data;
-      Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions
+      @* Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions
       {
         WriteIndented = true
-      }));
+      })); *@
     }
     else
     {

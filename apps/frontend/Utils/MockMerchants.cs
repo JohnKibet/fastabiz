@@ -30,9 +30,9 @@ public static class MockData
                     },
                     Variants = new List<Variant>
                     {
-                        new Variant { Id = Guid.NewGuid(), SKU = "APP-SM-001", Price = 1.20, Stock = 120, Image = "apple_small.jpg", Options = new Dictionary<string,string>{{"Size","Small"}} },
-                        new Variant { Id = Guid.NewGuid(), SKU = "APP-MD-001", Price = 1.50, Stock = 200, Image = "apple_medium.jpg", Options = new Dictionary<string,string>{{"Size","Medium"}} },
-                        new Variant { Id = Guid.NewGuid(), SKU = "APP-LG-001", Price = 1.80, Stock = 80, Image = "apple_large.jpg", Options = new Dictionary<string,string>{{"Size","Large"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "APP-SM-001", Price = 1.20, Stock = 120, ImageUrl = "apple_small.jpg", Options = new Dictionary<string,string>{{"Size","Small"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "APP-MD-001", Price = 1.50, Stock = 200, ImageUrl = "apple_medium.jpg", Options = new Dictionary<string,string>{{"Size","Medium"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "APP-LG-001", Price = 1.80, Stock = 80, ImageUrl = "apple_large.jpg", Options = new Dictionary<string,string>{{"Size","Large"}} },
                     }
                 },
                 new ProductX
@@ -86,8 +86,8 @@ public static class MockData
                     },
                     Variants = new List<Variant>
                     {
-                        new Variant { Id = Guid.NewGuid(), SKU = "ORG-SW-101", Price = 0.95, Stock = 180, Image = "orange_sweet.jpg", Options = new Dictionary<string,string>{{"Type","Sweet"}} },
-                        new Variant { Id = Guid.NewGuid(), SKU = "ORG-TG-101", Price = 1.00, Stock = 150, Image = "orange_tangy.jpg", Options = new Dictionary<string,string>{{"Type","Tangy"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "ORG-SW-101", Price = 0.95, Stock = 180, ImageUrl = "orange_sweet.jpg", Options = new Dictionary<string,string>{{"Type","Sweet"}} },
+                        new Variant { Id = Guid.NewGuid(), SKU = "ORG-TG-101", Price = 1.00, Stock = 150, ImageUrl = "orange_tangy.jpg", Options = new Dictionary<string,string>{{"Type","Tangy"}} },
                     }
                 },
                 new ProductX

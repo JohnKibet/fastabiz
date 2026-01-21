@@ -77,8 +77,8 @@ type ProductListItem struct {
 	Description string    `db:"description" json:"description"`
 	Category    string    `db:"category" json:"category"`
 
-	ImageURL   *string `db:"image_url" json:"image_url,omitempty"`
-	IsPrimary  *bool   `db:"is_primary" json:"is_primary,omitempty"`
+	ImageURL  *string `db:"image_url" json:"image_url,omitempty"`
+	IsPrimary *bool   `db:"is_primary" json:"is_primary,omitempty"`
 
 	HasVariants bool `db:"has_variants" json:"has_variants"`
 
@@ -91,6 +91,6 @@ type ProductListItem struct {
 	MinPrice     float64 `db:"min_price" json:"min_price,omitempty"`
 	MaxPrice     float64 `db:"max_price" json:"max_price,omitempty"`
 
-	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	CreatedAt *time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
 }
-
