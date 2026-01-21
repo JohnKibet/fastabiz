@@ -277,12 +277,18 @@ public class ProductListItem
     [JsonPropertyName("stock")]
     public int Stock { get; set; }
 
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
+
     public double Rating { get; set; }
     public int TotalSold { get; set; }
 }
 
 public class ActiveStoreContext
 {
+    [JsonPropertyName("id")]
     public Guid StoreId { get; set; }
-    public string StoreName { get; set; } = "";
+
+    [JsonPropertyName("name")]
+    public string StoreName { get; set; } = string.Empty;
 }

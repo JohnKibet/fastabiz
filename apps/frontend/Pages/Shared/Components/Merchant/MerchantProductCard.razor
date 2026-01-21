@@ -13,6 +13,13 @@
         <div class="flex justify-between items-start">
           <h3 class="font-semibold text-lg">@Product.Name</h3>
 
+          @if (IsNew)
+          {
+            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+              New
+            </span>
+          }
+
           <span class="text-xs px-2 py-1 rounded bg-gray-100">
             @Product.Category
           </span>
@@ -20,6 +27,10 @@
 
         <p class="text-sm text-gray-500 line-clamp-2">
           @Product.Description
+        </p>
+
+        <p class="text-xs text-gray-400 mt-1">
+          On sale: @TimeOnSale
         </p>
 
         <!-- Inventory / Variants -->
@@ -66,4 +77,36 @@
   private Task Edit() => OnEdit.InvokeAsync(productId);
   private Task Delete() => OnDelete.InvokeAsync(productId);
   private Task ManageVariants() => OnManageVariants.InvokeAsync(productId);
+
+  private string TimeOnSale
+  {
+    get
+    {
+      if (Product == null)
+        return "";
+
+      var days = (DateTime.UtcNow - Product.CreatedAt).Days;
+
+      if (days <= 0)
+        return "Today";
+
+      if (days == 1)
+        return "1 day ago";
+
+      return $"{days} days ago";
+    }
+  }
+
+  private bool IsNew
+  {
+    get
+    {
+      if (Product == null)
+        return false;
+
+      return (DateTime.UtcNow - Product.CreatedAt).Days < 7;
+    }
+  }
+
+
 }

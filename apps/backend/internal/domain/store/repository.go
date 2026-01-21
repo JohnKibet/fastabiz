@@ -44,7 +44,7 @@ type Repository interface {
 	//
 	// This is typically used for dashboards and management views
 	// scoped to a single account.
-	ListStoresByOwner(ctx context.Context, ownerID uuid.UUID) ([]*Store, error)
+	ListStoresByOwner(ctx context.Context, ownerID uuid.UUID) ([]*MyStores, error)
 
 	// ListStoresPaged returns a paginated and filtered list of stores
 	// using the provided filter criteria.

@@ -2,6 +2,7 @@
 @namespace frontend.Pages.Merchant
 @using frontend.Models
 @using frontend.Pages.Shared.Layout
+@inject StoreService StoreService
 
 <CascadingValue Value="ActiveStore">
     <AuthorizedLayout>
@@ -11,5 +12,23 @@
 
 @code {
     private ActiveStoreContext ActiveStore = new();
+    private List<ActiveStoreContext> stores = new();
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch merchant stores
+        var result = await StoreService.GetStoresByOwner();
+        if (result.Success && result.Data != null)
+        {
+            stores = result.Data;
+            // Decide which store becomes active
+            ActiveStore.StoreId = stores[0].StoreId;
+            ActiveStore.StoreName = stores[0].StoreName;
+        }
+        else
+        {
+            stores = new();
+        }
+
+    }
 
 }

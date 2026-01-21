@@ -40,9 +40,9 @@ public class StoreService
         return await GetFromJsonSafe<List<Store>>("stores/all_stores");
     }
 
-    public async Task<ServiceResult2<List<Store>>> GetStoresByOwner()
+    public async Task<ServiceResult2<List<ActiveStoreContext>>> GetStoresByOwner()
     {
-        return await GetFromJsonSafe<List<Store>>("stores/me");
+        return await GetFromJsonSafe<List<ActiveStoreContext>>("stores/me");
     }
 
     public async Task<ServiceResult2<List<Store>>> ListStoresPaginated()

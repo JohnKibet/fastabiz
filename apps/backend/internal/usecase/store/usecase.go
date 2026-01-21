@@ -62,7 +62,7 @@ func (uc *UseCase) ListAllStores(ctx context.Context) ([]*store.Store, error) {
 	return uc.repo.ListStores(ctx)
 }
 
-func (uc *UseCase) ListOwnerStores(ctx context.Context, ownerID uuid.UUID) ([]*store.Store, error) {
+func (uc *UseCase) ListOwnerStores(ctx context.Context, ownerID uuid.UUID) ([]*store.MyStores, error) {
 	return uc.repo.ListStoresByOwner(ctx, ownerID)
 }
 

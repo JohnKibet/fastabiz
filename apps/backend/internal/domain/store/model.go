@@ -56,3 +56,14 @@ type StoreFilter struct {
 // Used for:
 // “Can this user edit this store?”
 // “Can this merchant create products under this store?”
+
+type MyStores struct {
+	ID   uuid.UUID `db:"id" json:"id"`
+	Name string    `db:"name" json:"name"`
+}
+
+// merchant_store_preferences {
+//   merchant_id,
+//   default_store_id,
+//   pinned_store_ids []
+// }

@@ -135,13 +135,13 @@ func (r *StoreRepository) ListStores(ctx context.Context) ([]*store.Store, error
 	return stores, err
 }
 
-func (r *StoreRepository) ListStoresByOwner(ctx context.Context, ownerID uuid.UUID) ([]*store.Store, error) {
+func (r *StoreRepository) ListStoresByOwner(ctx context.Context, ownerID uuid.UUID) ([]*store.MyStores, error) {
 	query := `
-		SELECT * FROM stores
+		SELECT id, name FROM stores
 		WHERE owner_id = $1
 	`
 
-	var stores []*store.Store
+	var stores []*store.MyStores
 	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &stores, query, ownerID)
 	return stores, err
 }
