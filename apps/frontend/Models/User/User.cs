@@ -51,6 +51,9 @@ namespace frontend.Models
 
         [JsonPropertyName("created_at")]
         public DateTime? CreatedAt { get; set; }
+
+        public DateTime? ExpiresAt { get; set; }
+
     }
 
     public class CreateUserRequest

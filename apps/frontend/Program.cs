@@ -35,6 +35,7 @@ Console.WriteLine($"API Base URL set to: {apiBaseUrl}");
 
 // Register Auth Token Handler
 builder.Services.AddScoped<AuthHeaderHandler>();
+builder.Services.AddScoped<AuthExpiredHandler>();
 
 // Register named HttpClients
 // 1. Anonymous Client (no Bearer header)
@@ -47,7 +48,8 @@ builder.Services.AddHttpClient("AnonymousApi", client =>
 builder.Services.AddHttpClient("AuthenticatedApi", client =>
 {
     client.BaseAddress = new Uri(apiBaseUrl);
-}).AddHttpMessageHandler<AuthHeaderHandler>();
+}).AddHttpMessageHandler<AuthHeaderHandler>()
+.AddHttpMessageHandler<AuthExpiredHandler>();
 
 
 // Register app services
@@ -72,4 +74,4 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 
-await builder.Build().RunAsync();   
+await builder.Build().RunAsync();

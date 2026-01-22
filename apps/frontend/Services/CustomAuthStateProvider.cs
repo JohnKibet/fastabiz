@@ -36,7 +36,15 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             if (_cachedUser == null)
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
-            var identity = CreateIdentity(_cachedUser);
+            var identity = await CreateIdentity(_cachedUser);
+
+            if (identity == null)
+            {
+                return new AuthenticationState(
+                    new ClaimsPrincipal(new ClaimsIdentity())
+                );
+            }
+
             return new AuthenticationState(new ClaimsPrincipal(identity));
         }
         catch
@@ -64,8 +72,14 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         _navigationManager.NavigateTo("/auth/login", forceLoad: true);
     }
 
-    private ClaimsIdentity CreateIdentity(User user)
+    private async Task<ClaimsIdentity?> CreateIdentity(User user)
     {
+        if (_cachedUser?.ExpiresAt != null && _cachedUser.ExpiresAt <= DateTime.UtcNow)
+        {
+            await ForceLogoutAsync();
+            return null;
+        }
+
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
@@ -84,12 +98,12 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
         // Status (enum, nullable)
         if (user.Status != null)
-            claims.Add(new Claim("status", user.Status.ToString()));
+            claims.Add(new Claim("status", user.Status.Value.ToString()));
 
         // Last Login (nullable datetime)
         if (user.LastLogin != null)
-            claims.Add(new Claim("last_login", user.LastLogin.Value.ToString("o"))); 
-            // ISO-8601 format
+            claims.Add(new Claim("last_login", user.LastLogin.Value.ToString("o")));
+        // ISO-8601 format
 
         // Created At (nullable datetime)
         if (user.CreatedAt != null)
@@ -135,7 +149,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             // Slug (nullable)
             if (claimsDict.TryGetValue("slug", out var slugVal))
                 user.Slug = slugVal?.ToString() ?? "";
-            
+
             // Status (enum)
             if (claimsDict.TryGetValue("status", out var statusVal) && statusVal != null)
             {
@@ -173,6 +187,18 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
                 user.CreatedAt = null;
             }
 
+            // exp (Unix timestamp)
+            if (claimsDict.TryGetValue("exp", out var expVal) &&
+                expVal != null &&
+                long.TryParse(expVal.ToString(), out var expUnix))
+            {
+                user.ExpiresAt = DateTimeOffset.FromUnixTimeSeconds(expUnix).UtcDateTime;
+            }
+            else
+            {
+                user.ExpiresAt = null;
+            }
+
             return user;
         }
         catch
@@ -185,4 +211,58 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     {
         return base64.PadRight(base64.Length + (4 - base64.Length % 4) % 4, '=');
     }
+
+    private async Task ForceLogoutAsync()
+    {
+        await _jSRuntime.InvokeVoidAsync("localStorage.removeItem", TokenStorageKey);
+        await _jSRuntime.InvokeVoidAsync("localStorage.removeItem", "cart");
+        _cachedUser = null;
+
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+
+        _navigationManager.NavigateTo("/auth/login", forceLoad: true);
+    }
 }
+
+public class AuthExpiredHandler : DelegatingHandler
+{
+    private readonly CustomAuthStateProvider _auth;
+    public AuthExpiredHandler(CustomAuthStateProvider auth)
+    {
+        _auth = auth;
+    }
+
+    protected override async Task<HttpResponseMessage>SendAsync(
+        HttpRequestMessage request, 
+        CancellationToken cancellationToken)
+    {
+        var response = await base.SendAsync(request, cancellationToken);
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            await _auth.SignOutAsync();
+        }
+
+        return response;
+    }
+}
+
+// proactive logout with a timer
+// private Timer? _expiryTimer;
+
+// private void ScheduleExpiry(User user)
+// {
+//     if (user.ExpiresAt == null) return;
+
+//     var delay = user.ExpiresAt.Value - DateTime.UtcNow;
+//     if (delay <= TimeSpan.Zero) return;
+
+//     _expiryTimer?.Dispose();
+//     _expiryTimer = new Timer(async _ =>
+//     {
+//         await ForceLogoutAsync();
+//     }, null, delay, Timeout.InfiniteTimeSpan);
+// }
+// Call it in:
+// SignInAsync
+// GetAuthenticationStateAsync
