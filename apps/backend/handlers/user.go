@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -78,8 +79,12 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	u := req.ToUser()
 
 	if err := h.UC.Users.UseCase.RegisterUser(r.Context(), u); err != nil {
-		log.Printf("failed to create user: %v", err)
-		writeJSONError(w, http.StatusInternalServerError, "Failed to create user", err)
+		switch {
+		case errors.Is(err, user.ErrUserAlreadyExists):
+			writeJSONError(w, http.StatusInternalServerError, "Email already exists", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, user.ErrCreateUser.Error(), err)
+		}
 		return
 	}
 

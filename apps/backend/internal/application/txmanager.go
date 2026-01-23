@@ -1,6 +1,7 @@
 package application
 
 import (
+	"backend/internal/usecase/common"
 	"context"
 	"log"
 
@@ -28,8 +29,9 @@ func (m *SQLTxManager) Do(ctx context.Context, fn func(ctx context.Context) erro
 		return err
 	}
 
+	txCtx := common.MarkTx(ctx)
 	// Store the transaction in a new ctx
-	txCtx := context.WithValue(ctx, txCtxKey{}, tx)
+	txCtx = context.WithValue(ctx, txCtxKey{}, tx)
 
 	// Run the business logic
 	if err := fn(txCtx); err != nil {

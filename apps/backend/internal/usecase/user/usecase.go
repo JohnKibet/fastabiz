@@ -40,7 +40,7 @@ func (uc *UseCase) RegisterUser(ctx context.Context, u *domain.User) error {
 
 		// 2. insert user to DB
 		if err := uc.repo.Create(txCtx, u); err != nil {
-			return fmt.Errorf("could not create user: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		// 3. if role is driver, insert into drivers table

@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type UserRepository struct {
@@ -33,7 +34,13 @@ func (r *UserRepository) Create(ctx context.Context, u *user.User) error {
 	`
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, u)
 	if err != nil {
-		return fmt.Errorf("insert user: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23505":
+				return user.ErrUserAlreadyExists
+			}
+		}
+		return err
 	}
 	defer rows.Close()
 
