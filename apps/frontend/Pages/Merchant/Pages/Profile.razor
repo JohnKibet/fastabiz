@@ -159,7 +159,7 @@
 
             ShowEditProfileModal = false;
 
-            ToastService.ShowToast("Profile updated", ToastService.ToastLevel.Success);
+            ToastService.ShowToast("Profile updated", string.Empty, ToastService.ToastLevel.Success);
             return;
         }
 
@@ -167,17 +167,17 @@
 
         if (errMessage == null)
         {
-            ToastService.ShowToast("Profile update failed (unknown error)", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("Profile update failed (unknown error)", string.Empty, ToastService.ToastLevel.Error);
             return;
         }
 
         if (!string.IsNullOrWhiteSpace(errMessage.Detail))
         {
-            ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+            ToastService.ShowToast(errMessage.Detail, string.Empty, ToastService.ToastLevel.Error);
             return;
         }
 
-        ToastService.ShowToast("Profile update failed", ToastService.ToastLevel.Error);
+        ToastService.ShowToast("Profile update failed", string.Empty, ToastService.ToastLevel.Error);
     }
 
     private void OpenEditProfileModal()

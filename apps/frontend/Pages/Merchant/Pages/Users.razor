@@ -259,7 +259,7 @@ else
 
         if (editableUser.Status == selectedUser.Status || editableUser.Status == null)
         {
-            ToastService.ShowToast("No changes were made", ToastService.ToastLevel.Warning);
+            ToastService.ShowToast("No changes were made", string.Empty, ToastService.ToastLevel.Warning);
             CloseModal();
             return;
         }
@@ -271,7 +271,7 @@ else
             if (!result.Success)
             {
                 var errorMsg = result.Error?.Detail ?? "Failed to update user status.";
-                ToastService.ShowToast(errorMsg, ToastService.ToastLevel.Error);
+                ToastService.ShowToast(errorMsg, string.Empty, ToastService.ToastLevel.Error);
             }
             else
             {
@@ -279,12 +279,12 @@ else
                 if (refresh.Success && refresh.Data != null)
                     users = refresh.Data;
 
-                ToastService.ShowToast("User status updated successfully", ToastService.ToastLevel.Success);
+                ToastService.ShowToast("User status updated successfully", string.Empty, ToastService.ToastLevel.Success);
             }
         }
         catch
         {
-            ToastService.ShowToast("Failed to update user status.", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("Failed to update user status.", string.Empty, ToastService.ToastLevel.Error);
         }
 
         CloseModal();
@@ -302,12 +302,12 @@ else
                 if (result.Success && result.Data != null)
                 {
                     users = result.Data;
-                    ToastService.ShowToast("User deleted successfully", ToastService.ToastLevel.Success);
+                    ToastService.ShowToast("User deleted successfully", string.Empty, ToastService.ToastLevel.Success);
                 }
             }
             else
             {
-                ToastService.ShowToast("Failed to delete user", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to delete user", string.Empty, ToastService.ToastLevel.Error);
             }
         }
 

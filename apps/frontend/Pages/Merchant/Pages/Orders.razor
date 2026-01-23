@@ -312,16 +312,16 @@ else
             if (result.Success && result.Data != null)
             {
                 orders = result.Data;
-                ToastService.ShowToast("Order updated successfully", ToastService.ToastLevel.Success);
+                ToastService.ShowToast("Order updated successfully", string.Empty, ToastService.ToastLevel.Success);
             }
             else
             {
-                ToastService.ShowToast("Failed to update order.", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to update order.", string.Empty, ToastService.ToastLevel.Error);
             }
         }
         else
         {
-            ToastService.ShowToast("No changes were made", ToastService.ToastLevel.Warning);
+            ToastService.ShowToast("No changes were made", string.Empty, ToastService.ToastLevel.Warning);
         }
 
         CloseModal();
@@ -351,12 +351,12 @@ else
                 if (result.Success && result.Data != null)
                 {
                     orders = result.Data;
-                    ToastService.ShowToast("Order deleted successfully", ToastService.ToastLevel.Success);
+                    ToastService.ShowToast("Order deleted successfully", string.Empty, ToastService.ToastLevel.Success);
                 }
             }
             else
             {
-                ToastService.ShowToast("Failed to delete order", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to delete order", string.Empty, ToastService.ToastLevel.Error);
             }
         }
 

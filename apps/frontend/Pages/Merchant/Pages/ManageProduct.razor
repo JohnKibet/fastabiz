@@ -80,7 +80,7 @@
 
     if (!result.Success || result.Data == null)
     {
-      ToastService.ShowToast("Failed to load product", ToastService.ToastLevel.Error);
+      ToastService.ShowToast("Failed to load product", string.Empty, ToastService.ToastLevel.Error);
       Navigation.NavigateTo("/merchant/products");
       return;
     }
@@ -120,7 +120,7 @@
       if (res.Success && res.Data != null)
       {
         product = res.Data;
-        ToastService.ShowToast("update successful", ToastService.ToastLevel.Success);
+        ToastService.ShowToast("update successful", string.Empty, ToastService.ToastLevel.Success);
         return;
       }
 

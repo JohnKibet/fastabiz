@@ -260,12 +260,12 @@ else
                 if (result.Success && result.Data != null)
                 {
                     deliveries = result.Data;
-                    ToastService.ShowToast("Delivery deleted successfully", ToastService.ToastLevel.Success);
+                    ToastService.ShowToast("Delivery deleted successfully", string.Empty, ToastService.ToastLevel.Success);
                 }
             }
             else
             {
-                ToastService.ShowToast("Failed to delete delivery", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to delete delivery", string.Empty, ToastService.ToastLevel.Error);
             }
         }
 

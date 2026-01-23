@@ -80,13 +80,13 @@
     {
         if (PasswordModel.NewPassword != PasswordModel.ConfirmPassword)
         {
-            ToastService.ShowToast("New passwords do not match.", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("New passwords do not match.", string.Empty, ToastService.ToastLevel.Error);
             return;
         }
 
         if (!UserId.HasValue)
         {
-            ToastService.ShowToast("User not logged in or session expired.", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("User not logged in or session expired.", string.Empty, ToastService.ToastLevel.Error);
             return;
         }
 
@@ -97,23 +97,23 @@
             PasswordModel = new();
             ShowChangePasswordModal = false;
 
-            ToastService.ShowToast("Password updated.", ToastService.ToastLevel.Success);
+            ToastService.ShowToast("Password updated.", string.Empty, ToastService.ToastLevel.Success);
             return;
         }
         
         var errMessage = response.Error;
         if (errMessage == null)
         {
-            ToastService.ShowToast("Password update failed (unknown error)", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("Password update failed (unknown error)", string.Empty, ToastService.ToastLevel.Error);
             return;
         }
         if (!string.IsNullOrWhiteSpace(errMessage.Detail))
         {
-            ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+            ToastService.ShowToast(errMessage.Detail, string.Empty, ToastService.ToastLevel.Error);
             return;
         }   
 
-        ToastService.ShowToast("Password update failed", ToastService.ToastLevel.Error);
+        ToastService.ShowToast("Password update failed", string.Empty, ToastService.ToastLevel.Error);
     }
     private bool notificationsEnabled = true;
 

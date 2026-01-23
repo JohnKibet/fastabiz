@@ -121,6 +121,7 @@
     {
       ToastService.ShowToast(
       "Please select a store before creating a product",
+      string.Empty,
       ToastService.ToastLevel.Warning
       );
       return;
@@ -132,13 +133,14 @@
 
       if (result.Success)
       {
-        ToastService.ShowToast("Product created successfully", ToastService.ToastLevel.Success);
+        ToastService.ShowToast("Product created successfully", string.Empty, ToastService.ToastLevel.Success);
         Navigation.NavigateTo($"/merchant/products/{result.Data}");
       }
       else
       {
         ToastService.ShowToast(
         result.Error?.Detail ?? "Failed to create product",
+        string.Empty,
         ToastService.ToastLevel.Error
         );
       }
@@ -147,6 +149,7 @@
     {
       ToastService.ShowToast(
       "An error occurred while creating the product",
+      string.Empty,
       ToastService.ToastLevel.Error
       );
     }

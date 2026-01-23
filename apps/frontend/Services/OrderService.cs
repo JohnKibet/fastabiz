@@ -87,15 +87,15 @@ public class OrderService
             _cachedOrders = result.Data;
             _lastFetchTime = DateTime.UtcNow;
 
-            _toastService.ShowToast("Orders fetched successfully.", ToastService.ToastLevel.Success);
+            _toastService.ShowToast("Orders fetched successfully.", string.Empty, ToastService.ToastLevel.Success);
         }
         else if (result.Success && (result.Data == null || !result.Data.Any()))
         {
-            _toastService.ShowToast("No orders.", ToastService.ToastLevel.Warning);
+            _toastService.ShowToast("No orders.", string.Empty, ToastService.ToastLevel.Warning);
         }
         else
         {
-            _toastService.ShowToast("Failed to load orders.", ToastService.ToastLevel.Error);
+            _toastService.ShowToast("Failed to load orders.", string.Empty, ToastService.ToastLevel.Error);
         }
 
         return result;

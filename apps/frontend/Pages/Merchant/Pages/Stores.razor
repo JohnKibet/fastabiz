@@ -171,11 +171,11 @@ ValueChanged = EventCallback.Factory.Create<string?>(this, v => store.LogoUrl = 
     if (result.Success)
     {
       await LoadStores();
-      ToastService.ShowToast("Store updated successfully", ToastService.ToastLevel.Success);
+      ToastService.ShowToast("Store updated successfully", string.Empty, ToastService.ToastLevel.Success);
     }
     else
     {
-      ToastService.ShowToast("Failed to update store", ToastService.ToastLevel.Error);
+      ToastService.ShowToast("Failed to update store", string.Empty, ToastService.ToastLevel.Error);
     }
 
     CloseModal();
@@ -199,11 +199,11 @@ ValueChanged = EventCallback.Factory.Create<string?>(this, v => store.LogoUrl = 
     if (result.Success)
     {
       await LoadStores();
-      ToastService.ShowToast("Store deleted successfully", ToastService.ToastLevel.Success);
+      ToastService.ShowToast("Store deleted successfully", string.Empty, ToastService.ToastLevel.Success);
     }
     else
     {
-      ToastService.ShowToast("Failed to delete store", ToastService.ToastLevel.Error);
+      ToastService.ShowToast("Failed to delete store", string.Empty, ToastService.ToastLevel.Error);
     }
 
     isDeleteModalOpen = false;

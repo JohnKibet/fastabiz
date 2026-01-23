@@ -359,7 +359,7 @@ else
         Console.WriteLine($"ORDER TEST OBJECT: {System.Text.Json.JsonSerializer.Serialize(request)}");
         if (result.Success)
         {
-            ToastService.ShowToast("Order created successfully!", ToastService.ToastLevel.Success);
+            ToastService.ShowToast("Order created successfully!", string.Empty, ToastService.ToastLevel.Success);
             @* Navigation.NavigateTo("admin/users"); *@
             return;
         }
@@ -368,17 +368,17 @@ else
 
         if (errMessage == null)
         {
-            ToastService.ShowToast("Failed to create order (unknown error)", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("Failed to create order (unknown error)", string.Empty, ToastService.ToastLevel.Error);
             return;
         }
 
         if (!string.IsNullOrWhiteSpace(errMessage.Detail))
         {
-            ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+            ToastService.ShowToast(errMessage.Detail, string.Empty, ToastService.ToastLevel.Error);
             return;
         }
 
-        ToastService.ShowToast("Failed to create order.", ToastService.ToastLevel.Error);
+        ToastService.ShowToast("Failed to create order.", string.Empty, ToastService.ToastLevel.Error);
 
         @* Navigation.NavigateTo("/orders/confirmation"); *@
     }

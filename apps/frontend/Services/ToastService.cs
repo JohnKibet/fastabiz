@@ -4,6 +4,7 @@ public class ToastService
 
     public void ShowToast(
         string message,
+        string errDetail,
         ToastLevel level = ToastLevel.Info,
         int durationMs = 4000,
         bool allowHtml = false,
@@ -13,6 +14,7 @@ public class ToastService
         var toast = new ToastMessage
         {
             Message = message,
+            ErrDetail = errDetail,
             Level = level,
             DurationMs = durationMs,
             AllowHtml = allowHtml,
@@ -33,6 +35,7 @@ public class ToastService
     public class ToastMessage
     {
         public string Message { get; set; } = string.Empty;
+        public string ErrDetail { get; set; } = string.Empty;
         public ToastLevel Level { get; set; }
         public int DurationMs { get; set; }
         public bool AllowHtml { get; set; }

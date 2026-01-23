@@ -41,11 +41,11 @@ public class NotificationService
         var response = await _http.PatchAsync($"notifications/mark_all_as_read/{userId}", null);
         if (response.IsSuccessStatusCode)
         {
-            _toastService.ShowToast("Marked Read !", ToastService.ToastLevel.Success);
+            _toastService.ShowToast("Marked Read !", string.Empty, ToastService.ToastLevel.Success);
         }
         else
         {
-            _toastService.ShowToast("Mark All Read Failed !", ToastService.ToastLevel.Error);
+            _toastService.ShowToast("Mark All Read Failed !", string.Empty, ToastService.ToastLevel.Error);
         }
     }
 }

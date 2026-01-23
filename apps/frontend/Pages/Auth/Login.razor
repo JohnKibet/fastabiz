@@ -188,7 +188,7 @@
 
         if (string.IsNullOrEmpty(loginModel.Role))
         {
-            ToastService.ShowToast("Please select a role.", ToastService.ToastLevel.Warning);
+            ToastService.ShowToast("Please select a role.", string.Empty, ToastService.ToastLevel.Warning);
             return;
         }
 
@@ -218,7 +218,7 @@
 
                 if (tokenResponse is null || string.IsNullOrEmpty(tokenResponse.Token))
                 {
-                    ToastService.ShowToast("Token not received from server.", ToastService.ToastLevel.Error);
+                    ToastService.ShowToast("Token not received from server.", string.Empty, ToastService.ToastLevel.Error);
                     return;
                 }
 
@@ -226,7 +226,7 @@
 
                 if (claimsUser?.Role != loginModel.Role)
                 {
-                    ToastService.ShowToast($"User exists but is not assigned to role '{loginModel.Role}'", ToastService.ToastLevel.Error);
+                    ToastService.ShowToast($"User exists but is not assigned to role '{loginModel.Role}'", string.Empty, ToastService.ToastLevel.Error);
                     return;
                 }
 
@@ -239,7 +239,7 @@
             else
             {
                 var errObj = JsonSerializer.Deserialize<ErrorResponse>(json);
-                ToastService.ShowToast(errObj?.Error ?? "Unexpected error occurred.", ToastService.ToastLevel.Error);
+                ToastService.ShowToast(errObj?.Error ?? "Unexpected error occurred.", string.Empty, ToastService.ToastLevel.Error);
 
             }
         }

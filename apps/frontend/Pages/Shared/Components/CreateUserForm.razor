@@ -88,7 +88,7 @@
             if (result.Success)
             {
                 ClearForm();
-                ToastService.ShowToast("User successfully created!", ToastService.ToastLevel.Success);
+                ToastService.ShowToast("User successfully created!", string.Empty, ToastService.ToastLevel.Success);
                 Navigation.NavigateTo("merchant/users");
                 return;
             }
@@ -97,21 +97,21 @@
 
             if (errMessage == null)
             {
-                ToastService.ShowToast("Failed to create user (unknown error)", ToastService.ToastLevel.Error);
+                ToastService.ShowToast("Failed to create user (unknown error)", string.Empty, ToastService.ToastLevel.Error);
                 return;
             }
 
             if (!string.IsNullOrWhiteSpace(errMessage.Detail))
             {
-                ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+                ToastService.ShowToast(errMessage.Detail, string.Empty, ToastService.ToastLevel.Error);
                 return;
             }
 
-            ToastService.ShowToast("Failed to create user.", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("Failed to create user.", string.Empty, ToastService.ToastLevel.Error);
         }
         catch (Exception ex)
         {
-            ToastService.ShowToast($"Failed to create user: {ex.Message}", ToastService.ToastLevel.Error);
+            ToastService.ShowToast($"Failed to create user: {ex.Message}", string.Empty, ToastService.ToastLevel.Error);
         }
         finally
         {

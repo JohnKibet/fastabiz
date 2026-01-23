@@ -59,7 +59,7 @@
       var result = await StoreService.CreateStore(store);
       if (result.Success)
       {
-        ToastService.ShowToast("Store created successfully", ToastService.ToastLevel.Success);
+        ToastService.ShowToast("Store created successfully", string.Empty, ToastService.ToastLevel.Success);
         Navigation.NavigateTo($"merchant/products/create/{store.Id}");
         return;
       }
@@ -67,21 +67,21 @@
       var errMessage = result.Error;
       if (errMessage == null)
       {
-        ToastService.ShowToast("Failed to create store (unknown error)", ToastService.ToastLevel.Error);
+        ToastService.ShowToast("Failed to create store (unknown error)", string.Empty, ToastService.ToastLevel.Error);
         return;
       }
 
       if (!string.IsNullOrWhiteSpace(errMessage.Detail))
       {
-        ToastService.ShowToast(errMessage.Detail, ToastService.ToastLevel.Error);
+        ToastService.ShowToast(errMessage.Detail, string.Empty, ToastService.ToastLevel.Error);
         return;
       }
 
-      ToastService.ShowToast("Failed to create store", ToastService.ToastLevel.Error);
+      ToastService.ShowToast("Failed to create store", string.Empty, ToastService.ToastLevel.Error);
     }
     catch (Exception ex)
     {
-      ToastService.ShowToast($"Error: {ex.Message}", ToastService.ToastLevel.Error);
+      ToastService.ShowToast($"Error: {ex.Message}", string.Empty, ToastService.ToastLevel.Error);
     }
     finally
     {
