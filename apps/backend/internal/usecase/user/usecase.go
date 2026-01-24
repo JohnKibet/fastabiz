@@ -34,7 +34,7 @@ func (uc *UseCase) RegisterUser(ctx context.Context, u *domain.User) error {
 		// 1. hash password
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.PasswordHash), bcrypt.DefaultCost)
 		if err != nil {
-			return fmt.Errorf("failed to hash password: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		u.PasswordHash = string(hashedPassword)
 
@@ -59,7 +59,7 @@ func (uc *UseCase) RegisterUser(ctx context.Context, u *domain.User) error {
 				CreatedAt: time.Now(),
 			}
 			if err := uc.drvRepo.RegisterDriver(txCtx, driver); err != nil {
-				return fmt.Errorf("could not register driver: %w", err)
+				return fmt.Errorf("%w", err)
 			}
 		}
 
@@ -79,11 +79,11 @@ func (uc *UseCase) UpdateDriverProfile(ctx context.Context, id uuid.UUID, req *d
 		// fetch user for notification
 		user, err := uc.repo.GetByID(txCtx, id)
 		if err != nil {
-			return fmt.Errorf("could not fetch user: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		if err := uc.repo.UpdateDriverProfile(txCtx, id, req.Phone); err != nil {
-			return fmt.Errorf("update user profile failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		go func() {
@@ -105,11 +105,11 @@ func (uc *UseCase) UpdateUserProfile(ctx context.Context, id uuid.UUID, req *dom
 		// fetch user for notification
 		user, err := uc.repo.GetByID(txCtx, id)
 		if err != nil {
-			return fmt.Errorf("could not fetch user: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		if err := uc.repo.UpdateUserProfile(txCtx, id, req.Phone, req.Email, req.FullName); err != nil {
-			return fmt.Errorf("update user profile failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		go func() {
@@ -125,11 +125,11 @@ func (uc *UseCase) UpdateStatus(ctx context.Context, id uuid.UUID, req *domain.U
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		user, err := uc.repo.GetByID(txCtx, id)
 		if err != nil {
-			return fmt.Errorf("could not fetch user: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		if err := uc.repo.UpdateUserStatus(txCtx, id, req.Status); err != nil {
-			return fmt.Errorf("update user status failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		go func() {
@@ -146,11 +146,11 @@ func (uc *UseCase) UpdateUser(ctx context.Context, userID uuid.UUID, req *domain
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		user, err := uc.repo.GetByID(txCtx, userID)
 		if err != nil {
-			return fmt.Errorf("could not fetch user: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
-		if err := uc.repo.UpdateColum(txCtx, userID, req.Column, req.Value); err != nil {
-			return fmt.Errorf("update user failed: %w", err)
+		if err := uc.repo.UpdateColumn(txCtx, userID, req.Column, req.Value); err != nil {
+			return fmt.Errorf("%w", err)
 		}
 
 		go func() {
@@ -166,23 +166,23 @@ func (uc *UseCase) ChangePassword(ctx context.Context, userID uuid.UUID, req *do
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		user, err := uc.repo.GetByID(txCtx, userID)
 		if err != nil {
-			return fmt.Errorf("user not found: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		// 1. verify old password
 		if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.CurrentPassword)) != nil {
-			return fmt.Errorf("current password incorrect")
+			return domain.ErrInvalidCurrentPassword
 		}
 
 		// 2. hash new password
 		hashed, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
-			return fmt.Errorf("hashing failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		// 3. save
-		if err := uc.repo.UpdateColum(txCtx, userID, "password_hash", string(hashed)); err != nil {
-			return fmt.Errorf("failed to update password: %w", err)
+		if err := uc.repo.UpdateColumn(txCtx, userID, "password_hash", string(hashed)); err != nil {
+			return fmt.Errorf("%w", err)
 		}
 
 		return nil
@@ -205,11 +205,11 @@ func (uc *UseCase) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		user, err := uc.repo.GetByID(txCtx, id)
 		if err != nil {
-			return fmt.Errorf("could not fetch user: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		if err := uc.repo.Delete(txCtx, id); err != nil {
-			return fmt.Errorf("delete user failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		go func() {

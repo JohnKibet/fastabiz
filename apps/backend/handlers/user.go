@@ -81,7 +81,9 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err := h.UC.Users.UseCase.RegisterUser(r.Context(), u); err != nil {
 		switch {
 		case errors.Is(err, user.ErrUserAlreadyExists):
-			writeJSONError(w, http.StatusInternalServerError, "Email already exists", err)
+			writeJSONError(w, http.StatusConflict, "Email already exists", err)
+		case errors.Is(err, user.ErrRoleCheck):
+			writeJSONError(w, http.StatusInternalServerError, "Select another role.", err)
 		default:
 			writeJSONError(w, http.StatusInternalServerError, user.ErrCreateUser.Error(), err)
 		}
@@ -130,7 +132,14 @@ func (h *UserHandler) UpdateDriverProfile(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := h.UC.Users.UseCase.UpdateDriverProfile(r.Context(), userID, &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update user(driver) profile", err)
+		switch {
+		case errors.Is(err, user.ErrUserNotFound):
+			writeJSONError(w, http.StatusNotFound, "Driver does not exist.", err)
+		case errors.Is(err, user.ErrInvalidUserId):
+			writeJSONError(w, http.StatusInternalServerError, "Select driver again.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Driver profile update failed, try again later.", err)
+		}
 		return
 	}
 
@@ -166,7 +175,14 @@ func (h *UserHandler) UpdateUserProfile(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.UC.Users.UseCase.UpdateUserProfile(r.Context(), userID, &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update user profile", err)
+		switch {
+		case errors.Is(err, user.ErrUserNotFound):
+			writeJSONError(w, http.StatusNotFound, "User does not exist.", err)
+		case errors.Is(err, user.ErrInvalidUserId):
+			writeJSONError(w, http.StatusInternalServerError, "Select user again.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "User profile update failed, try again later.", err)
+		}
 		return
 	}
 
@@ -200,7 +216,16 @@ func (h *UserHandler) UpdateUserStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Users.UseCase.UpdateStatus(r.Context(), userID, &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update user status", err)
+		switch {
+		case errors.Is(err, user.ErrUserNotFound):
+			writeJSONError(w, http.StatusNotFound, "User does not exist.", err)
+		case errors.Is(err, user.ErrInvalidStatusInput):
+			writeJSONError(w, http.StatusInternalServerError, "Status does not exist.", err)
+		case errors.Is(err, user.ErrInvalidUserId):
+			writeJSONError(w, http.StatusConflict, user.ErrInvalidUserId.Error(), err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Update user status failed, try again later.", err)
+		}
 		return
 	}
 
@@ -235,7 +260,12 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Users.UseCase.UpdateUser(r.Context(), userID, &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update user", err)
+		switch {
+		case errors.Is(err, user.ErrUserNotFound):
+			writeJSONError(w, http.StatusNotFound, "User does not exist.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Update user failed, try again later.", err)
+		}
 		return
 	}
 
@@ -273,9 +303,12 @@ func (h *UserHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Users.UseCase.ChangePassword(r.Context(), userID, &req); err != nil {
-		// you can optionally inspect errors here:
-		// if errors.Is(err, domain.ErrInvalidPassword) ...
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update password", err)
+		switch {
+		case errors.Is(err, user.ErrInvalidCurrentPassword):
+			writeJSONError(w, http.StatusConflict, "Current password is incorrect, try again.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Change password failed, try again later.", err)
+		}
 		return
 	}
 
@@ -392,6 +425,8 @@ func (h *UserHandler) LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.UC.Users.UseCase.UpdateUser(r.Context(), u.ID, reqUpdate); err != nil {
 		log.Printf("failed to update last login for user %s: %v", u.ID, err)
+		writeJSONError(w, http.StatusInternalServerError, "Update last login failed.", err)
+		return
 	}
 
 	// Load the JWT secret from env
@@ -459,7 +494,14 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Users.UseCase.DeleteUser(r.Context(), userID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to delete user", err)
+		switch {
+		case errors.Is(err, user.ErrUserNotFound):
+			writeJSONError(w, http.StatusNotFound, "User does not exist.", err)
+		case errors.Is(err, user.ErrUserHasReferences):
+			writeJSONError(w, http.StatusConflict, "User cannot be deleted. Remove dependent records first.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Delete failed, try again later.", err)
+		}
 		return
 	}
 

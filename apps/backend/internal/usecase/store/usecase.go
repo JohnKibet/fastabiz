@@ -44,14 +44,14 @@ func (uc *UseCase) UpdateStore(ctx context.Context, storeID uuid.UUID, ownerID u
 
 		owned, err := uc.repo.IsOwnedBy(txCtx, storeID, ownerID)
 		if err != nil {
-			return fmt.Errorf("ownership check failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		if !owned {
-			return fmt.Errorf("store not owned by user")
+			return store.ErrNotOwner
 		}
 
 		if err := uc.repo.UpdateStoreDetails(txCtx, storeID, req.Name, req.Logo, req.Location); err != nil {
-			return fmt.Errorf("update store failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		return nil
@@ -77,10 +77,10 @@ func (uc *UseCase) DeleteStore(ctx context.Context, storeID uuid.UUID, ownerID u
 
 		owned, err := uc.repo.IsOwnedBy(txCtx, storeID, ownerID)
 		if err != nil {
-			return fmt.Errorf("ownership check failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		if !owned {
-			return fmt.Errorf("store not owned by user")
+			return store.ErrNotOwner
 		}
 
 		store, err := uc.repo.GetBasicByID(txCtx, storeID)

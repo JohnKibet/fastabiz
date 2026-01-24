@@ -36,8 +36,10 @@ func (r *UserRepository) Create(ctx context.Context, u *user.User) error {
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			switch pqErr.Code {
-			case "23505":
+			case "23505": // unique violation
 				return user.ErrUserAlreadyExists
+			case "23514": //check violation
+				return user.ErrRoleCheck
 			}
 		}
 		return err
@@ -69,7 +71,13 @@ func (r *UserRepository) UpdateDriverProfile(ctx context.Context, userID uuid.UU
 
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, args)
 	if err != nil {
-		return fmt.Errorf("update user(driver) profile: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return user.ErrInvalidUserId
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -78,7 +86,7 @@ func (r *UserRepository) UpdateDriverProfile(ctx context.Context, userID uuid.UU
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no user found with id %s", userID)
+		return user.ErrUserNotFound
 	}
 
 	return nil
@@ -104,7 +112,13 @@ func (r *UserRepository) UpdateUserProfile(ctx context.Context, userID uuid.UUID
 
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, args)
 	if err != nil {
-		return fmt.Errorf("update user profile: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return user.ErrInvalidUserId
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -113,7 +127,7 @@ func (r *UserRepository) UpdateUserProfile(ctx context.Context, userID uuid.UUID
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no user found with id %s", userID)
+		return user.ErrUserNotFound
 	}
 
 	return nil
@@ -133,7 +147,15 @@ func (r *UserRepository) UpdateUserStatus(ctx context.Context, userID uuid.UUID,
 
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, args)
 	if err != nil {
-		return fmt.Errorf("update user status: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503": // foreign_key_violation
+				return user.ErrInvalidUserId
+			case "23502": // not_null_violation
+				return user.ErrInvalidStatusInput
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -142,13 +164,13 @@ func (r *UserRepository) UpdateUserStatus(ctx context.Context, userID uuid.UUID,
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no user found with id %s", userID)
+		return user.ErrUserNotFound
 	}
 
 	return nil
 }
 
-func (r *UserRepository) UpdateColum(ctx context.Context, userID uuid.UUID, column string, value any) error {
+func (r *UserRepository) UpdateColumn(ctx context.Context, userID uuid.UUID, column string, value any) error {
 	allowed := map[string]bool{
 		"full_name":     true,
 		"email":         true,
@@ -160,7 +182,7 @@ func (r *UserRepository) UpdateColum(ctx context.Context, userID uuid.UUID, colu
 	}
 
 	if !allowed[column] {
-		return fmt.Errorf("attempted to update disallowed column: %s", column)
+		return fmt.Errorf("%w: %s", user.ErrInvalidColumn, column)
 	}
 
 	query := fmt.Sprintf(`
@@ -175,7 +197,15 @@ func (r *UserRepository) UpdateColum(ctx context.Context, userID uuid.UUID, colu
 
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, args)
 	if err != nil {
-		return fmt.Errorf("update user: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503": // foreign_key_violation
+				return user.ErrInvalidUserId
+			case "23502": // not_null_violation
+				return user.ErrInvalidDataInput
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -184,7 +214,7 @@ func (r *UserRepository) UpdateColum(ctx context.Context, userID uuid.UUID, colu
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no user found with id %s", userID)
+		return user.ErrUserNotFound
 	}
 
 	return nil
@@ -232,7 +262,13 @@ func (r *UserRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	`
 	res, err := r.exec.ExecContext(ctx, query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503": // foreign_key_violation
+				return user.ErrUserHasReferences
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -241,7 +277,7 @@ func (r *UserRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("user already deleted or invalid")
+		return user.ErrUserNotFound
 	}
 
 	return nil
@@ -250,11 +286,11 @@ func (r *UserRepository) Delete(ctx context.Context, id uuid.UUID) error {
 
 func (r *UserRepository) GetAllCustomers(ctx context.Context) ([]user.AllCustomers, error) {
 	query := `
-        SELECT id, full_name
-        FROM users
-        WHERE role = 'customer'
-        ORDER BY full_name ASC
-    `
+		SELECT id, full_name
+		FROM users
+		WHERE role = 'customer'
+		ORDER BY full_name ASC
+  `
 	var customers []user.AllCustomers
 	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &customers, query)
 	return customers, err

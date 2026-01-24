@@ -35,12 +35,15 @@ func (r *StoreRepository) Create(ctx context.Context, s *store.Store) error {
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, s)
 	if err != nil {
-		if pgErr, ok := err.(*pq.Error); ok {
-			if pgErr.Code == "23505" {
-				return store.ErrStoreNameAlreadyExists
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23505":
+				return store.ErrStoreNameConflict
+			case "23502":
+				return store.ErrInvalidStoreInput
 			}
 		}
-		return fmt.Errorf("inserting store: %w", err)
+		return err
 	}
 
 	defer rows.Close()
@@ -110,7 +113,17 @@ func (r *StoreRepository) UpdateStoreDetails(ctx context.Context, storeID uuid.U
 	`
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("update store details: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23502": // not_null_violation
+				return store.ErrInvalidStoreInput
+			case "23505": // unique_violation
+				return store.ErrStoreNameConflict
+			case "23503": // foreign_key_violation
+				return store.ErrInvalidStoreInput
+			}
+		}
+		return fmt.Errorf("%w", err)
 	}
 
 	rows, err := res.RowsAffected()
@@ -119,7 +132,7 @@ func (r *StoreRepository) UpdateStoreDetails(ctx context.Context, storeID uuid.U
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no store found with id %s", storeID)
+		return store.ErrStoreNotFound
 	}
 
 	return nil
@@ -175,7 +188,13 @@ func (r *StoreRepository) Delete(ctx context.Context, id uuid.UUID) error {
 
 	res, err := r.execFromCtx(ctx).ExecContext(ctx, query, id)
 	if err != nil {
-		return fmt.Errorf("failed to delete store: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503": // foreign_key_violation
+				return store.ErrStoreHasReferences
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -184,7 +203,7 @@ func (r *StoreRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("store already deleted or invalid")
+		return store.ErrStoreNotFound
 	}
 
 	return nil
@@ -199,7 +218,10 @@ func (r *StoreRepository) Exists(ctx context.Context, storeID uuid.UUID) (bool, 
 
 	var exists bool
 	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &exists, query, storeID)
-	return exists, err
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 func (r *StoreRepository) IsOwnedBy(ctx context.Context, storeID uuid.UUID, ownerID uuid.UUID) (bool, error) {
@@ -213,5 +235,8 @@ func (r *StoreRepository) IsOwnedBy(ctx context.Context, storeID uuid.UUID, owne
 
 	var owned bool
 	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &owned, query, storeID, ownerID)
-	return owned, err
+	if err != nil {
+		return false, err
+	}
+	return owned, nil
 }

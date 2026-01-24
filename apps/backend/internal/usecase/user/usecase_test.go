@@ -144,7 +144,7 @@ func (f *fakeUserRepo) List(context.Context) ([]*user.User, error) {
 func (f *fakeUserRepo) GetAllCustomers(context.Context) ([]user.AllCustomers, error) {
 	return nil, nil
 }
-func (f *fakeUserRepo) UpdateColum(context.Context, uuid.UUID, string, any) error {
+func (f *fakeUserRepo) UpdateColumn(context.Context, uuid.UUID, string, any) error {
 	return nil
 }
 func (f *fakeUserRepo) UpdateUserStatus(context.Context, uuid.UUID, user.UserStatus) error {

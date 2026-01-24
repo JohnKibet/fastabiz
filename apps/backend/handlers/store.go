@@ -61,12 +61,14 @@ func (h *StoreHandler) CreateStore(w http.ResponseWriter, r *http.Request) {
 	s.OwnerID = ownerID
 
 	if err := h.UC.Stores.UseCase.CreateStore(r.Context(), s); err != nil {
-		if errors.Is(err, store.ErrStoreNameAlreadyExists) {
-			writeJSONError(w, http.StatusConflict, "A store with this name already exists", nil)
-			return
+		switch {
+		case errors.Is(err, store.ErrStoreNameConflict):
+			writeJSONError(w, http.StatusConflict, "Name already exists", err)
+		case errors.Is(err, store.ErrInvalidStoreInput):
+			writeJSONError(w, http.StatusBadRequest, "Input data is invalid. Try again.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, store.ErrCreateStore.Error(), err)
 		}
-
-		writeJSONError(w, http.StatusInternalServerError, "Could not create store", err)
 		return
 	}
 
@@ -170,7 +172,16 @@ func (h *StoreHandler) UpdateStore(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Stores.UseCase.UpdateStore(r.Context(), storeID, ownerID, &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update store", err)
+		switch {
+		case errors.Is(err, store.ErrStoreNotFound):
+			writeJSONError(w, http.StatusNotFound, store.ErrStoreNotFound.Error(), err)
+		case errors.Is(err, store.ErrStoreNameConflict):
+			writeJSONError(w, http.StatusConflict, "Store name already exists.", err)
+		case errors.Is(err, store.ErrInvalidStoreInput):
+			writeJSONError(w, http.StatusBadRequest, "Invalid data input", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Update failed, try again later.", err)
+		}
 		return
 	}
 
@@ -301,7 +312,16 @@ func (h *StoreHandler) DeleteStore(w http.ResponseWriter, r *http.Request) {
 
 	name, err := h.UC.Stores.UseCase.DeleteStore(r.Context(), storeID, ownerID)
 	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to delete store", err)
+		switch {
+		case errors.Is(err, store.ErrStoreNotFound):
+			writeJSONError(w, http.StatusNotFound, "Store does not exist.", err)
+		case errors.Is(err, store.ErrStoreHasReferences):
+			writeJSONError(w, http.StatusConflict, "Store cannot be deleted. Remove dependent records first.", err)
+		case errors.Is(err, store.ErrNotOwner):
+			writeJSONError(w, http.StatusInternalServerError, "Access denied.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Delete failed, try again later", err)
+		}
 		return
 	}
 
