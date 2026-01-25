@@ -40,7 +40,13 @@ func (r *ProductRepository) AddImage(ctx context.Context, productID uuid.UUID, u
 	`
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("insert image: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidProduct
+			}
+		}
+		return err
 	}
 	defer rows.Close()
 
@@ -63,7 +69,13 @@ func (r *ProductRepository) RemoveImage(ctx context.Context, imageID uuid.UUID) 
 	`
 	res, err := r.exec.ExecContext(ctx, query, imageID)
 	if err != nil {
-		return fmt.Errorf("failed to delete image: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidImage
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -72,7 +84,7 @@ func (r *ProductRepository) RemoveImage(ctx context.Context, imageID uuid.UUID) 
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("image already deleted or invalid")
+		return product.ErrImageNotFound
 	}
 
 	return nil
@@ -89,22 +101,28 @@ func (r *ProductRepository) ReorderImages(ctx context.Context, productID uuid.UU
 	}
 
 	query := `
-        WITH ordered_images AS (
-            SELECT
-                unnest(:image_ids::uuid[]) AS image_id,
-                ordinality - 1 AS position
-            FROM unnest(:image_ids::uuid[]) WITH ORDINALITY
-        )
-        UPDATE product_images pi
-        SET position = oi.position
-        FROM ordered_images oi
-        WHERE pi.id = oi.image_id
-        AND pi.product_id = :product_id
-    `
+		WITH ordered_images AS (
+			SELECT
+					unnest(:image_ids::uuid[]) AS image_id,
+					ordinality - 1 AS position
+			FROM unnest(:image_ids::uuid[]) WITH ORDINALITY
+		)
+		UPDATE product_images pi
+		SET position = oi.position
+		FROM ordered_images oi
+		WHERE pi.id = oi.image_id
+		AND pi.product_id = :product_id
+  `
 
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("reorder product images: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidReorder
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -130,13 +148,21 @@ func (r *ProductRepository) AddOption(ctx context.Context, productID uuid.UUID, 
 
 	query := `
 		INSERT INTO product_options (product_id, name)
-        VALUES (:product_id, :name)
-        RETURNING id
+		VALUES (:product_id, :name)
+		RETURNING id
 	`
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("insert option name: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return uuid.Nil, product.ErrInvalidProduct
+			case "23502":
+				return uuid.Nil, product.ErrInvalidOptionInput
+			}
+		}
+		return uuid.Nil, err
 	}
 	defer rows.Close()
 
@@ -186,7 +212,13 @@ func (r *ProductRepository) RemoveOption(ctx context.Context, optionID uuid.UUID
 	`
 	res, err := r.exec.ExecContext(ctx, query, optionID)
 	if err != nil {
-		return fmt.Errorf("failed to delete option name: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidOption
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -195,7 +227,7 @@ func (r *ProductRepository) RemoveOption(ctx context.Context, optionID uuid.UUID
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("option name already deleted or invalid")
+		return product.ErrOptionNotFound
 	}
 
 	return nil
@@ -215,7 +247,15 @@ func (r *ProductRepository) AddOptionValue(ctx context.Context, productID uuid.U
 	`
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("insert option value: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidOptionValue
+			case "23502":
+				return product.ErrInvalidOptionValueInput
+			}
+		}
+		return err
 	}
 	defer rows.Close()
 
@@ -266,7 +306,13 @@ func (r *ProductRepository) RemoveOptionValue(ctx context.Context, optionValueID
 	`
 	res, err := r.exec.ExecContext(ctx, query, optionValueID)
 	if err != nil {
-		return fmt.Errorf("failed to delete option value: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidOptionValueInput
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -275,7 +321,7 @@ func (r *ProductRepository) RemoveOptionValue(ctx context.Context, optionValueID
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("option value already deleted or invalid")
+		return product.ErrOptionValueNotFound
 	}
 
 	return nil
@@ -293,7 +339,15 @@ func (r *ProductRepository) CreateVariant(ctx context.Context, variant *product.
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, variant)
 	if err != nil {
-		return fmt.Errorf("insert variant: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23505": // unique_violation
+				return product.ErrVariantAlreadyExists
+			case "23502": // not_null_violation
+				return product.ErrInvalidVariantInput
+			}
+		}
+		return err
 	}
 	defer rows.Close()
 
@@ -316,7 +370,15 @@ func (r *ProductRepository) AddVariantOptionValue(ctx context.Context, variantID
 	`
 	_, err := r.execFromCtx(ctx).ExecContext(ctx, query, variantID, valueID)
 	if err != nil {
-		return fmt.Errorf("insert variant option-value mapping: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503": // foreign_key_violation -> invalid reference
+				return product.ErrInvalidVariant
+			case "23502": // not_null_violation
+				return product.ErrInvalidVariantOptValInput
+			}
+		}
+		return err
 	}
 
 	return nil
@@ -345,14 +407,22 @@ func (r *ProductRepository) UpdateVariantStock(ctx context.Context, variantID uu
 
 	query := `
 		UPDATE variants
-        SET stock = :stock,
-            updated_at = NOW()
-        WHERE id = :variant_id
+		SET stock = :stock,
+				updated_at = NOW()
+		WHERE id = :variant_id
 	`
 
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("update variant stock: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidVariant
+			case "23502":
+				return product.ErrInvalidVariantInput
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -361,7 +431,7 @@ func (r *ProductRepository) UpdateVariantStock(ctx context.Context, variantID uu
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no variant found with id %s", variantID)
+		return product.ErrVariantNotFound
 	}
 
 	return nil
@@ -375,14 +445,22 @@ func (r *ProductRepository) UpdateVariantPrice(ctx context.Context, variantID uu
 
 	query := `
 		UPDATE variants
-        SET price = :price,
-            updated_at = NOW()
-        WHERE id = :variant_id
+		SET price = :price,
+				updated_at = NOW()
+		WHERE id = :variant_id
 	`
 
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("update variant price: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidVariant
+			case "23502":
+				return product.ErrInvalidVariantInput
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -391,7 +469,7 @@ func (r *ProductRepository) UpdateVariantPrice(ctx context.Context, variantID uu
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no variant found with id %s", variantID)
+		return product.ErrVariantNotFound
 	}
 
 	return nil
@@ -419,7 +497,13 @@ func (r *ProductRepository) RemoveVariant(ctx context.Context, variantID uuid.UU
 	`
 	res, err := r.exec.ExecContext(ctx, query, variantID)
 	if err != nil {
-		return fmt.Errorf("failed to delete variant: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidVariant
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -428,7 +512,7 @@ func (r *ProductRepository) RemoveVariant(ctx context.Context, variantID uuid.UU
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("variant already deleted or invalid")
+		return product.ErrVariantNotFound
 	}
 
 	return nil
@@ -437,11 +521,11 @@ func (r *ProductRepository) RemoveVariant(ctx context.Context, variantID uuid.UU
 func (r *ProductRepository) Create(ctx context.Context, p *product.Product) error {
 	query := `
 		INSERT INTO products (
-		store_id, name, description, category
-	) VALUES (
-		:store_id, :name, :description, :category
-	)
-	RETURNING id
+			store_id, name, description, category
+		) VALUES (
+			:store_id, :name, :description, :category
+		)
+		RETURNING id
 	`
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, p)
@@ -453,10 +537,10 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 			case "23505": // unique_violation
 				return product.ErrProductAlreadyExists
 			case "23502": // not_null_violation
-				return product.ErrProductInvalidInput
+				return product.ErrInvalidProductInput
 			}
 		}
-		return fmt.Errorf("insert product: %w", err)
+		return err
 	}
 	defer rows.Close()
 
@@ -545,13 +629,21 @@ func (r *ProductRepository) UpdateProductStock(ctx context.Context, productID uu
 
 	query := `
 		UPDATE products
-        SET stock = :stock,
-            updated_at = NOW()
-        WHERE id = :product_id
+		SET stock = :stock,
+				updated_at = NOW()
+		WHERE id = :product_id
 	`
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("update product stock: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidProduct
+			case "23502":
+				return product.ErrInvalidProductInput
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -560,7 +652,7 @@ func (r *ProductRepository) UpdateProductStock(ctx context.Context, productID uu
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no product found with id %s", productID)
+		return product.ErrProductNotFound
 	}
 
 	return nil
@@ -585,7 +677,15 @@ func (r *ProductRepository) UpdateDetails(ctx context.Context, productID uuid.UU
 	`
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
-		return fmt.Errorf("update product details: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidProduct
+			case "23502":
+				return product.ErrInvalidProductInput
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -594,7 +694,7 @@ func (r *ProductRepository) UpdateDetails(ctx context.Context, productID uuid.UU
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("no product found with id %s", productID)
+		return product.ErrProductNotFound
 	}
 
 	return nil
@@ -650,7 +750,13 @@ func (r *ProductRepository) Delete(ctx context.Context, productID uuid.UUID) err
 
 	res, err := r.exec.ExecContext(ctx, query, productID)
 	if err != nil {
-		return fmt.Errorf("failed to delete product: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidProduct
+			}
+		}
+		return err
 	}
 
 	rows, err := res.RowsAffected()
@@ -659,7 +765,7 @@ func (r *ProductRepository) Delete(ctx context.Context, productID uuid.UUID) err
 	}
 
 	if rows == 0 {
-		return fmt.Errorf("product already deleted or invalid")
+		return product.ErrProductNotFound
 	}
 
 	return nil
@@ -677,7 +783,10 @@ func (r *ProductRepository) IsOptionUsed(ctx context.Context, optionID uuid.UUID
 	`
 	var exists bool
 	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &exists, query, optionID)
-	return exists, err
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 func (r *ProductRepository) IsOptionValueUsed(ctx context.Context, optionValueID uuid.UUID) (bool, error) {
@@ -690,5 +799,8 @@ func (r *ProductRepository) IsOptionValueUsed(ctx context.Context, optionValueID
 	`
 	var exists bool
 	err := sqlx.GetContext(ctx, r.execFromCtx(ctx), &exists, query, optionValueID)
-	return exists, err
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }

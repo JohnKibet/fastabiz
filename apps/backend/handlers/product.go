@@ -45,18 +45,17 @@ func (h *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	if err := h.UC.Products.UseCase.CreateProduct(r.Context(), p); err != nil {
 		switch {
 		case errors.Is(err, product.ErrProductInvalidStore):
-			writeJSONError(w, http.StatusBadRequest, "Invalid store", nil)
+			writeJSONError(w, http.StatusBadRequest, "Invalid store", err)
 
-		case errors.Is(err, product.ErrProductInvalidInput):
-			writeJSONError(w, http.StatusBadRequest, "Invalid product data", nil)
+		case errors.Is(err, product.ErrInvalidProductInput):
+			writeJSONError(w, http.StatusBadRequest, "Invalid product data", err)
 
 		case errors.Is(err, product.ErrProductAlreadyExists):
-			writeJSONError(w, http.StatusConflict, "Product already exists", nil)
+			writeJSONError(w, http.StatusConflict, "Product already exists", err)
 
 		default:
-			writeJSONError(w, http.StatusInternalServerError, "Failed to create product", nil)
+			writeJSONError(w, http.StatusInternalServerError, "Create product failed, try again later.", err)
 		}
-
 		return
 	}
 
@@ -130,7 +129,14 @@ func (h *ProductHandler) UpdateProductDetails(w http.ResponseWriter, r *http.Req
 	}
 
 	if err := h.UC.Products.UseCase.UpdateProductDetails(r.Context(), &req); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update product details", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidProduct):
+			writeJSONError(w, http.StatusBadRequest, "Select product to update.", err)
+		case errors.Is(err, product.ErrInvalidProductInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing product field/s. Try again.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Update product details failed, try again later.", err)
+		}
 		return
 	}
 
@@ -192,7 +198,12 @@ func (h *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Products.UseCase.DeleteProduct(r.Context(), productID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to delete product", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidProduct):
+			writeJSONError(w, http.StatusBadRequest, "Select store to delete.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Delete failed, try again later.", err)
+		}
 		return
 	}
 
@@ -232,7 +243,12 @@ func (h *ProductHandler) AddImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Products.UseCase.AddImage(r.Context(), req.ProductID, images); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to add image", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidImage):
+			writeJSONError(w, http.StatusBadRequest, "Select image to add.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Add image failed, try again later.", err)
+		}
 		return
 	}
 
@@ -264,7 +280,12 @@ func (h *ProductHandler) DeleteImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Products.UseCase.DeleteImage(r.Context(), imageID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to delete image", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidImage):
+			writeJSONError(w, http.StatusBadRequest, "Select image to delete.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Delete image failed, try again later.", err)
+		}
 		return
 	}
 
@@ -294,7 +315,12 @@ func (h *ProductHandler) ReorderImages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Products.UseCase.ReorderImages(r.Context(), req.ProductID, req.ImageIDs); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to reorder images", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidReorder):
+			writeJSONError(w, http.StatusBadRequest, "Select product images to reorder.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Images reorder failed, try again later.", err)
+		}
 		return
 	}
 
@@ -325,7 +351,14 @@ func (h *ProductHandler) AddOptionName(w http.ResponseWriter, r *http.Request) {
 
 	optionID, err := h.UC.Products.UseCase.AddOptionName(r.Context(), req.ProductID, req.Name)
 	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to add option", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidProduct):
+			writeJSONError(w, http.StatusBadRequest, "Select product to add option", err)
+		case errors.Is(err, product.ErrInvalidOptionInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing field option name.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Add option failed, try again later.", err)
+		}
 		return
 	}
 
@@ -357,7 +390,12 @@ func (h *ProductHandler) DeleteOptionName(w http.ResponseWriter, r *http.Request
 	}
 
 	if err := h.UC.Products.UseCase.DeleteOptionName(r.Context(), optionID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to delete option", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidOption):
+			writeJSONError(w, http.StatusBadRequest, "Select option name to delete.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Delete option name failed, try again later.", err)
+		}
 		return
 	}
 
@@ -392,7 +430,14 @@ func (h *ProductHandler) AddOptionValue(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.UC.Products.UseCase.AddOptionValue(r.Context(), req.ProductID, req.OptionID, req.Values); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to add option value", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidOptionValue):
+			writeJSONError(w, http.StatusBadRequest, "Select product & option to add values. ", err)
+		case errors.Is(err, product.ErrInvalidOptionValueInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing option value/s.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Add option value failed, try again later.", err)
+		}
 		return
 	}
 
@@ -423,12 +468,13 @@ func (h *ProductHandler) DeleteOptionValue(w http.ResponseWriter, r *http.Reques
 
 	if err := h.UC.Products.UseCase.DeleteOptionValue(r.Context(), valueID); err != nil {
 		switch {
+		case errors.Is(err, product.ErrInvalidOptionValueInput):
+			writeJSONError(w, http.StatusBadRequest, "Select option value to delete.", err)
 		case errors.Is(err, product.ErrOptionValueInUse):
-			writeJSONError(w, http.StatusConflict, "Option value is used by existing variants", err)
+			writeJSONError(w, http.StatusConflict, "Option value is used by existing variants.", err)
 		default:
-			writeJSONError(w, http.StatusInternalServerError, "Failed to delete option value", err)
+			writeJSONError(w, http.StatusInternalServerError, "Delete option value failed, try again later.", err)
 		}
-
 		return
 	}
 
@@ -489,6 +535,10 @@ func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 	variant, err := h.UC.Products.UseCase.CreateVariant(r.Context(), req)
 	if err != nil {
 		switch {
+		case errors.Is(err, product.ErrVariantAlreadyExists):
+			writeJSONError(w, http.StatusConflict, "Variant SKU already exists.", err)
+		case errors.Is(err, product.ErrInvalidVariantInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing variant fields.", err)
 		case errors.Is(err, product.ErrProductNotFound):
 			writeJSONError(w, http.StatusNotFound, "Product not found", err)
 		case errors.Is(err, product.ErrOptionNotFound):
@@ -496,7 +546,7 @@ func (h *ProductHandler) CreateVariant(w http.ResponseWriter, r *http.Request) {
 		case errors.Is(err, product.ErrOptionValueNotFound):
 			writeJSONError(w, http.StatusNotFound, "Option value not found", err)
 		default:
-			writeJSONError(w, http.StatusInternalServerError, "Failed to create variant", err)
+			writeJSONError(w, http.StatusInternalServerError, "Create variant failed, try again later.", err)
 		}
 		return
 	}
@@ -527,7 +577,14 @@ func (h *ProductHandler) UpdateVariantStock(w http.ResponseWriter, r *http.Reque
 	}
 
 	if err := h.UC.Products.UseCase.UpdateVariantStock(r.Context(), req.VariantID, req.Stock); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update stock", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidVariant):
+			writeJSONError(w, http.StatusBadRequest, "Select variant to update stock.", err)
+		case errors.Is(err, product.ErrInvalidVariantInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing value for field stock.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Update stock failed, try again later.", err)
+		}
 		return
 	}
 
@@ -557,7 +614,13 @@ func (h *ProductHandler) UpdateVariantPrice(w http.ResponseWriter, r *http.Reque
 	}
 
 	if err := h.UC.Products.UseCase.UpdateVariantPrice(r.Context(), req.VariantID, req.Price); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to update price", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidVariant):
+			writeJSONError(w, http.StatusBadRequest, "Select variant to update price.", err)
+		case errors.Is(err, product.ErrInvalidVariantInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing value for field price.", err)
+		}
+		writeJSONError(w, http.StatusInternalServerError, "Update price failed, try again later.", err)
 		return
 	}
 
@@ -587,7 +650,12 @@ func (h *ProductHandler) DeleteVariant(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.UC.Products.UseCase.DeleteVariant(r.Context(), variantID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "Failed to delete variant", err)
+		switch {
+		case errors.Is(err, product.ErrInvalidVariant):
+			writeJSONError(w, http.StatusBadRequest, "Select variant to delete.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Delete variant failed, try again later.", err)
+		}
 		return
 	}
 

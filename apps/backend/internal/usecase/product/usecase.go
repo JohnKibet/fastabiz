@@ -4,7 +4,6 @@ import (
 	"backend/internal/domain/product"
 	"backend/internal/usecase/common"
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -45,7 +44,7 @@ func (uc *UseCase) GetProductByID(ctx context.Context, id uuid.UUID) (*product.P
 func (uc *UseCase) UpdateProductDetails(ctx context.Context, req *product.UpdateProductDetailsRequest) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		if err := uc.repo.UpdateDetails(txCtx, req.ProductID, req.Category, req.Name, req.Description); err != nil {
-			return fmt.Errorf("update product details failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		return nil
 	})
@@ -63,7 +62,7 @@ func (uc *UseCase) AddImage(ctx context.Context, productID uuid.UUID, images []p
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		for _, image := range images {
 			if err := uc.repo.AddImage(txCtx, productID, image.URL, image.IsPrimary); err != nil {
-				return fmt.Errorf("image upload failed: %w", err)
+				return fmt.Errorf("%w", err)
 			}
 		}
 		return nil
@@ -73,7 +72,7 @@ func (uc *UseCase) AddImage(ctx context.Context, productID uuid.UUID, images []p
 func (uc *UseCase) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		if err := uc.repo.RemoveImage(txCtx, imageID); err != nil {
-			return fmt.Errorf("delete image failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		return nil
 	})
@@ -82,7 +81,7 @@ func (uc *UseCase) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
 func (uc *UseCase) ReorderImages(ctx context.Context, productID uuid.UUID, imageIDs []uuid.UUID) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		if err := uc.repo.ReorderImages(txCtx, productID, imageIDs); err != nil {
-			return fmt.Errorf("reorder images failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		return nil
 	})
@@ -93,7 +92,7 @@ func (uc *UseCase) AddOptionName(ctx context.Context, productID uuid.UUID, name 
 	err := uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		id, err := uc.repo.AddOption(txCtx, productID, name)
 		if err != nil {
-			return fmt.Errorf("add option name failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		optionID = id
 		return nil
@@ -118,13 +117,13 @@ func (uc *UseCase) DeleteOptionName(ctx context.Context, optionID uuid.UUID) err
 
 func (uc *UseCase) AddOptionValue(ctx context.Context, productID uuid.UUID, optionID uuid.UUID, values []string) error {
 	if len(values) == 0 {
-		return errors.New("no option values provided")
+		return product.ErrMissingOptValues
 	}
 
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		for _, value := range values {
 			if err := uc.repo.AddOptionValue(txCtx, productID, optionID, value); err != nil {
-				return fmt.Errorf("add option value failed: %w", err)
+				return fmt.Errorf("%w", err)
 			}
 		}
 		return nil
@@ -195,13 +194,13 @@ func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantR
 		}
 
 		if err := uc.repo.CreateVariant(txCtx, variant); err != nil {
-			return fmt.Errorf("create variant failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 
 		// 3. Associate option values with variant
 		for _, valueID := range optionvalueIDs {
 			if err := uc.repo.AddVariantOptionValue(txCtx, variant.ID, valueID); err != nil {
-				return fmt.Errorf("associate option value with variant failed: %w", err)
+				return fmt.Errorf("%w", err)
 			}
 		}
 
@@ -229,7 +228,7 @@ func (uc *UseCase) CreateVariant(ctx context.Context, req product.CreateVariantR
 func (uc *UseCase) UpdateVariantStock(ctx context.Context, variantID uuid.UUID, stock int) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		if err := uc.repo.UpdateVariantStock(txCtx, variantID, stock); err != nil {
-			return fmt.Errorf("update variant stock failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		return nil
 	})
@@ -238,7 +237,7 @@ func (uc *UseCase) UpdateVariantStock(ctx context.Context, variantID uuid.UUID, 
 func (uc *UseCase) UpdateVariantPrice(ctx context.Context, variantID uuid.UUID, price float64) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		if err := uc.repo.UpdateVariantPrice(txCtx, variantID, price); err != nil {
-			return fmt.Errorf("update variant price failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		return nil
 	})
@@ -247,7 +246,7 @@ func (uc *UseCase) UpdateVariantPrice(ctx context.Context, variantID uuid.UUID, 
 func (uc *UseCase) DeleteVariant(ctx context.Context, variantID uuid.UUID) error {
 	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
 		if err := uc.repo.RemoveVariant(txCtx, variantID); err != nil {
-			return fmt.Errorf("delete variant failed: %w", err)
+			return fmt.Errorf("%w", err)
 		}
 		return nil
 	})
