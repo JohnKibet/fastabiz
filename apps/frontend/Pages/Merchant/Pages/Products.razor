@@ -1,36 +1,73 @@
 @page "/merchant/products"
 @layout MerchantLayout
 @using System.Text.Json
+@using System.Web
 @using frontend.Models
 @inject ProductService ProductService
+@inject NavigationManager Navigation
 
-<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-  @foreach (var product in products)
-  {
-    <MerchantProductCard Product="@product" />
-  }
-</div>
+@if (isLoading)
+{
+  <p>Loading products...</p>
+}
+else
+{
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    @if (ShowSelectProductOverlay)
+    {
+      <SelectProductOverlay OnDismiss="HideOverlay" />
+    }
+
+    @foreach (var product in products)
+    {
+      <MerchantProductCard Product="@product" />
+    }
+  </div>
+}
 
 @code {
   [CascadingParameter] public ActiveStoreContext StoreCtx { get; set; } = default!;
+  [CascadingParameter] public ActiveProductContext ProductCtx { get; set; } = default!;
   private List<ProductListItem> products = new();
+  bool ShowSelectProductOverlay;
+  bool isLoading;
+  Guid? lastLoadedStoreId;
 
-  protected override async Task OnInitializedAsync()
+  protected override async Task OnParametersSetAsync()
   {
-    // Get products
+    if (StoreCtx == null || StoreCtx.StoreId == Guid.Empty)
+      return;
+
+    // Prevent reloading endlessly
+    if (lastLoadedStoreId == StoreCtx.StoreId)
+      return;
+
+    lastLoadedStoreId = StoreCtx.StoreId;
+
+    var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+    var query = HttpUtility.ParseQueryString(uri.Query);
+
+    var intent = query.Get("intent");
+    ShowSelectProductOverlay =
+    intent == "manage" && !(ProductCtx?.HasValue ?? false);
+
+    isLoading = true;
+
     var result = await ProductService.ListAllStoreProducts(StoreCtx.StoreId);
-    if (result.Success && result.Data != null)
-    {
-      products = result.Data;
-      @* Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions
+
+    products = result.Success && result.Data != null
+    ? result.Data
+    : new();
+    @* Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions
       {
         WriteIndented = true
       })); *@
-    }
-    else
-    {
-      products = new List<ProductListItem>();
-    }
+    isLoading = false;
+  }
+
+  void HideOverlay()
+  {
+    ShowSelectProductOverlay = false;
   }
 }
 

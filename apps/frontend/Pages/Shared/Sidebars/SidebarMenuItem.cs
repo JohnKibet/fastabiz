@@ -16,7 +16,7 @@ namespace frontend.Models
             Icon = icon;
             SubItems = subItems;
             BadgeCount = badgeCount;
-            active = isActive;
+            isActive = active;
         }
     }
 }

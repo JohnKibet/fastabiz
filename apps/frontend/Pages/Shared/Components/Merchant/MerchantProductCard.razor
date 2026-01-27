@@ -73,6 +73,7 @@
   [Parameter] public EventCallback<Guid> OnEdit { get; set; }
   [Parameter] public EventCallback<Guid> OnDelete { get; set; }
   [Parameter] public EventCallback<Guid> OnManageVariants { get; set; }
+  [CascadingParameter] private ActiveProductContext? ActiveProduct { get; set; }
 
   [Inject] NavigationManager Navigation { get; set; } = default!;
 
@@ -82,6 +83,12 @@
   private void Edit()
   {
     if (Product == null) return;
+    if (ActiveProduct != null)
+    {
+      ActiveProduct.ProductId = productId;
+      ActiveProduct.ProductName = Product.Name;
+    }
+    else return;
 
     Navigation.NavigateTo($"/merchant/products/{Product.Id}?mode=edit");
   }

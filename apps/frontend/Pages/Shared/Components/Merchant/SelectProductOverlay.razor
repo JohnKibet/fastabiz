@@ -1,0 +1,36 @@
+@using Microsoft.AspNetCore.Components
+@namespace frontend.Pages.Shared.Components.Merchant
+
+<div class="fixed inset-0 z-50 flex items-start justify-center pt-24">
+
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/40" @onclick="Dismiss"></div>
+
+  <!-- Notice Card -->
+  <div class="relative z-10 w-full max-w-md bg-white rounded-xl shadow-lg p-6">
+    <h2 class="text-lg font-semibold text-center mb-2">
+      Select a product to manage
+    </h2>
+
+    <p class="text-sm text-gray-600 text-center">
+      To manage a product, choose one from the list below and click
+      <span class="font-medium">Edit</span>.
+    </p>
+
+    <div class="mt-4 flex justify-center">
+      <button class="btn-primary px-6" @onclick="Dismiss">
+        Got it
+      </button>
+    </div>
+  </div>
+</div>
+
+@code {
+  [Parameter] public EventCallback OnDismiss { get; set; }
+
+  private async Task Dismiss()
+  {
+    if (OnDismiss.HasDelegate)
+      await OnDismiss.InvokeAsync();
+  }
+}

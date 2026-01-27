@@ -1,28 +1,39 @@
 @inherits LayoutComponentBase
 @namespace frontend.Pages.Merchant
+@using System.Text.Json
 @using frontend.Models
 @using frontend.Pages.Shared.Layout
 @inject StoreService StoreService
 
 <CascadingValue Value="ActiveStore">
-    <AuthorizedLayout>
-        @Body
-    </AuthorizedLayout>
+    <CascadingValue Value="ActiveProduct">
+        <AuthorizedLayout>
+            @Body
+        </AuthorizedLayout>
+    </CascadingValue>
 </CascadingValue>
 
 @code {
     private ActiveStoreContext ActiveStore = new();
+    private ActiveProductContext ActiveProduct = new();
     private List<ActiveStoreContext> stores = new();
     protected override async Task OnInitializedAsync()
     {
         // Fetch merchant stores
         var result = await StoreService.GetStoresByOwner();
-        if (result.Success && result.Data != null)
+        if (result.Success && result.Data?.Any() == true)
         {
-            stores = result.Data;
             // Decide which store becomes active
-            ActiveStore.StoreId = stores[0].StoreId;
-            ActiveStore.StoreName = stores[0].StoreName;
+            var store = result.Data[0];
+            ActiveStore = new ActiveStoreContext
+            {
+                StoreId = store.StoreId,
+                StoreName = store.StoreName
+            };
+            Console.WriteLine(JsonSerializer.Serialize(ActiveStore, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            }));
         }
         else
         {

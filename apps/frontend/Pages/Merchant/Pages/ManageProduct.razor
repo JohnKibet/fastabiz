@@ -86,10 +86,10 @@
     }
 
     product = result.Data;
-    Console.WriteLine(JsonSerializer.Serialize(product, new JsonSerializerOptions
+    @* Console.WriteLine(JsonSerializer.Serialize(product, new JsonSerializerOptions
     {
       WriteIndented = true
-    }));
+    })); *@
 
     updateModel = new UpdateProductDetailsRequest
     {

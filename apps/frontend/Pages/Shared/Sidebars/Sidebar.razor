@@ -93,6 +93,7 @@
 </div>
 
 @code {
+    [CascadingParameter] public ActiveProductContext ProductCtx { get; set; } = default!;
     private bool IsCollapsed = false;
     private string? Role;
     // keep track of open sections by a stable key (use nameof of the property)
@@ -104,10 +105,10 @@
     private string? CurrentPath;
     private string? CurrentMode;
 
-   private bool IsManageProductActive =>
+    private bool IsManageProductActive =>
     CurrentProductId.HasValue &&
     CurrentPath?.StartsWith("/merchant/products/", StringComparison.OrdinalIgnoreCase) == true &&
-    CurrentMode == "edit";  // only active if ?mode=edit
+    CurrentMode == "edit"; // only active if ?mode=edit
 
 
     protected override async Task OnInitializedAsync()
@@ -145,38 +146,38 @@
     }
 
     private void UpdateRouteState()
-{
-    var uri = new Uri(Navigation.Uri);
-    CurrentPath = uri.AbsolutePath;
+    {
+        var uri = new Uri(Navigation.Uri);
+        CurrentPath = uri.AbsolutePath;
 
-    // Parse product ID from path
-    var segments = uri.AbsolutePath
+        // Parse product ID from path
+        var segments = uri.AbsolutePath
         .Trim('/')
         .Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-    if (segments.Length == 3 &&
+        if (segments.Length == 3 &&
         segments[0] == "merchant" &&
         segments[1] == "products" &&
         Guid.TryParse(segments[2], out var id))
-    {
-        CurrentProductId = id;
-    }
-    else
-    {
-        CurrentProductId = null;
-    }
+        {
+            CurrentProductId = id;
+        }
+        else
+        {
+            CurrentProductId = null;
+        }
 
-    // Optional: parse mode from query string
-    var query = QueryHelpers.ParseQuery(uri.Query);
-    if (query.TryGetValue("mode", out var modeValue))
-    {
-        CurrentMode = modeValue.ToString(); // e.g. "edit"
+        // Optional: parse mode from query string
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        if (query.TryGetValue("mode", out var modeValue))
+        {
+            CurrentMode = modeValue.ToString(); // e.g. "edit"
+        }
+        else
+        {
+            CurrentMode = null;
+        }
     }
-    else
-    {
-        CurrentMode = null;
-    }
-}
 
 
     private bool IsSectionOpen(string sectionKey) => openSections.Contains(sectionKey);
@@ -209,12 +210,12 @@ new("Map", "/merchant/map", "map")
 {
 new("Add Product", "/merchant/products/create", "layers-plus"),
 new(
-    "Manage Product", 
-    CurrentProductId.HasValue 
-        ? $"/merchant/products/{CurrentProductId}?mode=edit"
-        : "/merchant/products/create",
-    "wrench",
-    active: IsManageProductActive
+"Manage Product",
+ProductCtx.HasValue
+? $"/merchant/products/{ProductCtx.ProductId}?mode=edit"
+: "/merchant/products?intent=manage",
+"wrench",
+active: IsManageProductActive
 ),
 new("Products", "/merchant/products", "layers")
 };

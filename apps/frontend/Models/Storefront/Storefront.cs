@@ -289,6 +289,7 @@ public class ProductListItem
     public int TotalSold { get; set; }
 }
 
+// getstoresbyowner json mapper
 public class ActiveStoreContext
 {
     [JsonPropertyName("id")]
@@ -296,6 +297,12 @@ public class ActiveStoreContext
 
     [JsonPropertyName("name")]
     public string StoreName { get; set; } = string.Empty;
+}
+public class ActiveProductContext
+{
+    public Guid? ProductId { get; set; }
+    public string? ProductName { get; set; }
+    public bool HasValue => ProductId.HasValue;
 }
 
 // getproductbyid json mapper
