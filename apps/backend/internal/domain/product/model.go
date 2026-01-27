@@ -87,9 +87,9 @@ type ProductListItem struct {
 	Stock int     `db:"stock" json:"stock,omitempty"`
 
 	// Variant products
-	VariantCount int     `db:"variant_count" json:"variant_count,omitempty"`
-	MinPrice     float64 `db:"min_price" json:"min_price,omitempty"`
-	MaxPrice     float64 `db:"max_price" json:"max_price,omitempty"`
+	VariantCount int      `db:"variant_count" json:"variant_count,omitempty"`
+	MinPrice     *float64 `db:"min_price" json:"min_price,omitempty"`
+	MaxPrice     *float64 `db:"max_price" json:"max_price,omitempty"`
 
 	CreatedAt *time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
