@@ -30,16 +30,10 @@
                 StoreId = store.StoreId,
                 StoreName = store.StoreName
             };
-            Console.WriteLine(JsonSerializer.Serialize(ActiveStore, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            }));
         }
         else
         {
             stores = new();
         }
-
     }
-
 }

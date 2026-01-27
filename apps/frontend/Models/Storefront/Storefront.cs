@@ -98,7 +98,26 @@ public class CreateProductRequest
     [Required]
     [JsonPropertyName("category")]
     public string Category { get; set; } = string.Empty;
+
+    public bool HasVariants { get; set; }
 }
+
+// createproduct response
+public class CreateProductResponse
+{
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("store_id")]
+    public Guid StoreId { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
+}
+
 
 public class UpdateProductDetailsRequest
 {
@@ -132,6 +151,12 @@ public class CreateOptionNameRequest
     [Required]
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
+}
+
+public class CreateOptionNameResponse
+{
+    [JsonPropertyName("option_id")]
+    public Guid OptionId { get; set; }
 }
 
 public class AddOptionValuesRequest

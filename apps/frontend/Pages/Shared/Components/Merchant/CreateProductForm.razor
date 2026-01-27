@@ -45,27 +45,41 @@
     <p class="text-textLight mb-6">Add a product to your store</p>
 
     <EditForm Model="product" OnValidSubmit="Submit">
-      <DataAnnotationsValidator />
+      <fieldset disabled="@productCreated">
+        <DataAnnotationsValidator />
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-textDark">Product Name</label>
-          <InputText @bind-Value="product.Name" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-          <ValidationMessage For="() => product.Name" />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-textDark">Product Name</label>
+            <InputText @bind-Value="product.Name" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+            <ValidationMessage For="() => product.Name" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-textDark">Category</label>
+            <InputText @bind-Value="product.Category" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+            <ValidationMessage For="() => product.Category" />
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-textDark">Description</label>
+            <InputTextArea @bind-Value="product.Description" rows="4" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+            <ValidationMessage For="() => product.Description" />
+          </div>
         </div>
 
-        <div>
-          <label class="block text-sm font-medium text-textDark">Category</label>
-          <InputText @bind-Value="product.Category" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-          <ValidationMessage For="() => product.Category" />
+        <div class="mt-4">
+          <label class="flex items-center space-x-2">
+            <InputCheckbox @bind-Value="product.HasVariants" />
+            <span class="text-sm text-textDark">Does this product have variants?</span>
+          </label>
         </div>
 
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-textDark">Description</label>
-          <InputTextArea @bind-Value="product.Description" rows="4" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-          <ValidationMessage For="() => product.Description" />
-        </div>
-      </div>
+      </fieldset>
+      @if (productCreated && product.HasVariants)
+      {
+        <VariantSection ProductId="@createdProductId" />
+      }
 
       <button type="submit" class="mt-6 w-full bg-primary text-white py-2 rounded-xl hover:bg-ctaHover transition">
         Create Product
@@ -75,14 +89,15 @@
 </div>
 
 @code {
-  [Parameter]
-  public Guid? StoreId { get; set; }
-
+  [CascadingParameter] ActiveStoreContext? ActiveStore { get; set; }
+  [Parameter] public Guid? StoreId { get; set; }
   private CreateProductRequest product = new();
   private List<Store> stores = new();
   private Guid? selectedStoreId;
   private bool isLoadingStores = true;
   private bool isSubmitting = false;
+  private bool productCreated = false;
+  private Guid createdProductId;
 
   protected override async Task OnInitializedAsync()
   {
@@ -114,9 +129,11 @@
     }
   }
 
-
   private async Task Submit()
   {
+    if (ActiveStore is null) return;
+    product.StoreId = ActiveStore.StoreId;
+
     if (product.StoreId == Guid.Empty)
     {
       ToastService.ShowToast(
@@ -131,19 +148,23 @@
     {
       var result = await ProductService.AddProduct(product);
 
-      if (result.Success)
+      isSubmitting = false;
+
+      if (!result.Success || result.Data is null)
       {
-        ToastService.ShowToast("Product created successfully", string.Empty, ToastService.ToastLevel.Success);
-        Navigation.NavigateTo($"/merchant/products/{result.Data}");
+        ToastService.ShowToast(result.Error?.Detail ?? "Failed to create product", string.Empty, ToastService.ToastLevel.Error);
+        return;
       }
-      else
-      {
-        ToastService.ShowToast(
-        result.Error?.Detail ?? "Failed to create product",
-        string.Empty,
-        ToastService.ToastLevel.Error
-        );
-      }
+
+      createdProductId = result.Data.Id;
+      productCreated = true;
+      product.HasVariants = true;
+
+      ToastService.ShowToast(
+      "Product created successfully. You can now add variants.",
+      string.Empty,
+      ToastService.ToastLevel.Success
+      );
     }
     catch
     {

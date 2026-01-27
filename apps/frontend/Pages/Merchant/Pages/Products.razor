@@ -20,7 +20,7 @@ else
 
     @foreach (var product in products)
     {
-      <MerchantProductCard Product="@product" />
+      <MerchantProductCard Product="@product" OnDelete="HandleDelete"/>
     }
   </div>
 }
@@ -58,10 +58,6 @@ else
     products = result.Success && result.Data != null
     ? result.Data
     : new();
-    @* Console.WriteLine(JsonSerializer.Serialize(products, new JsonSerializerOptions
-      {
-        WriteIndented = true
-      })); *@
     isLoading = false;
   }
 
@@ -69,6 +65,11 @@ else
   {
     ShowSelectProductOverlay = false;
   }
+  private void HandleDelete(Guid productId)
+  {
+    products.RemoveAll(p => p.Id == productId);
+  }
+
 }
 
 @* Store order of precedence *@

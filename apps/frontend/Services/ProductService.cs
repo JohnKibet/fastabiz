@@ -12,26 +12,34 @@ public class ProductService
     _toastService = toastService;
   }
 
-  public async Task<ServiceResult2<HttpResponseMessage>> AddProduct(CreateProductRequest product)
+  public async Task<ServiceResult2<CreateProductResponse>> AddProduct(CreateProductRequest product)
   {
     try
     {
       var response = await _http.PostAsJsonAsync("products/create", product);
-      if (response.IsSuccessStatusCode)
+
+      if (!response.IsSuccessStatusCode)
       {
-        return ServiceResult2<HttpResponseMessage>.Ok(response);
+        var error = await ParseError(response);
+        return ServiceResult2<CreateProductResponse>.Fail(error);
       }
 
-      var error = await ParseError(response);
-      return ServiceResult2<HttpResponseMessage>.Fail(error);
+      var createdProduct = await response.Content.ReadFromJsonAsync<CreateProductResponse>();
+
+      if (createdProduct is null)
+      {
+        return ServiceResult2<CreateProductResponse>.Fail("Invalid server response");
+      }
+
+      return ServiceResult2<CreateProductResponse>.Ok(createdProduct);
     }
     catch (HttpRequestException ex)
     {
-      return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
+      return ServiceResult2<CreateProductResponse>.Fail($"Network error: {ex.Message}");
     }
     catch (Exception ex)
     {
-      return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
+      return ServiceResult2<CreateProductResponse>.Fail($"Unexpected error: {ex.Message}");
     }
   }
 
@@ -64,27 +72,33 @@ public class ProductService
     }
   }
 
-  public async Task<ServiceResult2<ProductX>> CreateOptionName(CreateOptionNameRequest request)
+  public async Task<ServiceResult2<CreateOptionNameResponse>> CreateOptionName(CreateOptionNameRequest request)
   {
     try
     {
       var response = await _http.PostAsJsonAsync("products/options/add", request);
-      if (response.IsSuccessStatusCode)
+      if (!response.IsSuccessStatusCode)
       {
-        var result = await response.Content.ReadFromJsonAsync<ProductX>();
-        return ServiceResult2<ProductX>.Ok(result ?? new ProductX());
+        var error = await ParseError(response);
+        return ServiceResult2<CreateOptionNameResponse>.Fail(error);
       }
 
-      var error = await ParseError(response);
-      return ServiceResult2<ProductX>.Fail(error);
+      var optionId = await response.Content.ReadFromJsonAsync<CreateOptionNameResponse>();
+
+      if (optionId is null)
+      {
+        return ServiceResult2<CreateOptionNameResponse>.Fail("Invalid server response");
+      }
+
+      return ServiceResult2<CreateOptionNameResponse>.Ok(optionId);
     }
     catch (HttpRequestException ex)
     {
-      return ServiceResult2<ProductX>.Fail($"Network error: {ex.Message}");
+      return ServiceResult2<CreateOptionNameResponse>.Fail($"Network error: {ex.Message}");
     }
     catch (Exception ex)
     {
-      return ServiceResult2<ProductX>.Fail($"Unexpected error: {ex.Message}");
+      return ServiceResult2<CreateOptionNameResponse>.Fail($"Unexpected error: {ex.Message}");
     }
   }
 
@@ -377,7 +391,7 @@ public class ProductService
           .SelectMany(kvp => kvp.Value.Select(v => $"{kvp.Key}: {v}"));
         return string.Join("; ", fieldErrors);
       }
-      
+
       // Fall back to detail or generic error
       return !string.IsNullOrWhiteSpace(error.Detail)
         ? error.Detail

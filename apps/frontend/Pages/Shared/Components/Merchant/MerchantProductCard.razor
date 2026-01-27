@@ -1,5 +1,7 @@
 @using frontend.Models
 @namespace frontend.Pages.Shared.Components.Merchant
+@inject ProductService ProductService
+@inject ToastService ToastService
 
 @if (Product != null)
 {
@@ -61,31 +63,45 @@
     <div class="mt-4 flex justify-end gap-2">
       <button class="btn-secondary" @onclick="Edit">Edit</button>
       <button class="btn-outline" @onclick="ManageVariants">Variants</button>
-      <button class="btn-danger" @onclick="Delete">Delete</button>
+      <button class="btn-danger" disabled="@isDeleting" @onclick="Delete">Delete</button>
     </div>
   </div>
 
 }
 
 @code {
-  private Guid productId;
   [Parameter] public ProductListItem? Product { get; set; }
   [Parameter] public EventCallback<Guid> OnEdit { get; set; }
   [Parameter] public EventCallback<Guid> OnDelete { get; set; }
   [Parameter] public EventCallback<Guid> OnManageVariants { get; set; }
   [CascadingParameter] private ActiveProductContext? ActiveProduct { get; set; }
-
   [Inject] NavigationManager Navigation { get; set; } = default!;
+  bool isDeleting = false;
 
-  private Task Delete() => OnDelete.InvokeAsync(productId);
-  private Task ManageVariants() => OnManageVariants.InvokeAsync(productId);
+  private async Task Delete()
+  {
+    if (Product == null) return;
+    isDeleting = true;
+    var response = await ProductService.DeleteProduct(Product.Id);
+    if (!response.Success)
+    {
+      ToastService.ShowToast(response.Error?.Detail ?? "Delete failed, try again later.", string.Empty,
+      ToastService.ToastLevel.Error);
+      return;
+    }
+
+    ToastService.ShowToast("Product deleted.", string.Empty, ToastService.ToastLevel.Success);
+    await OnDelete.InvokeAsync(Product.Id);
+    isDeleting = false;
+  }
+  private Task ManageVariants() => OnManageVariants.InvokeAsync(Product!.Id);
 
   private void Edit()
   {
     if (Product == null) return;
     if (ActiveProduct != null)
     {
-      ActiveProduct.ProductId = productId;
+      ActiveProduct.ProductId = Product.Id;
       ActiveProduct.ProductName = Product.Name;
     }
     else return;
