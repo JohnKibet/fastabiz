@@ -19,8 +19,18 @@
     private List<ActiveStoreContext> stores = new();
     protected override async Task OnInitializedAsync()
     {
-        // Fetch merchant stores
         var result = await StoreService.GetStoresByOwner();
+
+        @* stores = result.Success && result.Data != null
+        ? result.Data.Select(s => new ActiveStoreContext
+        {
+            StoreId = s.StoreId,
+            StoreName = s.StoreName
+        }).ToList()
+        : new();
+
+        ActiveStore = new ActiveStoreContext(); *@
+
         if (result.Success && result.Data?.Any() == true)
         {
             // Decide which store becomes active

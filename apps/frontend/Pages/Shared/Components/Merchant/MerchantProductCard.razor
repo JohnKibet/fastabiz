@@ -62,7 +62,12 @@
     <!-- Actions -->
     <div class="mt-4 flex justify-end gap-2">
       <button class="btn-secondary" @onclick="Edit">Edit</button>
-      <button class="btn-outline" @onclick="ManageVariants">Variants</button>
+      @if (Product?.HasVariants == true)
+      {
+        <button class="btn-outline" @onclick="ManageVariants">
+          Variants
+        </button>
+      }
       <button class="btn-danger" disabled="@isDeleting" @onclick="Delete">Delete</button>
     </div>
   </div>

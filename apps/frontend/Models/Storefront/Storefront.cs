@@ -243,6 +243,27 @@ public class CreateVariantRequest
     [JsonPropertyName("options")]
     public Dictionary<string, string> Options { get; set; } = new();
 }
+public class CreateVariantResponse
+{
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+    [JsonPropertyName("product_id")]
+    public Guid ProductId { get; set; }
+    [JsonPropertyName("sku")]
+    public string SKU { get; set; } = string.Empty;
+    [JsonPropertyName("price")]
+    public double Price { get; set; }
+    [JsonPropertyName("stock")]
+    public int stock { get; set; }
+    [JsonPropertyName("image_url")]
+    public string ImageURL { get; set; } = string.Empty;
+    [JsonPropertyName("options")]
+    public Dictionary<string, string> Options { get; set; } = new(); // Size → Small
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("updated_at")]
+    public DateTime UpdatedAt { get; set; }
+}
 
 public class UpdateVariantStockRequest
 {
@@ -315,13 +336,14 @@ public class ProductListItem
 }
 
 // getstoresbyowner json mapper
-public class ActiveStoreContext
+public sealed class ActiveStoreContext
 {
     [JsonPropertyName("id")]
     public Guid StoreId { get; set; }
 
     [JsonPropertyName("name")]
     public string StoreName { get; set; } = string.Empty;
+    // public bool HasValue => StoreId.HasValue && StoreId != Guid.Empty;
 }
 public class ActiveProductContext
 {

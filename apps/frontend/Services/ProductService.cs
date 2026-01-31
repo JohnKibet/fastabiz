@@ -126,27 +126,27 @@ public class ProductService
     }
   }
 
-  public async Task<ServiceResult2<ProductX>> CreateVariant(CreateVariantRequest request)
+  public async Task<ServiceResult2<CreateVariantResponse>> CreateVariant(CreateVariantRequest request)
   {
     try
     {
       var response = await _http.PostAsJsonAsync("products/variants/add", request);
       if (response.IsSuccessStatusCode)
       {
-        var result = await response.Content.ReadFromJsonAsync<ProductX>();
-        return ServiceResult2<ProductX>.Ok(result ?? new ProductX());
+        var result = await response.Content.ReadFromJsonAsync<CreateVariantResponse>();
+        return ServiceResult2<CreateVariantResponse>.Ok(result ?? new CreateVariantResponse());
       }
 
       var error = await ParseError(response);
-      return ServiceResult2<ProductX>.Fail(error);
+      return ServiceResult2<CreateVariantResponse>.Fail(error);
     }
     catch (HttpRequestException ex)
     {
-      return ServiceResult2<ProductX>.Fail($"Network error: {ex.Message}");
+      return ServiceResult2<CreateVariantResponse>.Fail($"Network error: {ex.Message}");
     }
     catch (Exception ex)
     {
-      return ServiceResult2<ProductX>.Fail($"Unexpected error: {ex.Message}");
+      return ServiceResult2<CreateVariantResponse>.Fail($"Unexpected error: {ex.Message}");
     }
   }
 

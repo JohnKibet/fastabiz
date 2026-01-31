@@ -20,7 +20,7 @@ else
 
     @foreach (var product in products)
     {
-      <MerchantProductCard Product="@product" OnDelete="HandleDelete"/>
+      <MerchantProductCard Product="@product" OnDelete="HandleDelete" />
     }
   </div>
 }
@@ -71,16 +71,3 @@ else
   }
 
 }
-
-@* Store order of precedence *@
-@* 1. Explicit switch by user (always wins)
-2. Pinned/default store (user preference)
-3. Last used store (localStorage)
-4. Fallback → first store *@
-
-
-@* logic *@
-@* var pinnedStoreId = await LocalStorage.GetItem<Guid?>("pinned_store");
-
-ActiveStore = stores.FirstOrDefault(s => s.Id == pinnedStoreId)
-           ?? stores.OrderByDescending(s => s.Revenue).First(); *@
