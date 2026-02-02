@@ -7,7 +7,7 @@ import (
 
 type CreateOrderRequest struct {
 	StoreID    uuid.UUID `json:"store_id" binding:"required"`
-	AdminID    uuid.UUID `json:"admin_id" binding:"required"`
+	AdminID    uuid.UUID `json:"admin_id"`
 	CustomerID uuid.UUID `json:"customer_id" binding:"required"`
 
 	ProductID uuid.UUID  `json:"product_id" binding:"required"`

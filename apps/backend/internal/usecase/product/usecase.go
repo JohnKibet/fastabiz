@@ -25,17 +25,13 @@ func (uc *UseCase) CreateProduct(ctx context.Context, p *product.Product) (err e
 }
 
 func (uc *UseCase) GetProductByID(ctx context.Context, id uuid.UUID) (*product.Product, error) {
-	p, err := uc.repo.GetProductByID(ctx, id)
+	p, err := uc.repo.GetFullProductByID(ctx, id)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("usecase GetProductByID: %w", err)
 	}
 
-	if p.HasVariants {
-		variants, err := uc.repo.ListVariantsByProductID(ctx, p.ID)
-		if err != nil {
-			return nil, err
-		}
-		p.Variants = variants
+	if p.HasVariants && len(p.Variants) == 0 {
+		return nil, fmt.Errorf("product %s has variants flag but no variants found", p.ID)
 	}
 
 	return p, nil

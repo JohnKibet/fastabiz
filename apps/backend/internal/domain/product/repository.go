@@ -13,9 +13,11 @@ type Repository interface {
 	// separately using their respective methods.
 	Create(ctx context.Context, product *Product) error
 
+	GetProductByID(ctx context.Context, id uuid.UUID) (*Product, error)
+
 	// GetProductByID retrieves a fully-hydrated product aggregate by its ID,
 	// including images, options, option values, and variants.
-	GetProductByID(ctx context.Context, id uuid.UUID) (*Product, error)
+	GetFullProductByID(ctx context.Context, id uuid.UUID) (*Product, error)
 
 	UpdateProductStock(ctx context.Context, productID uuid.UUID, stock int) error
 

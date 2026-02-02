@@ -48,6 +48,7 @@ type Variant struct {
 	Price     float64   `db:"price" json:"price"`
 	Stock     int       `db:"stock" json:"stock"`
 	ImageURL  string    `db:"image_url" json:"image_url"`
+	Options   map[string]string `json:"options,omitempty"`
 	CreatedAt time.Time `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
 }
