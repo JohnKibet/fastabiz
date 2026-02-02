@@ -20,7 +20,7 @@ public class CartService
     public IReadOnlyList<CartItem> Items => items.AsReadOnly();
     public int Count => items.Count();
 
-    public async Task AddItem(ProductX product, Variant? variant, int qty = 1 )
+    public async Task AddItem(ProductMapper.ProductDto product, ProductMapper.VariantDto? variant, int qty = 1 )
     {
         var variantId = variant?.Id ?? null;
 
@@ -29,10 +29,10 @@ public class CartService
             i.VariantId == variantId
         );
 
-        double price = (variant != null && variant.Price > 0) ? variant.Price : product.Price;
+        double price = (variant != null && variant.Price > 0) ? variant.Price : 0; // add price to productDto later
         string thumbnail = (variant != null && !string.IsNullOrEmpty(variant.ImageUrl)) 
                         ? variant.ImageUrl 
-                        : product.Images.FirstOrDefault() ?? "placeholder.jpg";
+                        : product?.Images?.FirstOrDefault() ?? "placeholder.jpg";
 
         if (existing != null)
         {
@@ -42,16 +42,13 @@ public class CartService
         {
             items.Add(new CartItem
             {
-                ProductId = product.Id,
+                ProductId = product!.Id,
                 VariantId = variantId!.Value,
                 Name = product.Name,
-                VariantName = variant != null 
-                    ? string.Join(", ", variant.Options.Select(o => $"{o.Key}: {o.Value}")) 
-                    : null,
                 Price = price,
                 Thumbnail = thumbnail,
                 Quantity = qty,
-                SKU = variant?.SKU ?? null,
+                SKU = variant?.Sku ?? null,
                 StoreId = product.StoreId,
                 Description = product.Description,
             });

@@ -100,7 +100,7 @@
   [CascadingParameter] ActiveStoreContext? ActiveStore { get; set; }
   [Parameter] public Guid? StoreId { get; set; }
   private CreateProductRequest product = new();
-  private List<Store> stores = new();
+  private List<StoreDto> stores = new();
   private Guid? selectedStoreId;
   private bool isLoadingStores = true;
   private bool isSubmitting = false;

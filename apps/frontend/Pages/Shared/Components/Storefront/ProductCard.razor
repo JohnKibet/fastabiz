@@ -1,34 +1,64 @@
 @using frontend.Models
+@using frontend.Pages.Shared.Components.Icons
 @namespace frontend.Pages.Shared.Components.Storefront
 
 <div class="product-card border rounded shadow hover:shadow-lg cursor-pointer p-4 flex flex-col"
-     @onclick="() => OnSelected.InvokeAsync(Product)">
+    @onclick="() => OnSelected.InvokeAsync(Product)">
+
     <!-- Product Image -->
-    <img src="@Product.ImageUrl" alt="@Product.Name" class="w-full h-48 object-cover mb-2 rounded" />
+    <div class="w-full h-48 mb-2 rounded bg-gray-100 flex items-center justify-center overflow-hidden">
+        @if (!string.IsNullOrWhiteSpace(Product.ImageUrl))
+        {
+            <img src="@Product.ImageUrl" alt="@($"{Product.Name} product image")" class="w-full h-full object-cover" />
+        }
+        else
+        {
+            <div class="flex flex-col items-center justify-center text-gray-400 text-sm">
+                <LucideIcon Name="image" Size="16" class="text-gray"/>
+                <span class="mt-1">No image available</span>
+            </div>
+        }
+    </div>
 
     <!-- Product Info -->
-    <h4 class="font-semibold text-lg">@Product.Name</h4>
-    @* <p class="text-sm text-gray-600">@Product.Name</p> *@
+    <h4 class="font-semibold text-lg truncate">@Product.Name</h4>
 
     <!-- Price -->
     @if (!Product.HasVariants)
     {
-        <p class="mt-1 font-bold">KES @Product.Price?.ToString("N2")</p>
+        <p class="mt-1 font-bold">
+            KES @Product.Price?.ToString("N2")
+        </p>
     }
     else
     {
-        <p class="mt-1 font-bold">From KES @Product.MinPrice?.ToString("N2") – KES @Product.MaxPrice?.ToString("N2")</p>
+        <p class="mt-1 font-bold text-sm">
+            From KES @Product.MinPrice?.ToString("N2")
+            – KES @Product.MaxPrice?.ToString("N2")
+        </p>
     }
 
-    <!-- Optional Rating / Sold -->
+    <!-- Rating & Sold -->
     <div class="mt-2 flex justify-between items-center text-sm text-gray-500">
-        <span>⭐ @Product.Rating.ToString("0.0")</span>
-        <span>@Product.TotalSold sold</span>
+        <span>⭐ @Rating.ToString("0.0")</span>
+        <span>@SoldUnits sold</span>
     </div>
 </div>
 
 @code {
     [Parameter] public ProductListItem Product { get; set; } = new();
-
     [Parameter] public EventCallback<ProductListItem> OnSelected { get; set; }
+
+    private double Rating;
+    private int SoldUnits;
+
+    protected override void OnInitialized()
+    {
+        // Deterministic randomization per product (stable across renders)
+        var seed = Product.Id.GetHashCode();
+        var random = new Random(seed);
+
+        Rating = Math.Round(3.8 + random.NextDouble() * (4.6 - 3.8), 1);
+        SoldUnits = random.Next(12, 280);
+    }
 }

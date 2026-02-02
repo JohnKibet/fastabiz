@@ -1,5 +1,6 @@
 @page "/stores"
 @layout StorefrontLayout
+@inject StoreService StoreService
 @inject NavigationManager NavigationManager
 
 <div class="px-4">
@@ -14,24 +15,27 @@
 </div>
 
 @code {
-    // For now, use mock data
-    private List<Store> Stores = MockData.Stores;
-    [CascadingParameter] StorefrontLayout Layout { get; set; }
+    [CascadingParameter] StorefrontLayout? Layout { get; set; }
+    private List<StoreDto> Stores = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        if (Layout is StorefrontLayout layout)
+        var result = await StoreService.GetAllStores();
+        if (result.Success && result.Data != null)
         {
-            layout?.SetBreadcrumbs(new List<BreadcrumbItem>
-            {
-                new() { Title = "Home", Url = "/" },
-                new() { Title = "Stores", Url = "/stores" }
-            });
+            Stores = result.Data;
         }
-    }
+        else
+        {
+            Console.Error.WriteLine("Failed to load stores: " + result.Error);
+        }
 
-    private void NavigateToStore(Store store)
-    {
-        NavigationManager.NavigateTo($"/store/{store.Id}");
+        Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+{
+new() { Title = "Home", Url = "/" },
+new() { Title = "Stores", Url = "/stores" }
+});
     }
+    private void NavigateToStore(StoreDto store)
+        => NavigationManager.NavigateTo($"/store/{store.Id}");
 }

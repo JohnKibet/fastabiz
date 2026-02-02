@@ -21,6 +21,34 @@ public class Store
     public DateTime UpdatedAt { get; set; }
 }
 
+// get all stores response
+public class StoreDto
+{
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("merchant_id")]
+    public Guid OnwerId { get; set; }
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = string.Empty;
+
+    [JsonPropertyName("logo_ur;")]
+    public string LogoURL { get; set; } = string.Empty;
+
+    [JsonPropertyName("location")]
+    public string Location { get; set; } = string.Empty;
+
+    [JsonPropertyName("created_at")]
+    public string CreatedAt { get; set; } = string.Empty;
+
+    [JsonPropertyName("updated_at")]
+    public string UpdatedAt { get; set; } = string.Empty;
+
+    public double? Rating { get; set; }
+    public int? TotalProducts { get; set; }
+}
+
 public class CreateStoreRequest
 {
     [Required]
@@ -378,6 +406,10 @@ public static class ProductMapper
         [JsonPropertyName("has_variants")]
         public bool HasVariants { get; set; }
 
+        // UI-friendly options (Size → [S, M, L])
+        public List<OptionDto> Options { get; set; } = new();
+
+        // concrete sellable units
         public List<VariantDto> Variants { get; set; } = new();
 
         [JsonPropertyName("created_at")]
@@ -411,9 +443,35 @@ public static class ProductMapper
 
         [JsonPropertyName("updated_at")]
         public DateTime UpdatedAt { get; set; }
+
+        [JsonPropertyName("options")]
+        public Dictionary<string, string> Options { get; set; } = new();
     }
+
+    public class OptionDto
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("values")]
+        public List<string> Values { get; set; } = new();
+    }
+
     public static ProductDto ToDto(this ProductX product)
     {
+        var variants = product.Variants?.Select(v => new VariantDto
+        {
+            Id = v.Id,
+            ProductId = v.ProductId,
+            Sku = v.SKU,
+            Price = v.Price,
+            Stock = v.Stock,
+            ImageUrl = v.ImageUrl,
+            Options = v.Options,
+            CreatedAt = v.CreatedAt,
+            UpdatedAt = v.UpdatedAt
+        }).ToList() ?? new();
+
         return new ProductDto
         {
             Id = product.Id,
@@ -421,21 +479,28 @@ public static class ProductMapper
             Name = product.Name,
             Description = product.Description,
             Category = product.Category,
-            Images = product.Images, // assuming it's List<string> or null
+            Images = product.Images,
             HasVariants = product.HasVariants,
-            Variants = product.Variants?.Select(v => new VariantDto
-            {
-                Id = v.Id,
-                ProductId = v.ProductId,
-                Sku = v.SKU,
-                Price = v.Price,
-                Stock = v.Stock,
-                ImageUrl = v.ImageUrl,
-                CreatedAt = v.CreatedAt,
-                UpdatedAt = v.UpdatedAt
-            }).ToList() ?? new List<VariantDto>(),
+            Variants = variants,
+            Options = product.HasVariants ? DeriveOptions(variants) : new(),
             CreatedAt = product.CreatedAt,
             UpdatedAt = product.UpdatedAt
         };
     }
+    private static List<OptionDto> DeriveOptions(List<VariantDto> variants)
+    {
+        return variants
+            .SelectMany(v => v.Options)
+            .GroupBy(o => o.Key)
+            .Select(g => new OptionDto
+            {
+                Name = g.Key,
+                Values = g.Select(x => x.Value)
+                          .Distinct()
+                          .OrderBy(val => val) // alphabetical order
+                          .ToList()
+            })
+            .ToList();
+    }
+
 }

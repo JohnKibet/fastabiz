@@ -3,9 +3,11 @@
 @using frontend.Models
 @inject NavigationManager Nav
 @inject IJSRuntime JS
-@inject CustomAuthStateProvider AuthStateProvider 
+@inject ProductService ProductService
+@inject CustomAuthStateProvider AuthStateProvider
 
-<nav id="scrollNav" class="fixed top-0 left-0 right-0 z-50 bg-white shadow transition-transform duration-300 ease-in-out">
+<nav id="scrollNav"
+    class="fixed top-0 left-0 right-0 z-50 bg-white shadow transition-transform duration-300 ease-in-out">
 
     <!-- MAIN NAVBAR -->
     <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
@@ -15,23 +17,17 @@
         </a>
 
         <div class="hidden md:flex items-center space-x-4">
-            <button 
-                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
-                @onclick="ToProducts">
+            <button class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" @onclick="ToProducts">
                 <LucideIcon Name="package" Size="6" />
                 <span class="text-sm font-medium">Products</span>
             </button>
 
-            <button 
-                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
-                @onclick="ToStores">
+            <button class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" @onclick="ToStores">
                 <LucideIcon Name="store" Size="6" />
                 <span class="text-sm font-medium">Stores</span>
             </button>
 
-            <button 
-                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow"
-                @onclick="ToggleMiniCart">
+            <button class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" @onclick="ToggleMiniCart">
                 <LucideIcon Name="cart" Size="6" />
                 <span class="text-sm font-medium">Cart (@CartService.Count)</span>
             </button>
@@ -56,18 +52,16 @@
 
         <button class="md:hidden focus:outline-none" @onclick="ToggleMobile">
             <svg class="w-7 h-7 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M4 6h16M4 12h16M4 18h16" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
         </button>
     </div>
 
-   <!-- MINI NAVBAR -->
+    <!-- MINI NAVBAR -->
     <div class="border-t bg-white p-0">
         <div class="max-w-7xl mx-auto px-2 h-12 flex items-center space-x-6 overflow-x-auto">
             <!-- Filters button -->
-            <button 
-                class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow" 
+            <button class="flex items-center gap-2 px-3 py-2 border rounded bg-white shadow"
                 @onclick="ToggleFiltersOpen">
                 <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -83,24 +77,24 @@
     </div>
 
     <!-- Drawer Component -->
-    <Drawer IsOpen="IsFiltersOpen" OnClose="ToggleFiltersOpen" />
+    <Drawer IsOpen="IsFiltersOpen" OnClose="ToggleFiltersOpen" Products="@AllProducts" Stores="@Stores" />
 
     <!-- MOBILE MENU -->
     <div class="@MobileMenuCss md:hidden bg-white shadow-inner px-6 pt-2 pb-4 space-y-3">
         <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
-                @onclick="() => { ToggleMobile(); ToProducts(); }">
+            @onclick="() => { ToggleMobile(); ToProducts(); }">
             <LucideIcon Name="package" Size="6" />
             Products
         </button>
 
         <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
-                @onclick="() => { ToggleMobile(); ToStores(); }">
+            @onclick="() => { ToggleMobile(); ToStores(); }">
             <LucideIcon Name="store" Size="6" />
             Stores
         </button>
 
         <button class="flex items-center gap-2 w-full py-2 text-left font-medium text-gray-700 hover:text-blue-600"
-                @onclick="() => { ToggleMobile(); ToggleMiniCart(); }">
+            @onclick="() => { ToggleMobile(); ToggleMiniCart(); }">
             <LucideIcon Name="cart" Size="6" />
             Cart (@CartService.Count)
         </button>
@@ -108,7 +102,7 @@
         @if (!IsLoggedIn)
         {
             <button class="block w-full bg-blue-600 text-white text-center py-2 rounded mt-3 hover:bg-blue-700"
-                    @onclick="() => { ToggleMobile(); ToCheckout(); }">
+                @onclick="() => { ToggleMobile(); ToCheckout(); }">
                 Login
             </button>
         }
@@ -125,24 +119,29 @@
 </nav>
 
 <!-- PAGE BODY -->
-<CascadingValue Value="this">
-    <div class="min-h-screen bg-gray-50 pb-10 pt-[calc(64px+60px)]">
-        @Body
-    </div>
+<CascadingValue Value="ActiveStore">
+    <CascadingValue Value="this">
+        <div class="min-h-screen bg-gray-50 pb-10 pt-[calc(64px+60px)]">
+            @Body
+        </div>
+    </CascadingValue>
 </CascadingValue>
 
 @code {
+    private ActiveStoreContext ActiveStore = new();
     private DotNetObjectReference<StorefrontLayout>? objRef;
     private string? clickOutsideToken;
     [Inject] private CartService CartService { get; set; } = default!;
+    [Inject] private StoreService StoreService { get; set; } = default!;
+    private List<StoreDto> Stores = new();
+    private List<ProductListItem> AllProducts = new();
+
     private bool ShowMiniCart = false;
-    
     private void ToggleMiniCart()
     {
         ShowMiniCart = !ShowMiniCart;
         StateHasChanged();
     }
-
     [JSInvokable]
     public void CloseMiniCart()
     {
@@ -152,7 +151,6 @@
             StateHasChanged();
         }
     }
-
     private bool mobileOpen = false;
     private bool IsFiltersOpen = false;
     private void ToggleMobile() => mobileOpen = !mobileOpen;
@@ -181,14 +179,36 @@
     {
         await CartService.LoadCartAsync();
 
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        // fetch all stores (temp fix)
+        var result = await StoreService.GetAllStores();
+        if (result.Success && result.Data?.Any() == true)
+        {
+            Stores = result.Data;
 
-        IsLoggedIn = user.Identity?.IsAuthenticated ?? false;
+            // pick first store as active
+            var store = Stores[0];
+            ActiveStore = new ActiveStoreContext
+            {
+                StoreId = store.Id,
+                StoreName = store.Name
+            };
 
-        if (IsLoggedIn) UserName = user.Identity!.Name;
+            // Fetch products for the first store (temp fix)
+            var productsResult = await ProductService.ListAllStoreProducts(store.Id);
+            if (productsResult.Success && productsResult.Data != null)
+            {
+                AllProducts = productsResult.Data;
+            }
 
-        CartService.OnChange += StateHasChanged;
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            IsLoggedIn = user.Identity?.IsAuthenticated ?? false;
+
+            if (IsLoggedIn) UserName = user.Identity!.Name;
+
+            CartService.OnChange += StateHasChanged;
+        }
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

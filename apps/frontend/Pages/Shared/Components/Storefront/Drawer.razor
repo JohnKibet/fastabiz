@@ -124,10 +124,13 @@
     [Parameter] public bool IsOpen { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
 
-    private List<ProductListItem> Products = MockData.GetAllProducts();
-    private List<string> Categories = MockData.GetAllCategories();
-    private List<Store> Stores = MockData.Stores;
+    [Parameter] public List<ProductListItem> Products { get; set; } = new();
+    [Parameter] public List<StoreDto> Stores { get; set; } = new();
 
+    private List<string> Categories => Products
+        .Select(p => p.Category)
+        .Distinct()
+        .ToList();
     private List<ProductListItem> CategoryProducts = new(); // second drawer items
     private List<ProductListItem> StoreProducts = new();
     private string? SelectedCategory;
@@ -142,26 +145,15 @@
     private void OpenCategoryDrawer(string category)
     {
         SelectedCategory = category;
-
-        // get products for that category
-        CategoryProducts = Products
-            .Where(p => p.Category == category)
-            .ToList();
-
+        CategoryProducts = Products.Where(p => p.Category == category).ToList();
         IsSecondOpen = true;
     }
-
-    private void OpenStoreDrawer(Store store)
+    private void OpenStoreDrawer(StoreDto store)
     {
         SelectedStore = store.Id;
-        SelectedCategory = null;          // reset category selection
-        CategoryProducts.Clear();         // clear category products
-
-        // get products for that merchant
-        StoreProducts = Products
-            .Where(p => p.StoreId == store.Id)
-            .ToList();
-
+        SelectedCategory = null;
+        CategoryProducts.Clear();
+        StoreProducts = Products.Where(p => p.StoreId == store.Id).ToList();
         IsSecondOpen = true;
     }
 

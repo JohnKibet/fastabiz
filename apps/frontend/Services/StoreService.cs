@@ -35,9 +35,9 @@ public class StoreService
         }
     }
 
-    public async Task<ServiceResult2<List<Store>>> GetAllStores()
+    public async Task<ServiceResult2<List<StoreDto>>> GetAllStores()
     {
-        return await GetFromJsonSafe<List<Store>>("stores/all_stores");
+        return await GetFromJsonSafe<List<StoreDto>>("stores/all_stores");
     }
 
     public async Task<ServiceResult2<List<ActiveStoreContext>>> GetStoresByOwner()

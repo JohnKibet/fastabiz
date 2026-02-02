@@ -57,12 +57,12 @@ else
   Message="Delete this store?" TargetName="@selectedStoreName" OnConfirm="DeleteStore" />
 
 @code {
-  private List<Store>? stores;
+  private List<StoreDto>? stores;
   private string searchTerm = "";
   private int currentPage = 1;
   private int pageSize = 10;
 
-  private Store? selectedStore;
+  private StoreDto? selectedStore;
   private UpdateStoreRequest editableStore = new();
 
   private bool isModalOpen;
@@ -84,15 +84,15 @@ else
     var result = await StoreService.GetAllStores();
     stores = result.Success && result.Data != null
     ? result.Data
-    : new List<Store>();
+    : new List<StoreDto>();
   }
 
-  private IEnumerable<Store> FilteredStores =>
+  private IEnumerable<StoreDto> FilteredStores =>
   stores?.Where(s =>
   string.IsNullOrWhiteSpace(searchTerm) ||
   s.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
   s.Location.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-  ) ?? Enumerable.Empty<Store>();
+  ) ?? Enumerable.Empty<StoreDto>();
 
   private void CreateStore()
   {
@@ -108,7 +108,7 @@ else
     {
       Name = selectedStore?.Name,
       Location = selectedStore?.Location,
-      LogoUrl = selectedStore?.LogoUrl
+      LogoUrl = selectedStore?.LogoURL
     };
     BuildStoreFields(editableStore);
 
@@ -125,7 +125,7 @@ else
     {
       Name = selectedStore?.Name,
       Location = selectedStore?.Location,
-      LogoUrl = selectedStore?.LogoUrl
+      LogoUrl = selectedStore?.LogoURL
     };
     BuildStoreFields(editableStore);
 

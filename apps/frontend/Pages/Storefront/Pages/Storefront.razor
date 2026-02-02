@@ -1,5 +1,6 @@
 @page "/storefront"
 @layout StorefrontLayout
+@inject ProductService ProductService
 @inject NavigationManager NavigationManager
 
 <div class="px-4">
@@ -14,49 +15,52 @@
     </div>
 
     <!-- Pagination (optional) -->
-    <PaginationControl CurrentPage="@CurrentPage" TotalPages="@TotalPages"
-                    OnPreviousPage="@LoadPreviousPage"
-                    OnNextPage="@LoadNextPage" />
-
+    <PaginationControls CurrentPage="@CurrentPage" TotalPages="@TotalPages" OnPreviousPage="@LoadPreviousPage"
+        OnNextPage="@LoadNextPage" />
 </div>
 
 @code {
-    // Mock Data (can be replaced by API call)
-    private List<ProductListItem> Products = MockData.GetAllProducts();
     [CascadingParameter] StorefrontLayout? Layout { get; set; }
+    [CascadingParameter] ActiveStoreContext ActiveStore { get; set; } = new();
+
+    private List<ProductListItem> Products = new();
 
     private int CurrentPage = 1;
     private int TotalPages = 1;
 
-    protected override void OnInitialized()
-    {
-        TotalPages = (int)Math.Ceiling((double)Products.Count / 9); // example: 9 per page
+    private bool _hasLoadedProducts = false;
 
-        // Set breadcrumb
-        if (Layout is StorefrontLayout layout)
+    protected override async Task OnParametersSetAsync()
+    {
+        // Only load if we have a valid store ID and haven't loaded yet
+        if (!_hasLoadedProducts && ActiveStore != null && ActiveStore.StoreId != Guid.Empty)
         {
-            layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+            var result = await ProductService.ListAllStoreProducts(ActiveStore.StoreId);
+            if (result.Success && result.Data != null)
             {
-                new() { Title = "Home", Url = "/storefront" },
-                new() { Title = "Products", Url = "/storefront" }
-            });
+                Products = result.Data;
+            }
+            else
+            {
+                Console.Error.WriteLine("Failed to load products: " + result.Error);
+            }
+
+            TotalPages = (int)Math.Ceiling((double)Products.Count / 9);
+            _hasLoadedProducts = true;
+
+            Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+{
+new() { Title = "Home", Url = "/storefront" },
+new() { Title = "Products", Url = "/storefront" }
+});
+
+            StateHasChanged();
         }
     }
 
-    private async Task LoadPreviousPage(int page)
-    {
-        CurrentPage = page;
-        // fetch page data if needed
-    }
-
-    private async Task LoadNextPage(int page)
-    {
-        CurrentPage = page;
-        // fetch page data if needed
-    }
+    private async Task LoadPreviousPage(int page) => CurrentPage = page;
+    private async Task LoadNextPage(int page) => CurrentPage = page;
 
     private void ViewProductDetail(ProductListItem product)
-    {
-        NavigationManager.NavigateTo($"/product/{product.Id}");
-    }
+    => NavigationManager.NavigateTo($"/product/{product.Id}");
 }

@@ -1,10 +1,12 @@
-@page "/product/{ProductId}"
-@page "/product/{ProductId}/{VariantId}"
+@page "/product/{ProductId:guid}"
+@page "/product/{ProductId:guid}/{VariantId:guid}"
 @using System.Threading.Tasks
 @layout StorefrontLayout
 @inject NavigationManager Nav
+@inject ProductService ProductService
+@inject StoreService StoreService
 
-@if (Product is null)
+@if (FetchedProduct is null)
 {
     <p>Loading...</p>
 }
@@ -14,28 +16,27 @@ else
 
         <!-- LEFT: Image Gallery -->
         <div>
-            <ImageGallery Images="@Product.Images" />
+            <ImageGallery Images="@FetchedProduct.Images" />
         </div>
 
         <!-- RIGHT: Info -->
         <div class="space-y-4">
 
-            <h2 class="text-2xl font-bold">@Product.Name</h2>
+            <h2 class="text-2xl font-bold">@FetchedProduct.Name</h2>
 
-            <button class="text-blue-600 underline"
-                    @onclick="() => ViewStore(Product.StoreId)">
+            <button class="text-blue-600 underline" @onclick="() => ViewStore(FetchedProduct.StoreId)">
                 @Store?.Name
             </button>
 
-            <p class="text-gray-700">@Product.Description</p>
+            <p class="text-gray-700">@FetchedProduct.Description</p>
 
             <!-- VARIANTS -->
-            @if (Product.HasVariants && Product.Variants.Count > 1)
+            @if (FetchedProduct.HasVariants && FetchedProduct.Variants.Count > 1)
             {
-                <VariantSelector
-                    Options="@Product.Options"
-                    Variants="@Product.Variants"
-                    OnVariantSelected="@SelectVariant"
+                <VariantSelector 
+                    Options="@FetchedProduct.Options" 
+                    Variants="@FetchedProduct.Variants" 
+                    OnVariantSelected="SelectVariant"
                     OnSelectionChanged="UpdateSelections" />
 
                 @if (ShowError)
@@ -56,33 +57,30 @@ else
 
             <!-- QUANTITY SELECTOR -->
             <div class="flex items-center gap-3">
-                <button class="px-3 py-1 border rounded-lg text-lg font-bold"
-                        @onclick="DecreaseQty"
-                        disabled="@(IsInCart || Quantity <= 1)">-</button>
+                <button class="px-3 py-1 border rounded-lg text-lg font-bold" @onclick="DecreaseQty"
+                    disabled="@(IsInCart || Quantity <= 1)">-</button>
 
                 <span class="min-w-[40px] text-center font-semibold">@Quantity</span>
 
-                <button class="px-3 py-1 border rounded-lg text-lg font-bold"
-                        @onclick="IncreaseQty"
-                        disabled="@(IsInCart || Quantity >= GetCurrentStock())">+</button>
+                <button class="px-3 py-1 border rounded-lg text-lg font-bold" @onclick="IncreaseQty"
+                    disabled="@(IsInCart || Quantity >= GetCurrentStock())">+</button>
             </div>
 
             <!-- ADD / REMOVE FROM CART -->
             @if (IsInCart)
             {
-                <button
-                    class="w-1/2 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-semibold"
+                <button class="w-1/2 bg-red-600 hover:bg-red-700 text-white px-4 py-3 rounded-lg font-semibold"
                     @onclick="RemoveFromCart">
                     Remove from Cart
                 </button>
             }
             else
             {
-                <button class="w-1/2 px-4 py-3 rounded-lg font-semibold
-                               @(CanAddToCart ? "bg-green-600 text-white hover:bg-green-700"
-                                              : "bg-gray-300 text-gray-500 cursor-not-allowed")"
-                        disabled="@(!CanAddToCart)"
-                        @onclick="AddToCart">
+                <button
+                    class="w-1/2 px-4 py-3 rounded-lg font-semibold
+                                                               @(CanAddToCart ? "bg-green-600 text-white hover:bg-green-700"
+                                                                                                                                  : "bg-gray-300 text-gray-500 cursor-not-allowed")"
+                    disabled="@(!CanAddToCart)" @onclick="AddToCart">
                     Add to Cart
                 </button>
             }
@@ -91,85 +89,85 @@ else
 }
 
 @code {
+    [CascadingParameter] public ActiveStoreContext? ActiveStore { get; set; }
     [Parameter] public Guid? VariantId { get; set; }
     [Parameter] public Guid ProductId { get; set; }
     [CascadingParameter] StorefrontLayout? Layout { get; set; }
     [Inject] private CartService CartService { get; set; } = default!;
 
-    private ProductX Product = new();
-    private Store Store = new();
+    private ProductMapper.ProductDto FetchedProduct = new();
+    private StoreDto Store = new();
 
-    private Variant? SelectedVariant;
+    private ProductMapper.VariantDto? SelectedVariant;
     private Dictionary<string, string?> Selections = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // 1. Load product
-        Product = MockData.Stores
-            .SelectMany(m => m.Products)
-            .FirstOrDefault(p => p.Id == ProductId);
+        // 1. Fetch product by id
+        var result = await ProductService.GetProductByID(ProductId);
+        if (result.Success && result.Data != null)
+        {
+            FetchedProduct = result.Data;
+        }
 
-        if (Product == null)
+        if (FetchedProduct == null)
             return;
 
         // 2. Load store
-        Store = MockData.Stores.First(m => m.Id == Product.StoreId);
+        if (ActiveStore == null) return;
+        Store.Name = ActiveStore.StoreName;
+        Store.Id = ActiveStore.StoreId;
 
         // 3. Prefill variant from URL (if provided)
-        if (VariantId.HasValue && Product.HasVariants)
+        if (VariantId.HasValue && FetchedProduct.HasVariants)
         {
-            SelectedVariant = Product.Variants
-                .FirstOrDefault(v => v.Id == VariantId.Value);
-
-            if (SelectedVariant != null)
-            {
-                foreach (var opt in SelectedVariant.Options)
-                {
-                    Selections[opt.Key] = opt.Value;
-                }
-            }
+            SelectedVariant = FetchedProduct.Variants
+            .FirstOrDefault(v => v.Id == VariantId.Value);
         }
 
         // 4. Breadcrumbs
         Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
-        {
-            new() { Title = "Home", Url = "/" },
-            new() { Title = "Stores", Url = "/stores" },
-            new() { Title = Store.Name, Url = $"/store/{Store.Id}" },
-            new() { Title = Product.Name, Url = $"/product/{ProductId}" }
-        });
+{
+new() { Title = "Home", Url = "/" },
+new() { Title = "Stores", Url = "/stores" },
+new() { Title = Store.Name, Url = $"/store/{Store.Id}" },
+new() { Title = FetchedProduct.Name, Url = $"/product/{ProductId}" }
+});
     }
 
     private void UpdateSelections(Dictionary<string, string?> map) => Selections = map;
 
-    private bool AllOptionsSelected =>
-        Product!.Variants.Count > 1 && // only for multiple variants
-        Product.Options.All(o => Selections.ContainsKey(o.Name) && Selections[o.Name] != null);
+    private bool AllOptionsSelected => FetchedProduct!.Variants.Count > 1 && FetchedProduct != null;
 
     private bool ShowError =>
-        Product!.Variants.Count > 1 && AllOptionsSelected && SelectedVariant == null;
+    FetchedProduct!.Variants.Count > 1 && AllOptionsSelected && SelectedVariant == null;
 
     private bool CanAddToCart =>
-        !Product!.HasVariants ||       // no variants
-        Product.Variants.Count == 1 || // single variant
-        (AllOptionsSelected && SelectedVariant != null); // multiple variants
+    !FetchedProduct!.HasVariants || // no variants
+    FetchedProduct.Variants.Count == 1 || // single variant
+    (AllOptionsSelected && SelectedVariant != null); // multiple variants
 
-    private bool IsInCart => CartService.IsInCart(Product!.Id, SelectedVariant?.Id);
+    private bool IsInCart => CartService.IsInCart(FetchedProduct!.Id, SelectedVariant?.Id);
 
     private string GetPriceDisplay()
     {
-        if (!Product!.HasVariants) 
-            return Product.Price.ToString("N2") ?? "-";
+        // No variants (price not implemented yet)
+        if (!FetchedProduct!.HasVariants)
+            return "-";
 
-        if (Product.Variants.Count == 1) 
-            return Product.Variants[0].Price.ToString("N2");
+        // Single variant
+        if (FetchedProduct.Variants.Count == 1)
+            return FetchedProduct.Variants[0].Price.ToString("N2");
 
-        // multiple variants
+        // Multiple variants
         if (SelectedVariant != null)
             return SelectedVariant.Price.ToString("N2");
 
-        // Show price range
-        var prices = Product.Variants.Select(v => v.Price);
+        // Price range (SAFE)
+        var prices = FetchedProduct.Variants.Select(v => v.Price).ToList();
+        if (!prices.Any())
+            return "-";
+
         double min = prices.Min();
         double max = prices.Max();
         return min == max ? min.ToString("N2") : $"{min:N2} - {max:N2}";
@@ -177,25 +175,28 @@ else
 
     private string GetStockDisplay()
     {
-        if (!Product!.HasVariants) 
-            return Product.Stock.ToString();
+        if (!FetchedProduct!.HasVariants)
+            return "-";
 
-        if (Product.Variants.Count == 1) 
-            return Product.Variants[0].Stock.ToString();
+        if (FetchedProduct.Variants.Count == 1)
+            return FetchedProduct.Variants[0].Stock.ToString();
 
         if (SelectedVariant != null)
             return SelectedVariant.Stock.ToString();
 
-        // Show stock range
-        var stocks = Product.Variants.Select(v => v.Stock);
+        var stocks = FetchedProduct.Variants.Select(v => v.Stock).ToList();
+        if (!stocks.Any())
+            return "-";
+
         int min = stocks.Min();
         int max = stocks.Max();
         return min == max ? min.ToString() : $"{min} - {max}";
     }
 
+
     private void ViewStore(Guid id) => Nav.NavigateTo($"/store/{id}");
 
-    private void SelectVariant(Variant v)
+    private void SelectVariant(ProductMapper.VariantDto v)
     {
         SelectedVariant = v;
         StateHasChanged();
@@ -216,30 +217,31 @@ else
 
     private int GetCurrentStock()
     {
-        if (!Product!.HasVariants)
-            return Product.Stock;
-        
-        if (Product.Variants.Count == 1)
-            return Product.Variants[0].Stock;
+        if (!FetchedProduct!.HasVariants)
+            return int.MaxValue; // allow qty changes for now
+
+        if (FetchedProduct.Variants.Count == 1)
+            return FetchedProduct.Variants[0].Stock;
 
         return SelectedVariant?.Stock ?? 1;
     }
+
 
     private async Task AddToCart()
     {
         if (!CanAddToCart) return;
 
-        Variant? variantToAdd = Product.HasVariants ? SelectedVariant : null;
+        ProductMapper.VariantDto? variantToAdd = FetchedProduct.HasVariants ? SelectedVariant : null;
 
-        await CartService.AddItem(Product!, variantToAdd, Quantity);
+        await CartService.AddItem(FetchedProduct!, variantToAdd, Quantity);
         StateHasChanged();
     }
 
     private async Task RemoveFromCart()
     {
-        await CartService.RemoveItem(Product!.Id, SelectedVariant?.Id);
+        await CartService.RemoveItem(FetchedProduct!.Id, SelectedVariant?.Id);
         Quantity = 1;
-        if (Product.HasVariants && Product.Variants.Count > 1)
+        if (FetchedProduct.HasVariants && FetchedProduct.Variants.Count > 1)
             SelectedVariant = null; // reset variant selection
         StateHasChanged();
     }

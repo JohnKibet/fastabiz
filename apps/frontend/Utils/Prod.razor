@@ -1,0 +1,182 @@
+@* @page "/product/{ProductId:guid}"
+@page "/product/{ProductId:guid}/{VariantId:guid}"
+@layout StorefrontLayout
+
+@inject ProductService ProductService
+@inject NavigationManager Nav
+@inject CartService CartService
+
+@if (Product is null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="product-detail grid grid-cols-2 gap-8 p-6">
+
+        <!-- LEFT -->
+        <div>
+            <ImageGallery Images="@Product.Images" />
+        </div>
+
+        <!-- RIGHT -->
+        <div class="space-y-4">
+
+            <h2 class="text-2xl font-bold">@Product.Name</h2>
+
+            <button class="text-blue-600 underline"
+                    @onclick="() => ViewStore(Product.StoreId)">
+                @Store?.Name
+            </button>
+
+            <p class="text-gray-700">@Product.Description</p>
+
+            <!-- OPTIONS -->
+            @if (Product.HasVariants && Product.Variants.Count > 1)
+            {
+                <VariantSelector
+                    Options="@Product.Options"
+                    Variants="@Product.Variants"
+                    OnVariantSelected="SelectVariant"
+                    OnSelectionChanged="UpdateSelections" />
+
+                @if (ShowError)
+                {
+                    <p class="text-red-600 font-medium">
+                        This combination is not available.
+                    </p>
+                }
+            }
+
+            <!-- PRICE -->
+            <p class="text-xl font-semibold">
+                Price: KES @GetPriceDisplay()
+            </p>
+
+            <!-- STOCK -->
+            <p class="text-sm text-gray-500">
+                Stock: @GetStockDisplay()
+            </p>
+
+            <!-- QUANTITY -->
+            <div class="flex items-center gap-3">
+                <button class="px-3 py-1 border rounded-lg"
+                        @onclick="DecreaseQty"
+                        disabled="@(Quantity <= 1)">
+                    -
+                </button>
+
+                <span class="min-w-[40px] text-center font-semibold">
+                    @Quantity
+                </span>
+
+                <button class="px-3 py-1 border rounded-lg"
+                        @onclick="IncreaseQty"
+                        disabled="@(Quantity >= GetCurrentStock())">
+                    +
+                </button>
+            </div>
+
+            <!-- ADD TO CART -->
+            <button class="w-1/2 px-4 py-3 rounded-lg font-semibold
+                @(CanAddToCart
+                    ? "bg-green-600 text-white hover:bg-green-700"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed")"
+                disabled="@(!CanAddToCart)"
+                @onclick="AddToCart">
+                Add to Cart
+            </button>
+        </div>
+    </div>
+}
+
+
+@code {
+    [Parameter] public Guid? VariantId { get; set; }
+    [Parameter] public Guid ProductId { get; set; }
+    [CascadingParameter] StorefrontLayout? Layout { get; set; }
+
+    private ProductX Product = new();
+    private ProductMapper.ProductDto FetchedProduct = new();
+    private Store Store = new();
+    private ProductMapper.VariantDto? SelectedVariant;
+    private int Quantity = 1;
+    private bool IsInCart = false; // placeholder for cart logic
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await ProductService.GetProductByID(ProductId);
+        if (result.Success && result.Data != null)
+        {
+            FetchedProduct = result.Data;
+
+            // Prefill variant if URL contains VariantId
+            if (VariantId.HasValue && Product.HasVariants)
+            {
+                SelectedVariant = FetchedProduct.Variants.FirstOrDefault(v => v.Id == VariantId.Value);
+            }
+
+            Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
+{
+new() { Title = "Home", Url = "/" },
+new() { Title = "Stores", Url = "/stores" },
+new() { Title = Store?.Name ?? "Store", Url = $"/store/{Store?.Id}" },
+new() { Title = Product.Name, Url = $"/product/{ProductId}" }
+});
+        }
+        else
+        {
+            Console.Error.WriteLine("Failed to load product: " + result.Error);
+        }
+    }
+
+    private void SelectVariant(ProductMapper.VariantDto variant)
+    {
+        SelectedVariant = variant;
+        Quantity = 1;
+        StateHasChanged();
+    }
+
+    private string GetPriceDisplay()
+    {
+        if (Product.HasVariants)
+            return SelectedVariant?.Price.ToString("N2") ?? "-";
+        else
+            return "-"; // placeholder until single-product price route exists
+    }
+
+    private string GetStockDisplay()
+    {
+        if (Product.HasVariants)
+            return SelectedVariant?.Stock.ToString() ?? "-";
+        else
+            return "-"; // placeholder
+    }
+
+    private int GetCurrentStock() => SelectedVariant?.Stock ?? 0;
+
+    private void IncreaseQty()
+    {
+        if (Quantity < GetCurrentStock())
+            Quantity++;
+    }
+
+    private void DecreaseQty()
+    {
+        if (Quantity > 1)
+            Quantity--;
+    }
+
+    private bool CanAddToCart => SelectedVariant != null;
+
+    private void ViewStore(Guid id) => Nav.NavigateTo($"/store/{id}");
+
+    private async Task AddToCart()
+    {
+        if (SelectedVariant == null) return;
+
+        // placeholder for cart logic
+        IsInCart = true;
+        Console.WriteLine($"Added {Quantity} of {SelectedVariant.Sku} to cart.");
+    }
+} *@

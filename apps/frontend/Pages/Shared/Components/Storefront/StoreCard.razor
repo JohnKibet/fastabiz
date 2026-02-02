@@ -4,20 +4,20 @@
 <div class="merchant-card border rounded-lg shadow hover:shadow-lg p-4 cursor-pointer"
     @onclick="() => OnSelected.InvokeAsync(Store)">
     <div class="flex items-center space-x-4">
-        @if (!string.IsNullOrEmpty(Store.LogoUrl))
+        @if (!string.IsNullOrEmpty(Store.LogoURL))
         {
-            <img src="@Store.LogoUrl" alt="@Store.Name" class="w-12 h-12 rounded-full object-cover" />
+            <img src="@Store.LogoURL" alt="@Store.Name" class="w-12 h-12 rounded-full object-cover" />
         }
         <div>
             <h4 class="font-semibold text-lg">@Store.Name</h4>
-            <p class="text-sm text-gray-600">@Store.TotalProducts product(s)</p>
-            <p class="text-sm text-yellow-600">⭐ @Store.Rating.ToString("0.0")</p>
+            <p class="text-sm text-gray-600">@Store?.TotalProducts product(s)</p>
+            <p class="text-sm text-yellow-600">⭐ @Store?.Rating?.ToString("0.0")</p>
         </div>
     </div>
 
 </div>
 
 @code {
-    [Parameter] public Store Store { get; set; } = new();
-    [Parameter] public EventCallback<Store> OnSelected { get; set; }
+    [Parameter] public StoreDto Store { get; set; } = new();
+    [Parameter] public EventCallback<StoreDto> OnSelected { get; set; }
 }

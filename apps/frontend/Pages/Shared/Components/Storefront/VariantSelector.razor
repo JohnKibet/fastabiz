@@ -1,7 +1,7 @@
 @using frontend.Models
 @namespace frontend.Pages.Shared.Components.Storefront
 
-@if (Options?.Any() == true && Variants?.Any() == true && Options.Count > 0 && Variants.Count > 1)
+@if (Options.Any() == true && Variants?.Any() == true)
 {
     <div class="space-y-4">
         @foreach (var option in Options)
@@ -13,10 +13,9 @@
                     {
                         bool unavailable = IsValueUnavailable(option.Name, val);
 
-                        <button
-                            disabled="@unavailable"
-                            class="@GetValueClass(option.Name, val, unavailable)"
-                            @onclick="() => SelectOption(option.Name, val)">
+                        <button disabled="@unavailable" 
+                                class="@GetValueClass(option.Name, val, unavailable)"
+                                @onclick="() => SelectOption(option.Name, val)">
                             @val
                         </button>
                     }
@@ -27,7 +26,7 @@
         @if (Selected.Values.Any(v => !string.IsNullOrEmpty(v)))
         {
             <button class="mt-2 px-3 py-1 rounded-lg border border-gray-300 bg-white hover:bg-gray-100 text-gray-700"
-                    @onclick="ClearSelections">
+                @onclick="ClearSelections">
                 Clear Selection
             </button>
         }
@@ -35,24 +34,28 @@
 }
 
 @code {
-    [Parameter] public List<Option> Options { get; set; } = new();
-    [Parameter] public List<Variant> Variants { get; set; } = new();
+    [Parameter] public List<ProductMapper.OptionDto> Options { get; set; } = new();
+    [Parameter] public List<ProductMapper.VariantDto> Variants { get; set; } = new();
 
-    [Parameter] public EventCallback<Variant?> OnVariantSelected { get; set; }
+    [Parameter] public EventCallback<ProductMapper.VariantDto?> OnVariantSelected { get; set; }
     [Parameter] public EventCallback<Dictionary<string, string?>> OnSelectionChanged { get; set; }
 
     private Dictionary<string, string?> Selected = new();
+    private bool _hasInitialized = false;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
-        // Initialize selections only if multiple options exist
-        if (Options?.Any() == true)
+        if (!_hasInitialized && Options?.Any() == true)
         {
             foreach (var opt in Options)
-                Selected[opt.Name] = null;
-        }
+            {
+                if (!Selected.ContainsKey(opt.Name))
+                    Selected[opt.Name] = null;
+            }
 
-        EmitSelectedVariant();
+            EmitSelectedVariant();
+            _hasInitialized = true;
+        }
     }
 
     private void SelectOption(string optionName, string value)
@@ -71,16 +74,6 @@
         OnSelectionChanged.InvokeAsync(Selected);
     }
 
-    private void EmitSelectedVariant()
-    {
-        Variant? match = Variants.FirstOrDefault(v =>
-            v.Options.All(kv =>
-                Selected.ContainsKey(kv.Key) &&
-                Selected[kv.Key] == kv.Value));
-
-        OnVariantSelected.InvokeAsync(match);
-    }
-
     private bool IsValueUnavailable(string optionName, string value)
     {
         var temp = new Dictionary<string, string?>(Selected)
@@ -89,9 +82,28 @@
         };
 
         return !Variants.Any(v =>
-            v.Options.All(kv =>
-                temp.ContainsKey(kv.Key) &&
-                (temp[kv.Key] == null || temp[kv.Key] == kv.Value)));
+        v.Options.All(kv =>
+        temp.ContainsKey(kv.Key) &&
+        (temp[kv.Key] == null || temp[kv.Key] == kv.Value)));
+    }
+    private void EmitSelectedVariant()
+    {
+        var match = Variants.FirstOrDefault(v =>
+        v.Options.All(opt =>
+        Selected.ContainsKey(opt.Key) &&
+        Selected[opt.Key] == opt.Value));
+
+        // fallback: select first variant if none selected
+        if (match == null && Variants.Any())
+        {
+            match = Variants.First();
+            foreach (var opt in match.Options)
+                Selected[opt.Key] = opt.Value;
+
+            StateHasChanged(); // ensure buttons render immediately
+        }
+
+        OnVariantSelected.InvokeAsync(match);
     }
 
     private string GetValueClass(string optionName, string value, bool unavailable)
