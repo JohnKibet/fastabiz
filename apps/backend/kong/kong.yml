@@ -21,7 +21,7 @@ services:
         plugins:
           - name: rate-limiting
             config:
-              minute: 5
+              minute: 1000
               policy: local
           - name: jwt
           - name: cors

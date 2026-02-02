@@ -51,6 +51,7 @@ builder.Services.AddHttpClient("AuthenticatedApi", client =>
 }).AddHttpMessageHandler<AuthHeaderHandler>()
 .AddHttpMessageHandler<AuthExpiredHandler>();
 
+builder.Services.AddHttpClient("CloudinaryClient");
 
 // Register app services
 builder.Services.AddScoped<UserService>();

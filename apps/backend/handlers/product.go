@@ -3,9 +3,16 @@ package handlers
 import (
 	"backend/internal/application"
 	"backend/internal/domain/product"
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"net/http"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -255,6 +262,52 @@ func (h *ProductHandler) AddImage(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{
 		"message": "Image added",
 	})
+}
+
+// @Router /cloudinary/signature [post]
+func (h *ProductHandler) CloudinarySignature(w http.ResponseWriter, r *http.Request) {
+	// generate timestamp
+	ts := time.Now().Unix()
+
+	// build the string to sign
+	// You can include extra params here like folder, public_id, etc.
+	// signature_string must be sorted lexicographically
+	params := map[string]string{
+		"timestamp": strconv.FormatInt(ts, 10),
+		"folder":    "products",
+	}
+
+	// example: sign timestamp only
+	signature := generateCloudinarySignature(params, os.Getenv("CLOUDINARY_API_SECRET"))
+
+	writeJSON(w, http.StatusOK, map[string]interface{}{
+		"cloud_name": os.Getenv("CLOUDINARY_CLOUD_NAME"),
+		"api_key":    os.Getenv("CLOUDINARY_API_KEY"),
+		"timestamp":  ts,
+		"signature":  signature,
+		"folder":     "products",
+	})
+}
+
+func generateCloudinarySignature(params map[string]string, apiSecret string) string {
+	// sort keys alphabetically
+	keys := make([]string, 0, len(params))
+	for k := range params {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	// build string to sign
+	var parts []string
+	for _, k := range keys {
+		parts = append(parts, k+"="+params[k])
+	}
+
+	strToSign := strings.Join(parts, "&") + apiSecret
+
+	hasher := sha1.New()
+	hasher.Write([]byte(strToSign))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
 // DeleteImage godoc

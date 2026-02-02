@@ -1,0 +1,26 @@
+@using frontend.Models
+
+<div class="mt-10 border-t pt-6">
+  <h3 class="text-lg font-semibold mb-3">Created Variants</h3>
+
+  @foreach (var v in Variants)
+  {
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-center border rounded-lg p-3 mb-2">
+      <div class="font-medium text-sm">@v.SKU</div>
+      <div class="text-xs text-gray-600 col-span-2">
+        @string.Join(", ", v.Options.Select(o => $"{o.Key}: {o.Value}"))
+      </div>
+      <div class="text-sm">KES @v.Price</div>
+      <div class="text-sm">Stock: @v.stock</div>
+    </div>
+  }
+
+  <button class="mt-6 text-primary underline" @onclick="OnResetAll">
+    Create another product
+  </button>
+</div>
+
+@code {
+  [Parameter] public List<CreateVariantResponse> Variants { get; set; } = new();
+  [Parameter] public EventCallback OnResetAll { get; set; }
+}

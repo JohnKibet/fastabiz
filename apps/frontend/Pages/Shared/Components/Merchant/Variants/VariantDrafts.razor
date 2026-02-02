@@ -1,0 +1,55 @@
+@using frontend.Models
+@using static frontend.Pages.Shared.Components.Merchant.VariantSection
+
+@inject ToastService ToastService
+
+<div class="space-y-4">
+    @foreach (var v in Drafts)
+    {
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end border p-3 rounded-lg">
+            <div class="text-sm font-medium">
+                @v.Options.First().Key: @v.Options.First().Value
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-xs text-gray-600 mb-1">SKU</label>
+                <InputText @bind-Value="v.SKU" placeholder="e.g. APP-SM-001" class="px-3 py-2 border rounded-lg" />
+                <span class="text-[11px] text-gray-400 mt-1">Format: PRODUCT-OPTION-INDEX (APP-SM-001)</span>
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-xs text-gray-600 mb-1">Price</label>
+                <InputNumber @bind-Value="v.Price" class="px-3 py-2 border rounded-lg" />
+            </div>
+
+            <div class="flex flex-col">
+                <label class="text-xs text-gray-600 mb-1">Stock</label>
+                <InputNumber @bind-Value="v.Stock" class="px-3 py-2 border rounded-lg" />
+            </div>
+
+            <div class="flex flex-col col-span-2">
+                <label class="text-xs text-gray-600 mb-1">Images</label>
+                <InputFile multiple OnChange="@(e => OnImagesSelected.InvokeAsync((e, v)))" />
+
+                @if (v.Files.Any())
+                {
+                    <div class="flex gap-2 mt-2 flex-wrap">
+                        @for (int i = 0; i < v.Files.Count; i++)
+                        {
+                            <button type="button"
+                                    class="px-2 py-1 text-xs rounded @(v.PrimaryImageIndex == i ? "bg-primary text-white" : "bg-gray-200")"
+                                    @onclick="() => v.PrimaryImageIndex = i">
+                                @(v.PrimaryImageIndex == i ? "Primary" : $"Image {i + 1}")
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public List<VariantDraft> Drafts { get; set; } = new();
+    [Parameter] public EventCallback<(InputFileChangeEventArgs, VariantDraft)> OnImagesSelected { get; set; }
+}

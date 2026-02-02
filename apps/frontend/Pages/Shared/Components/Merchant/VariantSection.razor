@@ -1,153 +1,53 @@
 @using frontend.Models
+@using frontend.Pages.Shared.Components.Merchant.Variants
 @inject ProductService ProductService
 @inject ToastService ToastService
 
 <div class="mt-6 border-t pt-4">
   <h2 class="text-lg font-semibold text-textDark mb-2">Product Variants</h2>
 
-  <!-- Add Option Names -->
-  <fieldset disabled="@(options.Any(o => o.IsNameLocked))" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div>
-      <label class="block text-sm font-medium text-textDark">Option Name</label>
-      <InputText @bind-Value="optionName" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-    </div>
-    <div class="flex items-end">
-      <button @onclick="AddOptionName" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-ctaHover">Add
-        Option</button>
-    </div>
-  </fieldset>
+  <div class="@(variantsCreated ? "opacity-60 pointer-events-none" : "")">
+    <!-- Add Option Names -->
+    <fieldset disabled="@(options.Any(o => o.IsNameLocked))" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <label class="block text-sm font-medium text-textDark">Option Name</label>
+        <InputText @bind-Value="optionName" class="w-full mt-1 px-4 py-2 border rounded-lg" />
+      </div>
+      <div class="flex items-end">
+        <button @onclick="AddOptionName" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-ctaHover">Add
+          Option</button>
+      </div>
+    </fieldset>
 
-  <!-- List of Option Names -->
-  <ul class="mt-2">
-    @foreach (var opt in options)
+    <!-- List of Option Names -->
+    <OptionList Options="options" OnDeleteOption="@(opt => DeleteOption(opt))"
+      OnAddOptionValues="@(opt => AddOptionValues(opt))" OnClearValues="@(opt => ClearValues(opt))" />
+
+
+    @if (options.Any(o => o.IsNameLocked && o.AreValuesLocked) && !variantDrafts.Any())
     {
-      <div class="mt-4 border p-3 rounded-lg">
-        <h3 class="text-sm font-medium text-textDark">@opt.Name</h3>
+      BuildVariantDrafts();
+    }
+    @if (variantDrafts.Any())
+    {
+      <VariantDrafts Drafts="variantDrafts"
+        OnImagesSelected="@(args => OnVariantImagesSelected(args.Item1, args.Item2))" />
 
-        @if (opt.IsNameLocked)
-        {
-          <button class="text-sm text-red-600 hover:underline" @onclick="() => DeleteOption(opt)">
-            Delete
-          </button>
-        }
 
-        <div class="flex space-x-2 mt-2">
-          <InputText @bind-Value="opt.PendingValues" aria-disabled="@opt.AreValuesLocked"
-            class="w-full px-3 py-1 border rounded-lg" placeholder="Comma separated values" />
-
-          <button disabled="@opt.AreValuesLocked" @onclick="() => AddOptionValues(opt)"
-            class="bg-primary text-white px-3 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
-            Add Values
-          </button>
-        </div>
-        @if (opt.Values.Any())
-        {
-          <div class="flex flex-wrap gap-2 mt-3">
-            @foreach (var val in opt.Values)
-            {
-              <span class="px-3 py-1 text-sm bg-gray-100 rounded-full">
-                @val
-              </span>
-            }
-          </div>
-        }
-        @if (opt.AreValuesLocked)
-        {
-          <button class="text-xs text-red-600 mt-2 hover:underline" @onclick="() => ClearValues(opt)">
-            Delete values
-          </button>
-        }
+      <div class="mt-6 flex justify-end">
+        <button class="bg-primary text-white px-6 py-2 rounded-lg
+                                                  disabled:opacity-50 disabled:cursor-not-allowed
+                                                  hover:bg-ctaHover" @onclick="CreateVariants"
+          disabled="@variantDrafts.Any(v => string.IsNullOrWhiteSpace(v.SKU) || v.Price <= 0)">
+          Create Variants
+        </button>
       </div>
     }
-  </ul>
-  @if (options.Any(o => o.IsNameLocked && o.AreValuesLocked) && !variantDrafts.Any())
-  {
-    BuildVariantDrafts();
-  }
-  @if (variantDrafts.Any())
-  {
-    <div class="mt-8">
-      <h3 class="text-md font-semibold text-textDark mb-3">
-        Variants
-      </h3>
 
-      <div class="space-y-4">
-        @foreach (var v in variantDrafts)
-        {
-          <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end border p-3 rounded-lg">
-
-            <div class="text-sm font-medium">
-              @v.Options.First().Key: @v.Options.First().Value
-            </div>
-
-            <div class="flex flex-col">
-              <label class="text-xs text-gray-600 mb-1">SKU</label>
-              <InputText @bind-Value="v.SKU" placeholder="e.g. APP-SM-001" class="px-3 py-2 border rounded-lg" />
-              <span class="text-[11px] text-gray-400 mt-1">
-                Format: PRODUCT-OPTION-INDEX (APP-SM-001)
-              </span>
-            </div>
-
-            <div class="flex flex-col">
-              <label class="text-xs text-gray-600 mb-1">Price</label>
-              <InputNumber @bind-Value="v.Price" class="px-3 py-2 border rounded-lg" />
-            </div>
-
-            <div class="flex flex-col">
-              <label class="text-xs text-gray-600 mb-1">Stock</label>
-              <InputNumber @bind-Value="v.Stock" class="px-3 py-2 border rounded-lg" />
-            </div>
-
-            <div class="flex flex-col">
-              <label class="text-xs text-gray-600 mb-1">Image URL</label>
-              <InputText @bind-Value="v.Image" class="px-3 py-2 border rounded-lg" />
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-
-    <div class="mt-6 flex justify-end">
-      <button disabled="@variantDrafts.Any(v => string.IsNullOrWhiteSpace(v.SKU) || v.Price <= 0)" class="bg-primary text-white px-6 py-2 rounded-lg
-             disabled:opacity-50 disabled:cursor-not-allowed
-             hover:bg-ctaHover" @onclick="CreateVariants">
-        Create Variants
-      </button>
-    </div>
-  }
-
+  </div>
   @if (createdVariants.Any())
   {
-    <div class="mt-10 border-t pt-6">
-      <h3 class="text-lg font-semibold mb-3">
-        Created Variants
-      </h3>
-
-      @foreach (var v in createdVariants)
-      {
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-center border rounded-lg p-3 mb-2">
-          <div class="font-medium text-sm">
-            @v.SKU
-          </div>
-
-          <div class="text-xs text-gray-600 col-span-2">
-            @string.Join(", ", v.Options.Select(o => $"{o.Key}: {o.Value}"))
-          </div>
-
-          <div class="text-sm">
-            KES @v.Price
-          </div>
-
-          <div class="text-sm">
-            Stock: @v.stock
-          </div>
-        </div>
-      }
-
-      <button class="mt-6 text-primary underline" @onclick="ResetAll">
-        Create another product
-      </button>
-    </div>
+    <CreatedVariants Variants="createdVariants" OnResetAll="ResetAll" />
   }
 
 </div>
@@ -155,7 +55,7 @@
 @code {
   [Parameter] public Guid ProductId { get; set; }
   private string optionName = string.Empty;
-  private class OptionUi
+  public class OptionUi
   {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
@@ -166,16 +66,18 @@
   }
   private List<OptionUi> options = new();
 
-  private class VariantDraft
+  public class VariantDraft
   {
     public string SKU { get; set; } = string.Empty;
     public double Price { get; set; }
     public int Stock { get; set; }
-    public string Image { get; set; } = string.Empty;
+    public List<IBrowserFile> Files { get; set; } = new();
+    public int PrimaryImageIndex { get; set; } = 0;
     public Dictionary<string, string> Options { get; set; } = new();
   }
-  private List<VariantDraft> variantDrafts = new();
+  public List<VariantDraft> variantDrafts = new();
   private List<CreateVariantResponse> createdVariants = new();
+  private bool variantsCreated => createdVariants.Any();
 
   private async Task AddOptionName()
   {
@@ -257,6 +159,10 @@
       ToastService.ShowToast(result.Error?.Detail ?? "Failed to add values", string.Empty, ToastService.ToastLevel.Error);
     }
   }
+  private void OnVariantImagesSelected(InputFileChangeEventArgs e, VariantDraft draft)
+  {
+    draft.Files = e.GetMultipleFiles().ToList();
+  }
 
   private void ClearValues(OptionUi opt)
   {
@@ -295,7 +201,6 @@
         SKU = draft.SKU,
         Price = draft.Price,
         Stock = draft.Stock,
-        Image = draft.Image,
         Options = draft.Options
       };
 
@@ -311,9 +216,54 @@
       }
 
       createdVariants.Add(result.Data);
+
+      // upload images after variant exists
+      await SaveVariantImages(result.Data.ProductId, draft);
     }
 
-    ToastService.ShowToast("Variants created successfully", string.Empty, ToastService.ToastLevel.Success);
+    ToastService.ShowToast(
+    "Variants created successfully",
+    "Your product variants are now live and ready for sale.",
+    ToastService.ToastLevel.Success
+    );
+  }
+
+  private async Task SaveVariantImages(Guid productId, VariantDraft draft)
+  {
+    if (!draft.Files.Any())
+      return;
+
+    var sig = await ProductService.GetCloudinarySignature();
+    if (!sig.Success)
+      return;
+
+    var images = new List<Image>();
+
+    for (int i = 0; i < draft.Files.Count; i++)
+    {
+      var url = await ProductService.UploadToCloudinary(
+      draft.Files[i],
+      sig.Data!
+      );
+
+      if (url is null)
+        continue;
+
+      images.Add(new Image
+      {
+        URL = url,
+        IsPrimary = i == draft.PrimaryImageIndex
+      });
+    }
+
+    if (!images.Any())
+      return;
+
+    await ProductService.AddProductImages(new AddImageRequest
+    {
+      ProductId = productId,
+      Images = images
+    });
   }
 
   private void ResetAll()

@@ -45,7 +45,7 @@
     <p class="text-textLight mb-6">Add a product to your store</p>
 
     <EditForm Model="product" OnValidSubmit="Submit">
-      <fieldset disabled="@productCreated">
+      <fieldset disabled="@productCreated" class="space-y-4 @(productCreated ? "opacity-60 pointer-events-none" : "")">
         <DataAnnotationsValidator />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -76,21 +76,23 @@
         </div>
 
       </fieldset>
-      @if (productCreated && product.HasVariants)
-      {
-        <VariantSection ProductId="@createdProductId" />
-      }
 
       @if (!productCreated)
       {
         <button type="submit" disabled="@(isSubmitting || productCreated)" class="mt-6 w-full bg-primary text-white py-2 rounded-xl
-                  disabled:opacity-50 disabled:cursor-not-allowed
-                  hover:bg-ctaHover transition">
+                              disabled:opacity-50 disabled:cursor-not-allowed
+                              hover:bg-ctaHover transition">
           Create Product
         </button>
       }
 
     </EditForm>
+
+    @if (productCreated && product.HasVariants)
+    {
+      <VariantSection ProductId="@createdProductId" />
+    }
+
   </div>
 </div>
 
@@ -210,169 +212,3 @@
   }
 
 }
-@* 
-@layout MerchantLayout
-@using frontend.Models
-@using frontend.Pages.Merchant
-@inject ProductService ProductService
-@inject StoreService StoreService
-@inject ToastService ToastService
-
-@if (!HasActiveStore)
-{
-  <div class="max-w-xl mx-auto mt-20 bg-white rounded-xl shadow p-6">
-    <h2 class="text-lg font-semibold mb-4">Select a Store</h2>
-
-    @if (isLoadingStores)
-    {
-      <p class="text-sm text-gray-500">Loading stores...</p>
-    }
-    else if (stores.Count == 0)
-    {
-      <p class="text-sm text-red-500">
-        You don’t have any stores yet.
-        <a href="/merchant/stores/create" class="text-primary underline ml-1">
-          Create one
-        </a>
-      </p>
-    }
-    else
-    {
-      <select class="w-full px-4 py-2 border rounded-lg"
-              @bind="selectedStoreId"
-              @bind:after="ActivateStore">
-        <option value="">-- Select a store --</option>
-        @foreach (var store in stores)
-        {
-          <option value="@store.Id">@store.Name</option>
-        }
-      </select>
-    }
-  </div>
-}
-else
-{
-  <div class="min-h-screen bg-bgSoft p-6">
-    <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
-      <h1 class="text-2xl font-semibold mb-2">Create Product</h1>
-      <p class="text-textLight mb-6">
-        Adding product to <strong>@StoreCtx.StoreName</strong>
-      </p>
-
-      <EditForm Model="product" OnValidSubmit="Submit">
-        <fieldset disabled="@productCreated">
-          <DataAnnotationsValidator />
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium">Product Name</label>
-              <InputText @bind-Value="product.Name"
-                         class="w-full mt-1 px-4 py-2 border rounded-lg" />
-              <ValidationMessage For="() => product.Name" />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium">Category</label>
-              <InputText @bind-Value="product.Category"
-                         class="w-full mt-1 px-4 py-2 border rounded-lg" />
-            </div>
-
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium">Description</label>
-              <InputTextArea @bind-Value="product.Description"
-                             rows="4"
-                             class="w-full mt-1 px-4 py-2 border rounded-lg" />
-            </div>
-          </div>
-
-          <div class="mt-4">
-            <label class="flex items-center space-x-2">
-              <InputCheckbox @bind-Value="product.HasVariants" />
-              <span class="text-sm">Does this product have variants?</span>
-            </label>
-          </div>
-        </fieldset>
-
-        @if (!productCreated)
-        {
-          <button type="submit"
-                  disabled="@isSubmitting"
-                  class="mt-6 w-full bg-primary text-white py-2 rounded-xl
-                         disabled:opacity-50 disabled:cursor-not-allowed">
-            Create Product
-          </button>
-        }
-
-        @if (productCreated && product.HasVariants)
-        {
-          <VariantSection ProductId="@createdProductId" />
-        }
-      </EditForm>
-    </div>
-  </div>
-}
-
-@code {
-  [CascadingParameter] public ActiveStoreContext StoreCtx { get; set; } = default!;
-
-  private CreateProductRequest product = new();
-  private List<Store> stores = new();
-
-  private Guid? selectedStoreId;
-  private Guid createdProductId;
-
-  private bool isSubmitting;
-  private bool productCreated;
-  private bool isLoadingStores;
-
-  private bool HasActiveStore =>
-    StoreCtx != null && StoreCtx.StoreId != Guid.Empty;
-
-  protected override async Task OnInitializedAsync()
-  {
-    isLoadingStores = true;
-    var result = await StoreService.GetAllStores();
-    stores = result.Success && result.Data != null ? result.Data : new();
-    isLoadingStores = false;
-  }
-
-  private void ActivateStore()
-  {
-    if (!selectedStoreId.HasValue)
-      return;
-
-    var store = stores.First(s => s.Id == selectedStoreId.Value);
-    StoreCtx.StoreId = store.Id;
-    StoreCtx.StoreName = store.Name;
-  }
-
-  private async Task Submit()
-  {
-    if (isSubmitting || !HasActiveStore)
-      return;
-
-    isSubmitting = true;
-    product.StoreId = StoreCtx.StoreId!.Value;
-
-    var result = await ProductService.AddProduct(product);
-    if (!result.Success || result.Data == null)
-    {
-      ToastService.ShowToast(
-        result.Error?.Detail ?? "Failed to create product",
-        string.Empty,
-        ToastService.ToastLevel.Error
-      );
-      isSubmitting = false;
-      return;
-    }
-
-    createdProductId = result.Data.Id;
-    productCreated = true;
-
-    ToastService.ShowToast(
-      "Product created successfully",
-      string.Empty,
-      ToastService.ToastLevel.Success
-    );
-  }
-} *@

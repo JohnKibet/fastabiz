@@ -1,0 +1,52 @@
+@using frontend.Models
+@using static frontend.Pages.Shared.Components.Merchant.VariantSection
+@inject ToastService ToastService
+
+<ul class="mt-2">
+    @foreach (var opt in Options)
+    {
+        <li class="mt-4 border p-3 rounded-lg">
+            <h3 class="text-sm font-medium text-textDark">@opt.Name</h3>
+
+            @if (opt.IsNameLocked)
+            {
+                <button class="text-sm text-red-600 hover:underline" @onclick="() => OnDeleteOption.InvokeAsync(opt)">Delete</button>
+            }
+
+            <div class="flex space-x-2 mt-2">
+                <InputText @bind-Value="opt.PendingValues" aria-disabled="@opt.AreValuesLocked"
+                           class="w-full px-3 py-1 border rounded-lg" placeholder="Comma separated values" />
+
+                <button disabled="@opt.AreValuesLocked"
+                        @onclick="() => OnAddOptionValues.InvokeAsync(opt)"
+                        class="bg-primary text-white px-3 py-1 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    Add Values
+                </button>
+            </div>
+
+            @if (opt.Values.Any())
+            {
+                <div class="flex flex-wrap gap-2 mt-3">
+                    @foreach (var val in opt.Values)
+                    {
+                        <span class="px-3 py-1 text-sm bg-gray-100 rounded-full">@val</span>
+                    }
+                </div>
+            }
+
+            @if (opt.AreValuesLocked)
+            {
+                <button class="text-xs text-red-600 mt-2 hover:underline" @onclick="() => OnClearValues.InvokeAsync(opt)">
+                    Delete values
+                </button>
+            }
+        </li>
+    }
+</ul>
+
+@code {
+    [Parameter] public List<OptionUi> Options { get; set; } = new();
+    [Parameter] public EventCallback<OptionUi> OnDeleteOption { get; set; }
+    [Parameter] public EventCallback<OptionUi> OnAddOptionValues { get; set; }
+    [Parameter] public EventCallback<OptionUi> OnClearValues { get; set; }
+}

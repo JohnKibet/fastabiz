@@ -154,6 +154,7 @@ func NewRouter(
 
 			// Products
 			r.Route("/products", func(r chi.Router) {
+				r.Post("/cloudinary/signature", pr.CloudinarySignature)
 				r.Post("/create", pr.CreateProduct)
 				r.Get("/{store_id}/all_products", pr.ListProductsByStore)
 				r.Post("/images/add", pr.AddImage)

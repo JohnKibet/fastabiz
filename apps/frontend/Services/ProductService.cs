@@ -2,13 +2,16 @@ using System;
 using System.Text.Json;
 using System.Net.Http.Json;
 using frontend.Models;
+using Microsoft.AspNetCore.Components.Forms;
 public class ProductService
 {
   private readonly HttpClient _http;
+  private readonly HttpClient _cloudinaryHttp;
   private readonly ToastService _toastService;
   public ProductService(IHttpClientFactory httpClientFactory, ToastService toastService)
   {
     _http = httpClientFactory.CreateClient("AuthenticatedApi");
+    _cloudinaryHttp = httpClientFactory.CreateClient("CloudinaryClient");
     _toastService = toastService;
   }
 
@@ -48,27 +51,72 @@ public class ProductService
     return await GetFromJsonSafe<List<ProductListItem>>($"products/{StoreId}/all_products");
   }
 
-  public async Task<ServiceResult2<List<ProductX>>> AddImagesToProduct(AddImageRequest request)
+  // get signature
+  public async Task<ServiceResult2<CloudinarySignatureResponse>> GetCloudinarySignature()
+  {
+    try
+    {
+      var response = await _http.PostAsync("products/cloudinary/signature", null);
+
+      if (!response.IsSuccessStatusCode)
+        return ServiceResult2<CloudinarySignatureResponse>.Fail(
+            await ParseError(response)
+        );
+
+      var data = await response.Content.ReadFromJsonAsync<CloudinarySignatureResponse>();
+      return ServiceResult2<CloudinarySignatureResponse>.Ok(data!);
+    }
+    catch (Exception ex)
+    {
+      return ServiceResult2<CloudinarySignatureResponse>.Fail(ex.Message);
+    }
+  }
+
+  // upload image to cloudinary
+  public async Task<string?> UploadToCloudinary(IBrowserFile file, CloudinarySignatureResponse sig)
+  {
+    using var content = new MultipartFormDataContent();
+
+    content.Add(new StreamContent(file.OpenReadStream(10_000_000)), "file", file.Name);
+
+    content.Add(new StringContent(sig.Api_Key), "api_key");
+    content.Add(new StringContent(sig.Timestamp.ToString()), "timestamp");
+    content.Add(new StringContent(sig.Signature), "signature");
+    content.Add(new StringContent(sig.Folder), "folder");
+
+    var url = $"https://api.cloudinary.com/v1_1/{sig.Cloud_Name}/image/upload";
+
+    var response = await _cloudinaryHttp.PostAsync(url, content);
+
+    if (!response.IsSuccessStatusCode)
+      return null;
+
+    using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+    return doc.RootElement.GetProperty("secure_url").GetString();
+  }
+
+
+  public async Task<ServiceResult2<bool>> AddProductImages(AddImageRequest request)
   {
     try
     {
       var response = await _http.PostAsJsonAsync("products/images/add", request);
       if (response.IsSuccessStatusCode)
       {
-        var result = await response.Content.ReadFromJsonAsync<List<ProductX>>();
-        return ServiceResult2<List<ProductX>>.Ok(result ?? new List<ProductX>());
+        var result = await response.Content.ReadFromJsonAsync<bool>();
+        return ServiceResult2<bool>.Ok(true);
       }
 
       var error = await ParseError(response);
-      return ServiceResult2<List<ProductX>>.Fail(error);
+      return ServiceResult2<bool>.Fail(error);
     }
     catch (HttpRequestException ex)
     {
-      return ServiceResult2<List<ProductX>>.Fail($"Network error: {ex.Message}");
+      return ServiceResult2<bool>.Fail($"Network error: {ex.Message}");
     }
     catch (Exception ex)
     {
-      return ServiceResult2<List<ProductX>>.Fail($"Unexpected error: {ex.Message}");
+      return ServiceResult2<bool>.Fail($"Unexpected error: {ex.Message}");
     }
   }
 
