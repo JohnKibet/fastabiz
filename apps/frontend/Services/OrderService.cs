@@ -38,6 +38,24 @@ public class OrderService
         }
     }
 
+    public async Task<ServiceResult2<List<Guid>>> CreatePendingOrder(CreateOrderRequest order)
+    {
+        try
+        {
+            var response = await _http.PostAsJsonAsync("orders/pending", order);
+            if (!response.IsSuccessStatusCode)
+                return ServiceResult2<List<Guid>>.Fail(await ParseError(response));
+
+            var ids = await response.Content.ReadFromJsonAsync<List<Guid>>();
+            return ServiceResult2<List<Guid>>.Ok(ids!);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult2<List<Guid>>.Fail(ex.Message);
+        }
+    }
+
+
     public async Task<ServiceResult2<List<Order>>> GetOrderByID(Guid id)
     {
         return await GetFromJsonSafe<List<Order>>($"orders/by-id/{id}");
@@ -48,7 +66,7 @@ public class OrderService
     {
         return await GetFromJsonSafe<List<Order>>($"orders/by-customer/{customerId}");
     }
-    
+
     public async Task<Order?> UpdateOrder(Guid orderId, string column, object value)
     {
         var requestBody = new
@@ -136,7 +154,7 @@ public class OrderService
                     .SelectMany(kvp => kvp.Value.Select(v => $"{kvp.Key}: {v}"));
                 return string.Join("; ", fieldErrors);
             }
-            
+
             // Fall back to detail or generic error
             return !string.IsNullOrWhiteSpace(error.Detail)
                 ? error.Detail

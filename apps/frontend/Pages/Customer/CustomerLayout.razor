@@ -1,7 +1,52 @@
 @inherits LayoutComponentBase
 @namespace frontend.Pages.Customer
 @using frontend.Pages.Shared.Layout
+@inject CustomAuthStateProvider AuthStateProvider
+@inject CartService CartService
 
-<AuthorizedLayout>
-    @Body
-</AuthorizedLayout>
+<CascadingValue Value="UserName">
+    <AuthorizedLayout>
+        @Body
+    </AuthorizedLayout>
+</CascadingValue>
+
+@code {
+    private string? UserName;
+    private bool IsLoggedIn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        IsLoggedIn = user.Identity?.IsAuthenticated ?? false;
+        UserName = IsLoggedIn ? user.Identity!.Name : null;
+
+        // Seed cart if empty
+        if (!CartService.Items.Any())
+        {
+            var appleProduct = new ProductMapper.ProductDto
+            {
+                Id = Guid.Parse("162b61d3-0be7-43df-bb38-736592822090"),
+                Name = "Fresh Apples",
+                Description = "Crisp, sweet organic apples harvested this season.",
+                StoreId = Guid.Parse("2843abef-4b21-4c2b-91d5-e1c6bfcd5f0c"),
+                HasVariants = true,
+                Images = new List<string> { "apple_small.jpg" }
+            };
+
+            var appleVariant = new ProductMapper.VariantDto
+            {
+                Id = Guid.Parse("72331251-b031-46b0-8998-4117aeb3a072"), // small
+                Price = 1.2,
+                ImageUrl = "apple_small.jpg",
+                Sku = "APP-SM-001",
+                Options = new Dictionary<string, string> { { "size", "small" } }
+            };
+
+            await CartService.AddItem(appleProduct, appleVariant, qty: 2);
+
+            Console.WriteLine("Seeded cart with Fresh Apples (small).");
+        }
+    }
+}

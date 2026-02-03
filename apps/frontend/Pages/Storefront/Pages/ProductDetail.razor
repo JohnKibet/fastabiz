@@ -6,7 +6,11 @@
 @inject ProductService ProductService
 @inject StoreService StoreService
 
-@if (FetchedProduct is null)
+@if (LoadFailed)
+{
+    <p class="text-red-600">Failed to load product.</p>
+}
+else if (FetchedProduct is null)
 {
     <p>Loading...</p>
 }
@@ -31,13 +35,10 @@ else
             <p class="text-gray-700">@FetchedProduct.Description</p>
 
             <!-- VARIANTS -->
-            @if (FetchedProduct.HasVariants && FetchedProduct.Variants.Count > 1)
+            @if (FetchedProduct.HasVariants)
             {
-                <VariantSelector 
-                    Options="@FetchedProduct.Options" 
-                    Variants="@FetchedProduct.Variants" 
-                    OnVariantSelected="SelectVariant"
-                    OnSelectionChanged="UpdateSelections" />
+                <VariantSelector Options="@FetchedProduct.Options" Variants="@FetchedProduct.Variants"
+                    OnVariantSelected="SelectVariant" OnSelectionChanged="UpdateSelections" />
 
                 @if (ShowError)
                 {
@@ -76,11 +77,9 @@ else
             }
             else
             {
-                <button
+                <button disabled="@(!CanAddToCart)" @onclick="AddToCart"
                     class="w-1/2 px-4 py-3 rounded-lg font-semibold
-                                                               @(CanAddToCart ? "bg-green-600 text-white hover:bg-green-700"
-                                                                                                                                  : "bg-gray-300 text-gray-500 cursor-not-allowed")"
-                    disabled="@(!CanAddToCart)" @onclick="AddToCart">
+                                                                            @(CanAddToCart ? "bg-green-600 text-white hover:bg-green-700" : "bg-gray-300 text-gray-500 cursor-not-allowed")">
                     Add to Cart
                 </button>
             }
@@ -95,49 +94,88 @@ else
     [CascadingParameter] StorefrontLayout? Layout { get; set; }
     [Inject] private CartService CartService { get; set; } = default!;
 
-    private ProductMapper.ProductDto FetchedProduct = new();
+    private ProductMapper.ProductDto? FetchedProduct;
     private StoreDto Store = new();
 
     private ProductMapper.VariantDto? SelectedVariant;
     private Dictionary<string, string?> Selections = new();
+    private bool LoadFailed;
+    private Guid? _loadedProductId;
+    private Guid? _loadedVariantId;
+    private bool IsReady;
 
-    protected override async Task OnInitializedAsync()
+
+    protected override async Task OnParametersSetAsync()
     {
-        // 1. Fetch product by id
-        var result = await ProductService.GetProductByID(ProductId);
-        if (result.Success && result.Data != null)
-        {
-            FetchedProduct = result.Data;
-        }
-
-        if (FetchedProduct == null)
+        if (_loadedProductId == ProductId && _loadedVariantId == VariantId)
             return;
 
-        // 2. Load store
-        if (ActiveStore == null) return;
-        Store.Name = ActiveStore.StoreName;
-        Store.Id = ActiveStore.StoreId;
+        _loadedProductId = ProductId;
+        _loadedVariantId = VariantId;
 
-        // 3. Prefill variant from URL (if provided)
+        await LoadProduct();
+    }
+
+    private async Task LoadProduct()
+    {
+        // 1. Initial State
+        IsReady = false;
+        LoadFailed = false;
+        FetchedProduct = null;
+
+        var result = await ProductService.GetProductByID(ProductId);
+
+        if (!result.Success || result.Data is null)
+        {
+            LoadFailed = true;
+            StateHasChanged();
+            return;
+        }
+
+        // 2. Data Assignment
+        FetchedProduct = result.Data;
+
+        // 3. Setup logic (Move this BEFORE IsReady)
         if (VariantId.HasValue && FetchedProduct.HasVariants)
         {
             SelectedVariant = FetchedProduct.Variants
             .FirstOrDefault(v => v.Id == VariantId.Value);
+
+            if (SelectedVariant != null)
+            {
+                Selections = SelectedVariant.Options
+                .ToDictionary(o => o.Key, o => o.Value);
+            }
         }
 
-        // 4. Breadcrumbs
-        Layout?.SetBreadcrumbs(new List<BreadcrumbItem>
-{
-new() { Title = "Home", Url = "/" },
-new() { Title = "Stores", Url = "/stores" },
-new() { Title = Store.Name, Url = $"/store/{Store.Id}" },
-new() { Title = FetchedProduct.Name, Url = $"/product/{ProductId}" }
-});
+        // 4. Final Transition
+        IsReady = true;
+        StateHasChanged(); // This is the critical call to swap "Loading..." for the UI
     }
 
-    private void UpdateSelections(Dictionary<string, string?> map) => Selections = map;
 
-    private bool AllOptionsSelected => FetchedProduct!.Variants.Count > 1 && FetchedProduct != null;
+    private void UpdateSelections(Dictionary<string, string?> map)
+    {
+        Selections = map;
+
+        if (FetchedProduct == null || !FetchedProduct.HasVariants)
+            return;
+
+        SelectedVariant = FetchedProduct.Variants.FirstOrDefault(v =>
+        v.Options.All(o =>
+        Selections.TryGetValue(o.Key, out var val) &&
+        val == o.Value
+        )
+        );
+
+        StateHasChanged();
+    }
+
+    private bool AllOptionsSelected =>
+    FetchedProduct is not null &&
+    FetchedProduct.Options.All(o =>
+    Selections.TryGetValue(o.Name, out var v) && v is not null);
+
 
     private bool ShowError =>
     FetchedProduct!.Variants.Count > 1 && AllOptionsSelected && SelectedVariant == null;
@@ -231,6 +269,7 @@ new() { Title = FetchedProduct.Name, Url = $"/product/{ProductId}" }
     {
         if (!CanAddToCart) return;
 
+        if (FetchedProduct == null) return;
         ProductMapper.VariantDto? variantToAdd = FetchedProduct.HasVariants ? SelectedVariant : null;
 
         await CartService.AddItem(FetchedProduct!, variantToAdd, Quantity);

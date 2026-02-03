@@ -5,43 +5,65 @@ namespace frontend.Models;
 
 public class Order
 {
+    [JsonPropertyName("id")]
     public Guid Id { get; set; }
+
+    [JsonPropertyName("store_id")]
     public Guid StoreId { get; set; }
+
+    [JsonPropertyName("customer_id")]
     public Guid CustomerId { get; set; }
 
-    // temp: string instead of Guid
-    public string ProductId { get; set; } = string.Empty;
-    public string VariantId { get; set; } = string.Empty;
+    [JsonPropertyName("product_id")]
+    public Guid ProductId { get; set; }
 
+    [JsonPropertyName("variant_id")]
+    public Guid? VariantId { get; set; }
+
+    [JsonPropertyName("quantity")]
     public int Quantity { get; set; }
 
+    [JsonPropertyName("unit_price")]
     public double UnitPrice { get; set; }
+
+    [JsonPropertyName("currency")]
     public string Currency { get; set; } = "KES";
-    public int Total { get; set; }
 
+    [JsonPropertyName("total")]
+    public double Total { get; set; }
+
+    [JsonPropertyName("product_name")]
+    public string ProductName { get; set; } = string.Empty;
+
+    [JsonPropertyName("variant_name")]
+    public string? VariantName { get; set; }
+
+    [JsonPropertyName("image_url")]
+    public string? ImageUrl { get; set; }
+
+    [JsonPropertyName("pickup_address")]
     public string PickupAddress { get; set; } = string.Empty;
-    public double PickupLat { get; set; }
-    public double PickupLng { get; set; }
 
+    [JsonPropertyName("delivery_address")]
     public string DeliveryAddress { get; set; } = string.Empty;
-    public double DeliveryLat { get; set; }
-    public double DeliveryLng { get; set; }
 
+    [JsonPropertyName("status")]
     public OrderStatus Status { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
 
+    [JsonPropertyName("created_at")]
+    public DateTime CreatedAt { get; set; }
 }
 
 public enum OrderStatus
-    {
-        Pending,
-        Assigned,
-        InTransit,
-        Delivered,
-        Cancelled
-    }
+{
+    Pending,
+    Assigned,
+    InTransit,
+    Delivered,
+    Cancelled
+}
 
+// mapping CartItem → CreateOrderItemDto.
 public sealed class CreateOrderRequest
 {
     [Required]
@@ -54,7 +76,7 @@ public sealed class CreateOrderRequest
 
     [Required]
     [JsonPropertyName("payment_method")]
-    public string PaymentMethod { get; set; } = "cash";
+    public string? PaymentMethod { get; set; }
 
     [Required]
     [JsonPropertyName("delivery")]
@@ -67,6 +89,8 @@ public sealed class CreateOrderRequest
     [Required]
     [JsonPropertyName("items")]
     public List<CreateOrderItemDto> Items { get; set; } = new();
+
+    public Dictionary<string, string>? ExtraData { get; set; }
 }
 
 public sealed class CreateOrderItemDto

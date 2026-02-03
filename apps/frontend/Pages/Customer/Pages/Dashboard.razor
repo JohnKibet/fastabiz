@@ -5,8 +5,10 @@
 @inject CartService CartService
 @inject NavigationManager Navigation
 
-<h1 class="text-2xl font-bold mb-6">Welcome back, @UserName!</h1>
-
+@if (ShowWelcome)
+{
+    <h1 class="text-2xl font-bold mb-6">Welcome back, @SecondName!</h1>
+}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
     <!-- Quick Stats Cards -->
@@ -46,19 +48,19 @@
 <!-- Quick Actions -->
 <div class="mt-8 flex flex-wrap gap-4">
     <button class="px-6 py-3 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
-            @onclick='() => Navigation.NavigateTo("/storefront")'>
+        @onclick='() => Navigation.NavigateTo("/storefront")'>
         Shop More
     </button>
     <button class="px-6 py-3 bg-green-600 text-white rounded shadow hover:bg-green-700"
-            @onclick='() => Navigation.NavigateTo("/customer/myorders")'>
+        @onclick='() => Navigation.NavigateTo("/customer/myorders")'>
         View Orders
     </button>
     <button class="px-6 py-3 bg-orange-500 text-white rounded shadow hover:bg-orange-600"
-            @onclick='() => Navigation.NavigateTo("/customer/trackorder")'>
+        @onclick='() => Navigation.NavigateTo("/customer/trackorder")'>
         Track Order
     </button>
     <button class="px-6 py-3 bg-gray-700 text-white rounded shadow hover:bg-gray-800"
-            @onclick='() => Navigation.NavigateTo("/customer/feedback")'>
+        @onclick='() => Navigation.NavigateTo("/customer/feedback")'>
         Give Feedback
     </button>
 </div>
@@ -85,7 +87,7 @@
                 @foreach (var order in RecentOrders.OrderByDescending(o => o.CreatedAt).Take(5))
                 {
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2">@order.Id.ToString().Substring(0,8)</td>
+                        <td class="px-4 py-2">@order.Id.ToString().Substring(0, 8)</td>
                         <td class="px-4 py-2">@order.Quantity</td>
                         <td class="px-4 py-2">@order.Status</td>
                         <td class="px-4 py-2">@order.CreatedAt.ToString("MMM dd, yyyy")</td>
@@ -106,9 +108,10 @@
                 <img src="@product.ImageUrl" class="w-full h-48 object-cover rounded-md mb-3" />
                 <h3 class="font-semibold text-lg">@product.Name</h3>
                 @* <p class="text-gray-500 text-sm mb-2">@product.StoreName</p> *@
-                <p class="font-bold text-stoneblue">@((product.HasVariants ? product.MinPrice : product.Price)?.ToString("C"))</p>
+                <p class="font-bold text-stoneblue">@((product.HasVariants ? product.MinPrice :
+                                    product.Price)?.ToString("C"))</p>
                 <button class="mt-auto px-4 py-2 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
-                        @onclick='() => Navigation.NavigateTo($"/product/{product.Id}")'>
+                    @onclick='() => Navigation.NavigateTo($"/product/{product.Id}")'>
                     View
                 </button>
             </div>
@@ -117,16 +120,30 @@
 </div>
 
 @code {
-    [CascadingParameter] public string UserName { get; set; } = "Customer";
+    [CascadingParameter] public string UserName { get; set; } = "Guest";
+    private string SecondName => GetSecondName(UserName);
+    private bool ShowWelcome = true;
     private List<Order> RecentOrders { get; set; } = new();
     private List<ProductListItem> FeaturedProducts { get; set; } = new();
 
     protected override async Task OnInitializedAsync()
     {
+        // Hide welcome message after 5 seconds
+        await Task.Delay(5000);
+        ShowWelcome = false;
+        StateHasChanged();
+
         // TODO: Load orders & products from API
         // Example placeholders
         RecentOrders = await LoadRecentOrdersAsync();
         FeaturedProducts = await LoadFeaturedProductsAsync();
+    }
+
+    private string GetSecondName(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName)) return "Guest";
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 1 ? parts[1] : parts[0];
     }
 
     private Task<List<Order>> LoadRecentOrdersAsync()
@@ -141,4 +158,3 @@
         return Task.FromResult(new List<ProductListItem>());
     }
 }
-
