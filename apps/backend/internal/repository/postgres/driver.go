@@ -9,6 +9,7 @@ import (
 	"github.com/cridenour/go-postgis"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/lib/pq"
 )
 
 type DriverRepository struct {
@@ -34,7 +35,17 @@ func (r *DriverRepository) Create(ctx context.Context, d *driver.Driver) error {
 	`
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, d)
 	if err != nil {
-		return fmt.Errorf("insert driver: %w", err)
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23505":
+				return driver.ErrDriverAlreadyExists
+			case "23514":
+				return driver.ErrRoleCheck
+			case "22021": // Return a specific error for invalid characters
+				return fmt.Errorf("invalid characters in input: %w", err)
+			}
+		}
+		return err
 	}
 
 	defer rows.Close()

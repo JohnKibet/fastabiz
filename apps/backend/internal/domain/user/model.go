@@ -32,7 +32,7 @@ type User struct {
 	PasswordHash         string     `db:"password_hash" json:"-"`
 	Role                 Role       `db:"role" json:"role"`
 	Phone                string     `db:"phone" json:"phone"`
-	Slug                 string     `db:"slug" json:"slug"` // adminSlug used in public route
+	Slug                 *string    `db:"slug" json:"slug,omitempty"` // adminSlug used in public route
 	Must_change_password bool       `db:"must_change_password" json:"must_change_password"`
 	Status               UserStatus `db:"status" json:"status"`
 	LastLogin            *time.Time `db:"last_login" json:"last_login,omitempty"`

@@ -29,13 +29,13 @@
             <SidebarSection Title="Dashboard" Icon="dashboard" SectionKey="MerchantDashboard" IsCollapsed="IsCollapsed"
                 Items="MerchantDashboard" IsOpen="@IsSectionOpen(nameof(MerchantDashboard))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Operations" Icon="todo" SectionKey="MerchantOperations" IsCollapsed="IsCollapsed"
+            <SidebarSection Title="Operations" Icon="shuffle" SectionKey="MerchantOperations" IsCollapsed="IsCollapsed"
                 Items="MerchantOperations" IsOpen="@IsSectionOpen(nameof(MerchantOperations))" OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Stores" Icon="warehouse" SectionKey="MerchantStores" IsCollapsed="IsCollapsed"
                 Items="MerchantStores" IsOpen="@IsSectionOpen(nameof(MerchantStores))" OnToggle="@ToggleSection" />
 
-            <SidebarSection Title="Products" Icon="" SectionKey="MerchantProducts" IsCollapsed="IsCollapsed"
+            <SidebarSection Title="Products" Icon="todo" SectionKey="MerchantProducts" IsCollapsed="IsCollapsed"
                 Items="MerchantProducts" IsOpen="@IsSectionOpen(nameof(MerchantProducts))" OnToggle="@ToggleSection" />
 
             <SidebarSection Title="Reports" Icon="chart" SectionKey="MerchantReports" IsCollapsed="IsCollapsed"
@@ -46,9 +46,22 @@
         }
         else if (Role == "driver")
         {
-            <SidebarSection Title="Driver Panel" Icon="truck" SectionKey="DriverMenu" IsCollapsed="IsCollapsed"
-                Items="DriverMenu" IsOpen="@IsSectionOpen(nameof(DriverMenu))" OnToggle="@ToggleSection" />
+            <SidebarSection Title="Dashboard" Icon="layout-dashboard" SectionKey="DriverDashboard" IsCollapsed="IsCollapsed"
+                Items="DriverDashboardItems" IsOpen="@IsSectionOpen(nameof(DriverDashboardItems))"
+                OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Deliveries" Icon="package" SectionKey="DriverDeliveries" IsCollapsed="IsCollapsed"
+                Items="DriverDeliveriesItems" IsOpen="@IsSectionOpen(nameof(DriverDeliveriesItems))"
+                OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Navigation" Icon="route" SectionKey="DriverRoute" IsCollapsed="IsCollapsed"
+                Items="DriverRouteItems" IsOpen="@IsSectionOpen(nameof(DriverRouteItems))" OnToggle="@ToggleSection" />
+
+            <SidebarSection Title="Proof of Delivery" Icon="package-check" SectionKey="DriverProof"
+                IsCollapsed="IsCollapsed" Items="DriverProofItems" IsOpen="@IsSectionOpen(nameof(DriverProofItems))"
+                OnToggle="@ToggleSection" />
         }
+
         else if (Role == "customer")
         {
             <SidebarSection Title="Dashboard" Icon="shopping-bag" SectionKey="CustomerMenu" IsCollapsed="IsCollapsed"
@@ -190,7 +203,8 @@ new("Dashboard", "/merchant/dashboard", "house"),
     private List<SidebarMenuItem> MerchantOperations => new()
 {
 new("Orders", "/merchant/orders", "file-stack"),
-new("Create Order", "/merchant/createorder", "file-plus")
+new("Order Assignments", "/merchant/operations/assignments", "truck"),
+
 };
 
     private List<SidebarMenuItem> MerchantUsers => new()
@@ -217,7 +231,7 @@ ProductCtx.HasValue
 "wrench",
 active: IsManageProductActive
 ),
-new("Products", "/merchant/products", "layers")
+new("All Products", "/merchant/products", "layers")
 };
 
     private List<SidebarMenuItem> MerchantReports => new()
@@ -226,13 +240,11 @@ new("Reports", "/merchant/reports", "chart-up"),
 new("Invoices", "/merchant/invoices", "")
 };
 
-    private List<SidebarMenuItem> DriverMenu => new()
-{
-new("Dashboard", "/driver/dashboard", "layout-dashboard"),
-new("Deliveries", "/driver/deliveries", "package"),
-new("Route", "/driver/route", "route"),
-new("Proof", "/driver/proof", "package-check")
+    private List<SidebarMenuItem> DriverDashboardItems => new() { new("Overview", "/driver/dashboard", "layout-panel-top")
 };
+    private List<SidebarMenuItem> DriverDeliveriesItems => new() { new("My Tasks", "/driver/deliveries", "truck") };
+    private List<SidebarMenuItem> DriverRouteItems => new() { new("View Map", "/driver/route", "map") };
+    private List<SidebarMenuItem> DriverProofItems => new() { new("Confirm Delivery", "/driver/proof", "package-check") };
 
     private List<SidebarMenuItem> CustomerDashboard => new()
 {

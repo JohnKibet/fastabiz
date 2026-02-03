@@ -1,0 +1,190 @@
+@page "/merchant/operations/assignments"
+@layout MerchantLayout
+
+<h1 class="text-2xl font-bold mb-6">Order Assignment</h1>
+
+<!-- Auto Assignment Toggle -->
+<div class="bg-white rounded-lg shadow p-4 mb-6">
+    <label class="flex items-center gap-3">
+        <input type="checkbox" @bind="AutoAssignEnabled" />
+        <span class="font-medium">
+            Enable Smart Auto-Assignment
+        </span>
+    </label>
+
+    <p class="text-sm text-gray-500 mt-1">
+        When enabled, the system automatically assigns drivers based on rules.
+    </p>
+</div>
+
+<!-- Auto Assignment Rules -->
+@if (AutoAssignEnabled)
+{
+    <div class="bg-white rounded-lg shadow p-4 mb-6">
+        <h2 class="font-semibold mb-3">Auto-Assignment Rules</h2>
+
+        <div class="space-y-2 text-sm">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" @bind="HighTrafficAutoAssign" />
+                Trigger auto-assignment during high order traffic
+            </label>
+
+            <label class="flex items-center gap-2">
+                <input type="checkbox" @bind="InstantCancelNotify" />
+                Instant notification on delivery cancellation
+            </label>
+
+            <label class="flex items-center gap-2">
+                <input type="checkbox" @bind="ReassignOnDelay" />
+                Auto re-assign driver on delivery delay
+            </label>
+        </div>
+    </div>
+}
+
+<!-- Orders -->
+<div class="bg-white rounded-lg shadow p-4">
+    <h2 class="font-semibold mb-4">Incoming Orders</h2>
+
+    @foreach (var order in Orders)
+    {
+        <div class="border-b py-4 flex justify-between items-center">
+            <div>
+                <p class="font-medium">@order.Name</p>
+                <p class="text-sm text-gray-500">
+                    @order.Description
+                </p>
+                <p class="text-xs text-gray-400">
+                    Qty: @order.Quantity • SKU: @order.SKU
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                @if (AutoAssignEnabled)
+                {
+                    <span class="text-green-600 text-sm font-medium">
+                        Auto-assigning…
+                    </span>
+                }
+                else
+                {
+                    <select class="border rounded px-2 py-1 text-sm"
+                            @onchange="e => AssignDriver(order, e.Value?.ToString())">
+                        <option value="">Assign driver</option>
+                        @foreach (var driver in Drivers.Where(d => d.IsOnline))
+                        {
+                            <option value="@driver.DriverId">
+                                @driver.Name (⭐ @driver.Rating)
+                            </option>
+                        }
+                    </select>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    // ===== Feature Flags =====
+    private bool AutoAssignEnabled = true;
+    private bool HighTrafficAutoAssign = true;
+    private bool InstantCancelNotify = true;
+    private bool ReassignOnDelay = true;
+
+    // ===== Mock Models =====
+    class MockOrder
+    {
+        public Guid OrderId { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public int Quantity { get; set; }
+        public double Price { get; set; }
+        public string SKU { get; set; } = "";
+        public string VariantName { get; set; } = "";
+        public string Status { get; set; } = "Pending";
+        public Guid? AssignedDriverId { get; set; }
+    }
+
+    class MockDriver
+    {
+        public Guid DriverId { get; set; }
+        public string Name { get; set; } = "";
+        public int ActiveDeliveries { get; set; }
+        public double Rating { get; set; }
+        public bool IsOnline { get; set; }
+    }
+
+    // ===== Hardcoded Orders =====
+    private List<MockOrder> Orders = new()
+    {
+        new MockOrder
+        {
+            OrderId = Guid.NewGuid(),
+            Name = "Fresh Apples",
+            Description = "Crisp, sweet organic apples harvested this season.",
+            Quantity = 2,
+            Price = 1.2,
+            SKU = "APP-SM-001",
+            VariantName = "Small Pack"
+        },
+        new MockOrder
+        {
+            OrderId = Guid.NewGuid(),
+            Name = "Organic Bananas",
+            Description = "Naturally ripened organic bananas.",
+            Quantity = 5,
+            Price = 0.8,
+            SKU = "BAN-YL-002",
+            VariantName = "Bunch"
+        },
+        new MockOrder
+        {
+            OrderId = Guid.NewGuid(),
+            Name = "Fresh Milk",
+            Description = "Locally sourced farm milk.",
+            Quantity = 1,
+            Price = 1.5,
+            SKU = "MLK-FR-003",
+            VariantName = "1 Litre"
+        }
+    };
+
+    // ===== Hardcoded Drivers =====
+    private List<MockDriver> Drivers = new()
+    {
+        new MockDriver
+        {
+            DriverId = Guid.NewGuid(),
+            Name = "James Mwangi",
+            ActiveDeliveries = 1,
+            Rating = 4.8,
+            IsOnline = true
+        },
+        new MockDriver
+        {
+            DriverId = Guid.NewGuid(),
+            Name = "Alice Wanjiru",
+            ActiveDeliveries = 0,
+            Rating = 4.9,
+            IsOnline = true
+        },
+        new MockDriver
+        {
+            DriverId = Guid.NewGuid(),
+            Name = "Peter Otieno",
+            ActiveDeliveries = 3,
+            Rating = 4.2,
+            IsOnline = false
+        }
+    };
+
+    // ===== Manual Assignment =====
+    private void AssignDriver(MockOrder order, string? driverId)
+    {
+        if (Guid.TryParse(driverId, out var id))
+        {
+            order.AssignedDriverId = id;
+            order.Status = "Assigned";
+        }
+    }
+}

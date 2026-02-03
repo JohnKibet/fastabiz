@@ -42,6 +42,7 @@ type UpdateUserStatusRequest struct {
 func (r *CreateUserRequest) ToUser() *User {
 	baseSlug := generate.GenerateSlug(r.FullName)
 	uniqueSuffix := uuid.New().String()[:8]
+	slug := baseSlug + "-" + uniqueSuffix
 
 	return &User{
 		FullName:     r.FullName,
@@ -49,7 +50,7 @@ func (r *CreateUserRequest) ToUser() *User {
 		PasswordHash: r.Password,
 		Role:         r.Role,
 		Phone:        r.Phone,
-		Slug:         baseSlug + "-" + uniqueSuffix,
+		Slug:         &slug,
 		Status:       Active,
 	}
 }
