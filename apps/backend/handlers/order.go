@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
 	"backend/internal/application"
 	"backend/internal/domain/order"
+	"backend/internal/middleware"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -26,57 +26,103 @@ func NewOrderHandler(uc *application.OrderService) *OrderHandler {
 // CreateOrder godoc
 // @Summary Create a new order
 // @Security BearerAuth
-// @Description Creates an order and returns the new object
+// @Description Creates an order and returns IDs of created orders
 // @Tags orders
 // @Accept json
 // @Produce json
-// @Param order body order.CreateOrderRequestDoc true "Order input"
-// @Success 201 {object} order.OrderDoc
-// @Failure 400 {string} handlers.ErrorResponse "Bad request"
-// @Failure 500 {string} handlers.ErrorResponse "Internal server error"
+// @Param order body order.CreateOrderRequest true "Order payload"
+// @Success 201 {object} map[string][]uuid.UUID "Created order IDs"
+// @Failure 400 {object} handlers.ErrorResponse "Bad request"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 409 {object} handlers.ErrorResponse "Conflict"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
 // @Router /orders/create [post]
 func (h *OrderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var req order.CreateOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeJSONError(w, http.StatusBadRequest, "Invalid request", nil)
+		writeJSONError(w, http.StatusBadRequest, "Invalid request payload", err)
 		return
 	}
 
-	o := req.ToOrder()
+	// Get customerID from middleware/context
+	customerID, err := middleware.GetUserIDFromContext(ctx)
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
 
-	if err := h.UC.Orders.UseCase.CreateOrder(r.Context(), o); err != nil {
-
+	// Create orders
+	orders, err := h.UC.Orders.UseCase.CreateOrder(ctx, customerID, &req)
+	if err != nil {
 		switch {
 		case errors.Is(err, order.ErrorOutOfStock):
 			writeJSONError(w, http.StatusConflict, "Product is out of stock", err)
-			return
 		case errors.Is(err, order.ErrorInvalidQuantity):
-			writeJSONError(w, http.StatusConflict, "Invalid Product Quantity", err)
+			writeJSONError(w, http.StatusConflict, "Invalid product quantity", err)
+		case errors.Is(err, order.ErrorVariantRequired):
+			writeJSONError(w, http.StatusConflict, "Variant required", err)
+		case errors.Is(err, order.ErrorVariantNotAllowed):
+			writeJSONError(w, http.StatusConflict, "Variant not allowed for this product", err)
 		default:
-			log.Printf("CreateOrder unexpected error: %v", err)
-			writeJSONError(w, http.StatusInternalServerError, "Could not create order", err)
+			writeJSONError(w, http.StatusInternalServerError, "Failed to create order", err)
 		}
+		return
+	}
+
+	// Respond with all created order IDs
+	orderIDs := make([]uuid.UUID, len(orders))
+	for i, o := range orders {
+		orderIDs[i] = o.ID
 	}
 
 	writeJSON(w, http.StatusCreated, map[string]any{
-		"id":               o.ID,
-		"store_id":         o.StoreID,
-		"admin_id":         o.AdminID,
-		"customer_id":      o.CustomerID,
-		"product_id":       o.ProductID,
-		"variant_id":       o.VariantID,
-		"quantity":         o.Quantity,
-		"unit_price":       o.UnitPrice,
-		"currency":         o.UnitPrice,
-		"total":            o.Total,
-		"product_name":     o.ProductName,
-		"variant_name":     o.VariantName,
-		"image_url":        o.ImageURL,
-		"pickup_address":   o.PickupAddress,
-		"delivery_address": o.DeliveryAddress,
-		"order_status":     o.Status,
-		"created_at":       o.CreatedAt,
-		"updated_at":       o.UpdatedAt,
+		"order_ids": orderIDs,
+	})
+}
+
+// CreatePending godoc
+// @Summary Create pending orders (cart)
+// @Security BearerAuth
+// @Description Creates pending orders and returns IDs
+// @Tags orders
+// @Accept json
+// @Produce json
+// @Param order body order.CreateOrderRequest true "Order payload"
+// @Success 200 {object} map[string][]uuid.UUID "Pending order IDs"
+// @Failure 400 {object} handlers.ErrorResponse "Bad request"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
+// @Router /orders/pending [post]
+func (h *OrderHandler) CreatePending(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var req order.CreateOrderRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request payload", err)
+		return
+	}
+
+	customerID, err := middleware.GetUserIDFromContext(ctx)
+	if err != nil {
+		writeJSONError(w, http.StatusUnauthorized, "Unauthorized", err)
+		return
+	}
+
+	orders, err := h.UC.Orders.UseCase.CreatePendingOrders(ctx, customerID, &req)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Failed to create pending orders", err)
+		return
+	}
+
+	orderIDs := make([]uuid.UUID, len(orders))
+	for i, o := range orders {
+		orderIDs[i] = o.ID
+	}
+
+	writeJSON(w, http.StatusOK, map[string]any{
+		"order_ids": orderIDs,
 	})
 }
 

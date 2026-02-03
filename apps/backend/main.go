@@ -13,6 +13,7 @@ import (
 	productadapter "backend/internal/adapters/product"
 	storeadapter "backend/internal/adapters/store"
 	useradapter "backend/internal/adapters/user"
+	"backend/internal/domain/mpesa"
 	"backend/internal/repository/postgres"
 	"backend/internal/router"
 	deliveryUsecase "backend/internal/usecase/delivery"
@@ -78,7 +79,7 @@ func main() {
 	inviteUC := inviteUsecase.NewUseCase(inviteRepo, txm)
 	driverUC := driverUsecase.NewUseCase(driverRepo, txm, notificationRepo)
 	userUC := userUsecase.NewUseCase(userRepo, driverUC, txm, notificationRepo)
-	orderUC := orderUsecase.NewUseCase(orderRepo, &useradapter.UseCaseAdapter{UseCase: userUC}, driverRepo, txm, notificationRepo, productRepo)
+	orderUC := orderUsecase.NewUseCase(orderRepo, &useradapter.UseCaseAdapter{UseCase: userUC}, driverRepo, txm, notificationRepo, productRepo, storeRepo)
 	deliveryUC := deliveryUsecase.NewUseCase(deliveryRepo, &orderadapter.UseCaseAdapter{UseCase: orderUC}, &driveradapter.UseCaseAdapter{UseCase: driverUC}, txm, notificationRepo)
 	notificationUC := notificationUsecase.NewUseCase(notificationRepo, txm)
 	storeUC := storeUsecase.NewUseCase(storeRepo, txm)
@@ -104,7 +105,7 @@ func main() {
 	orderHandler := handlers.NewOrderHandler(orderService)
 	driverHandler := handlers.NewDriverHandler(orderService)
 	deliveryHandler := handlers.NewDeliveryHandler(orderService)
-	paymentHandler := handlers.NewPaymentHandler(paymentUC)
+	paymentHandler := handlers.NewPaymentHandler(paymentUC, &mpesa.MpesaService{})
 	feedbackHandler := handlers.NewFeedbackHandler(feedbackUC)
 	notificationHandler := handlers.NewNotificationHandler(orderService)
 	inviteHandler := handlers.NewInviteHandler(inviteUC)

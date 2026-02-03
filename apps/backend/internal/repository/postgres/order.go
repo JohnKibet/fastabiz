@@ -1,10 +1,10 @@
 package postgres
 
 import (
-	"context"
-	"fmt"
 	"backend/internal/application"
 	"backend/internal/domain/order"
+	"context"
+	"fmt"
 
 	"github.com/cridenour/go-postgis"
 	"github.com/google/uuid"
@@ -29,17 +29,23 @@ func (r *OrderRepository) execFromCtx(ctx context.Context) sqlx.ExtContext {
 func (r *OrderRepository) Create(ctx context.Context, o *order.Order) error {
 	query := `
 		INSERT INTO orders (
-		admin_id, user_id, inventory_id, quantity,
-		pickup_address, pickup_point,
-		delivery_address, delivery_point,
-		status
-	) VALUES (
-		:admin_id, :user_id, :inventory_id, :quantity,
-		:pickup_address, ST_SetSRID(ST_MakePoint(:pickup_point.x, :pickup_point.y), 4326),
-		:delivery_address, ST_SetSRID(ST_MakePoint(:delivery_point.x, :delivery_point.y), 4326),
-		:status
-	)
-	RETURNING id
+			user_id, merchant_id, store_id, product_id, variant_id,
+			quantity, unit_price, currency, total,
+			product_name, variant_name, image_url,
+			pickup_address, delivery_address,
+			pickup_point, delivery_point,
+			status
+		)
+		VALUES (
+			:user_id, :merchant_id, :store_id, :product_id, :variant_id,
+			:quantity, :unit_price, :currency, :total,
+			:product_name, :variant_name, :image_url,
+			:pickup_address, :delivery_address,
+			ST_SetSRID(ST_MakePoint(:pickup_point.x, :pickup_point.y), 4326),
+			ST_SetSRID(ST_MakePoint(:delivery_point.x, :delivery_point.y), 4326),
+			:status
+		)
+		RETURNING id
 	`
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, o)
@@ -51,6 +57,66 @@ func (r *OrderRepository) Create(ctx context.Context, o *order.Order) error {
 	if rows.Next() {
 		if err := rows.Scan(&o.ID); err != nil {
 			return fmt.Errorf("scanning new order id: %w", err)
+		}
+	} else {
+		return fmt.Errorf("no id returned after scan")
+	}
+
+	return nil
+}
+
+func (r *OrderRepository) CreatePending(ctx context.Context, o *order.Order) error {
+	query := `
+		INSERT INTO orders (
+			user_id,
+			merchant_id,
+			store_id,
+			product_id,
+			variant_id,
+			quantity,
+			unit_price,
+			currency,
+			total,
+			product_name,
+			variant_name,
+			image_url,
+			pickup_address,
+			delivery_address,
+			pickup_point,
+			delivery_point,
+			status
+		)
+		VALUES (
+			:user_id,
+			:merchant_id,
+			:store_id,
+			:product_id,
+			:variant_id,
+			:quantity,
+			:unit_price,
+			:currency,
+			:total,
+			:product_name,
+			:variant_name,
+			:image_url,
+			:pickup_address,
+			:delivery_address,
+			:pickup_point,
+			:delivery_point,
+			'pending'
+		)
+		RETURNING id
+	`
+
+	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, o)
+	if err != nil {
+		return fmt.Errorf("insert pending order: %w", err)
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		if err := rows.Scan(&o.ID); err != nil {
+			return fmt.Errorf("scanning new pending order id: %w", err)
 		}
 	} else {
 		return fmt.Errorf("no id returned after scan")

@@ -18,8 +18,9 @@ const (
 )
 
 type Order struct {
-	ID         uuid.UUID `db:"id" json:"id"`
-	StoreID    uuid.UUID `db:"store_id" json:"store_id"` // owner
+	ID      uuid.UUID `db:"id" json:"id"`
+	StoreID uuid.UUID `db:"store_id" json:"store_id"`
+	MerchantID uuid.UUID `db:"merchant_id" json:"merchant_id"` // owner
 	AdminID    uuid.UUID `db:"admin_id" json:"admin_id"` // manager
 	CustomerID uuid.UUID `db:"user_id" json:"customer_id"`
 
@@ -83,4 +84,21 @@ type OrderDoc struct {
 	Status    OrderStatus `db:"status" json:"status"`
 	CreatedAt time.Time   `db:"created_at" json:"created_at"`
 	UpdatedAt time.Time   `db:"updated_at" json:"updated_at"`
+}
+
+// created inside the usecase, never sent by client.
+type CartItemSnapshot struct {
+	ProductID uuid.UUID
+	VariantID *uuid.UUID
+	Quantity  int
+
+	// price snapshot
+	UnitPrice int64
+	Currency  string
+	Total     int64
+
+	// product snapshot
+	ProductName string
+	VariantName *string
+	ImageURL    *string
 }

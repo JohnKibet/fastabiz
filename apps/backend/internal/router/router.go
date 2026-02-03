@@ -121,6 +121,10 @@ func NewRouter(
 				r.Get("/all_payments", p.ListPayments)
 				r.Get("/{id}", p.GetPaymentByID)
 				r.Get("/{order_id}", p.GetPaymentByOrderID)
+
+				// MPesa STK Push
+				r.Post("/mpesa-express", p.MpesaExpress)
+				r.Post("/mpesa-callback", p.MpesaCallback)
 			})
 
 			// Feedbacks

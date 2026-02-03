@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"backend/internal/domain/mpesa"
 	"backend/internal/domain/payment"
 	usecase "backend/internal/usecase/payment"
 	"encoding/json"
@@ -8,14 +9,19 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+
+	"fmt"
+	"os"
+	"time"
 )
 
 type PaymentHandler struct {
-	PH *usecase.UseCase
+	PH           *usecase.UseCase
+	mpesaService *mpesa.MpesaService
 }
 
-func NewPaymentHandler(ph *usecase.UseCase) *PaymentHandler {
-	return &PaymentHandler{PH: ph}
+func NewPaymentHandler(ph *usecase.UseCase, mpesa *mpesa.MpesaService) *PaymentHandler {
+	return &PaymentHandler{PH: ph, mpesaService: mpesa}
 }
 
 // CreatePayment godoc
@@ -128,4 +134,41 @@ func (ph *PaymentHandler) ListPayments(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, payments)
+}
+
+func (ph *PaymentHandler) MpesaExpress(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Phone  string `json:"phone"`
+		Amount string `json:"amount"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request", err)
+		return
+	}
+
+	stkRes, err := ph.mpesaService.STKPush(req.Phone, req.Amount)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "Mpesa STK push failed", err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, stkRes)
+}
+
+func (ph *PaymentHandler) MpesaCallback(w http.ResponseWriter, r *http.Request) {
+	var payload map[string]interface{}
+	_ = json.NewDecoder(r.Body).Decode(&payload)
+
+	f, _ := os.OpenFile("stk_callback.log",
+		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	defer f.Close()
+
+	fmt.Fprintf(
+		f,
+		"%s %v\n",
+		time.Now().Format("2006-01-02 15:04:05"),
+		payload,
+	)
+
+	writeJSON(w, http.StatusOK, payload)
 }

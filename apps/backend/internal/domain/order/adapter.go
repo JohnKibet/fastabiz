@@ -4,6 +4,7 @@ import (
 	"backend/internal/domain/driver"
 	"backend/internal/domain/notification"
 	"backend/internal/domain/product"
+	"backend/internal/domain/store"
 	"context"
 
 	"github.com/cridenour/go-postgis"
@@ -31,4 +32,8 @@ type ProductOrVariantReader interface {
 	GetVariantByID(ctx context.Context, id uuid.UUID) (*product.Variant, error)
 	UpdateProductStock(ctx context.Context, productID uuid.UUID, newStock int) error
 	UpdateVariantStock(ctx context.Context, variantID uuid.UUID, newStock int) error
+}
+
+type StoreReader interface {
+	GetByID(ctx context.Context, id uuid.UUID) (*store.Store, error)
 }
