@@ -39,21 +39,25 @@
         <div class="mt-2 text-sm">
           @if (Product.HasVariants)
           {
-            <span class="text-blue-600">
-              @Product.VariantCount variants
-            </span>
-            <span class="ml-3 text-gray-600">
-              Price: KES @Product.MinPrice – @Product.MaxPrice
-            </span>
+            <div class="flex flex-col">
+              <span class="text-blue-600">
+                @Product.VariantCount variants
+              </span>
+              <span class="ml-3 text-gray-600">
+                Price: KES @Product.MinPrice – @Product.MaxPrice
+              </span>
+            </div>
           }
           else
           {
-            <span class="text-gray-700">
-              Price: KES @Product.Price
-            </span>
-            <span class="ml-3 @(Product.Stock < 10 ? "text-red-600" : "text-green-600")">
-              Stock: @Product.Stock
-            </span>
+            <div class="flex flex-col">
+              <span class="text-gray-700">
+                Price: KES @Product.Price
+              </span>
+              <span class="ml-3 @(Product.Stock < 10 ? "text-red-600" : "text-green-600")">
+                Stock: @Product.Stock
+              </span>
+            </div>
           }
         </div>
       </div>
