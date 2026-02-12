@@ -104,7 +104,10 @@ func (uc *UseCase) createOrders(
 			if item.VariantID != nil {
 				return nil, order.ErrorVariantNotAllowed
 			}
-			if p.Stock < item.Quantity {
+			if p.Stock == nil {
+				return nil, fmt.Errorf("product %s has no stock value", p.ID)
+			}
+			if *p.Stock < item.Quantity {
 				return nil, order.ErrorOutOfStock
 			}
 		}
@@ -137,7 +140,10 @@ func (uc *UseCase) createOrders(
 			o.ImageURL = firstImage(p.Images)
 
 			// Decrement stock
-			newStock := p.Stock - item.Quantity
+			if p.Stock == nil {
+				return nil, fmt.Errorf("product %s has no stock value", p.ID)
+			}
+			newStock := *p.Stock - item.Quantity
 			if err := uc.prodvrt.UpdateProductStock(ctx, p.ID, newStock); err != nil {
 				return nil, fmt.Errorf("update product stock failed: %w", err)
 			}

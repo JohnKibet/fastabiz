@@ -25,8 +25,6 @@ type Repository interface {
 	// Each product should be returned as a fully-hydrated aggregate.
 	ListProductsByStore(ctx context.Context, storeID uuid.UUID) ([]ProductListItem, error)
 
-	// ListAllProducts()
-
 	// UpdateDetails updates the core mutable fields of a product.
 	// This does not affect images, options, variants, or inventory.
 	UpdateDetails(
@@ -137,4 +135,13 @@ type Repository interface {
 	// by one or more variants, which would otherwise leave orphaned variant data
 	// and violate domain integrity.
 	IsOptionValueUsed(ctx context.Context, optionValueID uuid.UUID) (bool, error)
+
+	// Universal fetch for all products regardless of store or merchant
+	// ListAllProducts()
+
+	// Adds price to product without variants
+	// UpdateProductInvPrice(ctx context.Context, productID uuid.UUID, price float64) error
+
+	// Adds stock to product without variants
+	// UpdateProductInvStock(ctx context.Context, productID uuid.UUID, stock int) error
 }

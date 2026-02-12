@@ -606,10 +606,15 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, id uuid.UUID) (*
 			p.name,
 			p.description,
 			p.category,
-			EXISTS (
-				SELECT 1 FROM variants v WHERE v.product_id = p.id
-			) AS has_variants
+			(v.product_id IS NOT NULL) AS has_variants,
+			pi.stock
 		FROM products p
+		LEFT JOIN (
+				SELECT DISTINCT product_id
+				FROM variants
+		) v ON v.product_id = p.id
+		LEFT JOIN product_inventory pi
+				ON pi.product_id = p.id
 		WHERE p.id = $1;
 	`
 
@@ -814,11 +819,11 @@ func (r *ProductRepository) GetFullProductByID(ctx context.Context, id uuid.UUID
 
 	// 2. Fetch images
 	queryImages := `
-        SELECT url
-        FROM product_images
-        WHERE product_id = $1
-        ORDER BY is_primary DESC, position ASC
-    `
+		SELECT url
+		FROM product_images
+		WHERE product_id = $1
+		ORDER BY is_primary DESC, position ASC
+	`
 	var images []string
 	if err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &images, queryImages, id); err != nil {
 		return nil, fmt.Errorf("list product images: %w", err)
@@ -850,12 +855,12 @@ func (r *ProductRepository) GetFullProductByID(ctx context.Context, id uuid.UUID
 	for i := range variants {
 		variant := &variants[i]
 		queryOptVals := `
-            SELECT pov.id, po.name AS option_name, pov.value
-            FROM variant_option_values vov
-            JOIN product_option_values pov ON vov.option_value_id = pov.id
-            JOIN product_options po ON pov.product_option_id = po.id
-            WHERE vov.variant_id = $1
-        `
+			SELECT pov.id, po.name AS option_name, pov.value
+			FROM variant_option_values vov
+			JOIN product_option_values pov ON vov.option_value_id = pov.id
+			JOIN product_options po ON pov.product_option_id = po.id
+			WHERE vov.variant_id = $1
+		`
 		rows, err := r.execFromCtx(ctx).QueryContext(ctx, queryOptVals, variant.ID)
 		if err != nil {
 			return nil, fmt.Errorf("list variant options: %w", err)

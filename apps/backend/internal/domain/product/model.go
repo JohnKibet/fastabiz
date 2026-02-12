@@ -20,7 +20,7 @@ type Product struct {
 
 	// Used only when HasVariants == false
 	Price float64 `db:"price" json:"price,omitempty"`
-	Stock int     `db:"stock" json:"stock,omitempty"`
+	Stock *int     `db:"stock" json:"stock,omitempty"`
 
 	// Stored as JSON/JSONB
 	Options  []Option  `db:"options" json:"options,omitempty"`
