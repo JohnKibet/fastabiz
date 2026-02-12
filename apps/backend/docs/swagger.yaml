@@ -223,58 +223,51 @@ definitions:
       status:
         $ref: '#/definitions/notification.NotificationStatus'
     type: object
-  order.CreateOrderRequestDoc:
+  order.CreateOrderItem:
     properties:
-      admin_id:
+      product_id:
         type: string
-      currency:
+      quantity:
+        type: integer
+      variant_id:
         type: string
+    required:
+    - product_id
+    - quantity
+    type: object
+  order.CreateOrderRequest:
+    properties:
       customer_id:
         type: string
       delivery_address:
         type: string
-      delivery_point:
-        $ref: '#/definitions/order.Point'
-      image_url:
-        type: string
-      merchant_id:
-        type: string
+      delivery_lat:
+        type: number
+      delivery_lng:
+        type: number
+      items:
+        items:
+          $ref: '#/definitions/order.CreateOrderItem'
+        minItems: 1
+        type: array
       pickup_address:
         type: string
-      pickup_point:
-        $ref: '#/definitions/order.Point'
-      product_id:
-        type: string
-      product_name:
-        description: snapshot at purchase time
-        type: string
-      quantity:
-        type: integer
-      total:
-        type: integer
-      unit_price:
-        type: integer
-      variant_id:
-        type: string
-      variant_name:
+      pickup_lat:
+        type: number
+      pickup_lng:
+        type: number
+      store_id:
         type: string
     required:
-    - admin_id
-    - currency
     - customer_id
     - delivery_address
-    - delivery_point
-    - image_url
-    - merchant_id
+    - delivery_lat
+    - delivery_lng
+    - items
     - pickup_address
-    - pickup_point
-    - product_id
-    - product_name
-    - quantity
-    - total
-    - unit_price
-    - variant_id
-    - variant_name
+    - pickup_lat
+    - pickup_lng
+    - store_id
     type: object
   order.OrderDoc:
     properties:
@@ -367,8 +360,13 @@ definitions:
   payment.Payment:
     properties:
       amount:
+        description: in cents
         type: integer
+      created_at:
+        type: string
       currency:
+        type: string
+      customer_id:
         type: string
       id:
         type: string
@@ -377,6 +375,11 @@ definitions:
       order_id:
         type: string
       paid_at:
+        type: string
+      phone_number:
+        type: string
+      provider_ref:
+        description: M-Pesa / Stripe refs
         type: string
       status:
         $ref: '#/definitions/payment.PaymentStatus'
@@ -574,6 +577,8 @@ definitions:
         type: integer
       store_id:
         type: string
+      updated_at:
+        type: string
       variant_count:
         description: Variant products
         type: integer
@@ -606,6 +611,26 @@ definitions:
     - name
     - product_id
     type: object
+  product.UpdateProductInvPriceRequest:
+    properties:
+      price:
+        type: number
+      product_id:
+        type: string
+    required:
+    - price
+    - product_id
+    type: object
+  product.UpdateProductInvStockRequest:
+    properties:
+      product_id:
+        type: string
+      stock:
+        type: integer
+    required:
+    - product_id
+    - stock
+    type: object
   product.UpdateVariantPriceRequest:
     properties:
       price:
@@ -634,6 +659,10 @@ definitions:
         type: string
       image_url:
         type: string
+      options:
+        additionalProperties:
+          type: string
+        type: object
       price:
         type: number
       product_id:
@@ -853,6 +882,9 @@ info:
   title: FastaBiz API
   version: "1.0"
 paths:
+  /cloudinary/signature:
+    post:
+      responses: {}
   /deliveries/{id}:
     delete:
       consumes:
@@ -1758,32 +1790,84 @@ paths:
     post:
       consumes:
       - application/json
-      description: Creates an order and returns the new object
+      description: Creates an order and returns IDs of created orders
       parameters:
-      - description: Order input
+      - description: Order payload
         in: body
         name: order
         required: true
         schema:
-          $ref: '#/definitions/order.CreateOrderRequestDoc'
+          $ref: '#/definitions/order.CreateOrderRequest'
       produces:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Created order IDs
           schema:
-            $ref: '#/definitions/order.OrderDoc'
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
         "400":
           description: Bad request
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
         "500":
           description: Internal server error
           schema:
-            type: string
+            $ref: '#/definitions/handlers.ErrorResponse'
       security:
       - BearerAuth: []
       summary: Create a new order
+      tags:
+      - orders
+  /orders/pending:
+    post:
+      consumes:
+      - application/json
+      description: Creates pending orders and returns IDs
+      parameters:
+      - description: Order payload
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/order.CreateOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Pending order IDs
+          schema:
+            additionalProperties:
+              items:
+                type: string
+              type: array
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create pending orders (cart)
       tags:
       - orders
   /payments/{id}:
@@ -2241,6 +2325,84 @@ paths:
       security:
       - BearerAuth: []
       summary: Reorder product images
+      tags:
+      - products
+  /products/inventory/price:
+    patch:
+      consumes:
+      - application/json
+      description: Updates price for a product without variants (product_inventory
+        table).
+      parameters:
+      - description: Product price update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/product.UpdateProductInvPriceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product price updated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body or invalid product input
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update product inventory price
+      tags:
+      - products
+  /products/inventory/stock:
+    patch:
+      consumes:
+      - application/json
+      description: Updates stock for a product without variants (product_inventory
+        table).
+      parameters:
+      - description: Product stock update payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/product.UpdateProductInvStockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Product stock updated
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Invalid request body or invalid product input
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update product inventory stock
       tags:
       - products
   /products/options/{optionId}/delete:

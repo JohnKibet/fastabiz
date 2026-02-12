@@ -140,8 +140,8 @@ type Repository interface {
 	// ListAllProducts()
 
 	// Adds price to product without variants
-	// UpdateProductInvPrice(ctx context.Context, productID uuid.UUID, price float64) error
+	UpdateProductInvPrice(ctx context.Context, productID uuid.UUID, price float64) error
 
 	// Adds stock to product without variants
-	// UpdateProductInvStock(ctx context.Context, productID uuid.UUID, stock int) error
+	UpdateProductInvStock(ctx context.Context, productID uuid.UUID, stock int) error
 }

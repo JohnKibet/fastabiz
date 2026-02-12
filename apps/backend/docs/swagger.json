@@ -12,6 +12,11 @@
     "host": "localhost:8000",
     "basePath": "/api",
     "paths": {
+        "/cloudinary/signature": {
+            "post": {
+                "responses": {}
+            }
+        },
         "/deliveries/all_deliveries": {
             "get": {
                 "security": [
@@ -1313,7 +1318,7 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Creates an order and returns the new object",
+                "description": "Creates an order and returns IDs of created orders",
                 "consumes": [
                     "application/json"
                 ],
@@ -1326,32 +1331,113 @@
                 "summary": "Create a new order",
                 "parameters": [
                     {
-                        "description": "Order input",
+                        "description": "Order payload",
                         "name": "order",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/order.CreateOrderRequestDoc"
+                            "$ref": "#/definitions/order.CreateOrderRequest"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Created order IDs",
                         "schema": {
-                            "$ref": "#/definitions/order.OrderDoc"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal server error",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/pending": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates pending orders and returns IDs",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Create pending orders (cart)",
+                "parameters": [
+                    {
+                        "description": "Order payload",
+                        "name": "order",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/order.CreateOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Pending order IDs",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -1937,6 +2023,126 @@
                     },
                     "404": {
                         "description": "Image not found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/inventory/price": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates price for a product without variants (product_inventory table).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Update product inventory price",
+                "parameters": [
+                    {
+                        "description": "Product price update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/product.UpdateProductInvPriceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product price updated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or invalid product input",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/inventory/stock": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates stock for a product without variants (product_inventory table).",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "products"
+                ],
+                "summary": "Update product inventory stock",
+                "parameters": [
+                    {
+                        "description": "Product stock update payload",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/product.UpdateProductInvStockRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Product stock updated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request body or invalid product input",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -3996,74 +4202,67 @@
                 }
             }
         },
-        "order.CreateOrderRequestDoc": {
+        "order.CreateOrderItem": {
             "type": "object",
             "required": [
-                "admin_id",
-                "currency",
-                "customer_id",
-                "delivery_address",
-                "delivery_point",
-                "image_url",
-                "merchant_id",
-                "pickup_address",
-                "pickup_point",
                 "product_id",
-                "product_name",
-                "quantity",
-                "total",
-                "unit_price",
-                "variant_id",
-                "variant_name"
+                "quantity"
             ],
             "properties": {
-                "admin_id": {
+                "product_id": {
                     "type": "string"
                 },
-                "currency": {
-                    "type": "string"
+                "quantity": {
+                    "type": "integer"
                 },
+                "variant_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "order.CreateOrderRequest": {
+            "type": "object",
+            "required": [
+                "customer_id",
+                "delivery_address",
+                "delivery_lat",
+                "delivery_lng",
+                "items",
+                "pickup_address",
+                "pickup_lat",
+                "pickup_lng",
+                "store_id"
+            ],
+            "properties": {
                 "customer_id": {
                     "type": "string"
                 },
                 "delivery_address": {
                     "type": "string"
                 },
-                "delivery_point": {
-                    "$ref": "#/definitions/order.Point"
+                "delivery_lat": {
+                    "type": "number"
                 },
-                "image_url": {
-                    "type": "string"
+                "delivery_lng": {
+                    "type": "number"
                 },
-                "merchant_id": {
-                    "type": "string"
+                "items": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/order.CreateOrderItem"
+                    }
                 },
                 "pickup_address": {
                     "type": "string"
                 },
-                "pickup_point": {
-                    "$ref": "#/definitions/order.Point"
+                "pickup_lat": {
+                    "type": "number"
                 },
-                "product_id": {
-                    "type": "string"
+                "pickup_lng": {
+                    "type": "number"
                 },
-                "product_name": {
-                    "description": "snapshot at purchase time",
-                    "type": "string"
-                },
-                "quantity": {
-                    "type": "integer"
-                },
-                "total": {
-                    "type": "integer"
-                },
-                "unit_price": {
-                    "type": "integer"
-                },
-                "variant_id": {
-                    "type": "string"
-                },
-                "variant_name": {
+                "store_id": {
                     "type": "string"
                 }
             }
@@ -4201,9 +4400,16 @@
             "type": "object",
             "properties": {
                 "amount": {
+                    "description": "in cents",
                     "type": "integer"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "currency": {
+                    "type": "string"
+                },
+                "customer_id": {
                     "type": "string"
                 },
                 "id": {
@@ -4216,6 +4422,13 @@
                     "type": "string"
                 },
                 "paid_at": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "provider_ref": {
+                    "description": "M-Pesa / Stripe refs",
                     "type": "string"
                 },
                 "status": {
@@ -4503,6 +4716,9 @@
                 "store_id": {
                     "type": "string"
                 },
+                "updated_at": {
+                    "type": "string"
+                },
                 "variant_count": {
                     "description": "Variant products",
                     "type": "integer"
@@ -4550,6 +4766,36 @@
                 }
             }
         },
+        "product.UpdateProductInvPriceRequest": {
+            "type": "object",
+            "required": [
+                "price",
+                "product_id"
+            ],
+            "properties": {
+                "price": {
+                    "type": "number"
+                },
+                "product_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "product.UpdateProductInvStockRequest": {
+            "type": "object",
+            "required": [
+                "product_id",
+                "stock"
+            ],
+            "properties": {
+                "product_id": {
+                    "type": "string"
+                },
+                "stock": {
+                    "type": "integer"
+                }
+            }
+        },
         "product.UpdateVariantPriceRequest": {
             "type": "object",
             "required": [
@@ -4591,6 +4837,12 @@
                 },
                 "image_url": {
                     "type": "string"
+                },
+                "options": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "price": {
                     "type": "number"

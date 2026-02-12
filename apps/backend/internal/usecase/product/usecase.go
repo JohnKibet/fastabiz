@@ -247,3 +247,21 @@ func (uc *UseCase) DeleteVariant(ctx context.Context, variantID uuid.UUID) error
 		return nil
 	})
 }
+
+func (uc *UseCase) UpdateProductInvStock(ctx context.Context, productID uuid.UUID, stock int) error {
+	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
+		if err := uc.repo.UpdateProductInvStock(txCtx, productID, stock); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+		return nil
+	})
+}
+
+func (uc *UseCase) UpdateProductInvPrice(ctx context.Context, productID uuid.UUID, price float64) error {
+	return uc.txManager.Do(ctx, func(txCtx context.Context) error {
+		if err := uc.repo.UpdateProductInvPrice(txCtx, productID, price); err != nil {
+			return fmt.Errorf("%w", err)
+		}
+		return nil
+	})
+}

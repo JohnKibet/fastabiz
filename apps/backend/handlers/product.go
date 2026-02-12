@@ -714,3 +714,75 @@ func (h *ProductHandler) DeleteVariant(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusOK, map[string]string{"message": "Variant deleted"})
 }
+
+// UpdateProductInvStock godoc
+// @Summary Update product inventory stock
+// @Description Updates stock for a product without variants (product_inventory table).
+// @Tags products
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param request body product.UpdateProductInvStockRequest true "Product stock update payload"
+// @Success 200 {object} map[string]string "Product stock updated"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid request body or invalid product input"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
+// @Router /products/inventory/stock [patch]
+func (h *ProductHandler) UpdateProductInvStock(w http.ResponseWriter, r *http.Request) {
+	var req product.UpdateProductInvStockRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", nil)
+		return
+	}
+
+	if err := h.UC.Products.UseCase.UpdateProductInvStock(r.Context(), req.ProductID, req.Stock); err != nil {
+		switch {
+		case errors.Is(err, product.ErrInvalidProduct):
+			writeJSONError(w, http.StatusBadRequest, "Select product to update stock.", err)
+		case errors.Is(err, product.ErrInvalidProductInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing value for field stock.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Update product stock failed, try again later.", err)
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Product stock updated"})
+}
+
+// UpdateProductInvPrice godoc
+// @Summary Update product inventory price
+// @Description Updates price for a product without variants (product_inventory table).
+// @Tags products
+// @Security BearerAuth
+// @Accept json
+// @Produce json
+// @Param request body product.UpdateProductInvPriceRequest true "Product price update payload"
+// @Success 200 {object} map[string]string "Product price updated"
+// @Failure 400 {object} handlers.ErrorResponse "Invalid request body or invalid product input"
+// @Failure 401 {object} handlers.ErrorResponse "Unauthorized"
+// @Failure 500 {object} handlers.ErrorResponse "Internal server error"
+// @Router /products/inventory/price [patch]
+func (h *ProductHandler) UpdateProductInvPrice(w http.ResponseWriter, r *http.Request) {
+	var req product.UpdateProductInvPriceRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "Invalid request body", nil)
+		return
+	}
+
+	if err := h.UC.Products.UseCase.UpdateProductInvPrice(r.Context(), req.ProductID, req.Price); err != nil {
+		switch {
+		case errors.Is(err, product.ErrInvalidProduct):
+			writeJSONError(w, http.StatusBadRequest, "Select product to update price.", err)
+		case errors.Is(err, product.ErrInvalidProductInput):
+			writeJSONError(w, http.StatusBadRequest, "Missing value for field price.", err)
+		default:
+			writeJSONError(w, http.StatusInternalServerError, "Update product price failed, try again later.", err)
+		}
+		return
+	}
+
+	writeJSON(w, http.StatusOK, map[string]string{"message": "Product price updated"})
+}

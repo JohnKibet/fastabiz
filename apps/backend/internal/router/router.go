@@ -160,7 +160,6 @@ func NewRouter(
 			r.Route("/products", func(r chi.Router) {
 				r.Post("/cloudinary/signature", pr.CloudinarySignature)
 				r.Post("/create", pr.CreateProduct)
-				r.Get("/{store_id}/all_products", pr.ListProductsByStore)
 				r.Post("/images/add", pr.AddImage)
 				r.Post("/options/add", pr.AddOptionName)
 				r.Post("/options/values/add", pr.AddOptionValue)
@@ -168,6 +167,9 @@ func NewRouter(
 				r.Patch("/variants/stock/update", pr.UpdateVariantStock)
 				r.Patch("/variants/price/update", pr.UpdateVariantPrice)
 				r.Patch("/images/reorder", pr.ReorderImages)
+				r.Patch("/inventory/stock", pr.UpdateProductInvStock)
+				r.Patch("/inventory/price", pr.UpdateProductInvPrice)
+				r.Get("/{store_id}/all_products", pr.ListProductsByStore)
 				r.Patch("/{id}/product_details", pr.UpdateProductDetails)
 				r.Get("/{productId}/options", pr.ListOptions)
 				r.Get("/by-id/{id}", pr.GetProductByID)

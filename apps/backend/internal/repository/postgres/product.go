@@ -882,3 +882,77 @@ func (r *ProductRepository) GetFullProductByID(ctx context.Context, id uuid.UUID
 
 	return p, nil
 }
+
+func (r *ProductRepository) UpdateProductInvStock(ctx context.Context, productID uuid.UUID, stock int) error {
+	params := map[string]interface{}{
+		"product_id": productID,
+		"stock":      stock,
+	}
+
+	query := `
+		UPDATE product_inventory
+		SET stock = :stock,
+				updated_at = NOW()
+		WHERE id = :product_id
+	`
+	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidProduct
+			case "23502":
+				return product.ErrInvalidProductInput
+			}
+		}
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return product.ErrProductNotFound
+	}
+
+	return nil
+}
+
+func (r *ProductRepository) UpdateProductInvPrice(ctx context.Context, productID uuid.UUID, price float64) error {
+	params := map[string]interface{}{
+		"product_id": productID,
+		"price":      price,
+	}
+
+	query := `
+		UPDATE product_inventory
+		SET price = :price,
+				updated_at = NOW()
+		WHERE id = :product_id
+	`
+	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			switch pqErr.Code {
+			case "23503":
+				return product.ErrInvalidProduct
+			case "23502":
+				return product.ErrInvalidProductInput
+			}
+		}
+		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return product.ErrProductNotFound
+	}
+
+	return nil
+}
