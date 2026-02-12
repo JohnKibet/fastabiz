@@ -315,6 +315,28 @@ public class UpdateVariantPriceRequest
     public double Price { get; set; }
 }
 
+// for products without variants
+public class UpdateProductInvPriceRequest
+{
+    [Required]
+    [JsonPropertyName("product_id")]
+    public Guid ProductId { get; set; }
+
+    [Required]
+    [JsonPropertyName("price")]
+    public double Price { get; set; }
+}
+public class UpdateProductInvStockRequest
+{
+    [Required]
+    [JsonPropertyName("product_id")]
+    public Guid ProductId { get; set; }
+
+    [Required]
+    [JsonPropertyName("stock")]
+    public int Stock { get; set; }
+}
+
 // Lightweight version for list/grid views
 public class ProductListItem
 {
