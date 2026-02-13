@@ -80,13 +80,46 @@
       @if (!productCreated)
       {
         <button type="submit" disabled="@(isSubmitting || productCreated)" class="mt-6 w-full bg-primary text-white py-2 rounded-xl
-                              disabled:opacity-50 disabled:cursor-not-allowed
-                              hover:bg-ctaHover transition">
+          disabled:opacity-50 disabled:cursor-not-allowed
+          hover:bg-ctaHover transition">
           Create Product
         </button>
       }
 
     </EditForm>
+
+    @if (productCreated && !product.HasVariants)
+    {
+      <div class="mt-6 border-t pt-4">
+        <h2 class="text-lg font-semibold text-textDark mb-2">Add Stock & Price</h2>
+
+        <fieldset disabled="@isAddSuccess" class="space-y-3 @(isAddSuccess ? "opacity-60 pointer-events-none" : "")">
+
+          <div class="flex flex-col">
+            <label class="text-xs text-gray-600 mb-1">Price</label>
+            <InputNumber @bind-Value="product.Price" class="px-3 py-2 border rounded-lg" />
+          </div>
+
+          <div class="flex flex-col">
+            <label class="text-xs text-gray-600 mb-1">Stock</label>
+            <InputNumber @bind-Value="product.Stock" class="px-3 py-2 border rounded-lg" />
+          </div>
+
+          <button @onclick="UpdateInventory" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-ctaHover">
+            Add Price & Stock
+          </button>
+
+        </fieldset>
+
+        @if (isAddSuccess)
+        {
+          <button class="mt-6 text-primary underline" @onclick="ResetAll">
+            Create another product
+          </button>
+        }
+
+      </div>
+    }
 
     @if (productCreated && product.HasVariants)
     {
@@ -105,6 +138,7 @@
   private bool isLoadingStores = true;
   private bool isSubmitting = false;
   private bool productCreated = false;
+  private bool isAddSuccess = false;
   private Guid createdProductId;
 
   protected override async Task OnInitializedAsync()
@@ -209,6 +243,58 @@
 
       isSubmitting = false;
     }
+    finally
+    {
+      isSubmitting = false;
+    }
   }
 
+  private async Task UpdateInventory()
+  {
+    if (product.Price <= 0 || product.Stock < 0)
+    {
+      ToastService.ShowToast(
+          "Price and stock must be valid values",
+          string.Empty,
+          ToastService.ToastLevel.Warning
+      );
+      return;
+    }
+
+    var req = new UpdateProductInventoryRequest
+    {
+      ProductId = createdProductId,
+      Price = product.Price,
+      Stock = product.Stock
+    };
+
+    var result = await ProductService.UpdateProductInventory(req);
+
+    if (!result.Success)
+    {
+      ToastService.ShowToast(
+          result.Error?.Detail ?? "Failed to update inventory",
+          string.Empty,
+          ToastService.ToastLevel.Error
+      );
+      return;
+    }
+
+    isAddSuccess = true;
+
+    ToastService.ShowToast(
+        result.Data?.Message ?? "Inventory updated",
+        string.Empty,
+        ToastService.ToastLevel.Success
+    );
+  }
+
+  private void ResetAll()
+  {
+    product = new CreateProductRequest();
+    productCreated = false;
+    isAddSuccess = false;
+    isSubmitting = false;
+    createdProductId = Guid.Empty;
+  }
 }

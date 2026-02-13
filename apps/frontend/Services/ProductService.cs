@@ -419,51 +419,28 @@ public class ProductService
     }
   }
 
-  public async Task<ServiceResult2<ProductX>> UpdateProductInvPrice(UpdateProductInvPriceRequest request)
+  public async Task<ServiceResult2<ApiMessageResponse>> UpdateProductInventory(UpdateProductInventoryRequest request)
   {
     try
     {
-      var response = await _http.PatchAsJsonAsync("products/inventory/price", request);
+      var response = await _http.PatchAsJsonAsync("products/inventory", request);
+
       if (response.IsSuccessStatusCode)
       {
-        var result = await response.Content.ReadFromJsonAsync<ProductX>();
-        return ServiceResult2<ProductX>.Ok(result ?? new ProductX());
+        var result = await response.Content.ReadFromJsonAsync<ApiMessageResponse>();
+        return ServiceResult2<ApiMessageResponse>.Ok(result ?? new ApiMessageResponse());
       }
 
       var error = await ParseError(response);
-      return ServiceResult2<ProductX>.Fail(error);
+      return ServiceResult2<ApiMessageResponse>.Fail(error);
     }
     catch (HttpRequestException ex)
     {
-      return ServiceResult2<ProductX>.Fail($"Network error: {ex.Message}");
+      return ServiceResult2<ApiMessageResponse>.Fail($"Network error: {ex.Message}");
     }
     catch (Exception ex)
     {
-      return ServiceResult2<ProductX>.Fail($"Unexpected error: {ex.Message}");
-    }
-  }
-
-  public async Task<ServiceResult2<ProductX>> UpdateProductInvStock(UpdateProductInvStockRequest request)
-  {
-    try
-    {
-      var response = await _http.PatchAsJsonAsync("products/inventory/stock", request);
-      if (response.IsSuccessStatusCode)
-      {
-        var result = await response.Content.ReadFromJsonAsync<ProductX>();
-        return ServiceResult2<ProductX>.Ok(result ?? new ProductX());
-      }
-
-      var error = await ParseError(response);
-      return ServiceResult2<ProductX>.Fail(error);
-    }
-    catch (HttpRequestException ex)
-    {
-      return ServiceResult2<ProductX>.Fail($"Network error: {ex.Message}");
-    }
-    catch (Exception ex)
-    {
-      return ServiceResult2<ProductX>.Fail($"Unexpected error: {ex.Message}");
+      return ServiceResult2<ApiMessageResponse>.Fail($"Unexpected error: {ex.Message}");
     }
   }
 

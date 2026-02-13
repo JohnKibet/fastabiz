@@ -128,6 +128,8 @@ public class CreateProductRequest
     public string Category { get; set; } = string.Empty;
 
     public bool HasVariants { get; set; }
+    public double Price { get; set; }
+    public int Stock { get; set; }
 }
 
 // createproduct response
@@ -316,7 +318,7 @@ public class UpdateVariantPriceRequest
 }
 
 // for products without variants
-public class UpdateProductInvPriceRequest
+public class UpdateProductInventoryRequest
 {
     [Required]
     [JsonPropertyName("product_id")]
@@ -325,12 +327,6 @@ public class UpdateProductInvPriceRequest
     [Required]
     [JsonPropertyName("price")]
     public double Price { get; set; }
-}
-public class UpdateProductInvStockRequest
-{
-    [Required]
-    [JsonPropertyName("product_id")]
-    public Guid ProductId { get; set; }
 
     [Required]
     [JsonPropertyName("stock")]
@@ -525,4 +521,10 @@ public static class ProductMapper
             .ToList();
     }
 
+
+}
+public class ApiMessageResponse
+{
+    [JsonPropertyName("message")]
+    public string Message { get; set; } = string.Empty;
 }
