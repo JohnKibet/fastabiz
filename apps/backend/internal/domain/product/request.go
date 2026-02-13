@@ -75,12 +75,8 @@ func (r CreateVariantRequest) ToVariant() *Variant {
 	}
 }
 
-type UpdateProductInvStockRequest struct {
-	ProductID uuid.UUID `json:"product_id" binding:"required"`
-	Stock     int       `json:"stock" binding:"required"`
-}
-
-type UpdateProductInvPriceRequest struct {
-	ProductID uuid.UUID `json:"product_id" binding:"required"`
-	Price     float64   `json:"price" binding:"required"`
+type UpdateProductInventoryRequest struct {
+	ProductID uuid.UUID `json:"product_id"`
+	Price     float64   `json:"price"`
+	Stock     int       `json:"stock"`
 }

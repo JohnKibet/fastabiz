@@ -542,13 +542,20 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 		}
 		return err
 	}
-	defer rows.Close()
+	// defer rows.Close()
 
-	if rows.Next() {
+	// if rows.Next() {
+	// 	if err := rows.Scan(&p.ID); err != nil {
+	// 		return fmt.Errorf("scan product id: %w", err)
+	// 	}
+	// }
+	if rows.Next() { // frees connection for the next statements inside the same transaction.
 		if err := rows.Scan(&p.ID); err != nil {
+			rows.Close()
 			return fmt.Errorf("scan product id: %w", err)
 		}
 	}
+	rows.Close()
 
 	// 2. Insert images (optional)
 	for _, img := range p.Images {
@@ -592,6 +599,15 @@ func (r *ProductRepository) Create(ctx context.Context, p *product.Product) erro
 			if err := r.CreateVariant(ctx, vi); err != nil {
 				return err
 			}
+		}
+	} else {
+		// Create product_inventory row immediately
+		invQuery := `
+			INSERT INTO product_inventory (product_id, stock, price)
+			VALUES ($1, 0, 0)
+    `
+		if _, err := r.execFromCtx(ctx).ExecContext(ctx, invQuery, p.ID); err != nil {
+			return fmt.Errorf("%w", err)
 		}
 	}
 
@@ -883,55 +899,21 @@ func (r *ProductRepository) GetFullProductByID(ctx context.Context, id uuid.UUID
 	return p, nil
 }
 
-func (r *ProductRepository) UpdateProductInvStock(ctx context.Context, productID uuid.UUID, stock int) error {
+func (r *ProductRepository) UpdateProductInventory(ctx context.Context, productID uuid.UUID, price float64, stock int) error {
 	params := map[string]interface{}{
 		"product_id": productID,
+		"price":      price,
 		"stock":      stock,
 	}
 
 	query := `
 		UPDATE product_inventory
-		SET stock = :stock,
-				updated_at = NOW()
-		WHERE id = :product_id
-	`
-	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
-	if err != nil {
-		if pqErr, ok := err.(*pq.Error); ok {
-			switch pqErr.Code {
-			case "23503":
-				return product.ErrInvalidProduct
-			case "23502":
-				return product.ErrInvalidProductInput
-			}
-		}
-		return err
-	}
-
-	rows, err := res.RowsAffected()
-	if err != nil {
-		return fmt.Errorf("rows affected: %w", err)
-	}
-
-	if rows == 0 {
-		return product.ErrProductNotFound
-	}
-
-	return nil
-}
-
-func (r *ProductRepository) UpdateProductInvPrice(ctx context.Context, productID uuid.UUID, price float64) error {
-	params := map[string]interface{}{
-		"product_id": productID,
-		"price":      price,
-	}
-
-	query := `
-		UPDATE product_inventory
 		SET price = :price,
+				stock = :stock,
 				updated_at = NOW()
-		WHERE id = :product_id
-	`
+		WHERE product_id = :product_id
+  `
+
 	res, err := sqlx.NamedExecContext(ctx, r.execFromCtx(ctx), query, params)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {

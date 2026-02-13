@@ -139,9 +139,6 @@ type Repository interface {
 	// Universal fetch for all products regardless of store or merchant
 	// ListAllProducts()
 
-	// Adds price to product without variants
-	UpdateProductInvPrice(ctx context.Context, productID uuid.UUID, price float64) error
-
-	// Adds stock to product without variants
-	UpdateProductInvStock(ctx context.Context, productID uuid.UUID, stock int) error
+	// Adds stock & price to product_inventory table for products without variants
+	UpdateProductInventory(ctx context.Context, productID uuid.UUID, price float64, stock int) error
 }

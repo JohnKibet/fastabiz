@@ -9,7 +9,7 @@ services:
     ports: # migration purposes
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - fastabiz_pgdata:/var/lib/postgresql/data
       - ./backups:/backups
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d fastabiz_db"]
@@ -69,6 +69,6 @@ services:
   #   restart: always
 
 volumes:
-  pgdata:
+  fastabiz_pgdata:
   # caddy_data:
   # caddy_config:
