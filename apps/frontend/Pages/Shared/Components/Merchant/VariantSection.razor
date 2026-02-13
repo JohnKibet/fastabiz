@@ -16,44 +16,45 @@
       <div class="flex items-end">
         <button @onclick="AddOptionName" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-ctaHover">Add
           Option</button>
-      </div>
-    </fieldset>
+        </div>
+      </fieldset>
 
-    <!-- List of Option Names -->
-    <OptionList Options="options" OnDeleteOption="@(opt => DeleteOption(opt))"
-      OnAddOptionValues="@(opt => AddOptionValues(opt))" OnClearValues="@(opt => ClearValues(opt))" />
+      <!-- List of Option Names -->
+      <OptionList Options="options" OnDeleteOption="@(opt => DeleteOption(opt))"
+                  OnAddOptionValues="@(opt => AddOptionValues(opt))" OnClearValues="@(opt => ClearValues(opt))" />
 
 
-    @if (options.Any(o => o.IsNameLocked && o.AreValuesLocked) && !variantDrafts.Any())
+      @if (options.Any(o => o.IsNameLocked && o.AreValuesLocked) && !variantDrafts.Any())
+      {
+        BuildVariantDrafts();
+      }
+      @if (variantDrafts.Any())
+      {
+        <VariantDrafts Drafts="variantDrafts"
+                       OnImagesSelected="@(args => OnVariantImagesSelected(args.Item1, args.Item2))" />
+
+
+        <div class="mt-6 flex justify-end">
+          <button class="bg-primary text-white px-6 py-2 rounded-lg
+            disabled:opacity-50 disabled:cursor-not-allowed
+            hover:bg-ctaHover" @onclick="CreateVariants"
+                  disabled="@variantDrafts.Any(v => string.IsNullOrWhiteSpace(v.SKU) || v.Price <= 0)">
+            Create Variants
+          </button>
+        </div>
+      }
+
+    </div>
+    @if (createdVariants.Any())
     {
-      BuildVariantDrafts();
-    }
-    @if (variantDrafts.Any())
-    {
-      <VariantDrafts Drafts="variantDrafts"
-        OnImagesSelected="@(args => OnVariantImagesSelected(args.Item1, args.Item2))" />
-
-
-      <div class="mt-6 flex justify-end">
-        <button class="bg-primary text-white px-6 py-2 rounded-lg
-                                                  disabled:opacity-50 disabled:cursor-not-allowed
-                                                  hover:bg-ctaHover" @onclick="CreateVariants"
-          disabled="@variantDrafts.Any(v => string.IsNullOrWhiteSpace(v.SKU) || v.Price <= 0)">
-          Create Variants
-        </button>
-      </div>
+      <CreatedVariants Variants="createdVariants" OnResetAll="ResetAll" />
     }
 
   </div>
-  @if (createdVariants.Any())
-  {
-    <CreatedVariants Variants="createdVariants" OnResetAll="ResetAll" />
-  }
-
-</div>
 
 @code {
   [Parameter] public Guid ProductId { get; set; }
+  [Parameter] public EventCallback OnVariantCreated { get; set; }
   private string optionName = string.Empty;
   public class OptionUi
   {
@@ -77,7 +78,7 @@
   }
   public List<VariantDraft> variantDrafts = new();
   private List<CreateVariantResponse> createdVariants = new();
-  private bool variantsCreated => createdVariants.Any();
+  public bool variantsCreated => createdVariants.Any();
 
   private async Task AddOptionName()
   {
@@ -216,6 +217,7 @@
       }
 
       createdVariants.Add(result.Data);
+      await OnVariantCreated.InvokeAsync(); // notify parent
 
       // upload images after variant exists
       await SaveVariantImages(result.Data.ProductId, draft);
@@ -266,10 +268,12 @@
     });
   }
 
-  private void ResetAll()
+  public void ResetAll()
   {
     options.Clear();
     variantDrafts.Clear();
     createdVariants.Clear();
+
+    StateHasChanged();
   }
 }

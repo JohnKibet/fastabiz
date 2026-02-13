@@ -123,7 +123,18 @@
 
     @if (productCreated && product.HasVariants)
     {
-      <VariantSection ProductId="@createdProductId" />
+      <VariantSection @ref="variantsRef" ProductId="@createdProductId" OnVariantCreated="(() => hasCreatedAtLeastOneVariant = true)"/>
+
+      @if (productCreated && product.HasVariants && hasCreatedAtLeastOneVariant)
+      {
+        <div class="mt-6 flex flex-row gap-4 justify-between items-center">
+          <p class="text-sm text-textDark mb-2">No more variants to add?</p>
+          <button class="text-primary underline" @onclick="ResetAll">
+            Create another product
+          </button>
+        </div>
+      }
+
     }
 
   </div>
@@ -140,6 +151,8 @@
   private bool productCreated = false;
   private bool isAddSuccess = false;
   private Guid createdProductId;
+  private VariantSection? variantsRef;
+  private bool hasCreatedAtLeastOneVariant = false;
 
   protected override async Task OnInitializedAsync()
   {
@@ -296,5 +309,7 @@
     isAddSuccess = false;
     isSubmitting = false;
     createdProductId = Guid.Empty;
+
+    variantsRef?.ResetAll();
   }
 }
