@@ -736,32 +736,50 @@ func (r *ProductRepository) ListProductsByStore(ctx context.Context, storeID uui
 		img.is_primary AS is_primary,
 
 		EXISTS (
-			SELECT 1 FROM variants v WHERE v.product_id = p.id
+			SELECT 1 FROM variants v2 WHERE v2.product_id = p.id
 		) AS has_variants,
 
+		-- Simple product inventory
+		pi.price AS price,
+		pi.stock AS stock,
+
+		-- Variant aggregation
 		COUNT(v.id)  AS variant_count,
 		MIN(v.price) AS min_price,
 		MAX(v.price) AS max_price
 
 	FROM products p
 
+	-- Primary image
 	LEFT JOIN LATERAL (
 		SELECT url, is_primary
-		FROM product_images pi
-		WHERE pi.product_id = p.id
-		ORDER BY pi.is_primary DESC, pi.position ASC
+		FROM product_images pi2
+		WHERE pi2.product_id = p.id
+		ORDER BY pi2.is_primary DESC, pi2.position ASC
 		LIMIT 1
 	) img ON true
 
+	-- Simple inventory
+	LEFT JOIN product_inventory pi ON pi.product_id = p.id
+
+	-- Variants
 	LEFT JOIN variants v ON v.product_id = p.id
+
 	WHERE p.store_id = $1
-	GROUP BY p.id, img.url, img.is_primary;
+
+	GROUP BY 
+		p.id,
+		img.url,
+		img.is_primary,
+		pi.price,
+		pi.stock;
 	`
 
 	var products []product.ProductListItem
 	err := sqlx.SelectContext(ctx, r.execFromCtx(ctx), &products, query, storeID)
 	return products, err
 }
+
 
 func (r *ProductRepository) Delete(ctx context.Context, productID uuid.UUID) error {
 	query := `
