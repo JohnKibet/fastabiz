@@ -49,8 +49,6 @@ services:
         paths: 
           - /api/public/create
           - /api/public/login
-          - /api/public/store/{adminSlug}/product/{productSlug}
-          - /api/public/store/{adminSlug}
         strip_path: false
         plugins:
           - name: cors
@@ -74,4 +72,4 @@ consumers:
   - username: test-user
     jwt_secrets:
       - key: my-client
-        secret: /OdCMZ8dajc853B9/TiFMyFAH7Yoei7nq59Fe12oroqMamjfekfXGIHgmRG9oDfKrgD3kCE8DPCTypeOFCluUw==
+        secret: ${JWT_SECRET}

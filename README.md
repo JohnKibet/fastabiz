@@ -1,47 +1,48 @@
-# FastaBiz 
+# FastaBiz
 
 FastaBiz helps businesses streamline **inventory, deliveries, and customer orders** — all in one platform. Whether you’re a farmer, shop owner, or everyday buyer, we provide a simple way to manage operations and connect with customers.
 
 ---
 
-## ✨ Why FastaBiz?  
+## ✨ Why FastaBiz?
 
-Many small and medium businesses struggle with:  
+Many small and medium businesses struggle with:
 
-- ❌ Manual tracking of stock, orders, and deliveries  
-- ❌ Poor visibility into customer feedback & delivery status  
-- ❌ No central tool for both **business owners and buyers**  
+- ❌ Manual tracking of stock, orders, and deliveries
+- ❌ Poor visibility into customer feedback & delivery status
+- ❌ No central tool for both **business owners and buyers**
 
-**FastaBiz solves this with an integrated platform**:  
-- 📦 Smart inventory management  
-- 🚚 Delivery & driver coordination  
-- 🛒 Customer ordering & tracking  
-- 📊 Dashboards for insights 
+**FastaBiz solves this with an integrated platform**:
+
+- 📦 Smart inventory management
+- 🚚 Delivery & driver coordination
+- 🛒 Customer ordering & tracking
+- 📊 Dashboards for insights
 
 ---
 
 ## 🚀 Features
 
-- **Role-based access control**: Merchant/Admin, Driver, Customer  
-- **Full CRUD APIs** for orders, inventory products, deliveries, payments, feedback, notifications  
-- **Business storefronts**: Merchants get unique links to share their stores  
-- **Customer tools**: Browse stores, order, track deliveries, review  
-- **Dockerized microservices**: Go Backend, Postgres DB, Kong API Gateway  
-- **Security**: JWT authentication, rate limiting via Kong  
-- **CI/CD ready**: GitHub Actions with API tests 
+- **Role-based access control**: Merchant/Admin, Driver, Customer
+- **Full CRUD APIs** for orders, inventory products, deliveries, payments, feedback, notifications
+- **Business storefronts**: Merchants get unique links to share their stores
+- **Customer tools**: Browse stores, order, track deliveries, review
+- **Dockerized microservices**: Go Backend, Postgres DB, Kong API Gateway
+- **Security**: JWT authentication, rate limiting via Kong
+- **CI/CD ready**: GitHub Actions with API tests
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer       | Technologies                                 |
-|-------------|----------------------------------------------|
-| Frontend    | Blazor Pages (C#), TailwindCSS               |
-| Backend     | Go (Chi, Clean Architecture, Swagger)        |
-| Gateway     | Kong (JWT auth + rate limiting)              |
-| Database    | PostgreSQL                                   |
-| CI/CD       | GitHub Actions + Docker + Postman/Newman     |
-| Containerization | Docker, Docker Compose                  |
+| Layer            | Technologies                             |
+| ---------------- | ---------------------------------------- |
+| Frontend         | Blazor Pages (C#), TailwindCSS           |
+| Backend          | Go (Chi, Clean Architecture, Swagger)    |
+| Gateway          | Kong (JWT auth + rate limiting)          |
+| Database         | PostgreSQL                               |
+| CI/CD            | GitHub Actions + Docker + Postman/Newman |
+| Containerization | Docker, Docker Compose                   |
 
 ---
 
@@ -71,13 +72,13 @@ fastabiz/
 
 ---
 
-## 🖼️ Project Flow (Business Use Case)  
+## 🖼️ Project Flow (Business Use Case)
 
 1️⃣ **Business Owners**: Register → Upload inventory → Share store link  
 2️⃣ **Customers**: Browse via link → Place orders → Track deliveries  
-3️⃣ **Admins/Drivers**: Manage deliveries, drivers, and feedback  
+3️⃣ **Admins/Drivers**: Manage deliveries, drivers, and feedback
 
-*(Illustrations & screenshots will be added here — AI-generated concept images for now, real dashboard shots later.)*  
+_(Illustrations & screenshots will be added here — AI-generated concept images for now, real dashboard shots later.)_
 
 ---
 
@@ -95,6 +96,8 @@ fastabiz/
 ```bash
 git clone https://github.com/JohnKibet/fastabiz.git
 cd fastabiz
+
+./scripts/generate-env.sh
 
 # Start all services: DB, backend, Kong
 docker compose up --env-file .env.docker --build
