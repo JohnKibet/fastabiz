@@ -1,10 +1,36 @@
 #!/bin/bash
+set -e
 
 MIGRATIONS_DIR="./migrations"
 DATABASE_URL="postgres://admin:secret@localhost:5432/fastabiz_db?sslmode=disable"
 
+# --- Ensure migrate is installed ---
+ensure_migrate() {
+  if ! command -v migrate >/dev/null 2>&1; then
+    echo "⚠️  'migrate' not found. Installing..."
+
+    if ! command -v go >/dev/null 2>&1; then
+      echo "❌ Go is not installed. Please install Go first."
+      exit 1
+    fi
+
+    go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
+    # Add GOPATH/bin to PATH if needed
+    export PATH="$PATH:$(go env GOPATH)/bin"
+
+    if ! command -v migrate >/dev/null 2>&1; then
+      echo "❌ Failed to install migrate. Ensure \$GOPATH/bin is in your PATH."
+      exit 1
+    fi
+
+    echo "✅ migrate installed successfully."
+  fi
+}
+
 case "$1" in
   run)
+    ensure_migrate
     migrate -path "$MIGRATIONS_DIR" -database "$DATABASE_URL" up
     ;;
 
@@ -20,10 +46,12 @@ case "$1" in
     ;;
 
   down)
+    ensure_migrate
     migrate -path "$MIGRATIONS_DIR" -database "$DATABASE_URL" down
     ;;
 
   drop)
+    ensure_migrate
     migrate -path "$MIGRATIONS_DIR" -database "$DATABASE_URL" drop -f
     ;;
 
@@ -49,14 +77,16 @@ case "$1" in
     ;;
 
   create)
+    ensure_migrate
     shift
     for name in "$@"; do
       migrate create -ext sql -dir "$MIGRATIONS_DIR" -seq "$name"
-      sleep 1  # Ensure unique sequential numbering
+      sleep 1
     done
     ;;
 
   fix_dirty)
+    ensure_migrate
     echo "Forcing migration state to a clean version (default 0)"
     version=${2:-0}
     migrate -path "$MIGRATIONS_DIR" -database "$DATABASE_URL" force "$version"

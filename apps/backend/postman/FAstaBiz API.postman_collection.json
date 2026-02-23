@@ -1,0 +1,1936 @@
+{
+  "info": {
+    "_postman_id": "1df822c9-7448-4e6e-b53c-2c1813339afe",
+    "name": "FAstaBiz API",
+    "description": "# 🚀 Get started here\n\nThis template guides you through CRUD operations (GET, POST, PUT, DELETE), variables, and tests.\n\n## 🔖 **How to use this template**\n\n#### **Step 1: Send requests**\n\nRESTful APIs allow you to perform CRUD operations using the POST, GET, PUT, and DELETE HTTP methods.\n\nThis collection contains each of these [request](https://learning.postman.com/docs/sending-requests/requests/) types. Open each request and click \"Send\" to see what happens.\n\n#### **Step 2: View responses**\n\nObserve the response tab for status code (200 OK), response time, and size.\n\n#### **Step 3: Send new Body data**\n\nUpdate or add new data in \"Body\" in the POST request. Typically, Body data is also used in PUT request.\n\n```\n{\n    \"name\": \"Add your name in the body\"\n}\n\n ```\n\n#### **Step 4: Update the variable**\n\nVariables enable you to store and reuse values in Postman. We have created a [variable](https://learning.postman.com/docs/sending-requests/variables/) called `base_url` with the sample request [https://postman-api-learner.glitch.me](https://postman-api-learner.glitch.me). Replace it with your API endpoint to customize this collection.\n\n#### **Step 5: Add tests in the \"Scripts\" tab**\n\nAdding tests to your requests can help you confirm that your API is working as expected. You can write test scripts in JavaScript and view the output in the \"Test Results\" tab.\n\n<img src=\"https://content.pstmn.io/fa30ea0a-373d-4545-a668-e7b283cca343/aW1hZ2UucG5n\" alt=\"\" height=\"1530\" width=\"2162\">\n\n## 💪 Pro tips\n\n- Use folders to group related requests and organize the collection.\n    \n- Add more [scripts](https://learning.postman.com/docs/writing-scripts/intro-to-scripts/) to verify if the API works as expected and execute workflows.\n    \n\n## 💡Related templates\n\n[API testing basics](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9a37a28-055b-49cd-8c7e-97494a21eb54&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[API documentation](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=e9c28f47-1253-44af-a2f3-20dce4da1f18&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)  \n[Authorization methods](https://go.postman.co/redirect/workspace?type=personal&collectionTemplateId=31a9a6ed-4cdf-4ced-984c-d12c9aec1c27&sourceTemplateId=ddb19591-3097-41cf-82af-c84273e56719)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "24501540"
+  },
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}users/all_users",
+              "host": [
+                "{{base_url}}users"
+              ],
+              "path": [
+                "all_users"
+              ]
+            },
+            "description": "This is a GET request and it is used to \"get\" data from an endpoint. There is no request body for a GET request, but you can use query parameters to help specify the resource you want data on (e.g., in this request, we have `id=1`).\n\nA successful GET response will have a `200 OK` status, and should include some kind of response body - for example, HTML web content or JSON data."
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}users/by-id/39ecdc1d-d547-423b-940c-14da8e4c46d3",
+              "host": [
+                "{{base_url}}users"
+              ],
+              "path": [
+                "by-id",
+                "39ecdc1d-d547-423b-940c-14da8e4c46d3"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}users/by-email/{email}",
+              "host": [
+                "{{base_url}}users"
+              ],
+              "path": [
+                "by-email",
+                "{email}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User By ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}users/{id}",
+              "host": [
+                "{{base_url}}users"
+              ],
+              "path": [
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fullName\": \"Mike Wambua\",\n    \"email\": \"wambua@example.com\",\n    \"phone\": \"\"\n\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}users/8eae47b7-ed78-408c-9774-fb39241c7d28/profile",
+              "host": [
+                "{{base_url}}users"
+              ],
+              "path": [
+                "8eae47b7-ed78-408c-9774-fb39241c7d28",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"column\": \"role\",\r\n    \"value\": \"admin\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}users/9e32024c-0d69-4175-9357-9462199f4660/update",
+              "host": [
+                "{{base_url}}users"
+              ],
+              "path": [
+                "9e32024c-0d69-4175-9357-9462199f4660",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"admin_id\": \"7435c977-65e0-4e8f-9634-26a66059f47c\",\r\n    \"quantity\": 50,\r\n    \"inventory_id\": \"28fd20bb-cc80-462a-a219-3b37e4edac45\",\r\n    \"customer_id\": \"3f11de6d-c889-46f1-be43-ce8df5504028\",\r\n    \"pickup_address\": \"longnet\",\r\n    \"pickup_lat\": \"\",\r\n    \"pickup_lng\": \"\",\r\n    \"delivery_address\": \"kimumu\",\r\n    \"delivery_lat\": \"\",\r\n    \"delivery_lng\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}orders/create",
+              "host": [
+                "{{base_url}}orders"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Successful PUT request\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);",
+                  "});",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\t\"column\": \"status\",\n    \"value\": \"delivered\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}orders/{id}/update",
+              "host": [
+                "{{base_url}}orders"
+              ],
+              "path": [
+                "{id}",
+                "update"
+              ]
+            },
+            "description": "This is a PUT request and it is used to overwrite an existing piece of data. For instance, after you create an entity with a POST request, you may want to modify that later. You can do that using a PUT request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).\n\nA successful PUT request typically returns a `200 OK`, `201 Created`, or `204 No Content` response code."
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}orders/all_orders",
+              "host": [
+                "{{base_url}}orders"
+              ],
+              "path": [
+                "all_orders"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}orders/by-id/500d2f6e-e02f-4fc7-b021-36efd08851f6",
+              "host": [
+                "{{base_url}}orders"
+              ],
+              "path": [
+                "by-id",
+                "500d2f6e-e02f-4fc7-b021-36efd08851f6"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order By Customer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}orders/by-customer/{customer_id}",
+              "host": [
+                "{{base_url}}orders"
+              ],
+              "path": [
+                "by-customer",
+                "{customer_id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}orders/{id}",
+              "host": [
+                "{{base_url}}orders"
+              ],
+              "path": [
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get FormData",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}orders/form-data",
+              "host": [
+                "{{base_url}}orders"
+              ],
+              "path": [
+                "form-data"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Drivers",
+      "item": [
+        {
+          "name": "Create Driver",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"full_name\": \"Poland Mike\",\r\n    \"email\": \"poland@gmail.com\",\r\n    \"vehicle_info\": \"KBG white lorry\",\r\n    \"current_location\": \"eldoret\",\r\n    \"available\": \"false\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}drivers/create",
+              "host": [
+                "{{base_url}}drivers"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Driver By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}drivers/by-id/1c5ab0db-e727-48ef-b889-93262d78011f",
+              "host": [
+                "{{base_url}}drivers"
+              ],
+              "path": [
+                "by-id",
+                "1c5ab0db-e727-48ef-b889-93262d78011f"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Driver By Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}drivers/{email}",
+              "host": [
+                "{{base_url}}drivers"
+              ],
+              "path": [
+                "{email}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Drivers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}drivers/all_drivers",
+              "host": [
+                "{{base_url}}drivers"
+              ],
+              "path": [
+                "all_drivers"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Driver",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"column\": \"\",\r\n    \"value\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}drivers/1c5ab0db-e727-48ef-b889-93262d78011f/update",
+              "host": [
+                "{{base_url}}drivers"
+              ],
+              "path": [
+                "1c5ab0db-e727-48ef-b889-93262d78011f",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Driver",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}drivers/{id}",
+              "host": [
+                "{{base_url}}drivers"
+              ],
+              "path": [
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Driver Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"vehicle_info\": \"KDC 123A - Toyota Prius\",\r\n    \"current_location\": {\r\n        \"x\": 36.8219,   // longitude\r\n        \"y\": -1.2921,   // latitude\r\n        \"srid\": 4326\r\n    }\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}drivers/d57f7f6b-9e74-4e1e-871c-fdca3ce195dd/profile",
+              "host": [
+                "{{base_url}}drivers"
+              ],
+              "path": [
+                "d57f7f6b-9e74-4e1e-871c-fdca3ce195dd",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Deliveries",
+      "item": [
+        {
+          "name": "Create Delivery",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"order_id\": \"834c36f5-16bd-49e6-8639-8d50b13eb0db\",\r\n    \"driver_id\": \"7f389a9e-987d-46a6-9759-da01ee11f590\",\r\n    \"status\": \"assigned\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}deliveries/create",
+              "host": [
+                "{{base_url}}deliveries"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Deliveries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}deliveries/all_deliveries",
+              "host": [
+                "{{base_url}}deliveries"
+              ],
+              "path": [
+                "all_deliveries"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Delivery By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}deliveries/by-id/9da507d5-d8f4-403a-8069-5a00752fcbee",
+              "host": [
+                "{{base_url}}deliveries"
+              ],
+              "path": [
+                "by-id",
+                "9da507d5-d8f4-403a-8069-5a00752fcbee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Delivery",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"id\": \"894f8595-71fb-4d9b-bba3-eabc787262c6\",\r\n    \"column\": \"status\",\r\n    \"value\": \"picked_up\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}deliveries/{id}/update",
+              "host": [
+                "{{base_url}}deliveries"
+              ],
+              "path": [
+                "{id}",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Delivery",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}deliveries/{id}",
+              "host": [
+                "{{base_url}}deliveries"
+              ],
+              "path": [
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Accept Delivery",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}deliveries/9da507d5-d8f4-403a-8069-5a00752fcbee/accept",
+              "host": [
+                "{{base_url}}deliveries"
+              ],
+              "path": [
+                "9da507d5-d8f4-403a-8069-5a00752fcbee",
+                "accept"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"order_id\": \"\",\r\n    \"amount\": \"\",\r\n    \"method\": \"\",\r\n    \"status\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}payments/create",
+              "host": [
+                "{{base_url}}payments"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}payments/all_payments",
+              "host": [
+                "{{base_url}}payments"
+              ],
+              "path": [
+                "all_payments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}payments/{id}",
+              "host": [
+                "{{base_url}}payments"
+              ],
+              "path": [
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Payment By Order",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}payments/{order_id}",
+              "host": [
+                "{{base_url}}payments"
+              ],
+              "path": [
+                "{order_id}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feedbacks",
+      "item": [
+        {
+          "name": "Create Feedback",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"order_id\": \"\",\r\n    \"customer_id\": \"\",\r\n    \"rating\": \"\",\r\n    \"comments\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}feedbacks/create",
+              "host": [
+                "{{base_url}}feedbacks"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Feedbacks",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}feedbacks/all_feedbacks",
+              "host": [
+                "{{base_url}}feedbacks"
+              ],
+              "path": [
+                "all_feedbacks"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Feedback By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}feedbacks/{id}",
+              "host": [
+                "{{base_url}}feedbacks"
+              ],
+              "path": [
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"user_id\": \"\",\r\n    \"message\": \"\",\r\n    \"type\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}notifications/create",
+              "host": [
+                "{{base_url}}notifications"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}notifications/all_notifications",
+              "host": [
+                "{{base_url}}notifications"
+              ],
+              "path": [
+                "all_notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Notification By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}notifications/{id}",
+              "host": [
+                "{{base_url}}notifications"
+              ],
+              "path": [
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventories",
+      "item": [
+        {
+          "name": "Create Inventory",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"admin_id\": \"eaf34cb6-bc60-4237-9e42-8ba251e56a93\",\r\n    \"name\": \"Kibet's Dairy Business\",\r\n    \"category\": \"Dairy\",\r\n    \"stock\": 500,\r\n    \"price_amount\": 75,\r\n    \"price_currency\": \"KES\",\r\n    \"images\": \"https://media.istockphoto.com/id/1297005217/photo/farmer-pouring-raw-milk-into-container.jpg?s=612x612&w=0&k=20&c=toiruwu04HHkwnLZhpKEjNPqOHI7Kmut5NMGTFSGm4M=\",\r\n    \"unit\": \"per litre\",\r\n    \"packaging\": \"10ltr dairy cans\",\r\n    \"description\": \"Fresh dairy milk.\",\r\n    \"location\": \"Longnet\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}inventories/create",
+              "host": [
+                "{{base_url}}inventories"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Inventory By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}inventories/by-id/b8dc8f55-00e3-4d36-81f9-63351f8d3667",
+              "host": [
+                "{{base_url}}inventories"
+              ],
+              "path": [
+                "by-id",
+                "b8dc8f55-00e3-4d36-81f9-63351f8d3667"
+              ],
+              "query": [
+                {
+                  "key": "",
+                  "value": null,
+                  "type": "text",
+                  "disabled": true
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Inventory By Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}inventories/by-name?name=Jonathan's homemade manure business",
+              "host": [
+                "{{base_url}}inventories"
+              ],
+              "path": [
+                "by-name"
+              ],
+              "query": [
+                {
+                  "key": "name",
+                  "value": "Jonathan's homemade manure business"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Inventories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}inventories/all_inventories?limit=10&offset=0",
+              "host": [
+                "{{base_url}}inventories"
+              ],
+              "path": [
+                "all_inventories"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Inventory By Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}inventories/by-category?category=Manure%20%26%20Fertilizer",
+              "host": [
+                "{{base_url}}inventories"
+              ],
+              "path": [
+                "by-category"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "Manure%20%26%20Fertilizer"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}inventories/categories",
+              "host": [
+                "{{base_url}}inventories"
+              ],
+              "path": [
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Get Public Product Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}public/store/{adminSlug}/product/{productSlug}",
+              "host": [
+                "{{base_url}}public"
+              ],
+              "path": [
+                "store",
+                "{adminSlug}",
+                "product",
+                "{productSlug}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Public Store Page",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}public/store/{adminSlug}",
+              "host": [
+                "{{base_url}}public"
+              ],
+              "path": [
+                "store",
+                "{adminSlug}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Successful POST request\", function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has JSON body\", function () {",
+                  "    pm.response.to.have.header(\"Content-Type: application/json\");",
+                  "    pm.response.to.be.withBody;",
+                  "    pm.response.to.be.json;",
+                  "});",
+                  "",
+                  "pm.test(\"Contains user ID\", function () {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.id).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"pass1234\",\n  \"role\": \"merchant\",\n  \"phone\": \"+254723456789\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}public/create",
+              "host": [
+                "{{base_url}}public"
+              ],
+              "path": [
+                "create"
+              ]
+            },
+            "description": "This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.\n\nA successful POST request typically returns a `200 OK` or `201 Created` response code."
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code !== 200) {\r",
+                  "    console.error(\"Non-200 response:\", pm.response.text());\r",
+                  "    pm.test(\"Login failed\", function () {\r",
+                  "        pm.expect.fail(\"Request failed with status \" + pm.response.code);\r",
+                  "    });\r",
+                  "    return;\r",
+                  "}\r",
+                  "\r",
+                  "const jsonData = pm.response.json();\r",
+                  "console.log(\"json response:\", jsonData);\r",
+                  "\r",
+                  "if (jsonData.token) {\r",
+                  "    pm.environment.set(\"authToken\", jsonData.token);\r",
+                  "    console.log(\"Token saved:\", jsonData.token);\r",
+                  "} else {\r",
+                  "    console.warn(\"No token found in login response\");\r",
+                  "}\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"pass1234\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}public/login",
+              "host": [
+                "{{base_url}}public"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Stores",
+      "item": [
+        {
+          "name": "Create Store",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Green Valley Farms\",\n  \"logo_url\": \"green_valley_logo.jpg\",\n  \"location\": \"eldoret\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}stores/create",
+              "host": [
+                "{{base_url}}stores"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Stores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}stores/all_stores",
+              "host": [
+                "{{base_url}}stores"
+              ],
+              "path": [
+                "all_stores"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Store",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}stores/99035ce2-e24b-44ef-afd1-422e2bf21cd0/delete",
+              "host": [
+                "{{base_url}}stores"
+              ],
+              "path": [
+                "99035ce2-e24b-44ef-afd1-422e2bf21cd0",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Store By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}stores/by-id/{id}",
+              "host": [
+                "{{base_url}}stores"
+              ],
+              "path": [
+                "by-id",
+                "{id}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Store Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}stores/{id}/summary",
+              "host": [
+                "{{base_url}}stores"
+              ],
+              "path": [
+                "{id}",
+                "summary"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Store",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"location\": \"string\",\n  \"logo\": \"string\",\n  \"name\": \"string\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}stores/{id}/update",
+              "host": [
+                "{{base_url}}stores"
+              ],
+              "path": [
+                "{id}",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"store_id\": \"2843abef-4b21-4c2b-91d5-e1c6bfcd5f0c\",\n    \"name\": \"Fresh Apples\",\n    \"description\": \"Crisp, sweet organic apples harvested this season.\",\n    \"category\": \"Fruits\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/create",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Store Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/b124115c-145d-41b4-b498-1e3d627c154a/all_products",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "b124115c-145d-41b4-b498-1e3d627c154a",
+                "all_products"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": \"4bbccf88-abdf-4a14-adc5-7a2ed09339d9\",\n  \"images\": [\n    { \"url\": \"apple_main.jpg\", \"is_primary\": true },\n    { \"url\": \"apple_2.jpg\", \"is_primary\": false }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/images/add",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "images",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Option Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": \"4db76049-82ad-448b-861a-9bdec8ed68f2\",\n    \"name\": \"Size\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/options/add",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "options",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Option Value",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": \"4db76049-82ad-448b-861a-9bdec8ed68f2\",\n    \"option_id\": \"4a0563f1-38c9-4718-8ee5-9fcd7b194ce1\",\n    \"values\": [\"Small\", \"Medium\", \"Large\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/options/values/add",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "options",
+                "values",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Variant",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": \"4db76049-82ad-448b-861a-9bdec8ed68f2\",\n    \"sku\": \"APP-LG-001\",\n    \"price\": 1.80,\n    \"stock\": 80,\n    \"image_url\": \"apple_large.jpg\",\n    \"options\": {\n        \"Size\": \"Large\"\n    }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/variants/add",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "variants",
+                "add"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Variant Stock",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"variant_id\": \"d2d7bd6e-ea45-4a29-9c4a-60922f639f51\",\n    \"stock\": 120\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/products/variants/stock/update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "products",
+                "variants",
+                "stock",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Variant Price",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"variant_id\": \"d2d7bd6e-ea45-4a29-9c4a-60922f639f51\",\n    \"price\": 1.20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/variants/price/update",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "variants",
+                "price",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Reorder Images",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": \"\",\n    \"images_ids\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/images/reorder",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "images",
+                "reorder"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Product Details",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": \"4bbccf88-abdf-4a14-adc5-7a2ed09339d9\",\n    \"name\": \"Fresh Apples\",\n    \"description\": \"Crisp, sweet organic apples harvested this season.\",\n    \"category\": \"Fruits\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/{id}/product_details",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "{id}",
+                "product_details"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/by-id/5b6e1d23-e5aa-4e96-b60c-75fb10ebee24",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "by-id",
+                "5b6e1d23-e5aa-4e96-b60c-75fb10ebee24"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/b334e2b8-4ff3-4992-9ad4-2b82b3eea767/delete",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "b334e2b8-4ff3-4992-9ad4-2b82b3eea767",
+                "delete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Image",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/images/{imageId}",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "images",
+                "{imageId}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Option Name",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/options/7487b82d-f965-4d8f-b72b-f7b9c399e3b2",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "options",
+                "7487b82d-f965-4d8f-b72b-f7b9c399e3b2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Option Value",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/options/values/949ccb3b-ed9a-4230-b598-d5cba94e07a0",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "options",
+                "values",
+                "949ccb3b-ed9a-4230-b598-d5cba94e07a0"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Variant",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/variants/a667dc72-4c9a-4a8f-a362-3efcda873df1",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "variants",
+                "a667dc72-4c9a-4a8f-a362-3efcda873df1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Product Options",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}products/4db76049-82ad-448b-861a-9bdec8ed68f2/options",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "4db76049-82ad-448b-861a-9bdec8ed68f2",
+                "options"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateProductInvPrice",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": \"\",\n    \"price\": \"2.5\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/inventory/price",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "inventory",
+                "price"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateProductInvStock",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\": \"\",\n    \"stock\": \"180\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}products/inventory/stock",
+              "host": [
+                "{{base_url}}products"
+              ],
+              "path": [
+                "inventory",
+                "stock"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{authToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "id",
+      "value": "1"
+    },
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/"
+    }
+  ]
+}
