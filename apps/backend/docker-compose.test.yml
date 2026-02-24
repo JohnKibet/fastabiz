@@ -1,0 +1,16 @@
+services:
+    newman:
+        image: postman/newman:alpine
+        depends_on:
+            kong:
+                condition: service_started
+        volumes:
+            - ./postman:/etc/newman
+        command: >
+            run fastabiz-api.postman_collection.json
+            --environment=dev_environment.postman_environment.json
+            --env-var base_url=http://kong:8000
+            --insecure
+            --reporters cli,json,html
+            --reporter-json-export=newman-report.json
+            --reporter-html-export=newman-report.html

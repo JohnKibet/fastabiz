@@ -72,3 +72,9 @@ newman/
 node_modules/
 dist/
 apps/frontend/wwwroot/css/site.css
+
+# Newman reports
+apps/backend/postman/newman-report.*
+
+# Postman globals
+apps/backend/postman/postman/globals/workspace.postman_globals.json

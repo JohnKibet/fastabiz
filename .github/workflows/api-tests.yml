@@ -1,0 +1,44 @@
+name: Run API Tests
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+
+jobs:
+    api-test:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                working-directory: apps/backend
+
+        steps:
+            - name: Checkout repo
+              uses: actions/checkout@v3
+
+            - name: Start services
+              run: |
+                  docker compose up -d --build
+                  sleep 20
+
+            - name: Run Newman via Docker
+              run: |
+                  docker run --rm \
+                    --network host \
+                    -v "${{ github.workspace }}/apps/backend/postman:/etc/newman" \
+                    postman/newman:alpine \
+                    run "fastabiz-api.postman_collection.json" \
+                    --environment="dev_environment.postman_environment.json" \
+                    --env-var "base_url=http://localhost:8000" \
+                    --insecure \
+                    --reporters cli,json,html \
+                    --reporter-json-export="newman-report.json" \
+                    --reporter-html-export="newman-report.html"
+
+            - name: Upload test reports
+              uses: actions/upload-artifact@v3
+              with:
+                  name: newman-reports
+                  path: apps/backend/postman/
