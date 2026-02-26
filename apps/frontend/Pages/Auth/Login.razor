@@ -1,175 +1,181 @@
 @page "/auth/login"
 @layout PublicLayout
 @using Microsoft.AspNetCore.WebUtilities
+@using System.Text
 @using System.Text.Json
 @using System.Security.Claims
 @using System.ComponentModel.DataAnnotations
 @using System.Text.Json.Serialization
 @using frontend.Services
-@using frontend.Models
-@using frontend.Pages.Shared.Components.Inputs
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant;
 @inject NavigationManager Navigation
 @inject CustomAuthStateProvider AuthProvider
 @inject IJSRuntime JS
 @inject IHttpClientFactory HttpClientFactory
 @inject ToastService ToastService
 
-<main id="login" class="flex justify-center items-center min-h-screen bg-white relative">
-    <!-- Top Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center">
-            <h1 class="font-bold text-2xl text-black cursor-pointer" 
-                @onclick='() => Navigation.NavigateTo("/")'>
-                FastaBiz
-            </h1>
-        </div>
-    </nav>
+<MudThemeProvider Theme="_theme" />
 
+<MudLayout>
+    <!-- Top Nav -->
+    <MudAppBar Elevation="2" Color="Color.Surface" Fixed="true">
+        <MudText Typo="Typo.h5" Class="font-bold cursor-pointer mud-text-primary" Style="font-weight:800; cursor:pointer;"
+                 @onclick='() => Navigation.NavigateTo("/")'>
+            FastaBiz
+        </MudText>
+    </MudAppBar>
 
-    <!-- Login Card -->
-    <div id="card" class="w-full max-w-md mt-10 p-8 border border-gray-200 shadow-md rounded-md bg-white mb-10">
-        <h2 class="text-center text-2xl font-semibold text-black mb-6">Log in to FastaBiz</h2>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center justify-center" Style="min-height:100vh; padding-top:80px; padding-bottom:40px;">
+            <MudPaper Elevation="4" Class="pa-8 rounded-xl" Style="width:100%;">
 
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="mb-4 text-red-600 text-sm font-medium text-center">@errorMessage</div>
-        }
+                <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-6" Style="font-weight:700;">
+                    Log in to FastaBiz
+                </MudText>
 
-        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-            <DataAnnotationsValidator />
-            @* <ValidationSummary /> *@
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+                }
 
-            <!-- Email / Username Input -->
-            <div class="mb-4">
-                <InputText @bind-Value="loginModel.Email" type="text" placeholder="Username or Email"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500" />
-                <ValidationMessage For="@(() => loginModel.Email)" class="text-red-600 text-sm mt-1" />
-            </div>
+                <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                    <DataAnnotationsValidator />
 
-            <!-- Password Input with eye toggle -->
-            <div class="mb-4">
-                <PasswordInput 
-                    Value="@loginModel.Password"
-                    ValueChanged="((string v) => loginModel.Password = v)"
-                    ValueExpression="@(() => loginModel.Password)"
-                    Placeholder="Password" />
-            </div>
+                    <!-- Email -->
+                    <MudTextField @bind-Value="loginModel.Email"
+                                  Label="Username or Email"
+                                  Variant="MudVariant.Outlined"
+                                  FullWidth="true"
+                                  Class="mb-4"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Email"
+                                  For="@(() => loginModel.Email)" />
 
+                    <!-- Password -->
+                    <MudTextField @bind-Value="loginModel.Password"
+                                  Label="Password"
+                                  Variant="MudVariant.Outlined"
+                                  FullWidth="true"
+                                  Class="mb-6"
+                                  InputType="@(_showPassword ? InputType.Text : InputType.Password)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(_showPassword ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="() => _showPassword = !_showPassword"
+                                  AdornmentAriaLabel="Toggle password visibility"
+                                  For="@(() => loginModel.Password)" />
 
-            <!-- Role Selector -->
-            <div class="mb-6 flex justify-center items-center space-x-4">
-                <!-- Merchant -->
-                <div @onclick="@(() => SelectRole("merchant"))"
-                    class="relative cursor-pointer border rounded-lg px-6 py-4 text-center w-40 transition duration-200 ease-in-out
-                            @(loginModel.Role == "merchant" 
-                                ? "border-green-600 border-2 bg-gray-50 shadow-md" 
-                                : "hover:shadow-md hover:border-gray-600 border-gray-300")">
-                    @if (loginModel.Role == "merchant")
-                    {
-                        <div class="absolute top-2 right-2 text-green-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4 -4M12 22a10 10 0 1 1 0 -20a10 10 0 0 1 0 20z" />
-                            </svg>
-                        </div>
-                    }
-                    <div class="text-3xl">🧑‍💼</div>
-                    <div class="mt-2 font-medium text-black">Merchant</div>
-                </div>
+                    <!-- Role Selection -->
+                    <MudText Typo="Typo.subtitle2" Class="mb-3 mud-text-secondary" Align="Align.Center">
+                        Select your role
+                    </MudText>
 
-                <!-- Customer -->
-                <div @onclick="@(() => SelectRole("customer"))"
-                    class="relative cursor-pointer border rounded-lg px-6 py-4 text-center w-40 transition duration-200 ease-in-out
-                            @(loginModel.Role == "customer" 
-                                ? "border-green-600 border-2 bg-gray-50 shadow-md" 
-                                : "hover:shadow-md hover:border-gray-600 border-gray-300")">
-                    @if (loginModel.Role == "customer")
-                    {
-                        <div class="absolute top-2 right-2 text-green-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4 -4M12 22a10 10 0 1 1 0 -20a10 10 0 0 1 0 20z" />
-                            </svg>
-                        </div>
-                    }
-                    <div class="text-3xl">🛒</div>
-                    <div class="mt-2 font-medium text-black">Customer</div>
-                </div>
+                    <MudGrid Justify="Justify.Center" Class="mb-2">
+                        @foreach (var role in _roles)
+                        {
+                            var isSelected = loginModel.Role == role.Key;
+                            <MudItem xs="4">
+                                <MudPaper @onclick="@(() => SelectRole(role.Key))"
+                                          Elevation="@(isSelected ? 4 : 1)"
+                                          Class="@($"d-flex flex-column align-center justify-center pa-3 rounded-lg cursor-pointer role-card {(isSelected ? "role-selected" : "")}")"
+                                          Style="@($"border: 2px solid {(isSelected ? "var(--mud-palette-primary)" : "transparent")}; transition: all 0.2s; cursor:pointer;")">
+                                    <MudText Style="font-size:2rem;">@role.Value.Icon</MudText>
+                                    <MudText Typo="Typo.caption" Class="mt-1" Style="font-weight:600;">@role.Value.Label</MudText>
+                                    @if (isSelected)
+                                    {
+                                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Primary" Size="Size.Small" Class="mt-1" />
+                                    }
+                                </MudPaper>
+                            </MudItem>
+                        }
+                    </MudGrid>
 
-                <!-- Driver -->
-                <div @onclick="@(() => SelectRole("driver"))"
-                    class="relative cursor-pointer border rounded-lg px-6 py-4 text-center w-40 transition duration-200 ease-in-out
-                            @(loginModel.Role == "driver" 
-                                ? "border-green-600 border-2 bg-gray-50 shadow-md" 
-                                : "hover:shadow-md hover:border-gray-600 border-gray-300")">
-                    @if (loginModel.Role == "driver")
-                    {
-                        <div class="absolute top-2 right-2 text-green-600">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                    d="M9 12l2 2l4 -4M12 22a10 10 0 1 1 0 -20a10 10 0 0 1 0 20z" />
-                            </svg>
-                        </div>
-                    }
-                    <div class="text-3xl">🚚</div>
-                    <div class="mt-2 font-medium text-black">Driver</div>
-                </div>
-            </div>
+                    <ValidationMessage For="@(() => loginModel.Role)" class="mud-error-text d-flex justify-center mb-4" />
 
-            <!-- Validation -->
-            <ValidationMessage For="@(() => loginModel.Role)" class="text-red-600 text-sm text-center mb-4" />
+                    <!-- Submit -->
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="MudVariant.Filled"
+                               Color="Color.Primary"
+                               FullWidth="true"
+                               Size="Size.Large"
+                               Class="mt-4"
+                               Style="font-weight:700; border-radius:8px;">
+                        Continue
+                    </MudButton>
+                </EditForm>
 
+                <!-- Divider -->
+                <MudDivider Class="my-5">
+                    <MudChip T="string" Size="Size.Small" Variant="MudVariant.Text" Class="mud-text-secondary">or</MudChip>
+                </MudDivider>
 
-            <!-- Submit Button -->
-            <button 
-                type="submit" 
-                class="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transform transition-transform duration-100 active:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" 
-            >
-                Continue
-            </button>
-        </EditForm>
+                <!-- Social Buttons -->
+                <MudButton Variant="MudVariant.Filled"
+                           FullWidth="true"
+                           Class="mb-3"
+                           Style="background:#4285F4; color:white; border-radius:8px; font-weight:600;">
+                    <MudImage Src="https://www.svgrepo.com/show/475656/google-color.svg" Width="20" Height="20" Class="mr-2" />
+                    Continue with Google
+                </MudButton>
 
-        <!-- OR Divider -->
-        <div class="flex items-center my-4">
-            <div class="flex-grow h-px bg-gray-300"></div>
-            <span class="mx-2 text-sm text-gray-500">or</span>
-            <div class="flex-grow h-px bg-gray-300"></div>
-        </div>
+                <MudButton Variant="MudVariant.Outlined"
+                    FullWidth="true"
+                    Class="mb-4"
+                    Style="border-radius:8px; font-weight:600;"
+                    StartIcon="fab fa-apple">
+                    Continue with Apple
+                </MudButton>
 
-        <!-- Social Logins -->
-        <button class="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 mb-3 transition">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
-            Continue with Google
-        </button>
+                <!-- Links -->
+                <MudText Align="Align.Center" Typo="Typo.body2" Class="mt-2">
+                    Don't have a FastaBiz account?
+                    <MudLink Href="/auth/register" Color="Color.Primary" Style="font-weight:600;">Sign Up</MudLink>
+                </MudText>
+                <MudText Align="Align.Center" Typo="Typo.body2" Class="mt-1">
+                    Just browsing?
+                    <MudLink Href="/" Color="Color.Primary" Style="font-weight:600;">Back to Home</MudLink>
+                </MudText>
 
-        <button class="w-full flex items-center justify-center gap-2 border border-black text-black py-2 rounded-md hover:bg-gray-100 transition">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 13H5v-2h14v2z" />
-            </svg>
-            Continue with Apple
-        </button>
-
-        <!-- Signup Link -->
-        <p class="text-center text-sm text-gray-600 mt-6">
-            Don't have a FastaBiz account?
-            <a href="/auth/register" class="text-green-600 hover:underline">Sign Up</a>
-        </p>
-
-        <p class="text-center text-sm text-gray-600 mt-3">
-            Just browsing?
-            <a href="/" class="text-green-600 hover:underline">Back to Home</a>
-        </p>
-    </div>
+            </MudPaper>
+        </MudContainer>
+    </MudMainContent>
 
     <!-- Footer -->
-    <footer class="absolute bottom-0 left-0 right-0 bg-black text-white text-sm text-center py-4">
-        © 2015 - 2025 FastaBiz Inc. • <a href="#" class="underline">Privacy Policy</a>
-    </footer>
-</main>
+    <MudAppBar Bottom="true" Fixed="true" Elevation="0" Color="Color.Dark" Dense="true">
+        <MudText Typo="Typo.caption" Align="Align.Center" Style="width:100%; color:rgba(255,255,255,0.7);">
+            © 2015–2025 FastaBiz Inc. •
+            <MudLink Href="#" Typo="Typo.caption" Style="color:rgba(255,255,255,0.9);">Privacy Policy</MudLink>
+        </MudText>
+    </MudAppBar>
+</MudLayout>
 
 
 @code {
     private string? returnUrl;
     private LoginModel loginModel = new();
     private string? errorMessage;
+    private bool _showPassword = false;
+
+    private MudTheme _theme = new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#16a34a",
+            PrimaryContrastText = "#ffffff",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#111827",
+            Background = "#f9fafb",
+            Surface = "#ffffff",
+        }
+    };
+
+    private record RoleInfo(string Icon, string Label);
+    private Dictionary<string, RoleInfo> _roles = new()
+    {
+        ["merchant"] = new("🧑‍💼", "Merchant"),
+        ["customer"] = new("🛒", "Customer"),
+        ["driver"]   = new("🚚", "Driver"),
+    };
 
     protected override void OnInitialized()
     {
@@ -177,10 +183,8 @@
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
         returnUrl = query["returnUrl"];
     }
-    private void SelectRole(string role)
-    {
-        loginModel.Role = role;
-    }
+
+    private void SelectRole(string role) => loginModel.Role = role;
 
     private async Task HandleLogin()
     {
@@ -194,17 +198,10 @@
 
         try
         {
-            var loginPayload = new
-            {
-                Email = loginModel.Email,
-                Password = loginModel.Password
-            };
-
+            var loginPayload = new { Email = loginModel.Email, Password = loginModel.Password };
             var content = new StringContent(
                 JsonSerializer.Serialize(loginPayload),
-                System.Text.Encoding.UTF8,
-                "application/json"
-            );
+                Encoding.UTF8, "application/json");
 
             var http = HttpClientFactory.CreateClient("AnonymousApi");
             var response = await http.PostAsync("public/login", content);
@@ -215,7 +212,6 @@
             if (response.IsSuccessStatusCode)
             {
                 var tokenResponse = JsonSerializer.Deserialize<LoginTokenResponse>(json);
-
                 if (tokenResponse is null || string.IsNullOrEmpty(tokenResponse.Token))
                 {
                     ToastService.ShowToast("Token not received from server.", string.Empty, ToastService.ToastLevel.Error);
@@ -223,7 +219,6 @@
                 }
 
                 var claimsUser = AuthProvider.ParseToken(tokenResponse.Token);
-
                 if (claimsUser?.Role != loginModel.Role)
                 {
                     ToastService.ShowToast($"User exists but is not assigned to role '{loginModel.Role}'", string.Empty, ToastService.ToastLevel.Error);
@@ -231,7 +226,6 @@
                 }
 
                 await AuthProvider.SignInAsync(tokenResponse.Token);
-
                 await JS.InvokeVoidAsync("localStorage.setItem", "showLoginSuccess", "true");
                 var target = returnUrl ?? $"/{claimsUser.Role}/dashboard";
                 Navigation.NavigateTo(target, forceLoad: true);
@@ -240,7 +234,6 @@
             {
                 var errObj = JsonSerializer.Deserialize<ErrorResponse>(json);
                 ToastService.ShowToast(errObj?.Error ?? "Unexpected error occurred.", string.Empty, ToastService.ToastLevel.Error);
-
             }
         }
         catch (Exception ex)
@@ -261,26 +254,14 @@
         public string Role { get; set; } = string.Empty;
     }
 
-    private class ErrorResponse
-    {
-        public string? Error { get; set; }
-    }
+    private class ErrorResponse { public string? Error { get; set; } }
 
     private class LoginTokenResponse
     {
-        [JsonPropertyName("id")]
-        public string ID { get; set; } = string.Empty;
-
-        [JsonPropertyName("fullName")]
-        public string FullName { get; set; } = string.Empty;
-
-        [JsonPropertyName("email")]
-        public string Email { get; set; } = string.Empty;
-
-        [JsonPropertyName("role")]
-        public string Role { get; set; } = string.Empty;
-
-        [JsonPropertyName("token")]
-        public string Token { get; set; } = string.Empty;
+        [JsonPropertyName("id")]     public string ID       { get; set; } = string.Empty;
+        [JsonPropertyName("fullName")] public string FullName { get; set; } = string.Empty;
+        [JsonPropertyName("email")]  public string Email    { get; set; } = string.Empty;
+        [JsonPropertyName("role")]   public string Role     { get; set; } = string.Empty;
+        [JsonPropertyName("token")]  public string Token    { get; set; } = string.Empty;
     }
 }

@@ -1,62 +1,75 @@
-<section id="discover" class="min-h-screen px-10 py-16 bg-gray-50 snap-start">
-        <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-10">
-                <h2 class="text-4xl font-bold text-gray-800 mb-4">Discover Stores</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Explore small and medium businesses near you. Shop directly, support local, 
-                    and discover unique products.
-                </p>
-            </div>
+@using MudBlazor
+@using MudIcon = MudBlazor.Icons
+@using MudVariant = MudBlazor.Variant
 
-            <!-- Store Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Store Card -->
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
-                    <img src="/Images/store-1.jpg" alt="Store Image" class="w-full h-40 object-cover rounded-t-2xl">
-                    <div class="p-5">
-                        <h3 class="text-lg font-semibold">Green Valley Farm</h3>
-                        <p class="text-gray-500 text-sm">Fresh farm produce delivered to your door.</p>
-                        <a href="/store/green-valley" 
-                        class="inline-block mt-3 text-blue-600 hover:underline text-sm font-semibold">
-                            Visit Store →
-                        </a>
-                    </div>
-                </div>
+<section id="discover" class="section-content" style="background:#ffffff;">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="section-inner">
 
-                <!-- Store Card -->
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
-                    <img src="/Images/store-2.jpg" alt="Store Image" class="w-full h-40 object-cover rounded-t-2xl">
-                    <div class="p-5">
-                        <h3 class="text-lg font-semibold">Urban Eats</h3>
-                        <p class="text-gray-500 text-sm">Homemade meals and healthy snacks.</p>
-                        <a href="/store/urban-eats" 
-                        class="inline-block mt-3 text-blue-600 hover:underline text-sm font-semibold">
-                            Visit Store →
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Store Card -->
-                <div class="bg-white rounded-2xl shadow hover:shadow-lg transition">
-                    <img src="/Images/store-3.jpg" alt="Store Image" class="w-full h-40 object-cover rounded-t-2xl">
-                    <div class="p-5">
-                        <h3 class="text-lg font-semibold">Bakers Hub</h3>
-                        <p class="text-gray-500 text-sm">Artisan bread, pastries, and custom cakes.</p>
-                        <a href="/store/bakers-hub" 
-                        class="inline-block mt-3 text-blue-600 hover:underline text-sm font-semibold">
-                            Visit Store →
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- View More Button -->
-            <div class="text-center mt-10">
-                <a href="/stores" 
-                class="inline-flex items-center gap-2 bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition">
-                View All Stores
-                <span>→</span>
-                </a>
-            </div>
+        <!-- Heading -->
+        <div class="d-flex flex-column align-center mb-10">
+            <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight:800; color:#111827;" Class="mb-2">
+                Discover Stores
+            </MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mud-text-secondary" Style="max-width:520px;">
+                Explore small and medium businesses near you. Shop directly, support local,
+                and discover unique products.
+            </MudText>
         </div>
-    </section>
+
+        <!-- Store Cards -->
+        <MudGrid Spacing="5">
+            @foreach (var store in _stores)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Elevation="2" Class="rounded-xl store-card" Style="height:100%; overflow:hidden; transition: box-shadow 0.2s, transform 0.2s;">
+                        <MudCardMedia Image="@store.Image" Height="180" />
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Style="font-weight:700; color:#111827;">@store.Name</MudText>
+                            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1" Style="line-height:1.6;">
+                                @store.Description
+                            </MudText>
+                        </MudCardContent>
+                        <MudCardActions Style="padding-top:0;">
+                            <MudButton Href="@store.Href" Variant="MudVariant.Text" Color="Color.Primary"
+                                       EndIcon="@MudIcon.Material.Filled.ArrowForward"
+                                       Style="font-weight:700;">
+                                Visit Store
+                            </MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+
+        <!-- View All -->
+        <div class="d-flex justify-center mt-12">
+            <MudButton Href="/stores"
+                       Variant="MudVariant.Filled"
+                       Color="Color.Secondary"
+                       Size="Size.Large"
+                       EndIcon="@MudIcon.Material.Filled.ArrowForward"
+                       Style="border-radius:10px; font-weight:700; padding:14px 36px;">
+                View All Stores
+            </MudButton>
+        </div>
+
+    </MudContainer>
+</section>
+
+<style>
+    .store-card:hover {
+        box-shadow: 0 10px 36px rgba(0,0,0,0.13) !important;
+        transform: translateY(-4px);
+    }
+</style>
+
+@code {
+    private record StoreInfo(string Name, string Description, string Image, string Href);
+
+    private readonly StoreInfo[] _stores =
+    {
+        new("Green Valley Farm",  "Fresh farm produce delivered to your door.",      "/Images/store-1.jpg", "/store/green-valley"),
+        new("Urban Eats",         "Homemade meals and healthy snacks.",               "/Images/store-2.jpg", "/store/urban-eats"),
+        new("Bakers Hub",         "Artisan bread, pastries, and custom cakes.",       "/Images/store-3.jpg", "/store/bakers-hub"),
+    };
+}

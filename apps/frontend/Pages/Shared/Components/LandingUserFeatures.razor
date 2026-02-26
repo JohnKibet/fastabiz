@@ -1,49 +1,85 @@
-<section id="features" class="min-h-screen px-6 md:px-10 py-16 bg-gray-50">
-    <h2 class="text-3xl font-bold text-center mb-10">Features & Tools</h2>
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 
-    <!-- Toggle Buttons -->
-    <div class="flex justify-center mb-8">
-        <button class='@GetBtnClass("merchant")' @onclick='() => Toggle("merchant")'>For Merchants</button>
-        <button class='@GetBtnClass("customer")' @onclick='() => Toggle("customer")'>For Customers</button>
-    </div>
+<section id="features" class="section-content" style="background:#f9fafb;">
+    <MudContainer MaxWidth="MaxWidth.Large" Class="section-inner">
 
-    <!-- Merchant Features -->
-    @if (selected == "merchant")
-    {
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center fade-in transition-opacity duration-300">
-            @FeatureCard("Smart Inventory Management", "Upload products, track stock levels, and get alerts when inventory runs low.", "data-trend.svg")
-            @FeatureCard("Order & Delivery Tracking", "Process orders, assign drivers, and monitor delivery progress in real time.", "delivery-map.svg")
-            @FeatureCard("Business Analytics", "View reports and understand customer trends and product performance.", "analytics-dashboard.svg")
+        <!-- Heading -->
+        <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight:800; color:#111827;" Class="mb-2">
+            Features &amp; Tools
+        </MudText>
+        <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-8 mud-text-secondary">
+            Everything you need, built for your role
+        </MudText>
+
+        <!-- Toggle -->
+        <div class="d-flex justify-center mb-10">
+            <MudButtonGroup Variant="MudVariant.Outlined" Color="Color.Primary" Size="Size.Medium">
+                <MudButton OnClick='() => Toggle("merchant")'
+                           Variant="@(selected == "merchant" ? MudVariant.Filled : MudVariant.Outlined)"
+                           Color="Color.Primary"
+                           Style="border-radius:8px 0 0 8px; font-weight:700; min-width:140px;">
+                    For Merchants
+                </MudButton>
+                <MudButton OnClick='() => Toggle("customer")'
+                           Variant="@(selected == "customer" ? MudVariant.Filled : MudVariant.Outlined)"
+                           Color="Color.Primary"
+                           Style="border-radius:0 8px 8px 0; font-weight:700; min-width:140px;">
+                    For Customers
+                </MudButton>
+            </MudButtonGroup>
         </div>
-    }
-    else
-    {
-        <!-- Customer Features -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 justify-items-center fade-in transition-opacity duration-300">
-            @FeatureCard("Seamless Ordering", "Browse stores, place orders easily, and get order confirmations instantly.", "ecommerce-ui.svg")
-            @FeatureCard("Real-Time Tracking", "Track your order from the warehouse to your doorstep, live.", "location-tracking.svg")
-            @FeatureCard("Customer Support", "Chat with sellers or drivers and access order history anytime.", "support-chat.svg")
-        </div>
-    }
+
+        <!-- Feature Cards -->
+        <MudGrid Justify="Justify.Center" Spacing="5">
+            @foreach (var card in GetCards())
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudPaper Elevation="2" Class="pa-6 rounded-xl feature-card" Style="height:100%; transition: box-shadow 0.2s;">
+                        <div class="d-flex flex-column align-center text-center" style="height:100%;">
+                            <MudImage Src="@($"/Images/{card.Img}")" Alt="@card.Title"
+                                      Style="width:100px; height:100px; object-fit:contain;" Class="mb-4" />
+                            <MudText Typo="Typo.h6" Style="font-weight:700; color:#111827;" Class="mb-2">
+                                @card.Title
+                            </MudText>
+                            <MudText Typo="Typo.body2" Style="color:#6b7280; line-height:1.7;">
+                                @card.Desc
+                            </MudText>
+                        </div>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+
+    </MudContainer>
 </section>
+
+<style>
+    .feature-card:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+        transform: translateY(-3px);
+        transition: box-shadow 0.2s, transform 0.2s;
+    }
+</style>
 
 @code {
     private string selected = "merchant";
 
-    private void Toggle(string type)
-    {
-        selected = type;
-    }
-    private string GetBtnClass(string type) =>
-        selected == type
-            ? "px-6 py-2 bg-green-600 text-white font-medium rounded-l-lg"
-            : "px-6 py-2 bg-white border border-green-600 text-green-600 font-medium";
-    RenderFragment FeatureCard(string title, string desc, string imgPath) => __builder =>
-    {
-        <div class="feature-card sm:w-[280px]">
-            <img src="@($"/Images/{imgPath}")" alt="@title" class="feature-img" />
-            <h4 class="feature-title">@title</h4>
-            <p class="feature-desc">@desc</p>
-        </div>;
-    };
+    private void Toggle(string type) => selected = type;
+
+    private record CardInfo(string Title, string Desc, string Img);
+
+    private IEnumerable<CardInfo> GetCards() => selected == "merchant"
+        ? new[]
+        {
+            new CardInfo("Smart Inventory Management",  "Upload products, track stock levels, and get alerts when inventory runs low.",          "data-trend.svg"),
+            new CardInfo("Order & Delivery Tracking",   "Process orders, assign drivers, and monitor delivery progress in real time.",           "delivery-map.svg"),
+            new CardInfo("Business Analytics",          "View reports and understand customer trends and product performance.",                   "analytics-dashboard.svg"),
+        }
+        : new[]
+        {
+            new CardInfo("Seamless Ordering",   "Browse stores, place orders easily, and get order confirmations instantly.",           "ecommerce-ui.svg"),
+            new CardInfo("Real-Time Tracking",  "Track your order from the warehouse to your doorstep, live.",                         "location-tracking.svg"),
+            new CardInfo("Customer Support",    "Chat with sellers or drivers and access order history anytime.",                      "support-chat.svg"),
+        };
 }

@@ -3,200 +3,184 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Text.Json
 @using Microsoft.AspNetCore.WebUtilities
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @inject AuthenticationStateProvider AuthProvider
 @inject ToastService ToastService
 @inject NavigationManager Navigation
 @inject IJSRuntime JS
 @inject IHttpClientFactory HttpClientFactory
 
-<main class="flex justify-center items-center min-h-screen bg-white relative">
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-3">
-            <h1 class="font-bold text-2xl text-black">FastaBiz</h1>
-        </div>
-    </nav>
+<MudThemeProvider Theme="_theme" />
 
-    <div class="w-full max-w-md mt-20 p-8 border border-gray-200 shadow-md rounded-md bg-white">
-        <h3 class="text-2xl font-bold mb-6 text-center">Sign up as @displayRole</h3>
+<MudLayout>
+    <MudAppBar Elevation="2" Color="Color.Surface" Fixed="true">
+        <MudText Typo="Typo.h5" Style="font-weight:800; cursor:pointer;" @onclick='() => Navigation.NavigateTo("/")'>
+            FastaBiz
+        </MudText>
+    </MudAppBar>
 
-        @if (!string.IsNullOrEmpty(successMessage))
-        {
-            <div class="bg-green-100 text-green-700 p-2 rounded mb-4">@successMessage</div>
-        }
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center justify-center" Style="min-height:100vh; padding-top:90px; padding-bottom:60px;">
+            <MudPaper Elevation="4" Class="pa-8 rounded-xl" Style="width:100%;">
 
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="bg-red-100 text-red-700 p-2 rounded mb-4">@errorMessage</div>
-        }
+                <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-1" Style="font-weight:800;">Create your account</MudText>
+                <MudText Typo="Typo.subtitle2" Align="Align.Center" Class="mb-6 mud-text-secondary">
+                    Signing up as <strong>@displayRole</strong>
+                </MudText>
 
-        <!-- Social Buttons -->
-        <div class="flex flex-col gap-3 mb-4">
-            <button
-                class="w-full flex items-center justify-center gap-2 border border-black text-black py-2 rounded hover:bg-gray-100 transition">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 13H5v-2h14v2z" />
-                </svg>
-                Continue with Apple
-            </button>
+                @if (!string.IsNullOrEmpty(successMessage))
+                {
+                    <MudAlert Severity="Severity.Success" Class="mb-4">@successMessage</MudAlert>
+                }
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <MudAlert Severity="Severity.Error" Class="mb-4">@errorMessage</MudAlert>
+                }
 
-            <button
-                class="w-full flex items-center justify-center gap-2 bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
-                <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5">
-                Continue with Google
-            </button>
-        </div>
+                <!-- Social Buttons -->
+                <MudButton Variant="MudVariant.Filled" FullWidth="true" Class="mb-3"
+                           Style="background:#4285F4; color:white; border-radius:8px; font-weight:600;">
+                    <MudImage Src="https://www.svgrepo.com/show/475656/google-color.svg" Width="20" Height="20" Class="mr-2" />
+                    Continue with Google
+                </MudButton>
 
-        <div class="flex items-center my-4">
-            <div class="flex-grow h-px bg-gray-300"></div>
-            <span class="mx-2 text-sm text-gray-500">or</span>
-            <div class="flex-grow h-px bg-gray-300"></div>
-        </div>
+                <MudButton Variant="MudVariant.Outlined"
+                    FullWidth="true"
+                    Class="mb-4"
+                    Style="border-radius:8px; font-weight:600;"
+                    StartIcon="fab fa-apple">
+                    Continue with Apple
+                </MudButton>
 
-        <!-- Registration Form -->
-        <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit">
-            <DataAnnotationsValidator />
-            @* <ValidationSummary /> *@
+                <MudDivider Class="mb-5">
+                    <MudChip T="string" Size="Size.Small" Variant="MudVariant.Text" Class="mud-text-secondary">or</MudChip>
+                </MudDivider>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <InputText @bind-Value="registerModel.FullName" placeholder="Full Name"
-                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
-                    <ValidationMessage For="@(() => registerModel.FullName)" />
-                </div>
-                <div>
-                    <InputText @bind-Value="registerModel.Phone" placeholder="Phone"
-                        class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
-                    <ValidationMessage For="@(() => registerModel.Phone)" />
-                </div>
-            </div>
+                <!-- Registration Form -->
+                <EditForm Model="@registerModel" OnValidSubmit="@HandleValidSubmit">
+                    <DataAnnotationsValidator />
 
-            <div class="mt-4">
-                <InputText @bind-Value="registerModel.Email" placeholder="Email"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
-                <ValidationMessage For="@(() => registerModel.Email)" />
-            </div>
+                    <MudGrid Spacing="3">
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="registerModel.FullName"
+                                          Label="Full Name"
+                                          Variant="MudVariant.Outlined"
+                                          FullWidth="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Person"
+                                          For="@(() => registerModel.FullName)" />
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudTextField @bind-Value="registerModel.Phone"
+                                          Label="Phone"
+                                          Variant="MudVariant.Outlined"
+                                          FullWidth="true"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Phone"
+                                          For="@(() => registerModel.Phone)" />
+                        </MudItem>
+                    </MudGrid>
 
-            <!-- Password Field with Toggle -->
-            <div class="mt-4 relative">
-                <InputText @bind-Value="registerModel.Password" type="@(showPassword ? "text" : "password")"
-                    placeholder="Password (8+ characters)"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    <MudTextField @bind-Value="registerModel.Email"
+                                  Label="Email"
+                                  Variant="MudVariant.Outlined"
+                                  FullWidth="true"
+                                  Class="mt-4"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Email"
+                                  For="@(() => registerModel.Email)" />
 
-                <button type="button" @onclick="TogglePasswordVisibility"
-                    class="absolute right-3 top-2.5 text-gray-600 hover:text-gray-800 focus:outline-none" tabindex="-1"
-                    aria-label="Toggle password visibility">
-                    @if (showPassword)
-                    {
-                        <!-- Eye Off Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-3.582-9-8s4-8 9-8a9.969 9.969 0 013.375.625m3.875 3.25A9.978 9.978 0 0121 11c0 4.418-4 8-9 8a9.978 9.978 0 01-2.887-.43M3 3l18 18" />
-                        </svg>
-                    }
-                    else
-                    {
-                        <!-- Eye Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    }
-                </button>
+                    <MudTextField @bind-Value="registerModel.Password"
+                                  Label="Password (8+ characters)"
+                                  Variant="MudVariant.Outlined"
+                                  FullWidth="true"
+                                  Class="mt-4"
+                                  InputType="@(_showPass ? InputType.Text : InputType.Password)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(_showPass ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="() => _showPass = !_showPass"
+                                  For="@(() => registerModel.Password)" />
 
-                <ValidationMessage For="@(() => registerModel.Password)" class="text-red-600 text-sm mt-1" />
-            </div>
+                    <MudTextField @bind-Value="registerModel.ConfirmPassword"
+                                  Label="Confirm Password"
+                                  Variant="MudVariant.Outlined"
+                                  FullWidth="true"
+                                  Class="mt-4"
+                                  InputType="@(_showConfirmPass ? InputType.Text : InputType.Password)"
+                                  Adornment="Adornment.End"
+                                  AdornmentIcon="@(_showConfirmPass ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                                  OnAdornmentClick="() => _showConfirmPass = !_showConfirmPass"
+                                  For="@(() => registerModel.ConfirmPassword)" />
 
-            <!-- Confirm Password Field with Toggle -->
-            <div class="mt-4 relative">
-                <InputText @bind-Value="registerModel.ConfirmPassword"
-                    type="@(showConfirmPassword ? "text" : "password")" placeholder="Confirm Password"
-                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500" />
+                    <!-- Checkboxes -->
+                    <MudCheckBox T="bool" Checked="true" Disabled="true" Class="mt-3" Color="Color.Primary"
+                                 Label="Send me helpful emails to find work and leads." />
 
-                <button type="button" @onclick="ToggleConfirmPasswordVisibility"
-                    class="absolute right-3 top-2.5 text-gray-600 hover:text-gray-800 focus:outline-none" tabindex="-1"
-                    aria-label="Toggle confirm password visibility">
-                    @if (showConfirmPassword)
-                    {
-                        <!-- Eye Off Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13.875 18.825A10.05 10.05 0 0112 19c-5 0-9-3.582-9-8s4-8 9-8a9.969 9.969 0 013.375.625m3.875 3.25A9.978 9.978 0 0121 11c0 4.418-4 8-9 8a9.978 9.978 0 01-2.887-.43M3 3l18 18" />
-                        </svg>
-                    }
-                    else
-                    {
-                        <!-- Eye Icon -->
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                    }
-                </button>
+                    <MudCheckBox T="bool" @bind-Checked="_agreedToTerms" Color="Color.Primary" Class="mt-1">
+                        <span class="mud-body2">
+                            I agree to the
+                            <MudLink Href="#" Color="Color.Primary">Terms of Service</MudLink>
+                            and
+                            <MudLink Href="#" Color="Color.Primary">Privacy Policy</MudLink>.
+                        </span>
+                    </MudCheckBox>
 
-                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" class="text-red-600 text-sm mt-1" />
-            </div>
+                    <MudButton ButtonType="ButtonType.Submit"
+                               Variant="MudVariant.Filled"
+                               Color="Color.Primary"
+                               FullWidth="true"
+                               Size="Size.Large"
+                               Disabled="@(!_agreedToTerms)"
+                               Class="mt-6"
+                               Style="font-weight:700; border-radius:8px;">
+                        Create my account
+                    </MudButton>
+                </EditForm>
 
-            <div class="mt-4 flex items-center">
-                <input type="checkbox" checked
-                    class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" disabled />
-                <label class="ml-2 text-sm text-gray-600">Send me helpful emails to find work and leads.</label>
-            </div>
+                <MudText Align="Align.Center" Typo="Typo.body2" Class="mt-5 mud-text-secondary">
+                    Already have an account?
+                    <MudLink Href="/auth/login" Color="Color.Primary" Style="font-weight:600;">Log In</MudLink>
+                </MudText>
 
-            <div class="mt-4 flex items-center">
-                <input type="checkbox" id="terms"
-                    class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500" required />
-                <label for="terms" class="ml-2 text-sm text-gray-600">
-                    I agree to the <a href="#" class="text-green-600 underline">Terms of Service</a> and <a href="#"
-                        class="text-green-600 underline">Privacy Policy</a>.
-                </label>
-            </div>
+            </MudPaper>
+        </MudContainer>
+    </MudMainContent>
 
-            <button type="submit"
-                class="w-full bg-green-600 text-white py-2 mt-6 rounded hover:bg-green-700 transition">
-                Create my account
-            </button>
-        </EditForm>
+    <MudAppBar Bottom="true" Fixed="true" Elevation="0" Color="Color.Dark" Dense="true">
+        <MudText Typo="Typo.caption" Style="width:100%; text-align:center; color:rgba(255,255,255,0.7);">
+            © 2025 FastaBiz Inc. •
+            <MudLink Href="#" Typo="Typo.caption" Style="color:rgba(255,255,255,0.9);">Privacy Policy</MudLink>
+        </MudText>
+    </MudAppBar>
+</MudLayout>
 
-        <p class="text-center text-sm text-gray-600 mt-6">
-            Already have an account?
-            <a href="/auth/login" class="text-green-600 hover:underline">Log In</a>
-        </p>
-    </div>
-
-    <footer class="absolute bottom-0 left-0 right-0 bg-black text-white text-sm text-center py-4">
-        © 2025 FastaBiz • <a href="#" class="underline">Privacy Policy</a>
-    </footer>
-</main>
 
 @code {
     private RegisterModel registerModel = new();
     private string displayRole = string.Empty;
-    private string? successMessage { get; set; }
-    private string? errorMessage { get; set; }
-    private bool showPassword = false;
-    private bool showConfirmPassword = false;
+    private string? successMessage;
+    private string? errorMessage;
+    private bool _showPass = false;
+    private bool _showConfirmPass = false;
+    private bool _agreedToTerms = false;
 
-    private void TogglePasswordVisibility()
+    private MudTheme _theme = new MudTheme
     {
-        showPassword = !showPassword;
-    }
-
-    private void ToggleConfirmPasswordVisibility()
-    {
-        showConfirmPassword = !showConfirmPassword;
-    }
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#16a34a",
+            PrimaryContrastText = "#ffffff",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#111827",
+            Background = "#f9fafb",
+            Surface = "#ffffff",
+        }
+    };
 
     private class ErrorResponse
     {
-        public string? Error { get; set; }
+        public string? Error  { get; set; }
         public string? Detail { get; set; }
     }
 
@@ -209,32 +193,21 @@
             Navigation.NavigateTo($"/{role}/dashboard", forceLoad: true);
         }
 
-        // Parse role from query param
         var uri = new Uri(Navigation.Uri);
         var queryParams = QueryHelpers.ParseQuery(uri.Query);
         if (queryParams.TryGetValue("role", out var r))
         {
-            var roleValue = r.ToString();
-
-            registerModel.Role = roleValue;
-            displayRole = roleValue switch
+            registerModel.Role = r.ToString();
+            displayRole = r.ToString() switch
             {
                 "merchant" => "Business Owner",
                 "customer" => "Customer",
-                _ => r
+                _ => r.ToString()
             };
         }
         else
         {
             displayRole = "User";
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JS.InvokeVoidAsync("loadPageCss", "css/register.css");
         }
     }
 
@@ -245,10 +218,8 @@
         if (response.IsSuccessStatusCode)
         {
             ToastService.ShowToast("Account created successfully", "Redirecting to login…", ToastService.ToastLevel.Success);
-
             await Task.Delay(1500);
             registerModel = new RegisterModel();
-
             Navigation.NavigateTo("/auth/login", forceLoad: true);
             return;
         }
@@ -260,15 +231,11 @@
         try
         {
             var errorObj = await response.Content.ReadFromJsonAsync<ErrorResponse>();
-
-            var title = errorObj?.Error ?? "Something went wrong";
-            var detail = errorObj?.Detail ?? "Please try again later.";
-
-            ToastService.ShowToast(title, detail, ToastService.ToastLevel.Error);
+            ToastService.ShowToast(errorObj?.Error ?? "Something went wrong", errorObj?.Detail ?? "Please try again later.", ToastService.ToastLevel.Error);
         }
         catch
         {
-            ToastService.ShowToast("Unexpected error","Please try again later.", ToastService.ToastLevel.Error);
+            ToastService.ShowToast("Unexpected error", "Please try again later.", ToastService.ToastLevel.Error);
         }
     }
 }

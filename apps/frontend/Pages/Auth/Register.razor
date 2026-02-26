@@ -1,121 +1,126 @@
 @page "/auth/register"
 @layout PublicLayout
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @inject NavigationManager Navigation
 
-<main class="flex flex-col items-center justify-center min-h-screen bg-white px-4">
-    <!-- Top Navigation -->
-    <nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center">
-            <h1 class="font-bold text-2xl text-black cursor-pointer" 
-                @onclick='() => Navigation.NavigateTo("/")'>
-                FastaBiz
-            </h1>
-        </div>
-    </nav>
+<MudThemeProvider Theme="_theme" />
 
-    <h2 class="text-3xl font-semibold mb-10 text-center">Join as a Business Owner or Customer</h2>
+<MudLayout>
+    <MudAppBar Elevation="2" Color="Color.Surface" Fixed="true">
+        <MudText Typo="Typo.h5" Style="font-weight:800; cursor:pointer;" @onclick='() => Navigation.NavigateTo("/")'>
+            FastaBiz
+        </MudText>
+    </MudAppBar>
 
-    <!-- Role Selection Cards -->
-    <div class="flex flex-col sm:flex-row gap-6 sm:gap-10 justify-center">
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Medium" Class="d-flex flex-column align-center justify-center" Style="min-height:100vh; padding-top:100px; padding-bottom:60px;">
 
-        <!-- Business Owner Card -->
-        <div @onclick="@(() => SelectRole("merchant"))"
-            class="relative cursor-pointer border rounded-lg px-8 py-6 text-center w-72 transition duration-200 ease-in-out
-                    @(selectedRole == "merchant" 
-                        ? "border-green-600 border-4 bg-gray-50 shadow-md" 
-                        : "hover:shadow-md hover:border-gray-600 border-gray-300")">
-            
-            @if (selectedRole == "merchant")
-            {
-                <div class="absolute top-3 right-3 text-green-600">
-                    <!-- Lucide check-circle icon SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4 -4M12 22a10 10 0 1 1 0 -20a10 10 0 0 1 0 20z" />
-                    </svg>
-                </div>
-            }
+            <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-2" Style="font-weight:800;">
+                Join FastaBiz
+            </MudText>
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-10 mud-text-secondary">
+                Are you a Business Owner or a Customer?
+            </MudText>
 
-            <div class="text-3xl">🧑‍💼</div>
-            <div class="text-lg font-medium text-black">I'm a Business Owner</div>
-            <div class="text-sm text-gray-500 mt-1">Hiring or listing products</div>
-        </div>
+            <!-- Role Cards -->
+            <MudGrid Justify="Justify.Center" Spacing="4">
 
-        <!-- Customer Card -->
-        <div @onclick="@(() => SelectRole("customer"))"
-            class="relative cursor-pointer border rounded-lg px-8 py-6 text-center w-72 transition duration-200 ease-in-out
-                    @(selectedRole == "customer" 
-                        ? "border-green-600 border-4 bg-gray-50 shadow-md" 
-                        : "hover:shadow-md hover:border-gray-600 border-gray-300")">
+                <!-- Merchant -->
+                <MudItem xs="12" sm="5">
+                    <MudPaper @onclick="@(() => SelectRole("merchant"))"
+                              Elevation="@(selectedRole == "merchant" ? 6 : 2)"
+                              Class="@($"pa-8 rounded-xl d-flex flex-column align-center justify-center role-card {(selectedRole == "merchant" ? "role-selected" : "")}")"
+                              Style="@($"border: 2px solid {(selectedRole == "merchant" ? "var(--mud-palette-primary)" : "transparent")}; cursor:pointer; transition:all 0.2s; position:relative; min-height:180px;")">
+                        @if (selectedRole == "merchant")
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Primary" Style="position:absolute; top:12px; right:12px;" />
+                        }
+                        <MudText Style="font-size:3rem;">🧑‍💼</MudText>
+                        <MudText Typo="Typo.h6" Class="mt-2" Style="font-weight:700;">Business Owner</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">Hiring or listing products</MudText>
+                    </MudPaper>
+                </MudItem>
 
-            @if (selectedRole == "customer")
-            {
-                <div class="absolute top-3 right-3 text-green-600">
-                    <!-- Lucide check-circle icon SVG -->
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4 -4M12 22a10 10 0 1 1 0 -20a10 10 0 0 1 0 20z" />
-                    </svg>
-                </div>
-            }
+                <!-- Customer -->
+                <MudItem xs="12" sm="5">
+                    <MudPaper @onclick="@(() => SelectRole("customer"))"
+                              Elevation="@(selectedRole == "customer" ? 6 : 2)"
+                              Class="@($"pa-8 rounded-xl d-flex flex-column align-center justify-center role-card {(selectedRole == "customer" ? "role-selected" : "")}")"
+                              Style="@($"border: 2px solid {(selectedRole == "customer" ? "var(--mud-palette-primary)" : "transparent")}; cursor:pointer; transition:all 0.2s; position:relative; min-height:180px;")">
+                        @if (selectedRole == "customer")
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Primary" Style="position:absolute; top:12px; right:12px;" />
+                        }
+                        <MudText Style="font-size:3rem;">🛒</MudText>
+                        <MudText Typo="Typo.h6" Class="mt-2" Style="font-weight:700;">Customer</MudText>
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">Looking to buy or browse</MudText>
+                    </MudPaper>
+                </MudItem>
 
-                <div class="text-5xl mb-3">🛒</div>
-                <div class="text-lg font-medium text-black">I'm a Customer</div>
-                <div class="text-sm text-gray-500 mt-1">Looking to buy or browse</div>
-        </div>
-    </div>
+            </MudGrid>
 
+            <!-- Continue Button -->
+            <MudButton Variant="MudVariant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       Class="mt-10 px-10"
+                       Disabled="@string.IsNullOrEmpty(selectedRole)"
+                       OnClick="ProceedToRegister"
+                       Style="border-radius:10px; font-weight:700; font-size:1rem; min-width:240px;">
+                @GetButtonText()
+            </MudButton>
 
-    <!-- Continue Button -->
-    <div class="text-center mt-10">
-        <button type="button"
-                disabled="@string.IsNullOrEmpty(selectedRole)"
-                class="px-8 py-3 rounded font-semibold transition-colors
-                       @(string.IsNullOrEmpty(selectedRole) 
-                         ? "bg-gray-300 text-gray-600 cursor-not-allowed" 
-                         : "bg-green-600 text-white hover:bg-green-700")"
-                @onclick="ProceedToRegister">
-            @GetButtonText()
-        </button>
-    </div>
+            <!-- Links -->
+            <MudText Typo="Typo.body2" Class="mt-6 mud-text-secondary">
+                Already have an account?
+                <MudLink Href="/auth/login" Color="Color.Primary" Style="font-weight:600;">Log In</MudLink>
+            </MudText>
+            <MudText Typo="Typo.body2" Class="mt-1 mud-text-secondary">
+                Just browsing?
+                <MudLink Href="/" Color="Color.Primary" Style="font-weight:600;">Back to Home</MudLink>
+            </MudText>
 
-    <!-- Login Prompt -->
-    <p class="text-center mt-6 text-sm text-gray-600">
-        Already have an account?
-        <a href="/auth/login" class="text-green-600 font-medium hover:underline">Log In</a>
-    </p>
+        </MudContainer>
+    </MudMainContent>
 
-    <p class="text-center text-sm text-gray-600 mt-3">
-        Just browsing?
-        <a href="/" class="text-green-600 hover:underline">Back to Home</a>
-    </p>
-</main>
+    <MudAppBar Bottom="true" Fixed="true" Elevation="0" Color="Color.Dark" Dense="true">
+        <MudText Typo="Typo.caption" Style="width:100%; text-align:center; color:rgba(255,255,255,0.7);">
+            © 2025 FastaBiz Inc. •
+            <MudLink Href="#" Typo="Typo.caption" Style="color:rgba(255,255,255,0.9);">Privacy Policy</MudLink>
+        </MudText>
+    </MudAppBar>
+</MudLayout>
 
 
 @code {
     private string selectedRole = string.Empty;
 
-    private void SelectRole(string role)
+    private MudTheme _theme = new MudTheme
     {
-        selectedRole = role;
-    }
-
-    private string GetButtonText()
-    {
-        if (string.IsNullOrEmpty(selectedRole))
-            return "Select a role to proceed";
-
-        return selectedRole switch
+        PaletteLight = new PaletteLight
         {
-            "producer" => "Register as Business Owner",
-            "customer" => "Register as Customer",
-            _ => "Register"
-        };
-    }
+            Primary = "#16a34a",
+            PrimaryContrastText = "#ffffff",
+            AppbarBackground = "#ffffff",
+            AppbarText = "#111827",
+            Background = "#f9fafb",
+            Surface = "#ffffff",
+        }
+    };
+
+    private void SelectRole(string role) => selectedRole = role;
+
+    private string GetButtonText() => selectedRole switch
+    {
+        "merchant" => "Register as Business Owner",
+        "customer" => "Register as Customer",
+        _          => "Select a role to proceed"
+    };
 
     private void ProceedToRegister()
     {
         if (!string.IsNullOrEmpty(selectedRole))
-        {
             Navigation.NavigateTo($"/auth/register-form?role={selectedRole}");
-        }
     }
 }

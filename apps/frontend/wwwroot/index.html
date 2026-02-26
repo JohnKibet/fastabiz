@@ -1,70 +1,93 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>fastabiz</title>
+        <base href="/" />
 
-<head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>fastabiz</title>
-	<base href="/" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+        />
+        <link href="css/site.css" rel="stylesheet" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins&display=swap"
+            rel="stylesheet"
+        />
 
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-	<link href="css/site.css" rel="stylesheet" />
-	<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+        <link rel="icon" type="image/png" href="favicon.png" />
+        <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+            rel="stylesheet"
+        />
 
-	<link rel="icon" type="image/png" href="favicon.png" />
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+        <!-- AwesomeMarkers CSS -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"
+        />
 
-	<!-- AwesomeMarkers CSS -->
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+        <link
+            href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+            rel="stylesheet"
+        />
+        <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+        <link
+            href="https://use.fontawesome.com/releases/v5.14.0/css/all.css"
+            rel="stylesheet"
+        />
 
-	<!-- AwesomeMarkers JS -->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+        <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 
-	<script src="js/pageStyles.js" defer></script>
-	<script src="js/site.js"></script>
-	<script src="js/clickOutside.js"></script>
-</head>
+        <!-- AwesomeMarkers JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
 
-<body>
-	<div id="app">
-		<svg class="loading-progress">
-			<circle r="40%" cx="50%" cy="50%" />
-			<circle r="40%" cx="50%" cy="50%" />
-		</svg>
-		<div class="loading-progress-text"></div>
-	</div>
+        <script src="js/pageStyles.js" defer></script>
+        <script src="js/site.js"></script>
+        <script src="js/clickOutside.js"></script>
+    </head>
 
-	<div id="blazor-error-ui">
-		An unhandled error has occurred.
-		<a href="" class="reload">Reload</a>
-		<a class="dismiss">X</a>
-	</div>
+    <body>
+        <div id="app">
+            <svg class="loading-progress">
+                <circle r="40%" cx="50%" cy="50%" />
+                <circle r="40%" cx="50%" cy="50%" />
+            </svg>
+            <div class="loading-progress-text"></div>
+        </div>
 
-	<script src="_framework/blazor.webassembly.js"></script>
+        <div id="blazor-error-ui">
+            An unhandled error has occurred.
+            <a href="" class="reload">Reload</a>
+            <a class="dismiss">X</a>
+        </div>
 
-	<script src="https://unpkg.com/lucide@latest"></script>
-	<script>
-		window.addEventListener("DOMContentLoaded", () => {
-			lucide.createIcons();
-		});
-	</script>
-	<script>
-		let lastScroll = 0;
-		window.addEventListener('scroll', function () {
-			const nav = document.getElementById('scrollNav');
-			const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
-			if (!nav) return;
+        <script src="_framework/blazor.webassembly.js"></script>
 
-			if (currentScroll > lastScroll) {
-				// Scrolling down
-				nav.classList.add('-translate-y-full');
-			} else {
-				// Scrolling up
-				nav.classList.remove('-translate-y-full');
-			}
-			lastScroll = currentScroll <= 0 ? 0 : currentScroll;
-		});
-	</script>
-</body>
+        <script src="https://unpkg.com/lucide@latest"></script>
+        <script>
+            window.addEventListener("DOMContentLoaded", () => {
+                lucide.createIcons();
+            });
+        </script>
+        <script>
+            let lastScroll = 0;
+            window.addEventListener("scroll", function () {
+                const nav = document.getElementById("scrollNav");
+                const currentScroll =
+                    window.pageYOffset || document.documentElement.scrollTop;
+                if (!nav) return;
 
+                if (currentScroll > lastScroll) {
+                    // Scrolling down
+                    nav.classList.add("-translate-y-full");
+                } else {
+                    // Scrolling up
+                    nav.classList.remove("-translate-y-full");
+                }
+                lastScroll = currentScroll <= 0 ? 0 : currentScroll;
+            });
+        </script>
+    </body>
 </html>

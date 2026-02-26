@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.AspNetCore.Components.Authorization;
 using frontend;
 using frontend.Services;
+using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -32,6 +33,7 @@ if (!config.TryGetValue("ApiBaseUrl", out var apiBaseUrl) || string.IsNullOrWhit
 
 Console.WriteLine($"API Base URL set to: {apiBaseUrl}");
 
+builder.Services.AddMudServices();
 
 // Register Auth Token Handler
 builder.Services.AddScoped<AuthHeaderHandler>();
