@@ -10,7 +10,7 @@
 
 @code {
     private bool _drawerOpen = false;
-    private bool isAuthenticated = false;
+    private bool? isAuthenticated = null; // null = still resolving, prevents Login/SignUp flash
 
     private MudTheme _theme = new MudTheme
     {
@@ -55,7 +55,8 @@
                        Style="background:#ea580c; color:white; font-weight:700; border-radius:8px;" Size="Size.Medium">
                 Shop Now
             </MudButton>
-            @if (!isAuthenticated)
+            @* null = still loading, don't render yet. false = not authenticated, show buttons. *@
+            @if (isAuthenticated == false)
             {
                 <MudButton Href="/auth/login"    Variant="MudVariant.Filled" Color="Color.Primary"   Style="border-radius:8px; font-weight:700;">Login</MudButton>
                 <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Secondary" Style="border-radius:8px; font-weight:700;">Sign Up</MudButton>
@@ -64,7 +65,7 @@
 
         <!-- Mobile -->
         <div class="d-flex d-md-none align-center gap-2">
-            @if (!isAuthenticated)
+            @if (isAuthenticated == false)
             {
                 <MudButton Href="/auth/login"    Variant="MudVariant.Filled" Color="Color.Primary"   Size="Size.Small" Style="border-radius:6px; font-weight:700; min-width:unset;">Login</MudButton>
                 <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Secondary" Size="Size.Small" Style="border-radius:6px; font-weight:700; min-width:unset;">Sign Up</MudButton>
@@ -90,7 +91,6 @@
 </MudDrawer>
 
 <!-- ===================== MAIN CONTENT ===================== -->
-<!-- inline padding-top matches fixed MudAppBar height (64px) -->
 <MudMainContent Style="padding-top:2px;">
 
     <!-- ===== HERO ===== -->
@@ -275,20 +275,10 @@
 </MudMainContent>
 
 <style>
-    /*
-     * ── Navbar offset ─────────────────────────────────────────────────
-     * MudMainContent's inline style already sets padding-top:64px.
-     * This rule is a belt-and-suspenders fallback.
-     */
     .mud-main-content {
         padding-top: 64px !important;
     }
 
-    /*
-     * ── Full-viewport sections ─────────────────────────────────────────
-     * Each section fills exactly one screen height (minus the 64px navbar)
-     * and vertically centers its content via flexbox.
-     */
     .section-full {
         min-height: calc(100vh - 64px);
         display: flex;
@@ -296,24 +286,15 @@
         justify-content: center;
     }
 
-    /*
-     * ── Inner container vertical breathing room ─────────────────────
-     */
     .section-inner {
         padding-top: 48px;
         padding-bottom: 48px;
     }
 
-    /*
-     * ── Component sections (Features / Discover) ───────────────────
-     * These contain variable-height third-party components so we only
-     * add padding rather than enforcing a viewport height.
-     */
     .section-content {
         padding: 72px 0;
     }
 
-    /* ── Nav link hover ──────────────────────────────────────────── */
     .nav-link {
         font-weight: 600;
         color: #374151 !important;

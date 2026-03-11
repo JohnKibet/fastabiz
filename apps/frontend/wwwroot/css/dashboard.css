@@ -1,0 +1,24 @@
+/* ── Metric card highlight borders ──────────────────────────────── */
+.metric-danger {
+    border-left: 4px solid #dc2626 !important;
+}
+.metric-success {
+    border-left: 4px solid #16a34a !important;
+}
+.metric-warning {
+    border-left: 4px solid #d97706 !important;
+}
+
+/* ── Icon bubble backgrounds ─────────────────────────────────────── */
+.icon-bg-default {
+    background: #fff7ed;
+} /* soft orange  */
+.icon-bg-danger {
+    background: #fef2f2;
+} /* soft red     */
+.icon-bg-success {
+    background: #f0fdf4;
+} /* soft green   */
+.icon-bg-warning {
+    background: #fffbeb;
+} /* soft amber   */

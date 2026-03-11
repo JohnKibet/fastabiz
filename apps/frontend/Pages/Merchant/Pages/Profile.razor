@@ -1,7 +1,6 @@
 @page "/merchant/profile"
 @layout MerchantLayout
 @using System.Security.Claims
-@inject AuthenticationStateProvider AuthProvider
 @inject NavigationManager Navigation
 @inject ToastService ToastService
 @inject UserService UserService
@@ -12,21 +11,21 @@
 
     <!-- HEADER -->
     <div class="flex items-center space-x-4">
-        <img src="https://ui-avatars.com/api/?name=@UserFullName&background=F97316&color=fff" 
-             alt="User Avatar" 
+        <img src="https://ui-avatars.com/api/?name=@UserFullName&background=F97316&color=fff"
+             alt="User Avatar"
              class="w-20 h-20 rounded-full shadow" />
 
         <div>
             <p class="text-xl font-semibold text-gray-800">@UserFullName</p>
             <div class="flex items-center space-x-2 mt-1">
-                <span class="px-2 py-1 text-xs rounded-full text-white 
+                <span class="px-2 py-1 text-xs rounded-full text-white
                     @(UserRole.ToLower() == "merchant" ? "bg-red-500" :
                       UserRole.ToLower() == "driver" ? "bg-blue-500" :
                       UserRole.ToLower() == "customer" ? "bg-green-600" : "bg-gray-500")">
                     @UserRole
                 </span>
 
-                <span class="px-2 py-1 text-xs rounded-full text-white 
+                <span class="px-2 py-1 text-xs rounded-full text-white
                     @(UserStatus.ToLower() == "active" ? "bg-green-500" :
                       UserStatus.ToLower() == "suspended" ? "bg-red-600" :
                       UserStatus.ToLower() == "pending" ? "bg-yellow-500" : "bg-gray-500")">
@@ -101,47 +100,54 @@
 </div>
 
 @code {
+    [CascadingParameter] public Guid?   UserId   { get; set; }
+    [CascadingParameter] public string? UserRole { get; set; }
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
     private EditProfile? EditProfileRef;
     private bool ShowManageSessions = false;
     private List<SessionModel> UserSessions = new();
     private bool ShowEditProfileModal = false;
     private EditUserModel EditModel = new();
-    private Guid UserID { get; set; }
+
+    private Guid   UserID       { get; set; }
     private string UserFullName { get; set; } = "Unknown User";
-    private string UserEmail { get; set; } = "N/A";
-    private string UserRole { get; set; } = "Guest";
-    private string UserStatus { get; set; } = "active";
-    private string UserPhone { get; set; } = "Not Provided";
-    private string UserSlug { get; set; } = "n/a";
+    private string UserEmail    { get; set; } = "N/A";
+    private string UserStatus   { get; set; } = "active";
+    private string UserPhone    { get; set; } = "Not Provided";
+    private string UserSlug     { get; set; } = "n/a";
+
     private DateTime? LastLogin { get; set; }
     private DateTime? CreatedAt { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthProvider.GetAuthenticationStateAsync();
+        if (AuthenticationStateTask == null) return;
+
+        var authState = await AuthenticationStateTask;
         var user = authState.User;
 
-        if (user.Identity?.IsAuthenticated == true)
-        {
-            var id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (id != null) UserID = Guid.Parse(id);
+        if (user.Identity?.IsAuthenticated != true) return;
 
-            UserFullName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
-            UserEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? "Not Provided";
-            UserRole = user.FindFirst(ClaimTypes.Role)?.Value ?? "guest";
+        var id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (id != null) UserID = Guid.Parse(id);
 
-            UserPhone = user.FindFirst("phone")?.Value ?? "Not Provided";
-            UserSlug = user.FindFirst("slug")?.Value ?? "- -";
-            UserStatus = user.FindFirst("status")?.Value ?? "active";
+        UserFullName = user.FindFirst(ClaimTypes.Name)?.Value ?? "Unknown";
+        UserEmail = user.FindFirst(ClaimTypes.Email)?.Value ?? "Not Provided";
+        UserRole = user.FindFirst(ClaimTypes.Role)?.Value ?? "guest";
 
-            var lastLoginStr = user.FindFirst("last_login")?.Value;
-            if (DateTime.TryParse(lastLoginStr, out var parsed))
-                LastLogin = parsed;
+        UserPhone = user.FindFirst("phone")?.Value ?? "Not Provided";
+        UserSlug = user.FindFirst("slug")?.Value ?? "- -";
+        UserStatus = user.FindFirst("status")?.Value ?? "active";
 
-            var createdStr = user.FindFirst("created_at")?.Value;
-            if (DateTime.TryParse(createdStr, out var created))
-                CreatedAt = created;
-        }
+        var lastLoginStr = user.FindFirst("last_login")?.Value;
+        if (DateTime.TryParse(lastLoginStr, out var parsed))
+            LastLogin = parsed;
+
+        var createdStr = user.FindFirst("created_at")?.Value;
+        if (DateTime.TryParse(createdStr, out var created))
+            CreatedAt = created;
+
     }
     private async Task SubmitProfileChange()
     {

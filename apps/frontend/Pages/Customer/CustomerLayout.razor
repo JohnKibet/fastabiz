@@ -1,7 +1,7 @@
 @inherits LayoutComponentBase
 @namespace frontend.Pages.Customer
 @using frontend.Pages.Shared.Layout
-@inject CustomAuthStateProvider AuthStateProvider
+@using Microsoft.AspNetCore.Components.Authorization
 @inject CartService CartService
 
 <CascadingValue Value="UserName">
@@ -11,16 +11,18 @@
 </CascadingValue>
 
 @code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
     private string? UserName;
-    private bool IsLoggedIn;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        IsLoggedIn = user.Identity?.IsAuthenticated ?? false;
-        UserName = IsLoggedIn ? user.Identity!.Name : null;
+        if (AuthenticationStateTask != null)
+        {
+            var authState = await AuthenticationStateTask;
+            var user = authState.User;
+            UserName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
+        }
 
         // Seed cart if empty
         if (!CartService.Items.Any())
@@ -37,7 +39,7 @@
 
             var appleVariant = new ProductMapper.VariantDto
             {
-                Id = Guid.Parse("72331251-b031-46b0-8998-4117aeb3a072"), // small
+                Id = Guid.Parse("72331251-b031-46b0-8998-4117aeb3a072"),
                 Price = 1.2,
                 ImageUrl = "apple_small.jpg",
                 Sku = "APP-SM-001",

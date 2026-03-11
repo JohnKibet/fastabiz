@@ -2,118 +2,149 @@
 @using frontend.Services
 @using System.Security.Claims
 @using frontend.Pages.Shared.Sidebars
+@using MudBlazor
 @inject NavigationManager Navigation
-@inject CustomAuthStateProvider AuthProvider
+@inject AuthenticationStateProvider AuthProvider
 @inject CartService CartService
+@implements IDisposable
 
-<CascadingAuthenticationState>
-    <AuthorizeView>
-        <Authorized>
-            @if (IsReady)
-            {
-                <div class="flex min-h-screen bg-gray-50 text-gray-800 mt-0">
-                    <!-- Sidebar -->
-                    <Sidebar OnCollapseChanged="OnSidebarCollapseChanged" />
+<MudThemeProvider Theme="_theme" />
+<MudSnackbarProvider />
+<MudDialogProvider />
 
-                    <!-- Main Section -->
-                    <div class="flex flex-col flex-1 min-h-screen">
-                        <!-- Navbar -->
-                        <CascadingValue Value="UserRole">
-                            <Navbar UserName="@UserName" />
-                        </CascadingValue>
-
-                        <!-- Scrollable Page Content -->
-                        <main class="flex-1 overflow-auto p-6 md:p-8 max-w-7xl mx-auto w-full">
-                            <CascadingValue Value="UserId">
-                                @ChildContent
-                            </CascadingValue>
-                        </main>
-                    </div>
+<AuthorizeView>
+    <Authorized>
+        @if (!IsReady)
+        {
+            @* Auth state is still being resolved (awaiting localStorage JS interop).
+            Show a spinner — never render page content or attempt a redirect here. *@
+            <div style="display:flex; align-items:center; justify-content:center; min-height:100vh; background:#f3f4f6;">
+                <div class="d-flex flex-column align-center gap-4">
+                    <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+                    <MudText Typo="Typo.body2" Style="color:#6b7280;">Loading…</MudText>
                 </div>
-            }
-            else
-            {
-                <p class="p-6 text-center text-gray-600">Loading...</p>
-            }
-        </Authorized>
-        <NotAuthorized>
-            @if (RedirectToLogin && IsReady && !Navigation.Uri.Contains("/auth/login"))
-            {
-                Navigation.NavigateTo("/auth/login", forceLoad: true);
-            }
-        </NotAuthorized>
-    </AuthorizeView>
-</CascadingAuthenticationState>
+            </div>
+        }
+        else
+        {
+            @* Auth resolved and confirmed — render the full shell. *@
+            <MudLayout Style="min-height:100vh; background:#f3f4f6;">
+                <MudMainContent Style="display:flex; flex-direction:column; min-height:100vh;">
+
+                    <CascadingValue Value="UserRole">
+                        <CascadingValue Value="UserId">
+
+                            <Sidebar OnCollapseChanged="OnSidebarCollapseChanged" />
+                            <Navbar UserName="@UserName" />
+
+                        </CascadingValue>
+                    </CascadingValue>
+
+                    <div style="flex:1; overflow-y:auto; padding:28px 32px; max-width:1400px; width:100%; margin:0 auto;">
+                        <CascadingValue Value="UserId">
+                            @ChildContent
+                        </CascadingValue>
+                    </div>
+
+                </MudMainContent>
+            </MudLayout>
+        }
+    </Authorized>
+
+    <NotAuthorized>
+        @if (RedirectToLogin && IsReady && !Navigation.Uri.Contains("/auth/login"))
+        {
+            Navigation.NavigateTo("/auth/login", forceLoad: false);
+        }
+    </NotAuthorized>
+</AuthorizeView>
 
 @code {
-    [Parameter] public RenderFragment? ChildContent { get; set; }
-    [Parameter] public bool RedirectToLogin { get; set; } = true;
-    private bool IsReady;
-    private bool IsSidebarCollapsed;
+    [Parameter] public RenderFragment? ChildContent    { get; set; }
+    [Parameter] public bool            RedirectToLogin { get; set; } = true;
+
+    private bool    IsReady;
+    private bool    IsAuthenticated;
+    private bool    IsSidebarCollapsed;
     private string? UserName;
     private string? UserRole;
-    private Guid? UserId;
+    private Guid?   UserId;
 
-    private void OnSidebarCollapseChanged(bool isCollapsed)
+    private MudTheme _theme = new MudTheme
     {
-        IsSidebarCollapsed = isCollapsed;
-    }
+        PaletteLight = new PaletteLight
+        {
+            Primary             = "#16a34a",
+            PrimaryContrastText = "#ffffff",
+            Secondary           = "#ea580c",
+            AppbarBackground    = "#ffffff",
+            AppbarText          = "#111827",
+            Background          = "#f3f4f6",
+            Surface             = "#ffffff",
+            TextPrimary         = "#111827",
+            TextSecondary       = "#6b7280",
+            DrawerBackground    = "#ffffff",
+            DrawerText          = "#374151",
+        }
+    };
+
+    private void OnSidebarCollapseChanged(bool isCollapsed) => IsSidebarCollapsed = isCollapsed;
 
     protected override async Task OnInitializedAsync()
     {
         CartService.OnChange += StateHasChanged;
 
+        // Await the full auth resolution (includes the localStorage JS interop round-trip).
+        // Nothing renders until this completes — IsReady stays false the entire time.
         var authState = await AuthProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
+        var user      = authState.User;
 
-        if (user.Identity?.IsAuthenticated == true)
+        IsAuthenticated = user.Identity?.IsAuthenticated == true;
+
+        if (IsAuthenticated)
         {
-            // Get ID claim
-            var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)
-                   ?? user.FindFirst("sub"); // fallback if JWT style
-            
+            var idClaim = user.FindFirst(ClaimTypes.NameIdentifier) ?? user.FindFirst("sub");
             if (Guid.TryParse(idClaim?.Value, out var parsedGuid))
-            {
                 UserId = parsedGuid;
-            }
 
-            // Get Role claim
             var roleClaim = user.FindFirst(ClaimTypes.Role) ?? user.FindFirst("role");
             UserRole = roleClaim?.Value;
 
-            // Try multiple claim types as fallbacks
             var nameClaim = user.FindFirst(ClaimTypes.Name)
-                        ?? user.FindFirst("name")  // JWT/common alternative
-                        ?? user.FindFirst(ClaimTypes.Email)
-                        ?? idClaim;
+                         ?? user.FindFirst("name")
+                         ?? user.FindFirst(ClaimTypes.Email)
+                         ?? idClaim;
 
             var displayName = nameClaim?.Value?.Trim();
-
-            // Extract first name, or fallback to a default
             if (!string.IsNullOrEmpty(displayName))
             {
-                var firstName = displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                                        .FirstOrDefault()?
-                                        .Trim();
-
+                var firstName = displayName
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .FirstOrDefault()?.Trim();
                 UserName = !string.IsNullOrEmpty(firstName) ? firstName : "User";
             }
             else
             {
                 UserName = "User";
-                UserId = null;
             }
         }
-        else
-        {
-            UserName = "Guest"; 
-        }
 
+        // Flip the flag — Blazor will now re-render with the resolved state.
         IsReady = true;
     }
 
-    public void Dispose()
+    protected override void OnAfterRender(bool firstRender)
     {
-        CartService.OnChange -= StateHasChanged;
+        // Safe place to call NavigateTo — the render pass is complete, so we
+        // are guaranteed IsReady = true and IsAuthenticated reflects the real
+        // resolved state, not the transient loading state.
+        // forceLoad: false keeps the WASM runtime alive so the DI container
+        // (including _cachedUser in CustomAuthStateProvider) is not discarded.
+        if (firstRender && IsReady && !IsAuthenticated && RedirectToLogin)
+        {
+            Navigation.NavigateTo("/auth/login", forceLoad: false);
+        }
     }
+
+    public void Dispose() => CartService.OnChange -= StateHasChanged;
 }

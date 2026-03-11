@@ -1,33 +1,72 @@
-@using Microsoft.AspNetCore.Components
+@using MudBlazor
+@using MudIcons = MudBlazor.Icons
+@using MudVariant = MudBlazor.Variant
 
-<div class="p-4 rounded-lg shadow-sm border bg-white flex items-center gap-4 
-            @(HighlightClass)">
-    <!-- Icon -->
-    @if (!string.IsNullOrWhiteSpace(Icon))
-    {
-        <div class="p-2 rounded-full bg-gray-100 text-orange-500">
-            <i class="fas fa-@Icon text-lg"></i>
-        </div>
-    }
+<MudPaper Elevation="2" Class="@($"pa-4 rounded-xl metric-card {HighlightClass}")"
+          Style="display:flex; align-items:center; gap:16px; height:100%;">
+
+    <!-- Icon bubble -->
+    <div class="@($"metric-icon-wrap {IconBgClass}")" style="flex-shrink:0;">
+        <MudIcon Icon="@ResolvedIcon" Style="@($"color:{IconColor}; font-size:1.4rem;")" />
+    </div>
 
     <!-- Content -->
     <div>
-        <p class="text-sm text-gray-500">@Title</p>
-        <p class="text-xl font-semibold text-gray-800">@Value</p>
+        <MudText Typo="Typo.caption" Style="color:#6b7280; font-weight:500; text-transform:uppercase; letter-spacing:0.05em;">
+            @Title
+        </MudText>
+        <MudText Typo="Typo.h5" Style="font-weight:800; color:#111827; line-height:1.2;" Class="mt-1">
+            @Value
+        </MudText>
     </div>
-</div>
+</MudPaper>
+
+<style>
+    .metric-card { transition: box-shadow 0.2s, transform 0.2s; }
+    .metric-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important; transform: translateY(-2px); }
+    .metric-icon-wrap {
+        width: 48px; height: 48px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+    }
+</style>
 
 @code {
-    [Parameter] public string Title { get; set; } = string.Empty;
-    [Parameter] public string Value { get; set; } = string.Empty;
-    [Parameter] public string Icon { get; set; } = ""; // e.g., "truck", "box"
-    [Parameter] public string Highlight { get; set; } = ""; // e.g., "danger", "success"
+    [Parameter] public string Title     { get; set; } = string.Empty;
+    [Parameter] public string Value     { get; set; } = string.Empty;
+    [Parameter] public string Icon      { get; set; } = "";
+    [Parameter] public string Highlight { get; set; } = "";
 
     private string HighlightClass => Highlight switch
     {
-        "danger" => "border-red-200 bg-red-50",
-        "success" => "border-green-200 bg-green-50",
-        "warning" => "border-yellow-200 bg-yellow-50",
-        _ => ""
+        "danger"  => "metric-danger",
+        "success" => "metric-success",
+        "warning" => "metric-warning",
+        _         => ""
+    };
+
+    private string IconBgClass => Highlight switch
+    {
+        "danger"  => "icon-bg-danger",
+        "success" => "icon-bg-success",
+        "warning" => "icon-bg-warning",
+        _         => "icon-bg-default"
+    };
+
+    private string IconColor => Highlight switch
+    {
+        "danger"  => "#dc2626",
+        "success" => "#16a34a",
+        "warning" => "#d97706",
+        _         => "#ea580c"
+    };
+
+    // Map legacy Font Awesome icon names → MudBlazor Material icons
+    private string ResolvedIcon => Icon switch
+    {
+        "box"          => MudIcons.Material.Filled.Inventory2,
+        "truck"        => MudIcons.Material.Filled.LocalShipping,
+        "clock"        => MudIcons.Material.Filled.Schedule,
+        "dollar-sign"  => MudIcons.Material.Filled.AttachMoney,
+        _              => MudIcons.Material.Filled.Circle,
     };
 }

@@ -226,9 +226,14 @@
                 }
 
                 await AuthProvider.SignInAsync(tokenResponse.Token);
+
+                // Yield once so Blazor's auth state cascade propagates fully
+                // before the router tears down this component and mounts the dashboard.
+                await Task.Yield();
+
                 await JS.InvokeVoidAsync("localStorage.setItem", "showLoginSuccess", "true");
                 var target = returnUrl ?? $"/{claimsUser.Role}/dashboard";
-                Navigation.NavigateTo(target, forceLoad: true);
+                Navigation.NavigateTo(target, forceLoad: false);
             }
             else
             {

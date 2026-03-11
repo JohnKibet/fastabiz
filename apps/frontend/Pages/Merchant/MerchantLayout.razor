@@ -3,6 +3,9 @@
 @using System.Text.Json
 @using frontend.Models
 @using frontend.Pages.Shared.Layout
+@using frontend.Services
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 @inject StoreService StoreService
 
 <CascadingValue Value="ActiveStore">
@@ -14,36 +17,28 @@
 </CascadingValue>
 
 @code {
-    private ActiveStoreContext ActiveStore = new();
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private ActiveStoreContext   ActiveStore   = new();
     private ActiveProductContext ActiveProduct = new();
-    private List<ActiveStoreContext> stores = new();
+
     protected override async Task OnInitializedAsync()
     {
+        if (AuthenticationStateTask == null) return;
+
+        var authState = await AuthenticationStateTask;
+        if (authState.User.Identity?.IsAuthenticated != true) return;
+
         var result = await StoreService.GetStoresByOwner();
-
-        @* stores = result.Success && result.Data != null
-        ? result.Data.Select(s => new ActiveStoreContext
-        {
-            StoreId = s.StoreId,
-            StoreName = s.StoreName
-        }).ToList()
-        : new();
-
-        ActiveStore = new ActiveStoreContext(); *@
 
         if (result.Success && result.Data?.Any() == true)
         {
-            // Decide which store becomes active
             var store = result.Data[0];
             ActiveStore = new ActiveStoreContext
             {
-                StoreId = store.StoreId,
+                StoreId   = store.StoreId,
                 StoreName = store.StoreName
             };
-        }
-        else
-        {
-            stores = new();
         }
     }
 }

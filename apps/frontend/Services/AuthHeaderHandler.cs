@@ -1,28 +1,27 @@
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
+// using System.Net.Http;
+// using System.Net.Http.Headers;
+// using System.Threading;
+// using System.Threading.Tasks;
 
-namespace frontend.Services;
+// namespace frontend.Services;
 
-public class AuthHeaderHandler : DelegatingHandler
-{
-    private readonly UserSessionService _session;
-    public AuthHeaderHandler(UserSessionService session)
-    {
-        _session = session;
-    }
+// public class AuthHeaderHandler : DelegatingHandler
+// {
+//     private readonly UserSessionService _session;
+//     public AuthHeaderHandler(UserSessionService session)
+//     {
+//         _session = session;
+//     }
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        var token = await _session.GetTokenAsync();
+//     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+//     {
+//         var token = await _session.GetTokenAsync();
 
-        if (!string.IsNullOrWhiteSpace(token))
-        {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        }
+//         if (!string.IsNullOrWhiteSpace(token))
+//         {
+//             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+//         }
 
-        return await base.SendAsync(request, cancellationToken);
-    }
-}
-
+//         return await base.SendAsync(request, cancellationToken);
+//     }
+// }

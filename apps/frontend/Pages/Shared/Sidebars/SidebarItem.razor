@@ -1,42 +1,106 @@
 @using frontend.Models
-@using frontend.Pages.Shared.Components.Icons
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @inject NavigationManager Nav
 
-<li class="relative group">
-    <NavLink href="@Item.Link" Match="NavLinkMatch.All"
-            class="@($"""flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors duration-150 {(IsActive ? "bg-stoneblue-light text-stoneblue font-semibold border-l-4 border-stoneblue" : "text-gray-700 hover:bg-stoneblue-hover hover:text-stoneblue")} """)"
-            title="@Item.Title">
+<li class="relative group" style="list-style:none;">
+    <MudNavLink Href="@Item.Link"
+                Match="NavLinkMatch.All"
+                Class="@($"sidebar-nav-item {(IsActive ? "sidebar-nav-active" : "")}")"
+                Icon="@ResolvedIcon">
 
-        <div class="flex items-center gap-3">
-            <LucideIcon Name="@Item.Icon" Size="5" />
-
-            @if (!IsCollapsed)
-            {
-                <span class="truncate">@Item.Title</span>
-            }
-        </div>
-
-        @if (!IsCollapsed && Item.BadgeCount.HasValue)
+        @if (!IsCollapsed)
         {
-            <span class="bg-orange-500 text-white text-xs font-semibold rounded-full px-2 py-0.5 ml-2">
-                @Item.BadgeCount
-            </span>
+            <div class="d-flex align-center justify-space-between" style="width:100%;">
+                <span style="font-size:0.8rem; font-weight:@(IsActive ? "700" : "500");">@Item.Title</span>
+                @if (Item.BadgeCount.HasValue)
+                {
+                    <MudChip T="string" Size="Size.Small" Color="Color.Warning" Variant="MudVariant.Filled"
+                             Style="height:18px; font-size:0.65rem; font-weight:700; padding:0 6px; min-width:unset;">
+                        @Item.BadgeCount
+                    </MudChip>
+                }
+            </div>
         }
-    </NavLink>
+    </MudNavLink>
 
+    <!-- Tooltip when collapsed -->
     @if (IsCollapsed)
     {
-        <div class="absolute left-full top-1/2 -translate-y-1/2 ml-2 opacity-0 group-hover:opacity-100
-                    bg-gray-900 text-white text-xs px-2 py-1 rounded-md whitespace-nowrap shadow-lg transition-opacity duration-150 pointer-events-none">
-            @Item.Title
-        </div>
+        <div class="sidebar-tooltip">@Item.Title</div>
     }
 </li>
 
+<style>
+    .sidebar-nav-item {
+        border-radius: 8px !important;
+        margin: 1px 0 !important;
+        padding: 7px 10px !important;
+        color: #374151 !important;
+        transition: background 0.15s, color 0.15s !important;
+        font-size: 0.8rem !important;
+    }
+    .sidebar-nav-item:hover {
+        background: #f0fdf4 !important;
+        color: #16a34a !important;
+    }
+    .sidebar-nav-active {
+        background: #dcfce7 !important;
+        color: #16a34a !important;
+        border-left: 3px solid #16a34a !important;
+        font-weight: 700 !important;
+    }
+    /* Tooltip */
+    .group { position: relative; }
+    .sidebar-tooltip {
+        position: absolute;
+        left: calc(100% + 8px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: #111827;
+        color: white;
+        font-size: 0.75rem;
+        padding: 4px 10px;
+        border-radius: 6px;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s;
+        z-index: 100;
+    }
+    .group:hover .sidebar-tooltip { opacity: 1; }
+</style>
+
 @code {
-    [Parameter] public bool HighlightSectionTitle { get; set; } = false;
-    [Parameter] public SidebarMenuItem Item { get; set; } = default!;
-    [Parameter] public bool IsCollapsed { get; set; }
+    [Parameter] public SidebarMenuItem Item               { get; set; } = default!;
+    [Parameter] public bool            IsCollapsed        { get; set; }
+    [Parameter] public bool            HighlightSectionTitle { get; set; } = false;
+
+    // Map legacy string icon names → MudBlazor Material icons
+    private string ResolvedIcon => Item.Icon switch
+    {
+        "house"           => Icons.Material.Filled.Home,
+        "file-stack"      => Icons.Material.Filled.FileCopy,
+        "truck"           => Icons.Material.Filled.LocalShipping,
+        "users"           => Icons.Material.Filled.Group,
+        "user-plus"       => Icons.Material.Filled.PersonAdd,
+        "warehouse"       => Icons.Material.Filled.Warehouse,
+        "create-store"    => Icons.Material.Filled.AddBusiness,
+        "map"             => Icons.Material.Filled.Map,
+        "layers-plus"     => Icons.Material.Filled.LibraryAdd,
+        "wrench"          => Icons.Material.Filled.Build,
+        "layers"          => Icons.Material.Filled.Layers,
+        "chart-up"        => Icons.Material.Filled.TrendingUp,
+        "package"         => Icons.Material.Filled.Inventory,
+        "layout-panel-top"=> Icons.Material.Filled.Dashboard,
+        "package-check"   => Icons.Material.Filled.FactCheck,
+        "thumbs-up"       => Icons.Material.Filled.ThumbUp,
+        "credit-card"     => Icons.Material.Filled.CreditCard,
+        "cart"            => Icons.Material.Filled.ShoppingCart,
+        "dashboard"       => Icons.Material.Filled.Dashboard,
+        _                 => Icons.Material.Filled.Circle,
+    };
 
     private bool IsActive =>
         Nav.Uri.TrimEnd('/').EndsWith(Item.Link.TrimEnd('/'), StringComparison.OrdinalIgnoreCase)

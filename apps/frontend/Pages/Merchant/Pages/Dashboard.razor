@@ -4,86 +4,190 @@
 @inject IJSRuntime JS
 @inject ToastService ToastService
 @attribute [Authorize(Roles = "merchant")]
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 
-<!-- Metric Cards -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <MetricCard Title="Active Orders" Value="@activeOrders.ToString()" Icon="box" />
-    <MetricCard Title="Deliveries This Week" Value="@deliveriesThisWeek.ToString()" Icon="truck" />
-    <MetricCard Title="Delayed Shipments" Value="@delayedShipments.ToString()" Icon="clock" Highlight="danger" />
-    <MetricCard Title="Revenue This Week" Value="@revenueThisWeek.ToString("C")" Icon="dollar-sign" />
+<MudThemeProvider Theme="_theme" />
+
+<!-- ── Page header ── -->
+<div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-3">
+    <div>
+        <MudText Typo="Typo.h5" Style="font-weight:800; color:#111827;">Merchant Dashboard</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">Welcome back! Here's what's happening today.</MudText>
+    </div>
+    <MudChip T="string" Icon="@Icons.Material.Filled.Circle" Color="Color.Success"
+             Variant="MudVariant.Filled" Size="Size.Small" Label="true"
+             Style="font-weight:600;">Live</MudChip>
 </div>
 
-<!-- Trends & Live Map -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    <!-- Trends Chart -->
-    <DashboardPanel Title="Order Trends (Last 7 Days)">
-        <div class="h-64 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-            [Chart Component Placeholder]
-        </div>
-    </DashboardPanel>
+<!-- ── Metric Cards ── -->
+<MudGrid Spacing="4" Class="mb-6">
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Active Orders"        Value="@activeOrders.ToString()"         Icon="box" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Deliveries This Week" Value="@deliveriesThisWeek.ToString()"   Icon="truck" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Delayed Shipments"    Value="@delayedShipments.ToString()"     Icon="clock"        Highlight="danger" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Revenue This Week"    Value="@revenueThisWeek.ToString("C")"   Icon="dollar-sign"  Highlight="success" />
+    </MudItem>
+</MudGrid>
 
-    <!-- Live Map -->
-    <DashboardPanel Title="Live Driver Locations" Class="lg:col-span-2">
-        <div style="height: 16rem; width: 100%; border-radius: 0.5rem; overflow: hidden;">
-            <LiveMap />
-        </div>
-    </DashboardPanel>
-</div>
+<!-- ── Trends & Live Map ── -->
+<MudGrid Spacing="4" Class="mb-6">
+    <!-- Trends chart -->
+    <MudItem xs="12" lg="4">
+        <DashboardPanel Title="Order Trends (Last 7 Days)" Icon="@Icons.Material.Filled.TrendingUp">
+            <MudPaper Elevation="0" Class="d-flex align-center justify-center rounded-lg"
+                      Style="height:260px; background:#f9fafb; border:2px dashed #e5e7eb;">
+                <div class="d-flex flex-column align-center gap-2">
+                    <MudIcon Icon="@Icons.Material.Filled.BarChart" Style="font-size:3rem; color:#d1d5db;" />
+                    <MudText Typo="Typo.body2" Style="color:#9ca3af;">Chart component placeholder</MudText>
+                </div>
+            </MudPaper>
+        </DashboardPanel>
+    </MudItem>
 
-<!-- Notifications & Recent Activity -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Live map -->
+    <MudItem xs="12" lg="8">
+        <DashboardPanel Title="Live Driver Locations" Icon="@Icons.Material.Filled.Map">
+            <div style="height:260px; width:100%; border-radius:10px; overflow:hidden;">
+                <LiveMap />
+            </div>
+        </DashboardPanel>
+    </MudItem>
+</MudGrid>
+
+<!-- ── Notifications & Recent Activity ── -->
+<MudGrid Spacing="4" Class="mb-6">
     <!-- Notifications -->
-    <DashboardPanel Title="Notifications">
-        <ul class="space-y-2 text-sm max-h-64 overflow-y-auto bg-white">
+    <MudItem xs="12" lg="4">
+        <DashboardPanel Title="Notifications" Icon="@Icons.Material.Filled.NotificationsActive">
             @if (notifications.Any())
             {
-                @foreach (var note in notifications)
-                {
-                    <li class="flex gap-2 items-start">
-                        <i class="fas fa-info-circle text-blue-500 mt-1"></i>
-                        <div>
-                            <p>@note</p>
-                            <span class="text-xs text-gray-400">Just now</span>
-                        </div>
-                    </li>
-                }
+                <MudList T="string" Dense="true" Style="max-height:240px; overflow-y:auto; padding:0;">
+                    @foreach (var note in notifications)
+                    {
+                        <MudListItem>
+                            <div class="d-flex align-start gap-3">
+                                <MudIcon Icon="@Icons.Material.Filled.Info"
+                                         Style="color:#3b82f6; font-size:1rem; margin-top:2px; flex-shrink:0;" />
+                                <div>
+                                    <MudText Typo="Typo.body2" Style="color:#374151;">@note</MudText>
+                                    <MudText Typo="Typo.caption" Class="mud-text-secondary">Just now</MudText>
+                                </div>
+                            </div>
+                        </MudListItem>
+                        <MudDivider />
+                    }
+                </MudList>
             }
             else
             {
-                <li class="text-gray-500">No notifications available.</li>
+                <MudText Typo="Typo.body2" Class="mud-text-secondary">No notifications available.</MudText>
             }
-        </ul>
-    </DashboardPanel>
+        </DashboardPanel>
+    </MudItem>
 
     <!-- Recent Activity -->
-    <DashboardPanel Title="Recent Activity" Class="lg:col-span-2">
-        <ul class="space-y-3 text-sm text-gray-700">
-            <li>📦 Order #1832 delivered by Sarah – <span class="text-gray-500">10 mins ago</span></li>
-            <li>⚠️ Shipment #774 delayed – <span class="text-gray-500">2 hours ago</span></li>
-            <li>🚚 New driver registered: Alex – <span class="text-gray-500">Yesterday</span></li>
-        </ul>
-    </DashboardPanel>
-</div>
+    <MudItem xs="12" lg="8">
+        <DashboardPanel Title="Recent Activity" Icon="@Icons.Material.Filled.History">
+            <MudList T="string" Dense="true" Style="padding:0;">
+                @foreach (var item in _recentActivity)
+                {
+                    <MudListItem>
+                        <div class="d-flex align-center justify-space-between">
+                            <div class="d-flex align-center gap-3">
+                                <MudAvatar Style="@($"background:{item.AvatarBg}; color:white; width:36px; height:36px; font-size:1rem;")">
+                                    <MudIcon Icon="@item.Icon" Style="font-size:1rem;" />
+                                </MudAvatar>
+                                <MudText Typo="Typo.body2" Style="color:#374151;">@item.Text</MudText>
+                            </div>
+                            <MudText Typo="Typo.caption" Class="mud-text-secondary" Style="white-space:nowrap;">
+                                @item.Time
+                            </MudText>
+                        </div>
+                    </MudListItem>
+                    <MudDivider />
+                }
+            </MudList>
+        </DashboardPanel>
+    </MudItem>
+</MudGrid>
 
-<!-- Quick Actions -->
-<DashboardPanel Title="Quick Actions">
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <ActionCard Title="Create Order" Icon="plus" OnClick="CreateOrder" />
-        <ActionCard Title="Assign Driver" Icon="user-check" OnClick="AssignDriver" />
-        <ActionCard Title="Generate Invoice" Icon="file-invoice" OnClick="GenerateInvoice" />
-        <ActionCard Title="New Product" Icon="boxes" OnClick="CreateProduct" />
-    </div>
+<!-- ── Quick Actions ── -->
+<DashboardPanel Title="Quick Actions" Icon="@Icons.Material.Filled.Bolt">
+    <MudGrid Spacing="3">
+        <MudItem xs="6" sm="3">
+            <MudButton OnClick="CreateOrder" Variant="MudVariant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.AddBox" FullWidth="true"
+                       Style="border-radius:10px; font-weight:700; padding:14px 8px; flex-direction:column; height:80px;">
+                Create Order
+            </MudButton>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudButton OnClick="AssignDriver" Variant="MudVariant.Outlined" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.PersonAdd" FullWidth="true"
+                       Style="border-radius:10px; font-weight:700; padding:14px 8px; height:80px;">
+                Assign Driver
+            </MudButton>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudButton OnClick="GenerateInvoice" Variant="MudVariant.Outlined" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Receipt" FullWidth="true"
+                       Style="border-radius:10px; font-weight:700; padding:14px 8px; height:80px;">
+                Generate Invoice
+            </MudButton>
+        </MudItem>
+        <MudItem xs="6" sm="3">
+            <MudButton OnClick="CreateProduct" Variant="MudVariant.Outlined" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Inventory" FullWidth="true"
+                       Style="border-radius:10px; font-weight:700; padding:14px 8px; height:80px;">
+                New Product
+            </MudButton>
+        </MudItem>
+    </MudGrid>
 </DashboardPanel>
 
 @code {
-    private int activeOrders = 12;
+    private int activeOrders       = 12;
     private int deliveriesThisWeek = 34;
-    private int delayedShipments = 3;
+    private int delayedShipments   = 3;
     private decimal revenueThisWeek = 15700.50m;
-    private List<string> notifications = new() { "Driver Mike marked delivery as delayed", "Low stock in Warehouse A" };
+    private List<string> notifications = new()
+    {
+        "Driver Mike marked delivery as delayed",
+        "Low stock in Warehouse A"
+    };
 
-    private void CreateOrder() => Navigation.NavigateTo("/merchant/createorder");
-    private void AssignDriver() => Console.WriteLine("TODO: Assign driver modal");
-    private void GenerateInvoice() => Console.WriteLine("TODO: Invoice generation logic");
-    private void CreateProduct() => Navigation.NavigateTo("/merchant/products/create");
+    private MudTheme _theme = new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary             = "#16a34a",
+            PrimaryContrastText = "#ffffff",
+            Secondary           = "#ea580c",
+            Background          = "#f3f4f6",
+            Surface             = "#ffffff",
+            TextPrimary         = "#111827",
+            TextSecondary       = "#6b7280",
+        }
+    };
+
+    private record ActivityItem(string Icon, string AvatarBg, string Text, string Time);
+
+    private readonly ActivityItem[] _recentActivity =
+    {
+        new(Icons.Material.Filled.LocalShipping, "#16a34a", "Order #1832 delivered by Sarah",     "10 mins ago"),
+        new(Icons.Material.Filled.Warning,       "#dc2626", "Shipment #774 delayed",               "2 hours ago"),
+        new(Icons.Material.Filled.PersonAdd,     "#2563eb", "New driver registered: Alex",         "Yesterday"),
+    };
+
+    private void CreateOrder()      => Navigation.NavigateTo("/merchant/createorder");
+    private void AssignDriver()     => ToastService.ShowToast("Coming soon", "Assign driver modal", ToastService.ToastLevel.Info);
+    private void GenerateInvoice()  => ToastService.ShowToast("Coming soon", "Invoice generation", ToastService.ToastLevel.Info);
+    private void CreateProduct()    => Navigation.NavigateTo("/merchant/products/create");
 }
