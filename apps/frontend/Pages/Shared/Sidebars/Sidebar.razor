@@ -5,6 +5,19 @@
 @inject NavigationManager Navigation
 @implements IDisposable
 
+@*
+    NOTE: No AuthenticationStateProvider injection needed here.
+    Role is received as a CascadingParameter from AuthorizedLayout,
+    which already resolved it from the auth state. Reading it again
+    here would be redundant and could race.
+
+    Role is read in OnParametersSet — NOT OnInitializedAsync.
+    CascadingParameters are not guaranteed to be populated when
+    OnInitializedAsync runs on the first render pass. OnParametersSet
+    is called after every parameter update, including the first one,
+    so UserRole is always available when we read it there.
+*@
+
 <MudDrawer @bind-Open="_open"
            Variant="DrawerVariant.Mini"
            MiniWidth="64px"
@@ -28,30 +41,30 @@
 
     <!-- Nav -->
     <MudNavMenu Style="padding:8px 4px; flex:1; overflow-y:auto;">
-        @if (Role == "merchant")
+        @if (_role == "merchant")
         {
-            <SidebarSection Title="Dashboard"   Icon="@Icons.Material.Filled.Dashboard"        SectionKey="MerchantDashboard"   IsCollapsed="!_open" Items="MerchantDashboard"   IsOpen="@IsSectionOpen("MerchantDashboard")"   OnToggle="ToggleSection" />
-            <SidebarSection Title="Operations"  Icon="@Icons.Material.Filled.SwapHoriz"        SectionKey="MerchantOperations"  IsCollapsed="!_open" Items="MerchantOperations"  IsOpen="@IsSectionOpen("MerchantOperations")"  OnToggle="ToggleSection" />
-            <SidebarSection Title="Stores"      Icon="@Icons.Material.Filled.Warehouse"        SectionKey="MerchantStores"      IsCollapsed="!_open" Items="MerchantStores"      IsOpen="@IsSectionOpen("MerchantStores")"      OnToggle="ToggleSection" />
-            <SidebarSection Title="Products"    Icon="@Icons.Material.Filled.Inventory2"       SectionKey="MerchantProducts"    IsCollapsed="!_open" Items="MerchantProducts"    IsOpen="@IsSectionOpen("MerchantProducts")"    OnToggle="ToggleSection" />
-            <SidebarSection Title="Reports"     Icon="@Icons.Material.Filled.BarChart"         SectionKey="MerchantReports"     IsCollapsed="!_open" Items="MerchantReports"     IsOpen="@IsSectionOpen("MerchantReports")"     OnToggle="ToggleSection" />
-            <SidebarSection Title="Users"       Icon="@Icons.Material.Filled.Group"            SectionKey="MerchantUsers"       IsCollapsed="!_open" Items="MerchantUsers"       IsOpen="@IsSectionOpen("MerchantUsers")"       OnToggle="ToggleSection" />
+            <SidebarSection Title="Dashboard"         Icon="@Icons.Material.Filled.Dashboard"            SectionKey="MerchantDashboard"  IsCollapsed="!_open" Items="MerchantDashboard"  IsOpen="@IsSectionOpen("MerchantDashboard")"  OnToggle="ToggleSection" />
+            <SidebarSection Title="Operations"        Icon="@Icons.Material.Filled.SwapHoriz"            SectionKey="MerchantOperations" IsCollapsed="!_open" Items="MerchantOperations" IsOpen="@IsSectionOpen("MerchantOperations")" OnToggle="ToggleSection" />
+            <SidebarSection Title="Stores"            Icon="@Icons.Material.Filled.Warehouse"            SectionKey="MerchantStores"     IsCollapsed="!_open" Items="MerchantStores"     IsOpen="@IsSectionOpen("MerchantStores")"     OnToggle="ToggleSection" />
+            <SidebarSection Title="Products"          Icon="@Icons.Material.Filled.Inventory2"           SectionKey="MerchantProducts"   IsCollapsed="!_open" Items="MerchantProducts"   IsOpen="@IsSectionOpen("MerchantProducts")"   OnToggle="ToggleSection" />
+            <SidebarSection Title="Reports"           Icon="@Icons.Material.Filled.BarChart"             SectionKey="MerchantReports"    IsCollapsed="!_open" Items="MerchantReports"    IsOpen="@IsSectionOpen("MerchantReports")"    OnToggle="ToggleSection" />
+            <SidebarSection Title="Users"             Icon="@Icons.Material.Filled.Group"                SectionKey="MerchantUsers"      IsCollapsed="!_open" Items="MerchantUsers"      IsOpen="@IsSectionOpen("MerchantUsers")"      OnToggle="ToggleSection" />
         }
-        else if (Role == "driver")
+        else if (_role == "driver")
         {
-            <SidebarSection Title="Dashboard"        Icon="@Icons.Material.Filled.Dashboard"        SectionKey="DriverDashboard"   IsCollapsed="!_open" Items="DriverDashboardItems"  IsOpen="@IsSectionOpen("DriverDashboard")"   OnToggle="ToggleSection" />
-            <SidebarSection Title="Deliveries"       Icon="@Icons.Material.Filled.LocalShipping"    SectionKey="DriverDeliveries"  IsCollapsed="!_open" Items="DriverDeliveriesItems" IsOpen="@IsSectionOpen("DriverDeliveries")"  OnToggle="ToggleSection" />
-            <SidebarSection Title="Navigation"       Icon="@Icons.Material.Filled.Route"            SectionKey="DriverRoute"       IsCollapsed="!_open" Items="DriverRouteItems"      IsOpen="@IsSectionOpen("DriverRoute")"       OnToggle="ToggleSection" />
-            <SidebarSection Title="Proof of Delivery" Icon="@Icons.Material.Filled.FactCheck"       SectionKey="DriverProof"       IsCollapsed="!_open" Items="DriverProofItems"      IsOpen="@IsSectionOpen("DriverProof")"       OnToggle="ToggleSection" />
+            <SidebarSection Title="Dashboard"         Icon="@Icons.Material.Filled.Dashboard"            SectionKey="DriverDashboard"  IsCollapsed="!_open" Items="DriverDashboardItems"  IsOpen="@IsSectionOpen("DriverDashboard")"  OnToggle="ToggleSection" />
+            <SidebarSection Title="Deliveries"        Icon="@Icons.Material.Filled.LocalShipping"        SectionKey="DriverDeliveries" IsCollapsed="!_open" Items="DriverDeliveriesItems" IsOpen="@IsSectionOpen("DriverDeliveries")" OnToggle="ToggleSection" />
+            <SidebarSection Title="Navigation"        Icon="@Icons.Material.Filled.Route"                SectionKey="DriverRoute"      IsCollapsed="!_open" Items="DriverRouteItems"      IsOpen="@IsSectionOpen("DriverRoute")"      OnToggle="ToggleSection" />
+            <SidebarSection Title="Proof of Delivery" Icon="@Icons.Material.Filled.FactCheck"            SectionKey="DriverProof"      IsCollapsed="!_open" Items="DriverProofItems"      IsOpen="@IsSectionOpen("DriverProof")"      OnToggle="ToggleSection" />
         }
-        else if (Role == "customer")
+        else if (_role == "customer")
         {
-            <SidebarSection Title="Dashboard"    Icon="@Icons.Material.Filled.Dashboard"        SectionKey="CustomerMenu"         IsCollapsed="!_open" Items="CustomerDashboard"   IsOpen="@IsSectionOpen("CustomerMenu")"         OnToggle="ToggleSection" />
-            <SidebarSection Title="Orders"       Icon="@Icons.Material.Filled.ListAlt"          SectionKey="CustomerOrders"       IsCollapsed="!_open" Items="CustomerOrders"      IsOpen="@IsSectionOpen("CustomerOrders")"       OnToggle="ToggleSection" />
-            <SidebarSection Title="Checkout"     Icon="@Icons.Material.Filled.ShoppingCartCheckout" SectionKey="CustomerCheckout" IsCollapsed="!_open" Items="CustomerCheckout"    IsOpen="@IsSectionOpen("CustomerCheckout")"     OnToggle="ToggleSection" />
-            <SidebarSection Title="Payment"      Icon="@Icons.Material.Filled.CreditCard"       SectionKey="CustomerPayment"      IsCollapsed="!_open" Items="CustomerPayment"     IsOpen="@IsSectionOpen("CustomerPayment")"      OnToggle="ToggleSection" />
-            <SidebarSection Title="Feedback"     Icon="@Icons.Material.Filled.ThumbUp"          SectionKey="CustomerFeedback"     IsCollapsed="!_open" Items="CustomerFeedback"    IsOpen="@IsSectionOpen("CustomerFeedback")"     OnToggle="ToggleSection" />
-            <SidebarSection Title="Track Order"  Icon="@Icons.Material.Filled.LocationOn"       SectionKey="CustomerTrackOrder"   IsCollapsed="!_open" Items="CustomerTrackOrder"  IsOpen="@IsSectionOpen("CustomerTrackOrder")"   OnToggle="ToggleSection" />
+            <SidebarSection Title="Dashboard"   Icon="@Icons.Material.Filled.Dashboard"               SectionKey="CustomerMenu"        IsCollapsed="!_open" Items="CustomerDashboard"  IsOpen="@IsSectionOpen("CustomerMenu")"        OnToggle="ToggleSection" />
+            <SidebarSection Title="Orders"      Icon="@Icons.Material.Filled.ListAlt"                 SectionKey="CustomerOrders"      IsCollapsed="!_open" Items="CustomerOrders"     IsOpen="@IsSectionOpen("CustomerOrders")"      OnToggle="ToggleSection" />
+            <SidebarSection Title="Checkout"    Icon="@Icons.Material.Filled.ShoppingCartCheckout"    SectionKey="CustomerCheckout"    IsCollapsed="!_open" Items="CustomerCheckout"   IsOpen="@IsSectionOpen("CustomerCheckout")"    OnToggle="ToggleSection" />
+            <SidebarSection Title="Payment"     Icon="@Icons.Material.Filled.CreditCard"              SectionKey="CustomerPayment"     IsCollapsed="!_open" Items="CustomerPayment"    IsOpen="@IsSectionOpen("CustomerPayment")"     OnToggle="ToggleSection" />
+            <SidebarSection Title="Feedback"    Icon="@Icons.Material.Filled.ThumbUp"                 SectionKey="CustomerFeedback"    IsCollapsed="!_open" Items="CustomerFeedback"   IsOpen="@IsSectionOpen("CustomerFeedback")"    OnToggle="ToggleSection" />
+            <SidebarSection Title="Track Order" Icon="@Icons.Material.Filled.LocationOn"              SectionKey="CustomerTrackOrder"  IsCollapsed="!_open" Items="CustomerTrackOrder" IsOpen="@IsSectionOpen("CustomerTrackOrder")"  OnToggle="ToggleSection" />
         }
         else
         {
@@ -73,27 +86,39 @@
 </MudDrawer>
 
 @code {
-    [CascadingParameter] public string? UserRole { get; set; }
-    [CascadingParameter] public ActiveProductContext ProductCtx { get; set; } = default!;
+    // Cascaded by AuthorizedLayout — already resolved from auth state
+    [CascadingParameter] public string?               UserRole   { get; set; }
+    [CascadingParameter] public ActiveProductContext? ProductCtx { get; set; }
+
     [Parameter] public EventCallback<bool> OnCollapseChanged { get; set; }
 
-    private bool _open = true;
-    private string? Role;
-    private HashSet<string> openSections = new();
-    private Guid? CurrentProductId;
-    private string? CurrentPath;
-    private string? CurrentMode;
+    private bool   _open = true;
+    private string _role = string.Empty;   // private backing field — never read UserRole directly in markup
+    private HashSet<string> _openSections = new();
+    private Guid?   _currentProductId;
+    private string? _currentPath;
+    private string? _currentMode;
 
     private bool IsManageProductActive =>
-        CurrentProductId.HasValue &&
-        CurrentPath?.StartsWith("/merchant/products/", StringComparison.OrdinalIgnoreCase) == true &&
-        CurrentMode == "edit";
+        _currentProductId.HasValue &&
+        _currentPath?.StartsWith("/merchant/products/", StringComparison.OrdinalIgnoreCase) == true &&
+        _currentMode == "edit";
 
-    protected override async Task OnInitializedAsync()
+    // ── Lifecycle ──────────────────────────────────────────────────────────
+
+    protected override void OnInitialized()
     {
-        Role = UserRole ?? "guest";
+        // Wire up location tracking — no async needed here
         Navigation.LocationChanged += HandleLocationChanged;
         UpdateRouteState();
+    }
+
+    protected override void OnParametersSet()
+    {
+        // CascadingParameters are guaranteed populated here — NOT in OnInitializedAsync.
+        // This also re-runs whenever AuthorizedLayout re-renders and pushes a new UserRole.
+        _role = UserRole ?? string.Empty;
+        Console.WriteLine("role", _role);
     }
 
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -104,56 +129,90 @@
 
     public void Dispose() => Navigation.LocationChanged -= HandleLocationChanged;
 
+    // ── Sidebar toggle ────────────────────────────────────────────────────
+
     private void ToggleSidebar()
     {
         _open = !_open;
-        if (!_open) openSections.Clear();
+        if (!_open) _openSections.Clear();
         OnCollapseChanged.InvokeAsync(!_open);
     }
 
     private void ToggleSection(string key)
     {
-        if (openSections.Contains(key)) openSections.Remove(key);
-        else openSections.Add(key);
+        if (_openSections.Contains(key)) _openSections.Remove(key);
+        else _openSections.Add(key);
         StateHasChanged();
     }
 
-    private bool IsSectionOpen(string key) => openSections.Contains(key);
+    private bool IsSectionOpen(string key) => _openSections.Contains(key);
+
+    // ── Route state ───────────────────────────────────────────────────────
 
     private void UpdateRouteState()
     {
-        var uri = new Uri(Navigation.Uri);
-        CurrentPath = uri.AbsolutePath;
+        var uri      = new Uri(Navigation.Uri);
+        _currentPath = uri.AbsolutePath;
+
         var segments = uri.AbsolutePath.Trim('/').Split('/', StringSplitOptions.RemoveEmptyEntries);
-        if (segments.Length == 3 && segments[0] == "merchant" && segments[1] == "products" && Guid.TryParse(segments[2], out var id))
-            CurrentProductId = id;
-        else
-            CurrentProductId = null;
-        var query = QueryHelpers.ParseQuery(uri.Query);
-        CurrentMode = query.TryGetValue("mode", out var m) ? m.ToString() : null;
+        _currentProductId = segments.Length == 3
+            && segments[0] == "merchant"
+            && segments[1] == "products"
+            && Guid.TryParse(segments[2], out var id)
+            ? id : null;
+
+        var query  = QueryHelpers.ParseQuery(uri.Query);
+        _currentMode = query.TryGetValue("mode", out var m) ? m.ToString() : null;
     }
 
-    #region Menu definitions
-    private List<SidebarMenuItem> MerchantDashboard   => new() { new("Dashboard",       "/merchant/dashboard",                    "house") };
-    private List<SidebarMenuItem> MerchantOperations  => new() { new("Orders",           "/merchant/orders",                       "file-stack"), new("Order Assignments", "/merchant/operations/assignments", "truck") };
-    private List<SidebarMenuItem> MerchantUsers       => new() { new("Users",            "/merchant/users",                        "users"), new("Create User", "/merchant/createuser", "user-plus") };
-    private List<SidebarMenuItem> MerchantStores      => new() { new("Create Store",     "/merchant/stores/create",                "create-store"), new("All Stores", "/merchant/stores", "warehouse"), new("Map", "/merchant/map", "map") };
-    private List<SidebarMenuItem> MerchantProducts    => new()
+    // ── Menu definitions ──────────────────────────────────────────────────
+    #region Menus
+
+    private List<SidebarMenuItem> MerchantDashboard  => new() { new("Dashboard", "/merchant/dashboard", "house") };
+    private List<SidebarMenuItem> MerchantOperations => new()
+    {
+        new("Orders",            "/merchant/orders",                      "file-stack"),
+        new("Order Assignments", "/merchant/operations/assignments",      "truck"),
+    };
+    private List<SidebarMenuItem> MerchantUsers    => new()
+    {
+        new("Users",       "/merchant/users",      "users"),
+        new("Create User", "/merchant/createuser", "user-plus"),
+    };
+    private List<SidebarMenuItem> MerchantStores   => new()
+    {
+        new("Create Store", "/merchant/stores/create", "create-store"),
+        new("All Stores",   "/merchant/stores",        "warehouse"),
+        new("Map",          "/merchant/map",            "map"),
+    };
+    private List<SidebarMenuItem> MerchantProducts => new()
     {
         new("Add Product",    "/merchant/products/create", "layers-plus"),
-        new("Manage Product", ProductCtx.HasValue ? $"/merchant/products/{ProductCtx.ProductId}?mode=edit" : "/merchant/products?intent=manage", "wrench", active: IsManageProductActive),
-        new("All Products",   "/merchant/products",        "layers")
+        new("Manage Product",
+            ProductCtx?.HasValue == true
+                ? $"/merchant/products/{ProductCtx.ProductId}?mode=edit"
+                : "/merchant/products?intent=manage",
+            "wrench",
+            active: IsManageProductActive),
+        new("All Products", "/merchant/products", "layers"),
     };
-    private List<SidebarMenuItem> MerchantReports     => new() { new("Reports",  "/merchant/reports",  "chart-up"), new("Invoices", "/merchant/invoices", "") };
-    private List<SidebarMenuItem> DriverDashboardItems  => new() { new("Overview",         "/driver/dashboard", "layout-panel-top") };
-    private List<SidebarMenuItem> DriverDeliveriesItems => new() { new("My Tasks",         "/driver/deliveries","truck") };
-    private List<SidebarMenuItem> DriverRouteItems      => new() { new("View Map",         "/driver/route",     "map") };
-    private List<SidebarMenuItem> DriverProofItems      => new() { new("Confirm Delivery", "/driver/proof",     "package-check") };
-    private List<SidebarMenuItem> CustomerDashboard     => new() { new("Dashboard",        "/customer/dashboard","dashboard") };
-    private List<SidebarMenuItem> CustomerTrackOrder    => new() { new("Track Order",      "/customer/trackorder","map") };
-    private List<SidebarMenuItem> CustomerOrders        => new() { new("My Orders",        "/customer/myorders", "package") };
-    private List<SidebarMenuItem> CustomerFeedback      => new() { new("Rate Delivery",    "/customer/feedback", "thumbs-up") };
-    private List<SidebarMenuItem> CustomerPayment       => new() { new("Payment",          "/customer/payment",  "credit-card") };
-    private List<SidebarMenuItem> CustomerCheckout      => new() { new("Checkout",         "/customer/checkout", "cart") };
+    private List<SidebarMenuItem> MerchantReports  => new()
+    {
+        new("Reports",  "/merchant/reports",  "chart-up"),
+        new("Invoices", "/merchant/invoices", ""),
+    };
+
+    private List<SidebarMenuItem> DriverDashboardItems  => new() { new("Overview",         "/driver/dashboard",  "layout-panel-top") };
+    private List<SidebarMenuItem> DriverDeliveriesItems => new() { new("My Tasks",          "/driver/deliveries", "truck") };
+    private List<SidebarMenuItem> DriverRouteItems      => new() { new("View Map",          "/driver/route",      "map") };
+    private List<SidebarMenuItem> DriverProofItems      => new() { new("Confirm Delivery",  "/driver/proof",      "package-check") };
+
+    private List<SidebarMenuItem> CustomerDashboard  => new() { new("Dashboard",   "/customer/dashboard",  "dashboard") };
+    private List<SidebarMenuItem> CustomerOrders     => new() { new("My Orders",   "/customer/myorders",   "package") };
+    private List<SidebarMenuItem> CustomerCheckout   => new() { new("Checkout",    "/customer/checkout",   "cart") };
+    private List<SidebarMenuItem> CustomerPayment    => new() { new("Payment",     "/customer/payment",    "credit-card") };
+    private List<SidebarMenuItem> CustomerFeedback   => new() { new("Rate Delivery", "/customer/feedback", "thumbs-up") };
+    private List<SidebarMenuItem> CustomerTrackOrder => new() { new("Track Order", "/customer/trackorder", "map") };
+
     #endregion
 }

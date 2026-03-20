@@ -1,0 +1,55 @@
+@*
+    AppTheme.razor
+    ══════════════════════════════════════════════════════════════════
+    Single source of truth for MudBlazor theming across the entire app.
+
+    Usage — place <AppTheme /> once in each top-level layout:
+        PublicLayout.razor      → <AppTheme />
+        AuthorizedLayout.razor  → <AppTheme />
+
+    Child components and pages do NOT need their own MudThemeProvider.
+    They inherit the theme automatically through the component tree.
+
+    Remove any inline `MudTheme _theme = new MudTheme { ... }` from
+    individual pages — they create isolated theme islands that break
+    colour consistency across the app.
+    ══════════════════════════════════════════════════════════════════
+*@
+
+@using MudBlazor
+
+<MudThemeProvider Theme="_theme" />
+
+@code {
+    private static readonly MudTheme _theme = new MudTheme
+    {
+        PaletteLight = new PaletteLight
+        {
+            // ── Brand ──────────────────────────────────────────────
+            Primary               = "#16a34a",   // green-600
+            PrimaryContrastText   = "#ffffff",
+            Secondary             = "#ea580c",   // orange-600 (dashboard accents)
+            SecondaryContrastText = "#ffffff",
+            Tertiary              = "#2563eb",   // blue-600   (public page CTA)
+            TertiaryContrastText  = "#ffffff",
+
+            // ── Surfaces ───────────────────────────────────────────
+            Background        = "#f3f4f6",   // gray-100  — authorized shell bg
+            Surface           = "#ffffff",
+            AppbarBackground  = "#ffffff",
+            AppbarText        = "#111827",
+            DrawerBackground  = "#ffffff",
+            DrawerText        = "#374151",
+
+            // ── Text ───────────────────────────────────────────────
+            TextPrimary   = "#111827",   // gray-900
+            TextSecondary = "#6b7280",   // gray-500
+
+            // ── Semantic ───────────────────────────────────────────
+            Success = "#16a34a",
+            Warning = "#d97706",
+            Error   = "#dc2626",
+            Info    = "#2563eb",
+        }
+    };
+}

@@ -8,6 +8,23 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @inject StoreService StoreService
 
+@*
+    MerchantLayout sits between LayoutComponentBase and AuthorizedLayout.
+    Its only jobs are:
+      1. Resolve the active store and cascade it down to merchant pages.
+      2. Cascade ActiveProductContext so the sidebar can build the
+         "Manage Product" link dynamically.
+
+    AppTheme, MudSnackbarProvider, MudDialogProvider are all provided by
+    AuthorizedLayout — do not add them here.
+
+    Auth guard: we await AuthenticationStateTask before calling any
+    authenticated API. Without this guard, StoreService.GetStoresByOwner()
+    fires during the auth-resolution window, the request has no Bearer
+    token, the server returns 401, AuthExpiredHandler calls SignOutAsync,
+    and the user is bounced to login before the dashboard ever renders.
+*@
+
 <CascadingValue Value="ActiveStore">
     <CascadingValue Value="ActiveProduct">
         <AuthorizedLayout>
@@ -24,6 +41,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // Guard: confirm auth before hitting any authenticated endpoint.
         if (AuthenticationStateTask == null) return;
 
         var authState = await AuthenticationStateTask;

@@ -17,7 +17,7 @@
 
 <MudThemeProvider Theme="_theme" />
 
-<MudLayout>
+<MudLayout Class="section-full">
     <!-- Top Nav -->
     <MudAppBar Elevation="2" Color="Color.Surface" Fixed="true">
         <MudText Typo="Typo.h5" Class="font-bold cursor-pointer mud-text-primary" Style="font-weight:800; cursor:pointer;"
@@ -27,7 +27,7 @@
     </MudAppBar>
 
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center justify-center" Style="min-height:100vh; padding-top:80px; padding-bottom:40px;">
+        <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center justify-center" Style="min-height:100vh; padding-top:40px; padding-bottom:40px;">
             <MudPaper Elevation="4" Class="pa-8 rounded-xl" Style="width:100%;">
 
                 <MudText Typo="Typo.h5" Align="Align.Center" Class="mb-6" Style="font-weight:700;">
@@ -141,9 +141,9 @@
     </MudMainContent>
 
     <!-- Footer -->
-    <MudAppBar Bottom="true" Fixed="true" Elevation="0" Color="Color.Dark" Dense="true">
+    <MudAppBar Bottom="true" Fixed="false" Elevation="0" Color="Color.Dark" Dense="true">
         <MudText Typo="Typo.caption" Align="Align.Center" Style="width:100%; color:rgba(255,255,255,0.7);">
-            © 2015–2025 FastaBiz Inc. •
+            © 2026 FastaBiz Inc. •
             <MudLink Href="#" Typo="Typo.caption" Style="color:rgba(255,255,255,0.9);">Privacy Policy</MudLink>
         </MudText>
     </MudAppBar>

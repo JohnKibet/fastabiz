@@ -1,30 +1,38 @@
 @inherits LayoutComponentBase
 @namespace frontend.Pages.Customer
 @using frontend.Pages.Shared.Layout
+@using frontend.Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject CartService CartService
 
-<CascadingValue Value="UserName">
-    <AuthorizedLayout>
-        @Body
-    </AuthorizedLayout>
-</CascadingValue>
+@*
+    CustomerLayout sits between LayoutComponentBase and AuthorizedLayout.
+    Its only job is seeding the cart for development/demo purposes and
+    cascading the username if needed by customer-specific child components.
+
+    AppTheme, MudSnackbarProvider, MudDialogProvider are all provided by
+    AuthorizedLayout — do not add them here.
+
+    NOTE: The cart seed block below is development scaffolding.
+    Remove or replace it with real cart-restore logic before going to prod.
+*@
+
+<AuthorizedLayout>
+    @Body
+</AuthorizedLayout>
 
 @code {
     [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
 
-    private string? UserName;
-
     protected override async Task OnInitializedAsync()
     {
-        if (AuthenticationStateTask != null)
-        {
-            var authState = await AuthenticationStateTask;
-            var user = authState.User;
-            UserName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
-        }
+        // Guard: confirm auth before doing anything user-specific
+        if (AuthenticationStateTask == null) return;
+        var authState = await AuthenticationStateTask;
+        if (authState.User.Identity?.IsAuthenticated != true) return;
 
-        // Seed cart if empty
+        // Dev/demo: seed cart if empty
+        // TODO: replace with CartService.RestoreFromServer() or similar
         if (!CartService.Items.Any())
         {
             var appleProduct = new ProductMapper.ProductDto
@@ -47,8 +55,6 @@
             };
 
             await CartService.AddItem(appleProduct, appleVariant, qty: 2);
-
-            Console.WriteLine("Seeded cart with Fresh Apples (small).");
         }
     }
 }
