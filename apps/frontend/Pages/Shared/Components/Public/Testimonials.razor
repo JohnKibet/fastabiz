@@ -1,0 +1,72 @@
+@namespace frontend.Pages.Shared.Components.Public
+@using MudBlazor
+@using MudIcon = MudBlazor.Icons
+@using MudVariant = MudBlazor.Variant
+
+<section id="about" class="section-content" style="background:#f0fdf4;">
+  <MudContainer MaxWidth="MaxWidth.Large" Class="section-inner">
+
+    <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight:800;" Class="mb-10">
+      Why Users Love Us
+    </MudText>
+
+    <MudGrid Justify="Justify.Center" Spacing="5">
+      <MudItem xs="12" md="5">
+        <MudPaper Elevation="3" Class="pa-6 rounded-xl" Style="border-top:4px solid #16a34a; height:100%;">
+          <MudIcon Icon="@Icons.Material.Filled.FormatQuote" Color="Color.Primary" Size="Size.Large" />
+          <MudText Typo="Typo.body1" Class="mt-2 mb-4" Style="font-style:italic; color:#374151; line-height:1.8;">
+            "FastaBiz transformed how I manage farm produce and delivery schedules. It's seamless!"
+          </MudText>
+          <MudDivider Class="mb-3" />
+          <div class="d-flex align-center gap-3">
+            <MudAvatar Color="Color.Primary" Size="Size.Medium">F</MudAvatar>
+            <div>
+              <MudText Typo="Typo.subtitle2" Style="font-weight:700;">Farmer A</MudText>
+              <MudText Typo="Typo.caption" Class="mud-text-secondary">Business Owner</MudText>
+            </div>
+          </div>
+        </MudPaper>
+      </MudItem>
+
+      <MudItem xs="12" md="5">
+        <MudPaper Elevation="3" Class="pa-6 rounded-xl" Style="border-top:4px solid #2563eb; height:100%;">
+          <MudIcon Icon="@Icons.Material.Filled.FormatQuote" Color="Color.Secondary" Size="Size.Large" />
+          <MudText Typo="Typo.body1" Class="mt-2 mb-4" Style="font-style:italic; color:#374151; line-height:1.8;">
+            "It's easy to order, track, and recommend products to friends. Super intuitive!"
+          </MudText>
+          <MudDivider Class="mb-3" />
+          <div class="d-flex align-center gap-3">
+            <MudAvatar Color="Color.Secondary" Size="Size.Medium">C</MudAvatar>
+            <div>
+              <MudText Typo="Typo.subtitle2" Style="font-weight:700;">Customer B</MudText>
+              <MudText Typo="Typo.caption" Class="mud-text-secondary">Regular Shopper</MudText>
+            </div>
+          </div>
+        </MudPaper>
+      </MudItem>
+    </MudGrid>
+
+  </MudContainer>
+
+  <!-- About FastaBiz -->
+  <MudGrid AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="6">
+    <MudItem xs="12" md="4" Class="d-flex justify-center">
+      <MudImage Src="/Images/team-spirit.svg" Alt="About Us" Style="max-width:240px; width:100%;" />
+    </MudItem>
+    <MudItem xs="12" md="6">
+      <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mb-4">About FastaBiz</MudText>
+      <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.9;" Class="mb-6">
+        We help bridge the gap between small businesses and their customers.
+        From smart inventories to real-time logistics, FastaBiz is designed for impact.
+      </MudText>
+      <div class="d-flex gap-3 flex-wrap">
+        <MudChip T="string" Icon="@Icons.Material.Filled.Groups" Color="Color.Primary" Variant="MudVariant.Outlined"
+                 Label="true">Community First</MudChip>
+        <MudChip T="string" Icon="@Icons.Material.Filled.Bolt" Color="Color.Secondary" Variant="MudVariant.Outlined"
+                 Label="true">Fast &amp; Reliable</MudChip>
+        <MudChip T="string" Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Primary" Variant="MudVariant.Outlined"
+                 Label="true">Built for Growth</MudChip>
+      </div>
+    </MudItem>
+  </MudGrid>
+</section>

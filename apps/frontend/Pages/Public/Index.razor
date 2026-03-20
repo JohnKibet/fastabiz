@@ -1,6 +1,6 @@
 @page "/"
 @layout PublicLayout
-@using frontend.Pages.Shared.Components
+@using frontend.Pages.Shared.Components.Public
 @using MudBlazor
 @using MudVariant = MudBlazor.Variant
 @inject NavigationManager Nav
@@ -46,11 +46,14 @@
 
         <!-- Desktop Nav -->
         <div class="d-none d-md-flex align-center gap-4">
-            <MudLink Href="#hero"        Underline="Underline.None" Color="Color.Default" Class="nav-link">Home</MudLink>
-            <MudLink Href="#get-started" Underline="Underline.None" Color="Color.Default" Class="nav-link">Get Started</MudLink>
-            <MudLink Href="#features"    Underline="Underline.None" Color="Color.Default" Class="nav-link">Features</MudLink>
-            <MudLink Href="#discover"    Underline="Underline.None" Color="Color.Default" Class="nav-link">Discover</MudLink>
-            <MudLink Href="#about"       Underline="Underline.None" Color="Color.Default" Class="nav-link">About</MudLink>
+            <MudLink Href="#hero" Underline="Underline.None" Color="Color.Default" Class="nav-link">Home</MudLink>
+            <MudLink Href="#get-started" Underline="Underline.None" Color="Color.Default" Class="nav-link">Get Started
+            </MudLink>
+            <MudLink Href="#features" Underline="Underline.None" Color="Color.Default" Class="nav-link">Features
+            </MudLink>
+            <MudLink Href="#discover" Underline="Underline.None" Color="Color.Default" Class="nav-link">Discover
+            </MudLink>
+            <MudLink Href="#about" Underline="Underline.None" Color="Color.Default" Class="nav-link">About</MudLink>
             <MudButton Href="/storefront" Variant="MudVariant.Filled"
                        Style="background:#ea580c; color:white; font-weight:700; border-radius:8px;" Size="Size.Medium">
                 Shop Now
@@ -58,8 +61,10 @@
             @* null = still loading, don't render yet. false = not authenticated, show buttons. *@
             @if (isAuthenticated == false)
             {
-                <MudButton Href="/auth/login"    Variant="MudVariant.Filled" Color="Color.Primary"   Style="border-radius:8px; font-weight:700;">Login</MudButton>
-                <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Secondary" Style="border-radius:8px; font-weight:700;">Sign Up</MudButton>
+                <MudButton Href="/auth/login" Variant="MudVariant.Filled" Color="Color.Primary"
+                           Style="border-radius:8px; font-weight:700;">Login</MudButton>
+                <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Secondary"
+                           Style="border-radius:8px; font-weight:700;">Sign Up</MudButton>
             }
         </div>
 
@@ -67,10 +72,13 @@
         <div class="d-flex d-md-none align-center gap-2">
             @if (isAuthenticated == false)
             {
-                <MudButton Href="/auth/login"    Variant="MudVariant.Filled" Color="Color.Primary"   Size="Size.Small" Style="border-radius:6px; font-weight:700; min-width:unset;">Login</MudButton>
-                <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Secondary" Size="Size.Small" Style="border-radius:6px; font-weight:700; min-width:unset;">Sign Up</MudButton>
+                <MudButton Href="/auth/login" Variant="MudVariant.Filled" Color="Color.Primary" Size="Size.Small"
+                           Style="border-radius:6px; font-weight:700; min-width:unset;">Login</MudButton>
+                <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Secondary" Size="Size.Small"
+                           Style="border-radius:6px; font-weight:700; min-width:unset;">Sign Up</MudButton>
             }
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Default" OnClick="@(() => _drawerOpen = !_drawerOpen)" />
+            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Default"
+                           OnClick="@(() => _drawerOpen = !_drawerOpen)" />
         </div>
     </MudContainer>
 </MudAppBar>
@@ -81,197 +89,44 @@
         <MudText Typo="Typo.h6" Style="font-weight:800;">FastaBiz</MudText>
     </MudDrawerHeader>
     <MudNavMenu>
-        <MudNavLink Href="#hero"        Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Home</MudNavLink>
-        <MudNavLink Href="#get-started" Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Get Started</MudNavLink>
-        <MudNavLink Href="#features"    Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Features</MudNavLink>
-        <MudNavLink Href="#discover"    Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Discover</MudNavLink>
-        <MudNavLink Href="#about"       Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">About</MudNavLink>
-        <MudNavLink Href="/storefront"  Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Shop Now</MudNavLink>
+        <MudNavLink Href="#hero" Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Home</MudNavLink>
+        <MudNavLink Href="#get-started" Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Get Started
+        </MudNavLink>
+        <MudNavLink Href="#features" Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Features
+        </MudNavLink>
+        <MudNavLink Href="#discover" Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Discover
+        </MudNavLink>
+        <MudNavLink Href="#about" Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">About</MudNavLink>
+        <MudNavLink Href="/storefront" Match="NavLinkMatch.All" OnClick="@(() => _drawerOpen = false)">Shop Now
+        </MudNavLink>
     </MudNavMenu>
 </MudDrawer>
 
 <!-- ===================== MAIN CONTENT ===================== -->
-<MudMainContent Style="padding-top:2px;">
-
-    <!-- ===== HERO ===== -->
-    <section id="hero" class="section-full" style="background:#f0fdf4;">
-        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="section-inner">
-            <MudGrid AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="8">
-                <MudItem xs="12" md="6" Class="d-flex flex-column align-center align-md-start">
-                    <MudImage Src="/Images/business-plan.svg" Alt="FastaBiz" Style="max-width:420px; width:100%;" />
-                    <MudButton Href="#get-started" Variant="MudVariant.Filled" Color="Color.Secondary" Size="Size.Large"
-                               Class="mt-8" Style="border-radius:10px; font-weight:700; font-size:1.05rem; padding:14px 36px;">
-                        Get Started
-                    </MudButton>
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudText Typo="Typo.h3" Style="font-weight:900; line-height:1.15; color:#111827;" Class="mb-5">
-                        Simplify Logistics &amp; Inventory
-                    </MudText>
-                    <MudText Typo="Typo.h6" Style="color:#4b5563; font-weight:400; line-height:1.7;">
-                        FastaBiz helps businesses streamline inventory, deliveries, and customer orders — all in one
-                        platform. Whether you're a farmer, producer, or everyday buyer, we've got you covered.
-                    </MudText>
-                    <MudDivider Class="my-6" Style="max-width:80px; border-color:#16a34a; border-width:3px;" />
-                    <div class="d-flex gap-4 flex-wrap">
-                        <MudChip T="string" Icon="@Icons.Material.Filled.Inventory"     Color="Color.Primary" Variant="MudVariant.Filled" Label="true">Smart Inventory</MudChip>
-                        <MudChip T="string" Icon="@Icons.Material.Filled.LocalShipping" Color="Color.Primary" Variant="MudVariant.Filled" Label="true">Live Deliveries</MudChip>
-                        <MudChip T="string" Icon="@Icons.Material.Filled.ShoppingCart"  Color="Color.Primary" Variant="MudVariant.Filled" Label="true">Easy Orders</MudChip>
-                    </div>
-                </MudItem>
-            </MudGrid>
-        </MudContainer>
-    </section>
-
-    <!-- ===== HOW IT WORKS ===== -->
-    <section id="get-started" class="section-full" style="background:#ffffff;">
-        <MudContainer MaxWidth="MaxWidth.Large" Class="section-inner">
-            <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight:800; color:#111827;" Class="mb-2">
-                How It Works
-            </MudText>
-            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-12 mud-text-secondary">
-                Three simple steps to get you up and running
-            </MudText>
-
-            <!-- Step 1 -->
-            <MudGrid AlignItems="AlignItems.Center" Spacing="6" Class="mb-12">
-                <MudItem xs="12" md="7">
-                    <MudPaper Elevation="0" Class="pa-6 rounded-xl" Style="background:#f0fdf4; border-left:5px solid #16a34a;">
-                        <MudText Typo="Typo.overline" Color="Color.Primary" Style="font-weight:700; letter-spacing:2px;">Step 01</MudText>
-                        <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mt-1 mb-3">Sign Up</MudText>
-                        <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.8;">
-                            Register as a business owner to manage inventory and receive a custom store link,
-                            or join as a customer to explore products.
-                        </MudText>
-                        <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Primary" Class="mt-4"
-                                   Style="border-radius:8px; font-weight:700;">Create Account</MudButton>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" md="5" Class="d-flex justify-center">
-                    <MudImage Src="/Images/sign-up.svg" Alt="Sign Up" Style="max-width:220px; width:100%;" />
-                </MudItem>
-            </MudGrid>
-
-            <!-- Step 2 -->
-            <MudGrid AlignItems="AlignItems.Center" Spacing="6" Class="mb-12">
-                <MudItem xs="12" md="5" Class="d-flex justify-center">
-                    <MudImage Src="/Images/content-structure.svg" Alt="Create & Shop" Style="max-width:220px; width:100%;" />
-                </MudItem>
-                <MudItem xs="12" md="7">
-                    <MudPaper Elevation="0" Class="pa-6 rounded-xl" Style="background:#eff6ff; border-left:5px solid #2563eb;">
-                        <MudText Typo="Typo.overline" Color="Color.Secondary" Style="font-weight:700; letter-spacing:2px;">Step 02</MudText>
-                        <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mt-1 mb-3">Create &amp; Shop</MudText>
-                        <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.8;">
-                            Business owners upload their inventory, while customers use shared links to browse and place orders with ease.
-                        </MudText>
-                    </MudPaper>
-                </MudItem>
-            </MudGrid>
-
-            <!-- Step 3 -->
-            <MudGrid AlignItems="AlignItems.Center" Spacing="6">
-                <MudItem xs="12" md="7">
-                    <MudPaper Elevation="0" Class="pa-6 rounded-xl" Style="background:#fefce8; border-left:5px solid #ca8a04;">
-                        <MudText Typo="Typo.overline" Style="font-weight:700; letter-spacing:2px; color:#ca8a04;">Step 03</MudText>
-                        <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mt-1 mb-3">Manage</MudText>
-                        <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.8;">
-                            Merchants manage deliveries, drivers, and feedback. Customers can track orders, share reviews, and manage their carts.
-                        </MudText>
-                    </MudPaper>
-                </MudItem>
-                <MudItem xs="12" md="5" Class="d-flex justify-center">
-                    <MudImage Src="/Images/done-checking.svg" Alt="Manage" Style="max-width:220px; width:100%;" />
-                </MudItem>
-            </MudGrid>
-        </MudContainer>
-    </section>
-
-    <!-- ===== FEATURES ===== -->
+<MudMainContent Class="mud-main-section">
+    <Hero />
+    <GetStarted />
     <LandingUserFeatures />
-
-    <!-- ===== DISCOVER STORES ===== -->
     <LandingStoreFeatures />
+    <Testimonials />
 
-    <!-- ===== TESTIMONIALS / ABOUT ===== -->
-    <section id="about" class="section-full" style="background:#f0fdf4;">
-        <MudContainer MaxWidth="MaxWidth.Large" Class="section-inner">
-            <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight:800;" Class="mb-10">
-                Why Users Love Us
-            </MudText>
-
-            <MudGrid Justify="Justify.Center" Spacing="5" Class="mb-16">
-                <MudItem xs="12" md="5">
-                    <MudPaper Elevation="3" Class="pa-6 rounded-xl" Style="border-top:4px solid #16a34a; height:100%;">
-                        <MudIcon Icon="@Icons.Material.Filled.FormatQuote" Color="Color.Primary" Size="Size.Large" />
-                        <MudText Typo="Typo.body1" Class="mt-2 mb-4" Style="font-style:italic; color:#374151; line-height:1.8;">
-                            "FastaBiz transformed how I manage farm produce and delivery schedules. It's seamless!"
-                        </MudText>
-                        <MudDivider Class="mb-3" />
-                        <div class="d-flex align-center gap-3">
-                            <MudAvatar Color="Color.Primary" Size="Size.Medium">F</MudAvatar>
-                            <div>
-                                <MudText Typo="Typo.subtitle2" Style="font-weight:700;">Farmer A</MudText>
-                                <MudText Typo="Typo.caption" Class="mud-text-secondary">Business Owner</MudText>
-                            </div>
-                        </div>
-                    </MudPaper>
-                </MudItem>
-
-                <MudItem xs="12" md="5">
-                    <MudPaper Elevation="3" Class="pa-6 rounded-xl" Style="border-top:4px solid #2563eb; height:100%;">
-                        <MudIcon Icon="@Icons.Material.Filled.FormatQuote" Color="Color.Secondary" Size="Size.Large" />
-                        <MudText Typo="Typo.body1" Class="mt-2 mb-4" Style="font-style:italic; color:#374151; line-height:1.8;">
-                            "It's easy to order, track, and recommend products to friends. Super intuitive!"
-                        </MudText>
-                        <MudDivider Class="mb-3" />
-                        <div class="d-flex align-center gap-3">
-                            <MudAvatar Color="Color.Secondary" Size="Size.Medium">C</MudAvatar>
-                            <div>
-                                <MudText Typo="Typo.subtitle2" Style="font-weight:700;">Customer B</MudText>
-                                <MudText Typo="Typo.caption" Class="mud-text-secondary">Regular Shopper</MudText>
-                            </div>
-                        </div>
-                    </MudPaper>
-                </MudItem>
-            </MudGrid>
-
-            <!-- About FastaBiz -->
-            <MudGrid AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="6">
-                <MudItem xs="12" md="4" Class="d-flex justify-center">
-                    <MudImage Src="/Images/team-spirit.svg" Alt="About Us" Style="max-width:240px; width:100%;" />
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mb-4">About FastaBiz</MudText>
-                    <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.9;" Class="mb-6">
-                        We help bridge the gap between small businesses and their customers.
-                        From smart inventories to real-time logistics, FastaBiz is designed for impact.
-                    </MudText>
-                    <div class="d-flex gap-3 flex-wrap">
-                        <MudChip T="string" Icon="@Icons.Material.Filled.Groups"     Color="Color.Primary"   Variant="MudVariant.Outlined" Label="true">Community First</MudChip>
-                        <MudChip T="string" Icon="@Icons.Material.Filled.Bolt"       Color="Color.Secondary" Variant="MudVariant.Outlined" Label="true">Fast &amp; Reliable</MudChip>
-                        <MudChip T="string" Icon="@Icons.Material.Filled.TrendingUp" Color="Color.Primary"   Variant="MudVariant.Outlined" Label="true">Built for Growth</MudChip>
-                    </div>
-                </MudItem>
-            </MudGrid>
-        </MudContainer>
-
-        <!-- Footer -->
-        <footer style="background:#111827; margin-top:60px; padding:32px 16px;">
-            <MudContainer MaxWidth="MaxWidth.ExtraLarge">
-                <div class="d-flex flex-column flex-md-row justify-space-between align-center gap-4">
-                    <MudText Typo="Typo.body2" Style="color:rgba(255,255,255,0.6);">
-                        © 2025 <strong style="color:white;">FastaBiz</strong>. All rights reserved.
-                    </MudText>
-                    <div class="d-flex gap-4">
-                        <MudLink Href="/privacy" Underline="Underline.Hover" Typo="Typo.body2" Style="color:rgba(255,255,255,0.7);">Privacy Policy</MudLink>
-                        <MudLink Href="/terms"   Underline="Underline.Hover" Typo="Typo.body2" Style="color:rgba(255,255,255,0.7);">Terms</MudLink>
-                        <MudLink Href="/contact" Underline="Underline.Hover" Typo="Typo.body2" Style="color:rgba(255,255,255,0.7);">Contact</MudLink>
-                    </div>
+    <footer style="background:#111827; margin-top:60px; padding:32px 16px;">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+            <div class="d-flex flex-column flex-md-row justify-space-between align-center gap-4">
+                <MudText Typo="Typo.body2" Style="color:rgba(255,255,255,0.6);">
+                    © 2025 <strong style="color:white;">FastaBiz</strong>. All rights reserved.
+                </MudText>
+                <div class="d-flex gap-4">
+                    <MudLink Href="/privacy" Underline="Underline.Hover" Typo="Typo.body2"
+                             Style="color:rgba(255,255,255,0.7);">Privacy Policy</MudLink>
+                    <MudLink Href="/terms" Underline="Underline.Hover" Typo="Typo.body2"
+                             Style="color:rgba(255,255,255,0.7);">Terms</MudLink>
+                    <MudLink Href="/contact" Underline="Underline.Hover" Typo="Typo.body2"
+                             Style="color:rgba(255,255,255,0.7);">Contact</MudLink>
                 </div>
-            </MudContainer>
-        </footer>
-    </section>
-
+            </div>
+        </MudContainer>
+    </footer>
 </MudMainContent>
 
 <style>
@@ -300,6 +155,7 @@
         color: #374151 !important;
         transition: color 0.15s;
     }
+
     .nav-link:hover {
         color: #16a34a !important;
     }

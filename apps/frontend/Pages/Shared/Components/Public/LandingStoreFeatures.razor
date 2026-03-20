@@ -1,3 +1,4 @@
+@namespace frontend.Pages.Shared.Components.Public
 @using MudBlazor
 @using MudIcon = MudBlazor.Icons
 @using MudVariant = MudBlazor.Variant
@@ -21,7 +22,8 @@
             @foreach (var store in _stores)
             {
                 <MudItem xs="12" sm="6" md="4">
-                    <MudCard Elevation="2" Class="rounded-xl store-card" Style="height:100%; overflow:hidden; transition: box-shadow 0.2s, transform 0.2s;">
+                    <MudCard Elevation="2" Class="rounded-xl store-card"
+                             Style="height:100%; overflow:hidden; transition: box-shadow 0.2s, transform 0.2s;">
                         <MudCardMedia Image="@store.Image" Height="180" />
                         <MudCardContent>
                             <MudText Typo="Typo.h6" Style="font-weight:700; color:#111827;">@store.Name</MudText>
@@ -31,8 +33,7 @@
                         </MudCardContent>
                         <MudCardActions Style="padding-top:0;">
                             <MudButton Href="@store.Href" Variant="MudVariant.Text" Color="Color.Primary"
-                                       EndIcon="@MudIcon.Material.Filled.ArrowForward"
-                                       Style="font-weight:700;">
+                                       EndIcon="@MudIcon.Material.Filled.ArrowForward"                                       Style="font-weight:700;">
                                 Visit Store
                             </MudButton>
                         </MudCardActions>
@@ -43,10 +44,7 @@
 
         <!-- View All -->
         <div class="d-flex justify-center mt-12">
-            <MudButton Href="/stores"
-                       Variant="MudVariant.Filled"
-                       Color="Color.Secondary"
-                       Size="Size.Large"
+            <MudButton Href="/stores"      Variant="MudVariant.Filled"                       Color="Color.Secondary"                       Size="Size.Large"
                        EndIcon="@MudIcon.Material.Filled.ArrowForward"
                        Style="border-radius:10px; font-weight:700; padding:14px 36px;">
                 View All Stores
@@ -58,7 +56,7 @@
 
 <style>
     .store-card:hover {
-        box-shadow: 0 10px 36px rgba(0,0,0,0.13) !important;
+        box-shadow: 0 10px 36px rgba(0, 0, 0, 0.13) !important;
         transform: translateY(-4px);
     }
 </style>
@@ -68,8 +66,8 @@
 
     private readonly StoreInfo[] _stores =
     {
-        new("Green Valley Farm",  "Fresh farm produce delivered to your door.",      "/Images/store-1.jpg", "/store/green-valley"),
-        new("Urban Eats",         "Homemade meals and healthy snacks.",               "/Images/store-2.jpg", "/store/urban-eats"),
-        new("Bakers Hub",         "Artisan bread, pastries, and custom cakes.",       "/Images/store-3.jpg", "/store/bakers-hub"),
+        new("Green Valley Farm", "Fresh farm produce delivered to your door.", "/Images/store-1.jpg", "/store/green-valley"),
+        new("Urban Eats", "Homemade meals and healthy snacks.", "/Images/store-2.jpg", "/store/urban-eats"),
+        new("Bakers Hub", "Artisan bread, pastries, and custom cakes.", "/Images/store-3.jpg", "/store/bakers-hub"),
     };
 }

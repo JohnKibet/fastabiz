@@ -1,0 +1,74 @@
+@namespace frontend.Pages.Shared.Components.Public
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+
+<section id="get-started" style="background:#ffffff;">
+  <MudContainer MaxWidth="MaxWidth.Large" Class="section-inner">
+
+    <!-- Heading -->
+    <div class="d-flex flex-column align-center">
+      <MudText Typo="Typo.h4" Align="Align.Center" Style="font-weight:800; color:#111827;" Class="mb-2">
+        How It Works
+      </MudText>
+      <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="mb-12 mud-text-secondary">
+        Three simple steps to get you up and running
+      </MudText>
+    </div>
+
+    <!-- Step 1 -->
+    <MudGrid AlignItems="AlignItems.Center" Spacing="6" Class="mb-12">
+      <MudItem xs="12" md="7">
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl" Style="background:#f0fdf4; border-left:5px solid #16a34a;">
+          <MudText Typo="Typo.overline" Color="Color.Primary" Style="font-weight:700; letter-spacing:2px;">Step 01
+          </MudText>
+          <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mt-1 mb-3">Sign Up</MudText>
+          <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.8;">
+            Register as a business owner to manage inventory and receive a custom store link,
+            or join as a customer to explore products.
+          </MudText>
+          <MudButton Href="/auth/register" Variant="MudVariant.Filled" Color="Color.Primary" Class="mt-4"
+                     Style="border-radius:8px; font-weight:700;">Create Account</MudButton>
+        </MudPaper>
+      </MudItem>
+      <MudItem xs="12" md="5" Class="d-flex justify-center">
+        <MudImage Src="/Images/sign-up.svg" Alt="Sign Up" Style="max-width:220px; width:100%;" />
+      </MudItem>
+    </MudGrid>
+
+    <!-- Step 2 -->
+    <MudGrid AlignItems="AlignItems.Center" Spacing="6" Class="mb-12">
+      <MudItem xs="12" md="5" Class="d-flex justify-center">
+        <MudImage Src="/Images/content-structure.svg" Alt="Create & Shop" Style="max-width:220px; width:100%;" />
+      </MudItem>
+      <MudItem xs="12" md="7">
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl" Style="background:#eff6ff; border-left:5px solid #2563eb;">
+          <MudText Typo="Typo.overline" Color="Color.Secondary" Style="font-weight:700; letter-spacing:2px;">Step 02
+          </MudText>
+          <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mt-1 mb-3">Create &amp; Shop</MudText>
+          <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.8;">
+            Business owners upload their inventory, while customers use shared links to browse and place
+            orders with ease.
+          </MudText>
+        </MudPaper>
+      </MudItem>
+    </MudGrid>
+
+    <!-- Step 3 -->
+    <MudGrid AlignItems="AlignItems.Center" Spacing="6">
+      <MudItem xs="12" md="7">
+        <MudPaper Elevation="0" Class="pa-6 rounded-xl" Style="background:#fefce8; border-left:5px solid #ca8a04;">
+          <MudText Typo="Typo.overline" Style="font-weight:700; letter-spacing:2px; color:#ca8a04;">Step
+            03</MudText>
+            <MudText Typo="Typo.h5" Style="font-weight:800;" Class="mt-1 mb-3">Manage</MudText>
+            <MudText Typo="Typo.body1" Style="color:#4b5563; line-height:1.8;">
+              Merchants manage deliveries, drivers, and feedback. Customers can track orders, share
+              reviews, and manage their carts.
+            </MudText>
+          </MudPaper>
+        </MudItem>
+        <MudItem xs="12" md="5" Class="d-flex justify-center">
+          <MudImage Src="/Images/done-checking.svg" Alt="Manage" Style="max-width:220px; width:100%;" />
+        </MudItem>
+      </MudGrid>
+    </MudContainer>
+  </section>

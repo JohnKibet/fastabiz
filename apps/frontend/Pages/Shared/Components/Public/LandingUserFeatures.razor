@@ -1,3 +1,4 @@
+@namespace frontend.Pages.Shared.Components.Public
 @using MudBlazor
 @using MudVariant = MudBlazor.Variant
 
@@ -16,14 +17,12 @@
         <div class="d-flex justify-center mb-10">
             <MudButtonGroup Variant="MudVariant.Outlined" Color="Color.Primary" Size="Size.Medium">
                 <MudButton OnClick='() => Toggle("merchant")'
-                           Variant="@(selected == "merchant" ? MudVariant.Filled : MudVariant.Outlined)"
-                           Color="Color.Primary"
+                           Variant="@(selected == "merchant" ? MudVariant.Filled : MudVariant.Outlined)"                           Color="Color.Primary"
                            Style="border-radius:8px 0 0 8px; font-weight:700; min-width:140px;">
                     For Merchants
                 </MudButton>
                 <MudButton OnClick='() => Toggle("customer")'
-                           Variant="@(selected == "customer" ? MudVariant.Filled : MudVariant.Outlined)"
-                           Color="Color.Primary"
+                           Variant="@(selected == "customer" ? MudVariant.Filled : MudVariant.Outlined)"                           Color="Color.Primary"
                            Style="border-radius:0 8px 8px 0; font-weight:700; min-width:140px;">
                     For Customers
                 </MudButton>
@@ -35,7 +34,8 @@
             @foreach (var card in GetCards())
             {
                 <MudItem xs="12" sm="6" md="4">
-                    <MudPaper Elevation="2" Class="pa-6 rounded-xl feature-card" Style="height:100%; transition: box-shadow 0.2s;">
+                    <MudPaper Elevation="2" Class="pa-6 rounded-xl feature-card"
+                              Style="height:100%; transition: box-shadow 0.2s;">
                         <div class="d-flex flex-column align-center text-center" style="height:100%;">
                             <MudImage Src="@($"/Images/{card.Img}")" Alt="@card.Title"
                                       Style="width:100px; height:100px; object-fit:contain;" Class="mb-4" />
@@ -56,7 +56,7 @@
 
 <style>
     .feature-card:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
         transform: translateY(-3px);
         transition: box-shadow 0.2s, transform 0.2s;
     }
@@ -72,14 +72,18 @@
     private IEnumerable<CardInfo> GetCards() => selected == "merchant"
         ? new[]
         {
-            new CardInfo("Smart Inventory Management",  "Upload products, track stock levels, and get alerts when inventory runs low.",          "data-trend.svg"),
-            new CardInfo("Order & Delivery Tracking",   "Process orders, assign drivers, and monitor delivery progress in real time.",           "delivery-map.svg"),
-            new CardInfo("Business Analytics",          "View reports and understand customer trends and product performance.",                   "analytics-dashboard.svg"),
+            new CardInfo("Smart Inventory Management", "Upload products, track stock levels, and get alerts when inventory runs low.", "data-trend.svg"),
+            new CardInfo("Order & Delivery Tracking", "Process orders, assign drivers, and monitor delivery progress in real time.",
+"delivery-map.svg"),
+            new CardInfo("Business Analytics", "View reports and understand customer trends and product performance.",
+"analytics-dashboard.svg"),
         }
         : new[]
         {
-            new CardInfo("Seamless Ordering",   "Browse stores, place orders easily, and get order confirmations instantly.",           "ecommerce-ui.svg"),
-            new CardInfo("Real-Time Tracking",  "Track your order from the warehouse to your doorstep, live.",                         "location-tracking.svg"),
-            new CardInfo("Customer Support",    "Chat with sellers or drivers and access order history anytime.",                      "support-chat.svg"),
+            new CardInfo("Seamless Ordering", "Browse stores, place orders easily, and get order confirmations instantly.",
+"ecommerce-ui.svg"),
+            new CardInfo("Real-Time Tracking", "Track your order from the warehouse to your doorstep, live.",
+"location-tracking.svg"),
+            new CardInfo("Customer Support", "Chat with sellers or drivers and access order history anytime.", "support-chat.svg"),
         };
 }

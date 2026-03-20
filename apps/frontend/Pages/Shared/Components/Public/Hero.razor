@@ -1,0 +1,36 @@
+@namespace frontend.Pages.Shared.Components.Public
+@using MudBlazor
+@using MudIcon = MudBlazor.Icons
+@using MudVariant = MudBlazor.Variant
+
+<section id="hero" class="section-full" style="background:#f0fdf4;">
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="section-inner">
+            <MudGrid AlignItems="AlignItems.Center" Justify="Justify.Center" Spacing="8">
+                <MudItem xs="12" md="6" Class="d-flex flex-column align-center align-md-start">
+                    <MudImage Src="/Images/business-plan.svg" Alt="FastaBiz" Style="max-width:420px; width:100%;" />
+                    <MudButton Href="#get-started" Variant="MudVariant.Filled" Color="Color.Secondary" Size="Size.Large"
+                               Class="mt-8" Style="border-radius:10px; font-weight:700; font-size:1.05rem; padding:14px 36px;">
+                        Get Started
+                    </MudButton>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudText Typo="Typo.h3" Style="font-weight:900; line-height:1.15; color:#111827;" Class="mb-5">
+                        Simplify Logistics &amp; Inventory
+                    </MudText>
+                    <MudText Typo="Typo.h6" Style="color:#4b5563; font-weight:400; line-height:1.7;">
+                        FastaBiz helps businesses streamline inventory, deliveries, and customer orders — all in one
+                        platform. Whether you're a farmer, producer, or everyday buyer, we've got you covered.
+                    </MudText>
+                    <MudDivider Class="my-6" Style="max-width:80px; border-color:#16a34a; border-width:3px;" />
+                    <div class="d-flex gap-4 flex-wrap">
+                        <MudChip T="string" Icon="@Icons.Material.Filled.Inventory" Color="Color.Primary"
+                                 Variant="MudVariant.Filled" Label="true">Smart Inventory</MudChip>
+                        <MudChip T="string" Icon="@Icons.Material.Filled.LocalShipping" Color="Color.Primary"
+                                 Variant="MudVariant.Filled" Label="true">Live Deliveries</MudChip>
+                        <MudChip T="string" Icon="@Icons.Material.Filled.ShoppingCart" Color="Color.Primary"
+                                 Variant="MudVariant.Filled" Label="true">Easy Orders</MudChip>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </section>
