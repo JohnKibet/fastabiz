@@ -93,6 +93,12 @@ public sealed class CreateOrderRequest
     public Dictionary<string, string>? ExtraData { get; set; }
 }
 
+// backend not yet updated - curr expects map of string ids
+public class CreateOrderResponse
+{
+
+}
+
 public sealed class CreateOrderItemDto
 {
     [Required]
@@ -112,4 +118,10 @@ public sealed class LocationDto
     public string Address { get; set; } = string.Empty;
     public double Lat { get; set; }
     public double Lng { get; set; }
+}
+
+public class UpdateOrderRequest
+{
+    public string Column { get; set; } = string.Empty;
+    public required object Value { get; set; }
 }

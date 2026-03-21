@@ -1,343 +1,317 @@
 @page "/merchant/users"
 @layout MerchantLayout
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 @inject UserService UserService
 @inject ToastService ToastService
+@inject NavigationManager Navigation
 @attribute [Authorize(Roles = "merchant")]
 
-<h2 class="text-2xl font-semibold text-gray-800 mb-6">User Management</h2>
-
-<!-- Top Actions -->
-<div class="flex items-center justify-between mb-4">
-    <div class="flex gap-2">
-        <button class="btn btn-primary" @onclick="OpenAddUser">+ Add User</button>
-        <button class="btn btn-outline" @onclick="ExportUsers">Export CSV</button>
-    </div>
+<!-- ── Page header ── -->
+<div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-3">
     <div>
-        <strong>Total Users:</strong> @users?.Count
+        <MudText Typo="Typo.h5" Style="font-weight:800;">User Management</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">@_users?.Count total user@(_users?.Count == 1 ? "" : "s")</MudText>
+    </div>
+    <div class="d-flex gap-2">
+        <MudButton OnClick="@(() => Navigation.NavigateTo("/merchant/createuser"))"
+                   Variant="MudVariant.Filled" Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.PersonAdd"
+                   Style="border-radius:8px; font-weight:700;">
+            Add User
+        </MudButton>
+        <MudButton OnClick="ExportUsers"
+                   Variant="MudVariant.Outlined" Color="Color.Default"
+                   StartIcon="@Icons.Material.Filled.Download"
+                   Style="border-radius:8px; font-weight:600;">
+            Export CSV
+        </MudButton>
     </div>
 </div>
 
-<!-- Filters & Search -->
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <input 
-        type="text" 
-        class="w-full pl-8 pr-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500" 
-        placeholder="Search users..."
-        @bind="searchTerm" 
-        @bind:event="oninput" 
-    />
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-search absolute text-gray-400"
-    >
-        <path d="m21 21-4.34-4.34" />
-        <circle cx="11" cy="11" r="8" />
-    </svg>
+<!-- ── Filters ── -->
+<MudGrid Spacing="3" Class="mb-6">
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField @bind-Value="_search"
+                      Placeholder="Search by name or email..."
+                      Variant="MudVariant.Outlined"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Margin="Margin.Dense"
+                      FullWidth="true"
+                      Immediate="true" />
+    </MudItem>
+    <MudItem xs="12" sm="3" md="2">
+        <SelectField TValue="string"
+                     TItem="string"
+                     Label="Role"
+                     Options="@_roleOptions"
+                     @bind-Value="_filterRole" />
+    </MudItem>
+    <MudItem xs="12" sm="3" md="2">
+        <SelectField TValue="string"
+                     TItem="string"
+                     Label="Status"
+                     Options="@_statusOptions"
+                     @bind-Value="_filterStatus" />
+    </MudItem>
+</MudGrid>
 
-    <select class="form-control w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700" @bind="filterRole">
-        <option value="">All Roles</option>
-        <option value="@UserRoles.Merchant">Merchant</option>
-        <option value="@UserRoles.Driver">Driver</option>
-        <option value="@UserRoles.Customer">Customer</option>
-    </select>
+<!-- ── Grid ── -->
+<AppGrid TItem="User"
+         Items="@FilteredUsers"
+         Loading="@_loading"
+         EmptyText="No users found.">
 
-    <select class="form-control w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700" @bind="filterStatus">
-        <option value="">All Status</option>
-        @foreach (var status in Enum.GetValues<UserStatus>())
+    <ColDefs>
+        <MudTh>User</MudTh>
+        <MudTh>Role</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Last Login</MudTh>
+        <MudTh></MudTh>
+    </ColDefs>
+
+    <RowTemplate Context="user">
+        <MudTd>
+            <div class="d-flex align-center gap-3">
+                <MudAvatar Style="background:#f97316; color:white; font-weight:700; width:34px; height:34px; font-size:0.85rem;">
+                    @(user.FullName?.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
+                </MudAvatar>
+                <div>
+                    <MudText Typo="Typo.body2" Style="font-weight:600;">@user.FullName</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@user.Email</MudText>
+                </div>
+            </div>
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small" Variant="MudVariant.Outlined" Color="Color.Default" Label="true">
+                @user.Role
+            </MudChip>
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small" Variant="MudVariant.Filled" Label="true"
+                     Color="@GetStatusColor(user.Status)">
+                @user.Status
+            </MudChip>
+        </MudTd>
+        <MudTd>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                @(user.LastLogin.HasValue ? user.LastLogin.Value.ToString("MMM d, yyyy") : "Never")
+            </MudText>
+        </MudTd>
+        <MudTd>
+            <span @onclick:stopPropagation="true" class="d-inline-flex gap-1">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Default"
+                               OnClick="@(() => OpenModal(user, editMode: false))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
+                               OnClick="@(() => OpenModal(user, editMode: true))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                               OnClick="@(() => ConfirmDelete(user))" />
+            </span>
+        </MudTd>
+    </RowTemplate>
+
+</AppGrid>
+
+<!-- ── View / Edit dialog ── -->
+<MudDialog @bind-IsVisible="_modalOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Person" Color="Color.Primary" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">
+                @(_editMode ? "Edit User" : _selectedUser?.FullName)
+            </MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        @if (_editMode)
         {
-            <option value="@status">@status</option>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
+                Update status for <strong>@_selectedUser?.FullName</strong>
+            </MudText>
+            <SelectField TValue="UserStatus?"
+                         TItem="UserStatus?"
+                         Label="Status"
+                         Options="@_statusEnumOptions"
+                         @bind-Value="_editStatus" />
         }
-    </select>
-</div>
+        else
+        {
+            <MudList T="string" Dense="true">
+                <MudListItem Icon="@Icons.Material.Filled.Person">
+                    <MudText Typo="Typo.body2"><strong>Name:</strong> @_selectedUser?.FullName</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Email">
+                    <MudText Typo="Typo.body2"><strong>Email:</strong> @_selectedUser?.Email</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Badge">
+                    <MudText Typo="Typo.body2"><strong>Role:</strong> @_selectedUser?.Role</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Circle">
+                    <MudText Typo="Typo.body2"><strong>Status:</strong> @_selectedUser?.Status</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.AccessTime">
+                    <MudText Typo="Typo.body2">
+                        <strong>Last Login:</strong>
+                        @(_selectedUser?.LastLogin.HasValue == true
+                            ? _selectedUser.LastLogin.Value.ToString("MMM d, yyyy HH:mm")
+                            : "Never")
+                    </MudText>
+                </MudListItem>
+            </MudList>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (!_editMode)
+        {
+            <MudButton Variant="MudVariant.Outlined" StartIcon="@Icons.Material.Filled.Edit"
+                       OnClick="@(() => _editMode = true)">Edit</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                       OnClick="SaveChanges" Disabled="@_saving">
+                @if (_saving) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                Save
+            </MudButton>
+        }
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _modalOpen = false)">Close</MudButton>
+    </DialogActions>
+</MudDialog>
 
-@if (users == null)
-{
-    <div class="text-gray-500">Loading users...</div>
-}
-else if (users.Count == 0)
-{
-    <div class="text-gray-600">No users found.</div>
-}
-else
-{
-    <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
-        <!-- Users Table -->
-        <UserTable
-            PagedUsers="FilteredUsers.ToList()"
-            CurrentPage="currentPage"
-            PageSize="pageSize"
-            OnView="ViewUser"
-            OnEdit="EditUser"
-            OnDelete="ConfirmDelete"
-            GetStatusClass="GetUserStatusClass"
-        />
-
-        <!-- View & Edit Modal -->
-        <TableRowModal TModel="User"
-            IsOpen="isEditModalOpen"
-            Model="editableUser"
-            IsEditMode="isEditMode"
-            Close="CloseModal"
-            EnableEdit="@(() => isEditMode = true)"
-            Save="SaveChanges"
-            Fields="userFields"
-            
-        />
-
-        <!-- Delete Modal -->
-        <DeleteConfirmationModal 
-            IsVisible="isDeleteModalOpen"
-            IsVisibleChanged="@((bool value) => isDeleteModalOpen = value)"
-            Message="Delete this user?"
-            TargetName="@selectedUserName"
-            OnConfirm="DeleteUser"
-        />
-    </div>
-
-    <!-- Pagination -->
-    <PaginationControls
-        CurrentPage="@currentPage"
-        TotalPages="@TotalPages"
-        OnNextPage="NextPage"
-        OnPreviousPage="PrevPage" 
-    />
-}
+<!-- ── Delete confirm dialog ── -->
+<MudDialog @bind-IsVisible="_deleteOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">Delete User</MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1">
+            Are you sure you want to delete <strong>@_deleteTargetName</strong>? This cannot be undone.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="MudVariant.Filled" Color="Color.Error"
+                   OnClick="DeleteUser" Disabled="@_saving">Delete</MudButton>
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _deleteOpen = false)">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    private List<User>? users;
-    private string searchTerm = "";
-    private string filterRole = "";
-    private string filterStatus = "";
-    private Dictionary<Guid, bool> userSelections = new();
+    private List<User>? _users;
+    private string  _search       = string.Empty;
+    private string  _filterRole   = string.Empty;
+    private string  _filterStatus = string.Empty;
+    private bool    _loading      = true;
 
-    private User? selectedUser;
-    private User editableUser = new();
-    private bool isEditModalOpen = false;
-    private bool isEditMode = false;
-    private List<IFieldDefinitionBase> userFields = new();
-    private bool isDeleteModalOpen = false;
-    private Guid userToDeleteId;
-    private string selectedUserName = "";
+    // Modal state
+    private bool        _modalOpen = false;
+    private bool        _editMode  = false;
+    private bool        _saving    = false;
+    private User?       _selectedUser;
+    private UserStatus? _editStatus;
 
-    // Pagination
-    private int currentPage = 1;
-    private int pageSize = 10;
-    private int totalPages => users == null ? 1 : (int)Math.Ceiling((double)users.Count / pageSize);
-    private bool CanPrev => currentPage > 1;
-    private bool CanNext => currentPage < totalPages;
+    // Delete state
+    private bool   _deleteOpen       = false;
+    private Guid   _deleteTargetId;
+    private string _deleteTargetName = string.Empty;
+
+    // Filter options
+    private static readonly List<string> _roleOptions   = new() { "", "merchant", "customer", "driver" };
+    private static readonly List<string> _statusOptions =
+        new[] { "" }.Concat(Enum.GetNames<UserStatus>()).ToList();
+    private static readonly List<UserStatus?> _statusEnumOptions =
+        Enum.GetValues<UserStatus>().Cast<UserStatus?>().ToList();
+
+    private IEnumerable<User> FilteredUsers =>
+        _users?.Where(u =>
+            (string.IsNullOrEmpty(_search)       || u.Email.Contains(_search, StringComparison.OrdinalIgnoreCase) || u.FullName.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(_filterRole)   || u.Role == _filterRole) &&
+            (string.IsNullOrEmpty(_filterStatus) || u.Status?.ToString() == _filterStatus)
+        ) ?? Enumerable.Empty<User>();
 
     protected override async Task OnInitializedAsync()
     {
         var result = await UserService.GetAllCachedUsers();
-        if (result.Success && result.Data != null)
-        {
-            users = result.Data;
-            userSelections = users.ToDictionary(u => u.ID, _ => false);
-        }
-        else
-        {
-            users = new List<User>();
-        }
+        _users   = result.Success && result.Data != null ? result.Data : new();
+        _loading = false;
     }
 
-    private IEnumerable<User> FilteredUsers =>
-        users?
-        .Where(u =>
-            (string.IsNullOrEmpty(searchTerm) || 
-             u.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-             u.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
-            (string.IsNullOrEmpty(filterRole) || u.Role == filterRole) &&
-            (string.IsNullOrEmpty(filterStatus) || u.Status.ToString() == filterStatus))
-        .Skip((currentPage - 1) * pageSize)
-        .Take(pageSize)
-        ?? Enumerable.Empty<User>();
-
-    private int TotalPages => (int)Math.Ceiling((double)FilteredUsers.Count() / pageSize);
-    private void NextPage()
+    private void OpenModal(User user, bool editMode)
     {
-        if (currentPage < TotalPages)
-            currentPage++;
-    }
-    private void PrevPage()
-    {
-        if (currentPage > 1)
-            currentPage--;
-    }
-    private void BuildUserFields(User user)
-    {
-        userFields = new List<IFieldDefinitionBase>
-        {
-            new FieldDefinition<UserStatus?>
-            {
-                Label = "Status",
-                Type = "select",
-                Options = Enum.GetNames(typeof (UserStatus)).ToList(),
-                Value = user.Status,
-                ValueChanged = EventCallback.Factory.Create<UserStatus?>(this, val =>
-                {
-                    user.Status = val;
-                })
-            }
-        };
-    }
-
-    private void ViewUser(Guid id)
-    {
-        selectedUser = users?.FirstOrDefault(o => o.ID == id);
-        if (selectedUser is not null)
-        {
-            editableUser = new User
-            {
-                ID = selectedUser.ID,
-                FullName = selectedUser.FullName,
-                Email = selectedUser.Email,
-                Status = selectedUser.Status,
-                LastLogin = selectedUser.LastLogin
-                // other fields
-            };
-            BuildUserFields(editableUser);
-
-            isEditMode = false;
-            isEditModalOpen = true;
-        }
-    }
-
-    private void EditUser(Guid id)
-    {
-        selectedUser = users?.FirstOrDefault(o => o.ID == id);
-        if (selectedUser is not null)
-        {
-            editableUser = new User
-            {
-                ID = selectedUser.ID,
-                Status = selectedUser.Status
-                // other fields
-            };
-            BuildUserFields(editableUser);
-
-            isEditMode = true;
-            isEditModalOpen = true;
-        }
-    }
-
-    private void CloseModal()
-    {
-        isEditModalOpen = false;
-        selectedUser = null;
-    }
-
-    private void ConfirmDelete(Guid id)
-    {
-        var user = users?.FirstOrDefault(u => u.ID == id);
-        if (user != null)
-        {
-            userToDeleteId = id;
-            selectedUserName = user.FullName;
-            isDeleteModalOpen = true;
-        }  
-    }
-
-    private void CancelDelete()
-    {
-        isDeleteModalOpen = false;
-        userToDeleteId = Guid.Empty;
+        _selectedUser = user;
+        _editStatus   = user.Status;
+        _editMode     = editMode;
+        _modalOpen    = true;
     }
 
     private async Task SaveChanges()
     {
-        if (selectedUser == null || editableUser == null)
-            return;
+        if (_selectedUser is null) return;
 
-        Console.WriteLine($"selected: {selectedUser.Status}, editable: {editableUser.Status}");
-
-        if (editableUser.Status == selectedUser.Status || editableUser.Status == null)
+        if (_editStatus == _selectedUser.Status || _editStatus is null)
         {
-            ToastService.ShowToast("No changes were made", string.Empty, ToastService.ToastLevel.Warning);
-            CloseModal();
+            ToastService.ShowToast("No changes were made.", string.Empty, ToastService.ToastLevel.Warning);
+            _modalOpen = false;
             return;
         }
 
-        try
+        _saving = true;
+        var result = await UserService.UpdateStatus(_selectedUser.ID, _editStatus.Value);
+        _saving = false;
+
+        if (result.Success)
         {
-            var result = await UserService.UpdateStatus(selectedUser.ID, editableUser.Status.Value);
-
-            if (!result.Success)
-            {
-                var errorMsg = result.Error?.Detail ?? "Failed to update user status.";
-                ToastService.ShowToast(errorMsg, string.Empty, ToastService.ToastLevel.Error);
-            }
-            else
-            {
-                var refresh = await UserService.GetAllUsers();
-                if (refresh.Success && refresh.Data != null)
-                    users = refresh.Data;
-
-                ToastService.ShowToast("User status updated successfully", string.Empty, ToastService.ToastLevel.Success);
-            }
+            var refresh = await UserService.GetAllUsers();
+            if (refresh.Success && refresh.Data != null) _users = refresh.Data;
+            ToastService.ShowToast("User status updated.", string.Empty, ToastService.ToastLevel.Success);
         }
-        catch
+        else
         {
-            ToastService.ShowToast("Failed to update user status.", string.Empty, ToastService.ToastLevel.Error);
+            ToastService.ShowToast(result.Error?.Message ?? "Failed to update status.", string.Empty, ToastService.ToastLevel.Error);
         }
 
-        CloseModal();
+        _modalOpen = false;
+    }
+
+    private void ConfirmDelete(User user)
+    {
+        _deleteTargetId   = user.ID;
+        _deleteTargetName = user.FullName;
+        _deleteOpen       = true;
     }
 
     private async Task DeleteUser()
     {
-        if (userToDeleteId != Guid.Empty)
+        _saving = true;
+        var success = await UserService.DeleteUser(_deleteTargetId);
+        _saving     = false;
+        _deleteOpen = false;
+
+        if (success)
         {
-            bool success = await UserService.DeleteUser(userToDeleteId);
-
-            if (success)
-            {
-                var result = await UserService.GetAllUsers();
-                if (result.Success && result.Data != null)
-                {
-                    users = result.Data;
-                    ToastService.ShowToast("User deleted successfully", string.Empty, ToastService.ToastLevel.Success);
-                }
-            }
-            else
-            {
-                ToastService.ShowToast("Failed to delete user", string.Empty, ToastService.ToastLevel.Error);
-            }
+            var result = await UserService.GetAllUsers();
+            if (result.Success && result.Data != null) _users = result.Data;
+            ToastService.ShowToast("User deleted.", string.Empty, ToastService.ToastLevel.Success);
         }
-
-        isDeleteModalOpen = false;
-        userToDeleteId = Guid.Empty;
+        else
+        {
+            ToastService.ShowToast("Failed to delete user.", string.Empty, ToastService.ToastLevel.Error);
+        }
     }
 
-    private void ToggleStatus(User user)
+    private static Color GetStatusColor(UserStatus? status) => status switch
     {
-        user.Status = user.Status == UserStatus.Active ? UserStatus.Suspended : UserStatus.Active;
-        // TODO: call UserService.UpdateStatus(user.ID, user.Status);
-    }
+        UserStatus.Active    => Color.Success,
+        UserStatus.Suspended => Color.Error,
+        UserStatus.Pending   => Color.Warning,
+        UserStatus.Inactive  => Color.Default,
+        _                    => Color.Default
+    };
 
-    private void ToggleSelectAll()
-    {
-        bool selectAll = userSelections.Values.Any(v => !v);
-        foreach (var key in userSelections.Keys.ToList())
-            userSelections[key] = selectAll;
-    }
-
-    private void OpenAddUser() { /* TODO */ }
     private void ExportUsers() { /* TODO */ }
-
-    private string GetUserStatusClass(UserStatus? status) => status switch
-{
-    UserStatus.Active    => "text-green-600 bg-green-100 px-2 py-1 rounded text-xs font-medium",
-    UserStatus.Inactive  => "text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium",
-    UserStatus.Suspended => "text-red-600 bg-red-100 px-2 py-1 rounded text-xs font-medium",
-    UserStatus.Pending   => "text-yellow-600 bg-yellow-100 px-2 py-1 rounded text-xs font-medium",
-    _ => "text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium"
-};
-
 }

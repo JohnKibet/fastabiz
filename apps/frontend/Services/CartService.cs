@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using frontend.Models;
+using frontend.Models.Storefront;
 using Microsoft.JSInterop;
 
 public class CartService

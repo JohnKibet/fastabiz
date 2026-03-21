@@ -1,0 +1,94 @@
+@*
+    AppGrid.razor — generic data grid backed by MudTable.
+
+    USAGE:
+        <AppGrid Items="@_products"
+                 TItem="ProductListItem"
+                 Loading="@_loading"
+                 EmptyText="No products found."
+                 OnRowClick="@(item => Navigation.NavigateTo($"/merchant/products/{item.Id}"))">
+            <ColDefs>
+                <MudTh>Name</MudTh>
+                <MudTh>Price</MudTh>
+            </ColDefs>
+            <RowTemplate Context="product">
+                <MudTd>@product.Name</MudTd>
+                <MudTd>@product.Price</MudTd>
+            </RowTemplate>
+        </AppGrid>
+
+    WHY TItem is explicit:
+        MudTable<T> infers T from Items at the call site, but Blazor's
+        generic type inference for @typeparam only works when the compiler
+        can resolve T from a direct parameter assignment. When T flows
+        through a RenderFragment<T> like RowTemplate the inference chain
+        can break, leaving T as 'object'. Declaring TItem="ProductListItem"
+        explicitly at the call site pins the type and gives you full
+        IntelliSense + compile-time safety on Context variables.
+*@
+
+@namespace frontend.Configs
+@using MudBlazor
+@typeparam TItem
+
+<MudTable Items="@Items" Loading="@Loading" Striped="@Striped" Hover="@Hover"     Dense="@Dense"     Elevation="2"
+          Class="rounded-xl"  LoadingProgressColor="Color.Primary"   OnRowClick="@HandleRowClick"          T="TItem">
+
+    <ToolBarContent>
+        @if (ToolBar != null)
+        {
+            @ToolBar
+        }
+    </ToolBarContent>
+
+    <HeaderContent>
+        @ColDefs
+    </HeaderContent>
+
+    <RowTemplate>
+        @RowTemplate(context)
+    </RowTemplate>
+
+    <NoRecordsContent>
+        <div class="d-flex flex-column align-center py-10">
+            <MudIcon Icon="@Icons.Material.Filled.SearchOff" Style="font-size:3rem; color:#d1d5db;" Class="mb-3" />
+            <MudText Typo="Typo.body1" Style="color:#9ca3af;">@EmptyText</MudText>
+        </div>
+    </NoRecordsContent>
+
+    <LoadingContent>
+        @for (int i = 0; i < 5; i++)
+        {
+            <MudTr>
+                <MudTd colspan="20">
+                    <MudSkeleton Animation="Animation.Wave" Height="36px" />
+                </MudTd>
+            </MudTr>
+        }
+    </LoadingContent>
+
+    <PagerContent>
+        <MudTablePager PageSizeOptions="new int[] { 10, 25, 50 }" />
+    </PagerContent>
+
+</MudTable>
+
+@code {
+    [Parameter, EditorRequired] public IEnumerable<TItem> Items { get; set; } = Enumerable.Empty<TItem>();
+    [Parameter, EditorRequired] public RenderFragment ColDefs { get; set; } = default!;
+    [Parameter, EditorRequired] public RenderFragment<TItem> RowTemplate { get; set; } = default!;
+
+    [Parameter] public bool Loading { get; set; } = false;
+    [Parameter] public string EmptyText { get; set; } = "No records found.";
+    [Parameter] public bool Striped { get; set; } = true;
+    [Parameter] public bool Hover { get; set; } = true;
+    [Parameter] public bool Dense { get; set; } = false;
+    [Parameter] public RenderFragment? ToolBar { get; set; }
+    [Parameter] public EventCallback<TItem> OnRowClick { get; set; }
+
+    private async Task HandleRowClick(TableRowClickEventArgs<TItem> args)
+    {
+        if (OnRowClick.HasDelegate && args.Item is not null)
+            await OnRowClick.InvokeAsync(args.Item);
+    }
+}

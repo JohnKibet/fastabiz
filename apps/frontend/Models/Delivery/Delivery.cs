@@ -28,13 +28,18 @@ public class Delivery
     public DeliveryStatus Status { get; set; }
 }
 
-public class CreateDelivery
+public class CreateDeliveryRequest
 {
     [Required]
     public Guid OrderID { get; set; }
 
     [Required]
     public Guid DriverID { get; set; }
+}
+
+public class CreateDeliveryResponse
+{
+    
 }
 
 public enum DeliveryStatus

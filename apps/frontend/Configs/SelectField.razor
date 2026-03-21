@@ -1,0 +1,116 @@
+@*
+    SelectField.razor
+    ══════════════════════════════════════════════════════════════════
+    Generic MudSelect wrapper with consistent styling across all forms.
+
+    USAGE — simple string list:
+
+        <SelectField Label="Category"
+                     @bind-Value="model.Category"
+                     Options="@categories"
+                     For="@(() => model.Category)" />
+
+    USAGE — object list with custom display:
+
+        <SelectField Label="Store"
+                     @bind-Value="model.StoreId"
+                     TValue="Guid"
+                     TItem="StoreDto"
+                     Items="@stores"
+                     ItemValue="@(s => s.Id)"
+                     ItemText="@(s => s.Name)"
+                     For="@(() => model.StoreId)" />
+
+    PARAMETERS
+        Label        — field label
+        Value        — bound value (@bind-Value)
+        ValueChanged — two-way binding callback
+        For          — expression for validation message
+        Placeholder  — helper text shown when empty
+        Disabled     — disables the field
+        Required     — marks as required
+
+        Simple mode (string/enum lists):
+          Options    — List<string> rendered directly
+
+        Object mode:
+          Items      — list of TItem objects
+          ItemValue  — selector: TItem → TValue
+          ItemText   — selector: TItem → display string
+    ══════════════════════════════════════════════════════════════════
+*@
+
+@namespace frontend.Configs
+@using MudBlazor
+@using System.Linq.Expressions
+@typeparam TValue
+@typeparam TItem
+
+@if (_isSimple)
+{
+    @* ── Simple mode: Options is List<string> or List<TValue> ── *@
+    <MudSelect T="TValue"
+               Label="@Label"
+               Value="@Value"
+               ValueChanged="@ValueChanged"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               FullWidth="true"
+               Class="@Class"
+               Disabled="@Disabled"
+               Required="@Required"
+               For="@For"
+               Placeholder="@Placeholder"
+               AnchorOrigin="Origin.BottomCenter">
+        @foreach (var opt in Options ?? Enumerable.Empty<TValue>())
+        {
+            <MudSelectItem T="TValue" Value="@opt">@opt?.ToString()</MudSelectItem>
+        }
+    </MudSelect>
+}
+else
+{
+    @* ── Object mode: Items with ItemValue/ItemText projections ── *@
+    <MudSelect T="TValue"
+               Label="@Label"
+               Value="@Value"
+               ValueChanged="@ValueChanged"
+               Variant="Variant.Outlined"
+               Margin="Margin.Dense"
+               FullWidth="true"
+               Class="@Class"
+               Disabled="@Disabled"
+               Required="@Required"
+               For="@For"
+               Placeholder="@Placeholder"
+               AnchorOrigin="Origin.BottomCenter">
+        @foreach (var item in Items ?? Enumerable.Empty<TItem>())
+        {
+            <MudSelectItem T="TValue" Value="@ItemValue!(item)">
+                @ItemText!(item)
+            </MudSelectItem>
+        }
+    </MudSelect>
+}
+
+@code {
+    // ── Common ───────────────────────────────────────────────────────
+    [Parameter] public string  Label       { get; set; } = string.Empty;
+    [Parameter] public TValue? Value       { get; set; }
+    [Parameter] public EventCallback<TValue> ValueChanged { get; set; }
+    [Parameter] public Expression<Func<TValue>>? For      { get; set; }
+    [Parameter] public string  Placeholder { get; set; } = string.Empty;
+    [Parameter] public string  Class       { get; set; } = "mb-4";
+    [Parameter] public bool    Disabled    { get; set; } = false;
+    [Parameter] public bool    Required    { get; set; } = false;
+
+    // ── Simple mode (Options) ─────────────────────────────────────────
+    [Parameter] public IEnumerable<TValue>? Options { get; set; }
+
+    // ── Object mode (Items + projections) ────────────────────────────
+    [Parameter] public IEnumerable<TItem>?        Items      { get; set; }
+    [Parameter] public Func<TItem, TValue>?       ItemValue  { get; set; }
+    [Parameter] public Func<TItem, string>?       ItemText   { get; set; }
+
+    private bool _isSimple => Items == null;
+}

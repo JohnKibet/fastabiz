@@ -1,194 +1,74 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using frontend.Models;
+using frontend.Models.Storefront;
+
+namespace frontend.Services;
+
 public class OrderService
 {
-    private readonly HttpClient _http;
-    private readonly ToastService _toastService;
+    private readonly ApiService _api;
+    private readonly HttpClient _cloudinaryHttp;
+    private readonly ToastService _toast;
+
     private List<Order>? _cachedOrders;
     private DateTime _lastFetchTime;
     private readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
-    public OrderService(IHttpClientFactory httpClientFactory, ToastService toastService)
+
+    public OrderService(ApiService api, IHttpClientFactory factory, ToastService toast)
     {
-        _http = httpClientFactory.CreateClient("AuthenticatedApi");
-        _toastService = toastService;
+        _api = api;
+        _cloudinaryHttp = factory.CreateClient("CloudinaryClient");
+        _toast = toast;
     }
 
-    public async Task<ServiceResult2<HttpResponseMessage>> AddOrder(CreateOrderRequest order)
-    {
-        try
-        {
-            var response = await _http.PostAsJsonAsync("orders/create", order);
-            if (response.IsSuccessStatusCode)
-            {
-                InvalidateCache();
-                return ServiceResult2<HttpResponseMessage>.Ok(response);
-            }
+    public Task<ApiResult<CreateOrderResponse>> AddOrder(CreateOrderRequest req) => _api.PostAsync<CreateOrderRequest, CreateOrderResponse>("orders/create", req);
 
-            var error = await ParseError(response);
-            return ServiceResult2<HttpResponseMessage>.Fail(error);
-        }
-        catch (HttpRequestException ex)
-        {
-            return ServiceResult2<HttpResponseMessage>.Fail($"Network error: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            return ServiceResult2<HttpResponseMessage>.Fail($"Unexpected error: {ex.Message}");
-        }
-    }
+    public Task<ApiResult<CreateOrderResponse>> CreatePendingOrder(CreateOrderRequest req) => _api.PostAsync<CreateOrderRequest, CreateOrderResponse>("orders/pending", req);
 
-    public async Task<ServiceResult2<List<Guid>>> CreatePendingOrder(CreateOrderRequest order)
-    {
-        try
-        {
-            var response = await _http.PostAsJsonAsync("orders/pending", order);
-            if (!response.IsSuccessStatusCode)
-                return ServiceResult2<List<Guid>>.Fail(await ParseError(response));
+    public Task<ApiResult<Order>> GetOrderByID(Guid id) => _api.GetAsync<Order>($"orders/by-id/{id}");
 
-            var ids = await response.Content.ReadFromJsonAsync<List<Guid>>();
-            return ServiceResult2<List<Guid>>.Ok(ids!);
-        }
-        catch (Exception ex)
-        {
-            return ServiceResult2<List<Guid>>.Fail(ex.Message);
-        }
-    }
+    public Task<ApiResult<List<Order>>> GetOrdersByCustomer(Guid customerId) => _api.GetAsync<List<Order>>($"orders/by-customer/{customerId}");
 
+    public Task<ApiResult<ApiMessageResponse>> UpdateOrder(Guid orderId, UpdateOrderRequest req)
 
-    public async Task<ServiceResult2<List<Order>>> GetOrderByID(Guid id)
-    {
-        return await GetFromJsonSafe<List<Order>>($"orders/by-id/{id}");
-    }
+        => _api.PutAsync<UpdateOrderRequest, ApiMessageResponse>($"orders/{orderId}/update", req);
 
-
-    public async Task<ServiceResult2<List<Order>>> GetOrdersByCustomer(Guid customerId)
-    {
-        return await GetFromJsonSafe<List<Order>>($"orders/by-customer/{customerId}");
-    }
-
-    public async Task<Order?> UpdateOrder(Guid orderId, string column, object value)
-    {
-        var requestBody = new
-        {
-            column,
-            value
-        };
-
-        var response = await _http.PutAsJsonAsync($"orders/{orderId}/update", requestBody);
-        if (response.IsSuccessStatusCode)
-        {
-            InvalidateCache();
-            return await response.Content.ReadFromJsonAsync<Order>() ?? new Order();
-        }
-
-        return null;
-
-    }
-
-    public async Task<ServiceResult2<List<Order>>> GetAllOrders()
-    {
-        return await GetFromJsonSafe<List<Order>>("orders/all_orders");
-    }
+    public Task<ApiResult<List<Order>>> GetAllOrders() => _api.GetAsync<List<Order>>("orders/all_orders");
 
     // cache orders
-    public async Task<ServiceResult2<List<Order>>> GetAllCachedOrders(bool forceRefresh = false)
-    {
-        if (!forceRefresh && _cachedOrders != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
-        {
-            return ServiceResult2<List<Order>>.Ok(_cachedOrders, fromCache: true);
-        }
+    // public async Task<ServiceResult2<List<Order>>> GetAllCachedOrders(bool forceRefresh = false)
+    // {
+    //     if (!forceRefresh && _cachedOrders != null && DateTime.UtcNow - _lastFetchTime < _cacheDuration)
+    //     {
+    //         return ServiceResult2<List<Order>>.Ok(_cachedOrders, fromCache: true);
+    //     }
 
-        var result = await GetAllOrders();
-        if (result.Success && result.Data != null && result.Data.Any())
-        {
-            _cachedOrders = result.Data;
-            _lastFetchTime = DateTime.UtcNow;
+    //     var result = await GetAllOrders();
+    //     if (result.Success && result.Data != null && result.Data.Any())
+    //     {
+    //         _cachedOrders = result.Data;
+    //         _lastFetchTime = DateTime.UtcNow;
 
-            _toastService.ShowToast("Orders fetched successfully.", string.Empty, ToastService.ToastLevel.Success);
-        }
-        else if (result.Success && (result.Data == null || !result.Data.Any()))
-        {
-            _toastService.ShowToast("No orders.", string.Empty, ToastService.ToastLevel.Warning);
-        }
-        else
-        {
-            _toastService.ShowToast("Failed to load orders.", string.Empty, ToastService.ToastLevel.Error);
-        }
+    //         _toastService.ShowToast("Orders fetched successfully.", string.Empty, ToastService.ToastLevel.Success);
+    //     }
+    //     else if (result.Success && (result.Data == null || !result.Data.Any()))
+    //     {
+    //         _toastService.ShowToast("No orders.", string.Empty, ToastService.ToastLevel.Warning);
+    //     }
+    //     else
+    //     {
+    //         _toastService.ShowToast("Failed to load orders.", string.Empty, ToastService.ToastLevel.Error);
+    //     }
 
-        return result;
-    }
+    //     return result;
+    // }
 
     public void InvalidateCache()
     {
         _cachedOrders = null;
     }
 
-    public async Task<bool> DeleteOrder(Guid id)
-    {
-        var res = await _http.DeleteAsync($"orders/{id}");
-        if (res.IsSuccessStatusCode)
-        {
-            InvalidateCache();
-        }
-        return res.IsSuccessStatusCode;
-    }
-
-    public async Task<string> ParseError(HttpResponseMessage response)
-    {
-        try
-        {
-            var json = await response.Content.ReadAsStringAsync();
-            var error = JsonSerializer.Deserialize<ErrorResponse>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-            if (error == null)
-                return $"HTTP {(int)response.StatusCode} - {response.ReasonPhrase}";
-
-            if (error.Errors != null && error.Errors.Any())
-            {
-                // Flatten field-level errors: "PickupAddress: Required"
-                var fieldErrors = error.Errors
-                    .SelectMany(kvp => kvp.Value.Select(v => $"{kvp.Key}: {v}"));
-                return string.Join("; ", fieldErrors);
-            }
-
-            // Fall back to detail or generic error
-            return !string.IsNullOrWhiteSpace(error.Detail)
-                ? error.Detail
-                : error.Error ?? $"HTTP {(int)response.StatusCode} - {response.ReasonPhrase}";
-        }
-        catch
-        {
-            return $"HTTP {(int)response.StatusCode} - {response.ReasonPhrase}";
-        }
-    }
-
-    private async Task<ServiceResult2<T>> GetFromJsonSafe<T>(string url)
-    {
-        try
-        {
-            var response = await _http.GetAsync(url);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var result = await response.Content.ReadFromJsonAsync<T>();
-                return ServiceResult2<T>.Ok(result ?? Activator.CreateInstance<T>());
-            }
-
-            var error = await ParseError(response);
-            return ServiceResult2<T>.Fail(error);
-        }
-        catch (HttpRequestException ex)
-        {
-            return ServiceResult2<T>.Fail($"Network error: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            return ServiceResult2<T>.Fail($"Unexpected error: {ex.Message}");
-        }
-    }
+    public Task<ApiResult<bool>> DeleteOrder(Guid orderId) => _api.DeleteAsync($"orders/{orderId}");
 }
 

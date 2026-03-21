@@ -1,0 +1,116 @@
+@*
+    AppForm.razor
+    ══════════════════════════════════════════════════════════════════
+    Generic form shell for Create / Edit flows.
+
+    Handles the card wrapper, title, submit/cancel buttons, loading
+    state, and error display. You provide the fields via ChildContent.
+
+    USAGE — Create Product form:
+
+        <AppForm Title="Add Product"
+                 SubmitLabel="Create Product"
+                 Model="@_model"
+                 OnValidSubmit="HandleSubmit"
+                 OnCancel="@(() => Navigation.NavigateTo("/merchant/products"))"
+                 Loading="@_saving"
+                 Error="@_error">
+
+            <MudTextField @bind-Value="_model.Name"
+                          Label="Product Name"
+                          Variant="Variant.Outlined"
+                          For="@(() => _model.Name)"
+                          Class="mb-4" />
+
+            <SelectField Label="Category"
+                         @bind-Value="_model.Category"
+                         Options="@_categories"
+                         For="@(() => _model.Category)" />
+
+        </AppForm>
+
+    PARAMETERS
+        Title        — heading shown at top of the card
+        Subtitle     — optional description below the title
+        Model        — the form model (for DataAnnotationsValidator)
+        OnValidSubmit — called when form passes validation
+        OnCancel     — optional back/cancel navigation
+        SubmitLabel  — text on the submit button (default: "Save")
+        CancelLabel  — text on the cancel button (default: "Cancel")
+        Loading      — shows spinner on submit button and disables form
+        Error        — error string shown in a MudAlert above the fields
+        ChildContent — the form fields
+    ══════════════════════════════════════════════════════════════════
+*@
+
+@namespace frontend.Configs
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+
+<MudPaper Elevation="2" Class="pa-6 rounded-xl">
+
+    @* ── Header ── *@
+    <div class="mb-6">
+        <MudText Typo="Typo.h6" Style="font-weight:800; color:#111827;">@Title</MudText>
+        @if (!string.IsNullOrEmpty(Subtitle))
+        {
+            <MudText Typo="Typo.body2" Class="mud-text-secondary mt-1">@Subtitle</MudText>
+        }
+    </div>
+
+    @* ── Error alert ── *@
+    @if (!string.IsNullOrEmpty(Error))
+    {
+        <MudAlert Severity="Severity.Error" Class="mb-4" Dense="true">@Error</MudAlert>
+    }
+
+    @* ── Form ── *@
+    <EditForm Model="@Model" OnValidSubmit="HandleSubmit">
+        <DataAnnotationsValidator />
+
+        @* Fields provided by the caller *@
+        <fieldset disabled="@Loading" style="border:none; padding:0; margin:0;">
+            @ChildContent
+        </fieldset>
+
+        @* ── Action buttons ── *@
+        <div class="d-flex align-center gap-3 mt-6 flex-wrap">
+            <MudButton ButtonType="ButtonType.Submit" Variant="MudVariant.Filled" Color="Color.Primary"
+                       Disabled="@Loading" Style="border-radius:8px; font-weight:700; min-width:140px;">
+                @if (Loading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    <span>Saving…</span>
+                }
+                else
+                {
+                    <span>@SubmitLabel</span>
+                }
+            </MudButton>
+
+            @if (OnCancel.HasDelegate)
+            {
+                <MudButton Variant="MudVariant.Outlined" Color="Color.Default" OnClick="@(() => OnCancel.InvokeAsync())"
+                           Disabled="@Loading" Style="border-radius:8px; font-weight:600;">
+                    @CancelLabel
+                </MudButton>
+            }
+        </div>
+    </EditForm>
+</MudPaper>
+
+@code {
+    [Parameter, EditorRequired] public object Model { get; set; } = default!;
+    [Parameter, EditorRequired] public EventCallback OnValidSubmit { get; set; }
+    [Parameter, EditorRequired] public string Title { get; set; } = string.Empty;
+
+    [Parameter] public string Subtitle { get; set; } = string.Empty;
+    [Parameter] public string SubmitLabel { get; set; } = "Save";
+    [Parameter] public string CancelLabel { get; set; } = "Cancel";
+    [Parameter] public bool Loading { get; set; } = false;
+    [Parameter] public string? Error { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private async Task HandleSubmit() => await OnValidSubmit.InvokeAsync();
+}

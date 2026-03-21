@@ -74,6 +74,11 @@ namespace frontend.Models
         public string Phone { get; set; } = string.Empty;
     }
 
+    public class CreateUserResponse
+    {
+        
+    }
+
     public class RegisterModel
     {
         [Required(ErrorMessage = "Full name is required")]

@@ -1,217 +1,284 @@
 @page "/merchant/stores"
 @layout MerchantLayout
+@using frontend.Models
+@using frontend.Models.Storefront
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 @inject StoreService StoreService
 @inject ToastService ToastService
 @inject NavigationManager Navigation
 @attribute [Authorize(Roles = "merchant")]
 
-<h2 class="text-2xl font-semibold text-gray-800 mb-6">Store Management</h2>
-
-<!-- Top Actions -->
-<div class="flex items-center justify-between mb-4">
-  <button class="btn btn-primary" @onclick="CreateStore">
-    + Create Store
-  </button>
-
-  <div>
-    <strong>Total Stores:</strong> @stores?.Count
-  </div>
+<!-- ── Page header ── -->
+<div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-3">
+    <div>
+        <MudText Typo="Typo.h5" Style="font-weight:800;">Store Management</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">@_stores?.Count store@(_stores?.Count == 1 ? "" : "s")</MudText>
+    </div>
+    <MudButton Href="/merchant/stores/create"
+               Variant="MudVariant.Filled" Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add"
+               Style="border-radius:8px; font-weight:700;">
+        Create Store
+    </MudButton>
 </div>
 
-<!-- Search -->
-<div class="mb-6">
-  <input type="text"
-    class="w-full pl-4 pr-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-    placeholder="Search stores by name or location..." @bind="searchTerm" @bind:event="oninput" />
-</div>
+<!-- ── Search ── -->
+<MudTextField @bind-Value="_search"
+              Placeholder="Search by name or location..."
+              Variant="MudVariant.Outlined"
+              Adornment="Adornment.Start"
+              AdornmentIcon="@Icons.Material.Filled.Search"
+              Margin="Margin.Dense"
+              Class="mb-6"
+              Style="max-width:400px;"
+              Immediate="true" />
 
-@if (stores == null)
-{
-  <div class="text-gray-500">Loading stores...</div>
-}
-else if (!FilteredStores.Any())
-{
-  <div class="text-gray-600">No stores found.</div>
-}
-else
-{
-  <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
-    <!-- Stores Table -->
-    <StoreTable
-      PagedStores="FilteredStores.ToList()"
-      CurrentPage="currentPage"
-      PageSize="pageSize"
-      OnView="ViewStore"
-      OnEdit="EditStore"
-      OnDelete="ConfirmDelete"
-    />
-  </div>
-}
+<!-- ── Grid ── -->
+<AppGrid TItem="StoreDto"
+         Items="@FilteredStores"
+         Loading="@_loading"
+         EmptyText="No stores found. Create your first store.">
 
-<!-- View / Edit Modal -->
-<TableRowModal TModel="UpdateStoreRequest" IsOpen="isModalOpen" Model="editableStore" IsEditMode="isEditMode"
-  Close="CloseModal" EnableEdit="@(() => isEditMode = true)" Save="SaveChanges" Fields="storeFields" />
+    <ColDefs>
+        <MudTh>Store</MudTh>
+        <MudTh>Location</MudTh>
+        <MudTh>Rating</MudTh>
+        <MudTh>Products</MudTh>
+        <MudTh>Created</MudTh>
+        <MudTh></MudTh>
+    </ColDefs>
 
-<!-- Delete Modal -->
-<DeleteConfirmationModal IsVisible="isDeleteModalOpen" IsVisibleChanged="@(v => isDeleteModalOpen = v)"
-  Message="Delete this store?" TargetName="@selectedStoreName" OnConfirm="DeleteStore" />
+    <RowTemplate Context="store">
+        <MudTd>
+            <div class="d-flex align-center gap-3">
+                <MudAvatar Rounded="true" Style="background:#f3f4f6; width:36px; height:36px;">
+                    @if (!string.IsNullOrEmpty(store.LogoUrl))
+                    {
+                        <MudImage Src="@store.LogoUrl" Alt="@store.Name" Style="width:36px; height:36px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Store" Style="color:#9ca3af;" />
+                    }
+                </MudAvatar>
+                <MudText Typo="Typo.body2" Style="font-weight:600;">@store.Name</MudText>
+            </div>
+        </MudTd>
+        <MudTd>
+            <div class="d-flex align-center gap-1">
+                <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Style="color:#9ca3af;" />
+                <MudText Typo="Typo.body2">@store.Location</MudText>
+            </div>
+        </MudTd>
+        <MudTd>
+            @if (store.Rating.HasValue)
+            {
+                <div class="d-flex align-center gap-1">
+                    <MudIcon Icon="@Icons.Material.Filled.Star" Size="Size.Small" Color="Color.Warning" />
+                    <MudText Typo="Typo.body2">@store.Rating.Value.ToString("F1")</MudText>
+                </div>
+            }
+            else
+            {
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">—</MudText>
+            }
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small" Variant="MudVariant.Outlined" Color="Color.Default" Label="true">
+                @(store.TotalProducts ?? 0)
+            </MudChip>
+        </MudTd>
+        <MudTd>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                @(DateTime.TryParse(store.CreatedAt, out var dt) ? dt.ToString("MMM d, yyyy") : "—")
+            </MudText>
+        </MudTd>
+        <MudTd>
+            <span @onclick:stopPropagation="true" class="d-inline-flex gap-1">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Default"
+                               OnClick="@(() => OpenModal(store, editMode: false))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
+                               OnClick="@(() => OpenModal(store, editMode: true))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                               OnClick="@(() => ConfirmDelete(store))" />
+            </span>
+        </MudTd>
+    </RowTemplate>
+
+</AppGrid>
+
+<!-- ── Edit / View dialog ── -->
+<MudDialog @bind-IsVisible="_modalOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Store" Color="Color.Primary" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">
+                @(_editMode ? "Edit Store" : _selectedStore?.Name)
+            </MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        @if (_editMode)
+        {
+            <MudTextField @bind-Value="_editRequest.Name"
+                          Label="Store Name"
+                          Variant="MudVariant.Outlined"
+                          FullWidth="true"
+                          Class="mb-4" />
+            <MudTextField @bind-Value="_editRequest.Location"
+                          Label="Location"
+                          Variant="MudVariant.Outlined"
+                          FullWidth="true"
+                          Class="mb-4" />
+            <MudTextField @bind-Value="_editRequest.LogoUrl"
+                          Label="Logo URL"
+                          Variant="MudVariant.Outlined"
+                          FullWidth="true"
+                          Class="mb-4" />
+        }
+        else
+        {
+            <MudList T="string" Dense="true">
+                <MudListItem Icon="@Icons.Material.Filled.Store">
+                    <MudText Typo="Typo.body2"><strong>Name:</strong> @_selectedStore?.Name</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.LocationOn">
+                    <MudText Typo="Typo.body2"><strong>Location:</strong> @_selectedStore?.Location</MudText>
+                </MudListItem>
+            </MudList>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (!_editMode)
+        {
+            <MudButton Variant="MudVariant.Outlined" OnClick="@(() => _editMode = true)"
+                       StartIcon="@Icons.Material.Filled.Edit">Edit</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                       OnClick="SaveChanges" Disabled="@_saving">
+                @if (_saving) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                Save
+            </MudButton>
+        }
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _modalOpen = false)">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- ── Delete confirm dialog ── -->
+<MudDialog @bind-IsVisible="_deleteOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">Delete Store</MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudText Typo="Typo.body1">
+            Are you sure you want to delete <strong>@_deleteTargetName</strong>? This cannot be undone.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="MudVariant.Filled" Color="Color.Error"
+                   OnClick="DeleteStore" Disabled="@_saving">Delete</MudButton>
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _deleteOpen = false)">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-  private List<StoreDto>? stores;
-  private string searchTerm = "";
-  private int currentPage = 1;
-  private int pageSize = 10;
+    private List<StoreDto>? _stores;
+    private string   _search  = string.Empty;
+    private bool     _loading = true;
 
-  private StoreDto? selectedStore;
-  private UpdateStoreRequest editableStore = new();
+    // Modal state
+    private bool              _modalOpen  = false;
+    private bool              _editMode   = false;
+    private bool              _saving     = false;
+    private StoreDto?         _selectedStore;
+    private UpdateStoreRequest _editRequest = new();
 
-  private bool isModalOpen;
-  private bool isEditMode;
+    // Delete state
+    private bool   _deleteOpen       = false;
+    private Guid   _deleteTargetId;
+    private string _deleteTargetName = string.Empty;
 
-  private bool isDeleteModalOpen;
-  private Guid storeToDeleteId;
-  private string selectedStoreName = "";
+    private IEnumerable<StoreDto> FilteredStores =>
+        _stores?.Where(s =>
+            string.IsNullOrWhiteSpace(_search) ||
+            s.Name.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+            s.Location.Contains(_search, StringComparison.OrdinalIgnoreCase)
+        ) ?? Enumerable.Empty<StoreDto>();
 
-  private List<IFieldDefinitionBase> storeFields = new();
-
-  protected override async Task OnInitializedAsync()
-  {
-    await LoadStores();
-  }
-
-  private async Task LoadStores()
-  {
-    var result = await StoreService.GetAllStores();
-    stores = result.Success && result.Data != null
-    ? result.Data
-    : new List<StoreDto>();
-  }
-
-  private IEnumerable<StoreDto> FilteredStores =>
-  stores?.Where(s =>
-  string.IsNullOrWhiteSpace(searchTerm) ||
-  s.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-  s.Location.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-  ) ?? Enumerable.Empty<StoreDto>();
-
-  private void CreateStore()
-  {
-    Navigation.NavigateTo("/merchant/stores/create");
-  }
-
-  private void ViewStore(Guid id)
-  {
-    selectedStore = stores?.FirstOrDefault(s => s.Id == id);
-    if (selectedStore == null)
-      return;
-    editableStore = new UpdateStoreRequest
+    protected override async Task OnInitializedAsync()
     {
-      Name = selectedStore?.Name,
-      Location = selectedStore?.Location,
-      LogoUrl = selectedStore?.LogoURL
-    };
-    BuildStoreFields(editableStore);
-
-    isEditMode = false;
-    isModalOpen = true;
-  }
-
-  private void EditStore(Guid id)
-  {
-    selectedStore = stores?.FirstOrDefault(s => s.Id == id);
-    if (selectedStore == null)
-      return;
-    editableStore = new UpdateStoreRequest
-    {
-      Name = selectedStore?.Name,
-      Location = selectedStore?.Location,
-      LogoUrl = selectedStore?.LogoURL
-    };
-    BuildStoreFields(editableStore);
-
-    isEditMode = true;
-    isModalOpen = true;
-  }
-
-  private void BuildStoreFields(UpdateStoreRequest store)
-  {
-    storeFields = new()
-{
-new FieldDefinition<string?>
-{
-Label = "Store Name",
-Type = "text",
-Value = store.Name,
-ValueChanged = EventCallback.Factory.Create<string?>(this, v => store.Name = v)
-},
-new FieldDefinition<string?>
-{
-Label = "Location",
-Type = "text",
-Value = store.Location,
-ValueChanged = EventCallback.Factory.Create<string?>(this, v => store.Location = v)
-},
-new FieldDefinition<string?>
-{
-Label = "Logo URL",
-Type = "text",
-Value = store.LogoUrl,
-ValueChanged = EventCallback.Factory.Create<string?>(this, v => store.LogoUrl = v)
-}
-};
-  }
-
-  private async Task SaveChanges()
-  {
-    if (selectedStore == null)
-      return;
-
-    var result = await StoreService.UpdateStore(selectedStore.Id, editableStore);
-
-    if (result.Success)
-    {
-      await LoadStores();
-      ToastService.ShowToast("Store updated successfully", string.Empty, ToastService.ToastLevel.Success);
-    }
-    else
-    {
-      ToastService.ShowToast("Failed to update store", string.Empty, ToastService.ToastLevel.Error);
+        await LoadStores();
+        _loading = false;
     }
 
-    CloseModal();
-  }
-
-  private void ConfirmDelete(Guid storeId)
-  {
-    var store = stores?.FirstOrDefault(s => s.Id == storeId);
-    if (store == null)
-      return;
-
-    storeToDeleteId = store.Id;
-    selectedStoreName = store.Name;
-    isDeleteModalOpen = true;
-  }
-
-  private async Task DeleteStore()
-  {
-    var result = await StoreService.DeleteStore(storeToDeleteId);
-
-    if (result.Success)
+    private async Task LoadStores()
     {
-      await LoadStores();
-      ToastService.ShowToast("Store deleted successfully", string.Empty, ToastService.ToastLevel.Success);
-    }
-    else
-    {
-      ToastService.ShowToast("Failed to delete store", string.Empty, ToastService.ToastLevel.Error);
+        var result = await StoreService.GetAllStores();
+        _stores = result.Success && result.Data != null ? result.Data : new();
     }
 
-    isDeleteModalOpen = false;
-  }
+    private void OpenModal(StoreDto store, bool editMode)
+    {
+        _selectedStore = store;
+        _editRequest   = new UpdateStoreRequest
+        {
+            Name     = store.Name,
+            Location = store.Location,
+            LogoUrl  = store.LogoUrl
+        };
+        _editMode  = editMode;
+        _modalOpen = true;
+    }
 
-  private void CloseModal()
-  {
-    isModalOpen = false;
-    selectedStore = null;
-  }
+    private async Task SaveChanges()
+    {
+        if (_selectedStore is null) return;
+        _saving = true;
+
+        var result = await StoreService.UpdateStore(_selectedStore.Id, _editRequest);
+        _saving = false;
+
+        if (result.Success)
+        {
+            await LoadStores();
+            ToastService.ShowToast("Store updated successfully", string.Empty, ToastService.ToastLevel.Success);
+            _modalOpen = false;
+        }
+        else
+        {
+            ToastService.ShowToast(result.Error?.Message ?? "Failed to update store.", string.Empty, ToastService.ToastLevel.Error);
+        }
+    }
+
+    private void ConfirmDelete(StoreDto store)
+    {
+        _deleteTargetId   = store.Id;
+        _deleteTargetName = store.Name;
+        _deleteOpen       = true;
+    }
+
+    private async Task DeleteStore()
+    {
+        _saving = true;
+        var result = await StoreService.DeleteStore(_deleteTargetId);
+        _saving = false;
+        _deleteOpen = false;
+
+        if (result.Success)
+        {
+            await LoadStores();
+            ToastService.ShowToast("Store deleted.", string.Empty, ToastService.ToastLevel.Success);
+        }
+        else
+        {
+            ToastService.ShowToast(result.Error?.Message ?? "Failed to delete store.", string.Empty, ToastService.ToastLevel.Error);
+        }
+    }
 }

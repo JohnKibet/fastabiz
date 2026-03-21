@@ -1,315 +1,242 @@
-@using System.Text.Json
-@using frontend.Models
 @namespace frontend.Pages.Shared.Components.Merchant
+@using frontend.Models
+@using frontend.Models.Storefront
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs.SelectField
+@using frontend.Configs.AppForm
 @inject ProductService ProductService
 @inject StoreService StoreService
 @inject ToastService ToastService
 @inject NavigationManager Navigation
 
+@* ── Store selector (shown when StoreId not injected via param) ── *@
 @if (!StoreId.HasValue)
 {
-  <div class="mb-6">
-    <label class="block text-sm font-medium text-textDark mb-1">
-      Select Store
-    </label>
-
-    @if (isLoadingStores)
-    {
-      <p class="text-sm text-gray-500">Loading stores...</p>
-    }
-    else if (stores.Count == 0)
-    {
-      <p class="text-sm text-red-500">
-        You don’t have any stores yet.
-        <a href="/merchant/stores/create" class="text-primary underline ml-1">
-          Create one
-        </a>
-      </p>
-    }
-    else
-    {
-      <select class="w-full px-4 py-2 border rounded-lg" @bind="selectedStoreId" @bind:after="OnStoreSelected">
-        <option value="">-- Select a store --</option>
-        @foreach (var store in stores)
+    <MudPaper Elevation="2" Class="pa-5 rounded-xl mb-6">
+        <MudText Typo="Typo.subtitle2" Class="mb-3" Style="font-weight:700;">Select Store</MudText>
+        @if (_loadingStores)
         {
-          <option value="@store.Id">@store.Name</option>
+            <MudSkeleton Height="40px" />
         }
-      </select>
-    }
-  </div>
+        else if (_stores.Count == 0)
+        {
+            <MudAlert Severity="Severity.Warning" Dense="true">
+                You don't have any stores yet.
+                <MudLink Href="/merchant/stores/create" Color="Color.Primary">Create one</MudLink>
+            </MudAlert>
+        }
+        else
+        {
+            <SelectField Label="Store"                         TValue="Guid"                         TItem="StoreDto" Items="@_stores" Value="@(_selectedStoreId ?? Guid.Empty)"
+                         ValueChanged="OnStoreSelected" ItemValue="@(s => s.Id)" ItemText="@(s => s.Name)" />
+        }
+    </MudPaper>
 }
 
-<div class="min-h-screen bg-bgSoft p-6">
-  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
-    <h1 class="text-2xl font-poppins font-semibold text-textDark mb-2">Create Product</h1>
-    <p class="text-textLight mb-6">Add a product to your store</p>
+@* ── Step 1: Core product details ── *@
+<AppForm Title="Create Product" Subtitle="Add a product to your store"     Model="@_product"     OnValidSubmit="Submit"
+         OnCancel="@(() => Navigation.NavigateTo("/merchant/products"))" SubmitLabel="Create Product"  Loading="@_saving"
+         Error="@_error">
 
-    <EditForm Model="product" OnValidSubmit="Submit">
-      <fieldset disabled="@productCreated" class="space-y-4 @(productCreated ? "opacity-60 pointer-events-none" : "")">
-        <DataAnnotationsValidator />
+    <MudGrid Spacing="3">
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_product.Name"                Label="Product Name"                         Variant="MudVariant.Outlined"
+                          FullWidth="true" For="@(() => _product.Name)" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <SelectField Label="Category"                 TValue="string"       TItem="string"               Options="@_categories"
+                         @bind-Value="_product.Category"              For="@(() => _product.Category)" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField @bind-Value="_product.Description"                       Label="Description"               Variant="MudVariant.Outlined"
+                          FullWidth="true"                          Lines="4"                          For="@(() => _product.Description)" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudCheckBox @bind-Value="_product.HasVariants" Color="Color.Primary"
+                         Label="This product has variants (sizes, colours, etc.)" />
+        </MudItem>
+    </MudGrid>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-textDark">Product Name</label>
-            <InputText @bind-Value="product.Name" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-            <ValidationMessage For="() => product.Name" />
-          </div>
+</AppForm>
 
-          <div>
-            <label class="block text-sm font-medium text-textDark">Category</label>
-            <InputText @bind-Value="product.Category" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-            <ValidationMessage For="() => product.Category" />
-          </div>
+@* ── Step 2a: Simple product — price & stock ── *@
+@if (_productCreated && !_product.HasVariants)
+{
+    <MudPaper Elevation="2" Class="pa-6 rounded-xl mt-6">
+        <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Price &amp; Stock</MudText>
 
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-textDark">Description</label>
-            <InputTextArea @bind-Value="product.Description" rows="4" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-            <ValidationMessage For="() => product.Description" />
-          </div>
-        </div>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="_product.Price"                                 Label="Price" Variant="MudVariant.Outlined" FullWidth="true"
+                                 Min="0" Format="F2"            Adornment="Adornment.Start"          AdornmentText="$"         Disabled="@_inventorySaved" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="_product.Stock"                   Label="Stock"                  Variant="MudVariant.Outlined"                FullWidth="true"
+                                 Min="0"                                Disabled="@_inventorySaved" />
+            </MudItem>
+        </MudGrid>
 
-        <div class="mt-4">
-          <label class="flex items-center space-x-2">
-            <InputCheckbox @bind-Value="product.HasVariants" />
-            <span class="text-sm text-textDark">Does this product have variants?</span>
-          </label>
-        </div>
-
-      </fieldset>
-
-      @if (!productCreated)
-      {
-        <button type="submit" disabled="@(isSubmitting || productCreated)" class="mt-6 w-full bg-primary text-white py-2 rounded-xl
-          disabled:opacity-50 disabled:cursor-not-allowed
-          hover:bg-ctaHover transition">
-          Create Product
-        </button>
-      }
-
-    </EditForm>
-
-    @if (productCreated && !product.HasVariants)
-    {
-      <div class="mt-6 border-t pt-4">
-        <h2 class="text-lg font-semibold text-textDark mb-2">Add Stock & Price</h2>
-
-        <fieldset disabled="@isAddSuccess" class="space-y-3 @(isAddSuccess ? "opacity-60 pointer-events-none" : "")">
-
-          <div class="flex flex-col">
-            <label class="text-xs text-gray-600 mb-1">Price</label>
-            <InputNumber @bind-Value="product.Price" class="px-3 py-2 border rounded-lg" />
-          </div>
-
-          <div class="flex flex-col">
-            <label class="text-xs text-gray-600 mb-1">Stock</label>
-            <InputNumber @bind-Value="product.Stock" class="px-3 py-2 border rounded-lg" />
-          </div>
-
-          <button @onclick="UpdateInventory" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-ctaHover">
-            Add Price & Stock
-          </button>
-
-        </fieldset>
-
-        @if (isAddSuccess)
+        @if (!_inventorySaved)
         {
-          <button class="mt-6 text-primary underline" @onclick="ResetAll">
-            Create another product
-          </button>
+            <MudButton OnClick="UpdateInventory" Variant="MudVariant.Filled" Color="Color.Primary"          Class="mt-4"
+                       Style="border-radius:8px; font-weight:700;"                       Loading="@_savingInventory">
+                Save Price &amp; Stock
+            </MudButton>
         }
+        else
+        {
+            <div class="d-flex align-center gap-3 mt-4">
+                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" />
+                <MudText Typo="Typo.body2" Style="color:#16a34a; font-weight:600;">Inventory saved</MudText>
+                <MudButton Variant="MudVariant.Text" Color="Color.Primary" OnClick="ResetAll">
+                    Create another product
+                </MudButton>
+            </div>
+        }
+    </MudPaper>
+}
 
-      </div>
-    }
+@* ── Step 2b: Variant product ── *@
+@if (_productCreated && _product.HasVariants)
+{
+    <VariantSection @ref="_variantSection"                    ProductId="@_createdProductId"                    OnVariantCreated="@(() => _hasVariants = true)" />
 
-    @if (productCreated && product.HasVariants)
+    @if (_hasVariants)
     {
-      <VariantSection @ref="variantsRef" ProductId="@createdProductId" OnVariantCreated="(() => hasCreatedAtLeastOneVariant = true)"/>
-
-      @if (productCreated && product.HasVariants && hasCreatedAtLeastOneVariant)
-      {
-        <div class="mt-6 flex flex-row gap-4 justify-between items-center">
-          <p class="text-sm text-textDark mb-2">No more variants to add?</p>
-          <button class="text-primary underline" @onclick="ResetAll">
-            Create another product
-          </button>
+        <div class="d-flex align-center justify-space-between mt-6">
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Done adding variants?</MudText>
+            <MudButton Variant="MudVariant.Text" Color="Color.Primary" OnClick="ResetAll">
+                Create another product
+            </MudButton>
         </div>
-      }
-
     }
-
-  </div>
-</div>
+}
 
 @code {
-  [CascadingParameter] ActiveStoreContext? ActiveStore { get; set; }
-  [Parameter] public Guid? StoreId { get; set; }
-  private CreateProductRequest product = new();
-  private List<StoreDto> stores = new();
-  private Guid? selectedStoreId;
-  private bool isLoadingStores = true;
-  private bool isSubmitting = false;
-  private bool productCreated = false;
-  private bool isAddSuccess = false;
-  private Guid createdProductId;
-  private VariantSection? variantsRef;
-  private bool hasCreatedAtLeastOneVariant = false;
+    [CascadingParameter] ActiveStoreContext? ActiveStore { get; set; }
+    [Parameter] public Guid? StoreId { get; set; }
 
-  protected override async Task OnInitializedAsync()
-  {
-    var result = await StoreService.GetAllStores();
-    if (result.Success && result.Data != null)
-      stores = result.Data;
+    private CreateProductRequest _product = new();
+    private List<StoreDto> _stores = new();
+    private Guid? _selectedStoreId;
+    private bool _loadingStores = true;
+    private bool _saving = false;
+    private bool _savingInventory = false;
+    private bool _productCreated = false;
+    private bool _inventorySaved = false;
+    private bool _hasVariants = false;
+    private Guid _createdProductId;
+    private string? _error;
 
-    isLoadingStores = false;
-  }
+    private VariantSection? _variantSection;
 
-  protected override void OnParametersSet()
-  {
-    if (StoreId.HasValue && StoreId.Value != Guid.Empty)
+    // Drives the Category SelectField — replace with API call if categories are dynamic
+    private readonly List<string> _categories = new()
     {
-      selectedStoreId = StoreId;
-      product.StoreId = StoreId.Value;
-    }
-  }
-
-  private void OnStoreSelected()
-  {
-    if (selectedStoreId.HasValue)
-    {
-      product.StoreId = selectedStoreId.Value;
-      Navigation.NavigateTo(
-      $"/merchant/products/create/{selectedStoreId}",
-      replace: true
-      );
-    }
-  }
-
-  private async Task Submit()
-  {
-    if (isSubmitting || productCreated)
-      return;
-
-    isSubmitting = true;
-
-    if (ActiveStore is null)
-    {
-      isSubmitting = false;
-      return;
-    }
-    product.StoreId = ActiveStore.StoreId;
-
-    if (product.StoreId == Guid.Empty)
-    {
-      ToastService.ShowToast(
-      "Please select a store before creating a product",
-      string.Empty,
-      ToastService.ToastLevel.Warning
-      );
-
-      isSubmitting = false;
-      return;
-    }
-
-    try
-    {
-      var result = await ProductService.AddProduct(product);
-
-      if (!result.Success || result.Data is null)
-      {
-        ToastService.ShowToast(
-        result.Error?.Detail ?? "Failed to create product",
-        string.Empty,
-        ToastService.ToastLevel.Error
-        );
-
-        isSubmitting = false;
-        return;
-      }
-
-      createdProductId = result.Data.Id;
-      productCreated = true;
-
-      if (product.HasVariants)
-      {
-        ToastService.ShowToast(
-        "Product created successfully. You can now add variants.",
-        string.Empty,
-        ToastService.ToastLevel.Success
-        );
-      }
-      else
-      {
-        ToastService.ShowToast(
-        "Product created successfully. You can now add price and stock and images.",
-        string.Empty,
-        ToastService.ToastLevel.Success
-        );
-      }
-    }
-    catch
-    {
-      ToastService.ShowToast(
-      "An error occurred while creating the product",
-      string.Empty,
-      ToastService.ToastLevel.Error
-      );
-
-      isSubmitting = false;
-    }
-    finally
-    {
-      isSubmitting = false;
-    }
-  }
-
-  private async Task UpdateInventory()
-  {
-    if (product.Price <= 0 || product.Stock < 0)
-    {
-      ToastService.ShowToast(
-          "Price and stock must be valid values",
-          string.Empty,
-          ToastService.ToastLevel.Warning
-      );
-      return;
-    }
-
-    var req = new UpdateProductInventoryRequest
-    {
-      ProductId = createdProductId,
-      Price = product.Price,
-      Stock = product.Stock
+        "Produce", "Dairy", "Bakery", "Beverages", "Meat",
+        "Seafood", "Frozen", "Snacks", "Household", "Other"
     };
 
-    var result = await ProductService.UpdateProductInventory(req);
-
-    if (!result.Success)
+    protected override async Task OnInitializedAsync()
     {
-      ToastService.ShowToast(
-          result.Error?.Detail ?? "Failed to update inventory",
-          string.Empty,
-          ToastService.ToastLevel.Error
-      );
-      return;
+        var result = await StoreService.GetAllStores();
+        if (result.Success && result.Data != null)
+            _stores = result.Data;
+        _loadingStores = false;
     }
 
-    isAddSuccess = true;
+    protected override void OnParametersSet()
+    {
+        if (StoreId.HasValue && StoreId != Guid.Empty)
+        {
+            _selectedStoreId = StoreId;
+            _product.StoreId = StoreId.Value;
+        }
+    }
 
-    ToastService.ShowToast(
-        result.Data?.Message ?? "Inventory updated",
-        string.Empty,
-        ToastService.ToastLevel.Success
-    );
-  }
+    private void OnStoreSelected(Guid id)
+    {
+        _selectedStoreId = id;
+        _product.StoreId = id;
+        Navigation.NavigateTo($"/merchant/products/create/{id}", replace: true);
+    }
 
-  private void ResetAll()
-  {
-    product = new CreateProductRequest();
-    productCreated = false;
-    isAddSuccess = false;
-    isSubmitting = false;
-    createdProductId = Guid.Empty;
+    private async Task Submit()
+    {
+        _error = null;
+        _saving = true;
 
-    variantsRef?.ResetAll();
-  }
+        // Prefer cascaded ActiveStore over the param — keeps it consistent with
+        // the rest of the merchant shell
+        if (ActiveStore is not null && ActiveStore.StoreId != Guid.Empty)
+            _product.StoreId = ActiveStore.StoreId;
+
+        if (_product.StoreId == Guid.Empty)
+        {
+            ToastService.ShowToast("Please select a store first.", "", ToastService.ToastLevel.Warning);
+            _saving = false;
+            return;
+        }
+
+        var result = await ProductService.AddProduct(_product);
+        _saving = false;
+
+        if (!result.Success || result.Data is null)
+        {
+            _error = result.Error?.Detail ?? "Failed to create product.";
+            return;
+        }
+
+        _createdProductId = result.Data.Id;
+        _productCreated = true;
+
+        ToastService.ShowToast(
+            _product.HasVariants
+                ? "Product created — now add variants."
+                : "Product created — now set price and stock.",
+            "", ToastService.ToastLevel.Success);
+    }
+
+    private async Task UpdateInventory()
+    {
+        if (_product.Price <= 0 || _product.Stock < 0)
+        {
+            ToastService.ShowToast("Enter a valid price and stock.", "", ToastService.ToastLevel.Warning);
+            return;
+        }
+
+        _savingInventory = true;
+
+        var result = await ProductService.UpdateProductInventory(new UpdateProductInventoryRequest
+        {
+            ProductId = _createdProductId,
+            Price = _product.Price,
+            Stock = _product.Stock
+        });
+
+        _savingInventory = false;
+
+        if (!result.Success)
+        {
+            ToastService.ShowToast(result.Error?.Detail ?? "Failed to update inventory.", "", ToastService.ToastLevel.Error);
+            return;
+        }
+
+        _inventorySaved = true;
+        ToastService.ShowToast(result.Data?.Message ?? "Inventory saved.", "", ToastService.ToastLevel.Success);
+    }
+
+    private void ResetAll()
+    {
+        _product = new CreateProductRequest();
+        _productCreated = false;
+        _inventorySaved = false;
+        _saving = false;
+        _savingInventory = false;
+        _createdProductId = Guid.Empty;
+        _hasVariants = false;
+        _error = null;
+        _variantSection?.ResetAll();
+    }
 }

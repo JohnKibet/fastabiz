@@ -1,73 +1,153 @@
 @page "/merchant/products"
 @layout MerchantLayout
-@using System.Text.Json
 @using System.Web
 @using frontend.Models
+@using frontend.Models.Storefront
+@using MudBlazor
+@using frontend.Configs
+@using MudVariant = MudBlazor.Variant
 @inject ProductService ProductService
 @inject NavigationManager Navigation
 
-@if (isLoading)
-{
-  <p>Loading products...</p>
-}
-else
-{
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-    @if (ShowSelectProductOverlay)
-    {
-      <SelectProductOverlay OnDismiss="HideOverlay" />
-    }
+<div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-3">
+    <div>
+        <MudText Typo="Typo.h5" Style="font-weight:800;">Products</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">
+            @if (StoreCtx is not null)
+            { <span>@StoreCtx.StoreName</span> }
+        </MudText>
+    </div>
+    <MudButton Href="/merchant/products/create"
+               Variant="MudVariant.Filled" Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add"
+               Style="border-radius:8px; font-weight:700;">
+        Add Product
+    </MudButton>
+</div>
 
-    @foreach (var product in products)
-    {
-      <MerchantProductCard Product="@product" OnDelete="HandleDelete" />
-    }
-  </div>
+@if (ShowSelectProductOverlay)
+{
+    <SelectProductOverlay OnDismiss="@(() => ShowSelectProductOverlay = false)" />
 }
+
+<AppGrid TItem="ProductListItem" Items="@_products"
+         Loading="@_loading"
+         EmptyText="No products found. Add your first product."
+         OnRowClick="@(p => Navigation.NavigateTo($"/merchant/products/{p.Id}?mode=edit"))">
+
+    <ColDefs>
+        <MudTh>Product</MudTh>
+        <MudTh>Category</MudTh>
+        <MudTh>Price</MudTh>
+        <MudTh>Stock</MudTh>
+        <MudTh>Variants</MudTh>
+        <MudTh></MudTh>
+    </ColDefs>
+
+    <RowTemplate Context="product">
+        <MudTd>
+            <div class="d-flex align-center gap-3">
+                <MudAvatar Rounded="true" Style="width:36px; height:36px; background:#f3f4f6;">
+                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                    {
+                        <MudImage Src="@product.ImageUrl" Alt="@product.Name"
+                                  Style="width:36px; height:36px; object-fit:cover;" />
+                    }
+                    else
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Inventory2" Style="color:#9ca3af;" />
+                    }
+                </MudAvatar>
+                <div>
+                    <MudText Typo="Typo.body2" Style="font-weight:600;">@product.Name</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                        @product.Description
+                    </MudText>
+                </div>
+            </div>
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small" Variant="MudVariant.Outlined" Color="Color.Default">
+                @product.Category
+            </MudChip>
+        </MudTd>
+        <MudTd>
+            @if (product.HasVariants)
+            {
+                <MudText Typo="Typo.body2">
+                    @product.MinPrice?.ToString("C") – @product.MaxPrice?.ToString("C")
+                </MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.body2">@product.Price?.ToString("C")</MudText>
+            }
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small"
+                     Color="@(product.Stock > 5 ? Color.Success : Color.Error)"
+                     Variant="MudVariant.Filled" Label="true">
+                @product.Stock
+            </MudChip>
+        </MudTd>
+        <MudTd>
+            @if (product.HasVariants)
+            {
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                    @product.VariantCount variant@(product.VariantCount == 1 ? "" : "s")
+                </MudText>
+            }
+            else
+            {
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">Simple</MudText>
+            }
+        </MudTd>
+        <MudTd>
+            @*
+                stopPropagation is on the wrapper <span>, not on MudIconButton.
+                MudIconButton exposes OnClick as a Blazor [Parameter], and
+                @onclick:stopPropagation also tries to bind to onclick — two
+                handlers on the same event causes RZ10010. The fix: let the
+                span absorb and stop the row-click bubbling; MudIconButton
+                only sees its own clean OnClick.
+            *@
+            <span @onclick:stopPropagation="true" class="d-inline-flex gap-1">
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
+                               OnClick="@(() => Navigation.NavigateTo($"/merchant/products/{product.Id}?mode=edit"))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                               OnClick="@(() => HandleDelete(product.Id))" />
+            </span>
+        </MudTd>
+    </RowTemplate>
+
+</AppGrid>
 
 @code {
-  [CascadingParameter] public ActiveStoreContext StoreCtx { get; set; } = default!;
-  [CascadingParameter] public ActiveProductContext ProductCtx { get; set; } = default!;
-  private List<ProductListItem> products = new();
-  bool ShowSelectProductOverlay;
-  bool isLoading;
-  Guid? lastLoadedStoreId;
+    [CascadingParameter] public ActiveStoreContext?   StoreCtx   { get; set; }
+    [CascadingParameter] public ActiveProductContext? ProductCtx { get; set; }
 
-  protected override async Task OnParametersSetAsync()
-  {
-    if (StoreCtx == null || StoreCtx.StoreId == Guid.Empty)
-      return;
+    private List<ProductListItem> _products = new();
+    private bool  _loading;
+    private Guid? _lastLoadedStoreId;
+    private bool  ShowSelectProductOverlay;
 
-    // Prevent reloading endlessly
-    if (lastLoadedStoreId == StoreCtx.StoreId)
-      return;
+    protected override async Task OnParametersSetAsync()
+    {
+        if (StoreCtx is null || StoreCtx.StoreId == Guid.Empty) return;
+        if (_lastLoadedStoreId == StoreCtx.StoreId)            return;
 
-    lastLoadedStoreId = StoreCtx.StoreId;
+        _lastLoadedStoreId = StoreCtx.StoreId;
 
-    var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-    var query = HttpUtility.ParseQueryString(uri.Query);
+        var uri    = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query  = HttpUtility.ParseQueryString(uri.Query);
+        ShowSelectProductOverlay = query.Get("intent") == "manage"
+                                   && !(ProductCtx?.HasValue ?? false);
 
-    var intent = query.Get("intent");
-    ShowSelectProductOverlay =
-    intent == "manage" && !(ProductCtx?.HasValue ?? false);
+        _loading = true;
+        var result = await ProductService.ListAllStoreProducts(StoreCtx.StoreId);
+        _products  = result.Success && result.Data != null ? result.Data : new();
+        _loading   = false;
+    }
 
-    isLoading = true;
-
-    var result = await ProductService.ListAllStoreProducts(StoreCtx.StoreId);
-
-    products = result.Success && result.Data != null
-    ? result.Data
-    : new();
-    isLoading = false;
-  }
-
-  void HideOverlay()
-  {
-    ShowSelectProductOverlay = false;
-  }
-  private void HandleDelete(Guid productId)
-  {
-    products.RemoveAll(p => p.Id == productId);
-  }
-
+    private void HandleDelete(Guid id) => _products.RemoveAll(p => p.Id == id);
 }

@@ -1,125 +1,109 @@
+@namespace frontend.Pages.Shared.Components.Merchant
 @using frontend.Models
-@using frontend.Pages.Shared.Components.InputField
-
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 @inject UserService UserService
 @inject ToastService ToastService
 @inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthProvider 
 
-<EditForm Model="@user" OnValidSubmit="HandleValidSubmit">
-    <DataAnnotationsValidator />
+<AppForm Title="Create User"
+         Subtitle="Add a new user to the platform"
+         Model="@_user"
+         OnValidSubmit="HandleValidSubmit"
+         OnCancel="@(() => Navigation.NavigateTo("/merchant/users"))"
+         SubmitLabel="Create User"
+         Loading="@_saving"
+         Error="@_error">
 
-    <div class="bg-white rounded-xl shadow p-6 max-w-xl mx-auto space-y-6">
-        <h3 class="text-2xl font-semibold text-gray-800">Create New User</h3>
+    <MudGrid Spacing="3">
+        <MudItem xs="12" sm="6">
+            <MudTextField @bind-Value="_user.FullName"
+                          Label="Full Name"
+                          Variant="MudVariant.Outlined"
+                          FullWidth="true"
+                          Placeholder="e.g. John Doe"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Person"
+                          For="@(() => _user.FullName)" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField @bind-Value="_user.Email"
+                          Label="Email"
+                          Variant="MudVariant.Outlined"
+                          FullWidth="true"
+                          Placeholder="e.g. john@example.com"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Email"
+                          For="@(() => _user.Email)" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField @bind-Value="_user.Password"
+                          Label="Password"
+                          Variant="MudVariant.Outlined"
+                          FullWidth="true"
+                          Placeholder="e.g. Pass1234"
+                          InputType="@(_showPass ? InputType.Text : InputType.Password)"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@(_showPass ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility)"
+                          OnAdornmentClick="@(() => _showPass = !_showPass)"
+                          For="@(() => _user.Password)" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudTextField @bind-Value="_user.Phone"
+                          Label="Phone"
+                          Variant="MudVariant.Outlined"
+                          FullWidth="true"
+                          Placeholder="e.g. 0712345678"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Phone"
+                          For="@(() => _user.Phone)" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <SelectField TValue="string"
+                         TItem="string"
+                         Label="Role"
+                         Options="@_roles"
+                         @bind-Value="_user.Role"
+                         For="@(() => _user.Role)" />
+        </MudItem>
+    </MudGrid>
 
-        <div class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputField
-                    Label="Full Name"
-                    Value="@user.FullName"
-                    ValueChanged="((string v) => user.FullName = v)"
-                    ValueExpression="@(() => user.FullName)"
-                    Placeholder="e.g., John Doe" 
-                />
-
-                <InputField
-                    Label="Email"
-                    Value="@user.Email"
-                    ValueChanged="((string v) => user.Email = v)"
-                    ValueExpression="@(() => user.Email)"
-                    Placeholder="e.g., johndoe@example.com" 
-                />
-
-                <InputField
-                    Label="Password"
-                    Value="@user.Password"
-                    ValueChanged="((string v) => user.Password = v)"
-                    ValueExpression="@(() => user.Password)"
-                    Placeholder="e.g., Pass1234" 
-                />
-
-                <InputField
-                    Label="Role"
-                    Value="@user.Role"
-                    ValueChanged="((string v) => user.Role = v)"
-                    ValueExpression="@(() => user.Role)"
-                    Placeholder="e.g., merchant, customer, driver" 
-                />
-
-                <InputField
-                    Label="Phone"
-                    Value="@user.Phone"
-                    ValueChanged="((string v) => user.Phone = v)"
-                    ValueExpression="@(() => user.Phone)"
-                    Placeholder="e.g., 123456789" 
-                />
-            </div>
-
-            <div class="flex flex-row space-x-12">
-                <button 
-                    type="submit" 
-                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200" 
-                    disabled="@isSubmitting"
-                >
-                    @(isSubmitting ? "Creating..." : "Create User")
-                </button>
-
-                <button 
-                    class="w-full bg-gray-500 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                    @onclick="ClearForm"
-                >
-                    Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-</EditForm>
+</AppForm>
 
 @code {
-    private CreateUserRequest user = new();
-    private bool isSubmitting = false;
+    private CreateUserRequest _user   = new();
+    private bool    _saving   = false;
+    private bool    _showPass = false;
+    private string? _error;
+
+    private static readonly List<string> _roles = new() { "merchant", "customer", "driver" };
 
     private async Task HandleValidSubmit()
     {
+        _error  = null;
+        _saving = true;
+
         try
         {
-            isSubmitting = true;
-            var result = await UserService.AddUser(user);
+            var result = await UserService.AddUser(_user);
+
             if (result.Success)
             {
-                ClearForm();
-                ToastService.ShowToast("User successfully created!", string.Empty, ToastService.ToastLevel.Success);
-                Navigation.NavigateTo("merchant/users");
+                ToastService.ShowToast("User created successfully!", string.Empty, ToastService.ToastLevel.Success);
+                Navigation.NavigateTo("/merchant/users");
                 return;
             }
 
-            var errMessage = result.Error;
-
-            if (errMessage == null)
-            {
-                ToastService.ShowToast("Failed to create user (unknown error)", string.Empty, ToastService.ToastLevel.Error);
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(errMessage.Detail))
-            {
-                ToastService.ShowToast(errMessage.Detail, string.Empty, ToastService.ToastLevel.Error);
-                return;
-            }
-
-            ToastService.ShowToast("Failed to create user.", string.Empty, ToastService.ToastLevel.Error);
+            _error = result.Error?.Message ?? "Failed to create user.";
         }
         catch (Exception ex)
         {
-            ToastService.ShowToast($"Failed to create user: {ex.Message}", string.Empty, ToastService.ToastLevel.Error);
+            _error = $"Error: {ex.Message}";
         }
         finally
         {
-            isSubmitting = false;
+            _saving = false;
         }
-    }
-    private void ClearForm()
-    {
-        user = new();
     }
 }

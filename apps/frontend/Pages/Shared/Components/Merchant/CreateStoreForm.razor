@@ -1,91 +1,81 @@
-@using frontend.Models
 @namespace frontend.Pages.Shared.Components.Merchant
-@inject HttpClient Http
-@inject ToastService ToastService
+@using frontend.Models
+@using frontend.Models.Storefront
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 @inject StoreService StoreService
+@inject ToastService ToastService
 @inject NavigationManager Navigation
 
-<div class="min-h-screen bg-bgSoft flex items-start justify-start p-2">
-  <div class="w-full max-w-xl bg-white rounded-2xl shadow p-8">
-    <h1 class="text-2xl font-poppins font-semibold text-textDark mb-2">Create Store</h1>
-    <p class="text-textLight mb-6">Set up your storefront details</p>
+<AppForm Title="Create Store"
+         Subtitle="Set up your storefront details"
+         Model="@_store"
+         OnValidSubmit="HandleValidSubmit"
+         OnCancel="@(() => Navigation.NavigateTo("/merchant/stores"))"
+         SubmitLabel="Create Store"
+         Loading="@_saving"
+         Error="@_error">
 
+    <MudTextField @bind-Value="_store.Name"
+                  Label="Store Name"
+                  Variant="MudVariant.Outlined"
+                  FullWidth="true"
+                  Class="mb-4"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Store"
+                  For="@(() => _store.Name)" />
 
-    <EditForm Model="@store" OnValidSubmit="HandleValidSubmit">
-      <DataAnnotationsValidator />
+    <MudTextField @bind-Value="_store.Location"
+                  Label="Location"
+                  Variant="MudVariant.Outlined"
+                  FullWidth="true"
+                  Class="mb-4"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.LocationOn"
+                  For="@(() => _store.Location)" />
 
+    <MudTextField @bind-Value="_store.Logo"
+                  Label="Logo URL"
+                  Variant="MudVariant.Outlined"
+                  FullWidth="true"
+                  Class="mb-4"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Image"
+                  Placeholder="https://..." />
 
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-textDark">Store Name</label>
-          <InputText @bind-Value="store.Name" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-          <ValidationMessage For="() => store.Name" />
-        </div>
-
-
-        <div>
-          <label class="block text-sm font-medium text-textDark">Location</label>
-          <InputText @bind-Value="store.Location" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-          <ValidationMessage For="() => store.Location" />
-        </div>
-
-
-        <div>
-          <label class="block text-sm font-medium text-textDark">Logo URL</label>
-          <InputText @bind-Value="store.Logo" class="w-full mt-1 px-4 py-2 border rounded-lg" />
-        </div>
-      </div>
-
-
-      <button type="submit" class="mt-6 w-full bg-primary text-white py-2 rounded-xl hover:bg-ctaHover transition">
-        Create Store
-      </button>
-    </EditForm>
-  </div>
-</div>
+</AppForm>
 
 @code {
-  private CreateStoreRequest store = new()
-  {
-    Id = Guid.NewGuid()
-  };
-  private bool isSubmitting = false;
+    private CreateStoreRequest _store = new() { Id = Guid.NewGuid() };
+    private bool    _saving = false;
+    private string? _error;
 
-  private async Task HandleValidSubmit()
-  {
-    try
+    private async Task HandleValidSubmit()
     {
-      isSubmitting = true;
-      var result = await StoreService.CreateStore(store);
-      if (result.Success)
-      {
-        ToastService.ShowToast("Store created successfully", string.Empty, ToastService.ToastLevel.Success);
-        Navigation.NavigateTo($"merchant/products/create/{store.Id}");
-        return;
-      }
+        _error  = null;
+        _saving = true;
 
-      var errMessage = result.Error;
-      if (errMessage == null)
-      {
-        ToastService.ShowToast("Failed to create store (unknown error)", string.Empty, ToastService.ToastLevel.Error);
-        return;
-      }
+        try
+        {
+            var result = await StoreService.CreateStore(_store);
 
-      if (!string.IsNullOrWhiteSpace(errMessage.Detail))
-      {
-        ToastService.ShowToast(errMessage.Detail, string.Empty, ToastService.ToastLevel.Error);
-        return;
-      }
+            if (result.Success)
+            {
+                ToastService.ShowToast("Store created successfully", string.Empty, ToastService.ToastLevel.Success);
+                Navigation.NavigateTo($"/merchant/products/create/{_store.Id}");
+                return;
+            }
 
-      ToastService.ShowToast("Failed to create store", string.Empty, ToastService.ToastLevel.Error);
+            _error = result.Error?.Message ?? "Failed to create store.";
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            _saving = false;
+        }
     }
-    catch (Exception ex)
-    {
-      ToastService.ShowToast($"Error: {ex.Message}", string.Empty, ToastService.ToastLevel.Error);
-    }
-    finally
-    {
-      isSubmitting = false;
-    }
-  }
 }
