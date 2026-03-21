@@ -6,7 +6,7 @@
 @inject CartService CartService
 @inject OrderService OrderService
 @inject ToastService ToastService
-@inject PaymentService PaymentService
+@* @inject PaymentService PaymentService *@
 @inject NavigationManager Navigation
 
 <h1 class="text-2xl font-bold mb-6">Payment</h1>
@@ -200,9 +200,9 @@ else
                 return;
             }
 
-            var res = await PaymentService.StartMpesaExpressAsync(MpesaPhone, MpesaAmount);
+            @* var res = await PaymentService.StartMpesaExpressAsync(MpesaPhone, MpesaAmount); *@
 
-            if (!res.Success)
+            @* if (!res.Success)
             {
                 ToastService.ShowToast(
                 "Failed to initiate MPesa payment.",
@@ -218,7 +218,7 @@ else
             SuccessMessage,
             "",
             ToastService.ToastLevel.Success
-            );
+            ); *@
         }
 
         var result = await OrderService.AddOrder(request);

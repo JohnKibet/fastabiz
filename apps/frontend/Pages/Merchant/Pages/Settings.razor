@@ -90,7 +90,12 @@
             return;
         }
 
-        var response = await UserService.ChangePassword(UserId.Value, PasswordModel.CurrentPassword, PasswordModel.NewPassword);
+        var body = new ChangePasswordDto
+         {
+            CurrentPassword = PasswordModel.CurrentPassword,
+            NewPassword = PasswordModel.NewPassword
+        };
+        var response = await UserService.ChangePassword(UserId.Value, body);
 
         if (response.Success)
         {

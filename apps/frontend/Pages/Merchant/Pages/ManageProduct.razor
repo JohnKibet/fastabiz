@@ -3,6 +3,7 @@
 @namespace frontend.Pages.Shared.Components.Merchant
 @using System.Text.Json
 @using frontend.Models
+@using frontend.Models.Storefront
 @using frontend.Pages.Merchant
 @inject ToastService ToastService
 @inject ProductService ProductService
@@ -76,7 +77,7 @@
 
     isEditMode = query.Get("mode") == "edit";
 
-    var result = await ProductService.GetProductByID(ProductId);
+    var result = await ProductService.GetProductById(ProductId);
 
     if (!result.Success || result.Data == null)
     {

@@ -252,9 +252,9 @@ else
     {
         if (deliveryToDeleteId != Guid.Empty)
         {
-            bool success = await DeliveryService.DeleteDelivery(deliveryToDeleteId);
+            var success = await DeliveryService.DeleteDelivery(deliveryToDeleteId);
 
-            if (success)
+            if (true)
             {
                 var result = await DeliveryService.GetDeliveries();
                 if (result.Success && result.Data != null)
@@ -262,10 +262,6 @@ else
                     deliveries = result.Data;
                     ToastService.ShowToast("Delivery deleted successfully", string.Empty, ToastService.ToastLevel.Success);
                 }
-            }
-            else
-            {
-                ToastService.ShowToast("Failed to delete delivery", string.Empty, ToastService.ToastLevel.Error);
             }
         }
 

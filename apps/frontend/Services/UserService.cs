@@ -32,45 +32,16 @@ public class UserService
         => _api.PutAsync<UpdateOrderRequest, ApiMessageResponse>($"users/{userId}/update", req);
 
 
-    // public async Task<ServiceResult2<HttpResponseMessage>> ChangePassword(Guid userId, string currentPassword, string newPassword)
-    // {
-    //     var body = new ChangePasswordDto
-    //     {
-    //         CurrentPassword = currentPassword,
-    //         NewPassword = newPassword
-    //     };
+    public Task<ApiResult<ApiMessageResponse>> ChangePassword(Guid userId, ChangePasswordDto req)
 
-    //     var response = await _http.PutAsJsonAsync($"users/{userId}/password", body);
+        => _api.PutAsync<ChangePasswordDto, ApiMessageResponse>($"users/{userId}/password", req);
 
-    //     if (response.IsSuccessStatusCode)
-    //         return ServiceResult2<HttpResponseMessage>.Ok(response);
 
-    //     var error = await ParseError(response);
-    //     return ServiceResult2<HttpResponseMessage>.Fail(error);
-    // }
+    public Task<ApiResult<ApiMessageResponse>> UpdateProfile(Guid userId, EditUserModel model)
+        => _api.PutAsync<EditUserModel, ApiMessageResponse>($"users/{userId}/profile", model);
 
-    // public async Task<ServiceResult2<HttpResponseMessage>> UpdateProfile(Guid userId, EditUserModel model)
-    // {
-    //     var response = await _http.PatchAsJsonAsync($"users/{userId}/profile", model);
-
-    //     if (response.IsSuccessStatusCode)
-    //         return ServiceResult2<HttpResponseMessage>.Ok(response);
-
-    //     // Parse structured backend error (ErrorResponse)
-    //     var error = await ParseError(response);
-    //     return ServiceResult2<HttpResponseMessage>.Fail(error);
-    // }
-
-    // public async Task<ServiceResult2<HttpResponseMessage>> UpdateStatus(Guid userId, UserStatus newStatus)
-    // {
-    //     var response = await _http.PatchAsJsonAsync($"users/{userId}/status", newStatus);
-
-    //     if (response.IsSuccessStatusCode)
-    //         return ServiceResult2<HttpResponseMessage>.Ok(response);
-
-    //     var error = await ParseError(response);
-    //     return ServiceResult2<HttpResponseMessage>.Fail(error);
-    // }
+    public Task<ApiResult<ApiMessageResponse>> UpdateStatus(Guid userId, UserStatus newStatus)
+        => _api.PutAsync<UserStatus, ApiMessageResponse>($"users/{userId}/status", newStatus);
 
     // public async Task<ServiceResult2<List<User>>> GetAllCachedUsers(bool forceRefresh = false)
     // {

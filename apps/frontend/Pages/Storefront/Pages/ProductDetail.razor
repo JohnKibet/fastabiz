@@ -1,6 +1,7 @@
 @page "/product/{ProductId:guid}"
 @page "/product/{ProductId:guid}/{VariantId:guid}"
 @using System.Threading.Tasks
+@using frontend.Models.Storefront
 @layout StorefrontLayout
 @inject NavigationManager Nav
 @inject ProductService ProductService
@@ -123,7 +124,7 @@ else
         LoadFailed = false;
         FetchedProduct = null;
 
-        var result = await ProductService.GetProductByID(ProductId);
+        var result = await ProductService.GetProductById(ProductId);
 
         if (!result.Success || result.Data is null)
         {

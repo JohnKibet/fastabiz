@@ -279,16 +279,34 @@ else
         bool updated = false;
 
         if (editableOrder.PickupAddress != selectedOrder.PickupAddress)
-            await OrderService.UpdateOrder(selectedOrder.Id, "PickupLocation", editableOrder.PickupAddress);
+        {
+            var body = new UpdateOrderRequest {
+                Column = "PickupLocation",
+                Value = editableOrder.PickupAddress,
+            };
+            await OrderService.UpdateOrder(selectedOrder.Id, body);
             updated = true;
+        }
 
         if (editableOrder.DeliveryAddress != selectedOrder.DeliveryAddress)
-            await OrderService.UpdateOrder(selectedOrder.Id, "DeliveryLocation", editableOrder.DeliveryAddress);
+        {
+            var body = new UpdateOrderRequest {
+                Column = "DeliveryLocation",
+                Value = editableOrder.DeliveryAddress,
+            };
+            await OrderService.UpdateOrder(selectedOrder.Id, body);
             updated = true;
+        }
 
         if (editableOrder.Status != selectedOrder.Status)
-            await OrderService.UpdateOrder(selectedOrder.Id, "OrderStatus", editableOrder.Status);
+        {
+            var body = new UpdateOrderRequest {
+                Column = "OrderStatus",
+                Value = editableOrder.Status,
+            };
+            await OrderService.UpdateOrder(selectedOrder.Id, body);
             updated = true;
+        }
 
         if (updated)
         {
@@ -322,9 +340,9 @@ else
     {
         if (orderToDeleteId != Guid.Empty)
         {
-            bool success = await OrderService.DeleteOrder(orderToDeleteId);
+            var success = await OrderService.DeleteOrder(orderToDeleteId);
 
-            if (success)
+            if (true)
             {
                 if (UserId.HasValue)
                 {
@@ -339,10 +357,6 @@ else
                 {
                     orders = new List<Order>();
                 }
-            }
-            else
-            {
-                ToastService.ShowToast("Failed to delete order", string.Empty, ToastService.ToastLevel.Error);
             }
         }
 

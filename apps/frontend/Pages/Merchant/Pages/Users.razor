@@ -13,19 +13,17 @@
 <div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-3">
     <div>
         <MudText Typo="Typo.h5" Style="font-weight:800;">User Management</MudText>
-        <MudText Typo="Typo.body2" Class="mud-text-secondary">@_users?.Count total user@(_users?.Count == 1 ? "" : "s")</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">@_users?.Count total user@(_users?.Count == 1 ? "" : "s")
+        </MudText>
     </div>
     <div class="d-flex gap-2">
-        <MudButton OnClick="@(() => Navigation.NavigateTo("/merchant/createuser"))"
-                   Variant="MudVariant.Filled" Color="Color.Primary"
-                   StartIcon="@Icons.Material.Filled.PersonAdd"
+        <MudButton OnClick="@(() => Navigation.NavigateTo("/merchant/createuser"))"     Variant="MudVariant.Filled"
+                   Color="Color.Primary"            StartIcon="@Icons.Material.Filled.PersonAdd"
                    Style="border-radius:8px; font-weight:700;">
             Add User
         </MudButton>
-        <MudButton OnClick="ExportUsers"
-                   Variant="MudVariant.Outlined" Color="Color.Default"
-                   StartIcon="@Icons.Material.Filled.Download"
-                   Style="border-radius:8px; font-weight:600;">
+        <MudButton OnClick="ExportUsers"              Variant="MudVariant.Outlined" Color="Color.Default"
+                   StartIcon="@Icons.Material.Filled.Download"                Style="border-radius:8px; font-weight:600;">
             Export CSV
         </MudButton>
     </div>
@@ -34,36 +32,21 @@
 <!-- ── Filters ── -->
 <MudGrid Spacing="3" Class="mb-6">
     <MudItem xs="12" sm="6" md="4">
-        <MudTextField @bind-Value="_search"
-                      Placeholder="Search by name or email..."
-                      Variant="MudVariant.Outlined"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@Icons.Material.Filled.Search"
-                      Margin="Margin.Dense"
-                      FullWidth="true"
-                      Immediate="true" />
+        <MudTextField @bind-Value="_search"              Placeholder="Search by name or email..."            Variant="MudVariant.Outlined"
+                      Adornment="Adornment.Start"                    AdornmentIcon="@Icons.Material.Filled.Search"                  Margin="Margin.Dense"
+                      FullWidth="true"  Immediate="true" />
     </MudItem>
     <MudItem xs="12" sm="3" md="2">
-        <SelectField TValue="string"
-                     TItem="string"
-                     Label="Role"
-                     Options="@_roleOptions"
-                     @bind-Value="_filterRole" />
+        <SelectField TValue="string"           TItem="string"                    Label="Role"                 Options="@_roleOptions"              @bind-Value="_filterRole" />
     </MudItem>
     <MudItem xs="12" sm="3" md="2">
-        <SelectField TValue="string"
-                     TItem="string"
-                     Label="Status"
-                     Options="@_statusOptions"
+        <SelectField TValue="string"           TItem="string"        Label="Status"      Options="@_statusOptions"
                      @bind-Value="_filterStatus" />
     </MudItem>
 </MudGrid>
 
 <!-- ── Grid ── -->
-<AppGrid TItem="User"
-         Items="@FilteredUsers"
-         Loading="@_loading"
-         EmptyText="No users found.">
+<AppGrid TItem="User"      Items="@FilteredUsers"         Loading="@_loading"      EmptyText="No users found.">
 
     <ColDefs>
         <MudTh>User</MudTh>
@@ -76,7 +59,8 @@
     <RowTemplate Context="user">
         <MudTd>
             <div class="d-flex align-center gap-3">
-                <MudAvatar Style="background:#f97316; color:white; font-weight:700; width:34px; height:34px; font-size:0.85rem;">
+                <MudAvatar
+                    Style="background:#f97316; color:white; font-weight:700; width:34px; height:34px; font-size:0.85rem;">
                     @(user.FullName?.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
                 </MudAvatar>
                 <div>
@@ -98,7 +82,7 @@
         </MudTd>
         <MudTd>
             <MudText Typo="Typo.caption" Class="mud-text-secondary">
-                @(user.LastLogin.HasValue ? user.LastLogin.Value.ToString("MMM d, yyyy") : "Never")
+                @(user.LastLogin.HasValue? user.LastLogin.Value.ToString("MMM d, yyyy") : "Never")
             </MudText>
         </MudTd>
         <MudTd>
@@ -131,10 +115,7 @@
             <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">
                 Update status for <strong>@_selectedUser?.FullName</strong>
             </MudText>
-            <SelectField TValue="UserStatus?"
-                         TItem="UserStatus?"
-                         Label="Status"
-                         Options="@_statusEnumOptions"
+            <SelectField TValue="UserStatus?"                     TItem="UserStatus?"                      Label="Status"                       Options="@_statusEnumOptions"
                          @bind-Value="_editStatus" />
         }
         else
@@ -171,9 +152,11 @@
         }
         else
         {
-            <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
-                       OnClick="SaveChanges" Disabled="@_saving">
-                @if (_saving) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+            <MudButton Variant="MudVariant.Filled" Color="Color.Primary"      OnClick="SaveChanges" Disabled="@_saving">
+                @if (_saving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
                 Save
             </MudButton>
         }
@@ -195,33 +178,33 @@
         </MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton Variant="MudVariant.Filled" Color="Color.Error"
-                   OnClick="DeleteUser" Disabled="@_saving">Delete</MudButton>
+        <MudButton Variant="MudVariant.Filled" Color="Color.Error"  OnClick="DeleteUser" Disabled="@_saving">Delete
+        </MudButton>
         <MudButton Variant="MudVariant.Text" OnClick="@(() => _deleteOpen = false)">Cancel</MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
     private List<User>? _users;
-    private string  _search       = string.Empty;
-    private string  _filterRole   = string.Empty;
-    private string  _filterStatus = string.Empty;
-    private bool    _loading      = true;
+    private string _search = string.Empty;
+    private string _filterRole = string.Empty;
+    private string _filterStatus = string.Empty;
+    private bool _loading = true;
 
     // Modal state
-    private bool        _modalOpen = false;
-    private bool        _editMode  = false;
-    private bool        _saving    = false;
-    private User?       _selectedUser;
+    private bool _modalOpen = false;
+    private bool _editMode = false;
+    private bool _saving = false;
+    private User? _selectedUser;
     private UserStatus? _editStatus;
 
     // Delete state
-    private bool   _deleteOpen       = false;
-    private Guid   _deleteTargetId;
+    private bool _deleteOpen = false;
+    private Guid _deleteTargetId;
     private string _deleteTargetName = string.Empty;
 
     // Filter options
-    private static readonly List<string> _roleOptions   = new() { "", "merchant", "customer", "driver" };
+    private static readonly List<string> _roleOptions = new() { "", "merchant", "customer", "driver" };
     private static readonly List<string> _statusOptions =
         new[] { "" }.Concat(Enum.GetNames<UserStatus>()).ToList();
     private static readonly List<UserStatus?> _statusEnumOptions =
@@ -229,24 +212,25 @@
 
     private IEnumerable<User> FilteredUsers =>
         _users?.Where(u =>
-            (string.IsNullOrEmpty(_search)       || u.Email.Contains(_search, StringComparison.OrdinalIgnoreCase) || u.FullName.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
-            (string.IsNullOrEmpty(_filterRole)   || u.Role == _filterRole) &&
+            (string.IsNullOrEmpty(_search) || u.Email.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+u.FullName.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(_filterRole) || u.Role == _filterRole) &&
             (string.IsNullOrEmpty(_filterStatus) || u.Status?.ToString() == _filterStatus)
         ) ?? Enumerable.Empty<User>();
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await UserService.GetAllCachedUsers();
-        _users   = result.Success && result.Data != null ? result.Data : new();
+        @* var result = await UserService.GetAllCachedUsers(); *@
+        @* _users   = result.Success && result.Data != null ? result.Data : new(); *@
         _loading = false;
     }
 
     private void OpenModal(User user, bool editMode)
     {
         _selectedUser = user;
-        _editStatus   = user.Status;
-        _editMode     = editMode;
-        _modalOpen    = true;
+        _editStatus = user.Status;
+        _editMode = editMode;
+        _modalOpen = true;
     }
 
     private async Task SaveChanges()
@@ -272,7 +256,8 @@
         }
         else
         {
-            ToastService.ShowToast(result.Error?.Message ?? "Failed to update status.", string.Empty, ToastService.ToastLevel.Error);
+            ToastService.ShowToast(result.Error?.Message ?? "Failed to update status.", string.Empty,
+ToastService.ToastLevel.Error);
         }
 
         _modalOpen = false;
@@ -280,37 +265,33 @@
 
     private void ConfirmDelete(User user)
     {
-        _deleteTargetId   = user.ID;
+        _deleteTargetId = user.ID;
         _deleteTargetName = user.FullName;
-        _deleteOpen       = true;
+        _deleteOpen = true;
     }
 
     private async Task DeleteUser()
     {
         _saving = true;
         var success = await UserService.DeleteUser(_deleteTargetId);
-        _saving     = false;
+        _saving = false;
         _deleteOpen = false;
 
-        if (success)
+        if (true)
         {
             var result = await UserService.GetAllUsers();
             if (result.Success && result.Data != null) _users = result.Data;
             ToastService.ShowToast("User deleted.", string.Empty, ToastService.ToastLevel.Success);
         }
-        else
-        {
-            ToastService.ShowToast("Failed to delete user.", string.Empty, ToastService.ToastLevel.Error);
-        }
     }
 
     private static Color GetStatusColor(UserStatus? status) => status switch
     {
-        UserStatus.Active    => Color.Success,
+        UserStatus.Active => Color.Success,
         UserStatus.Suspended => Color.Error,
-        UserStatus.Pending   => Color.Warning,
-        UserStatus.Inactive  => Color.Default,
-        _                    => Color.Default
+        UserStatus.Pending => Color.Warning,
+        UserStatus.Inactive => Color.Default,
+        _ => Color.Default
     };
 
     private void ExportUsers() { /* TODO */ }

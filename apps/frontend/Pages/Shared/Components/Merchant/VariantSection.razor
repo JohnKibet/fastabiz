@@ -1,4 +1,5 @@
 @using frontend.Models
+@using frontend.Models.Storefront
 @using frontend.Pages.Shared.Components.Merchant.Variants
 @inject ProductService ProductService
 @inject ToastService ToastService
@@ -239,7 +240,7 @@
     if (!sig.Success)
       return;
 
-    var images = new List<Image>();
+    var images = new List<ProductImage>();
 
     for (int i = 0; i < draft.Files.Count; i++)
     {
@@ -251,7 +252,7 @@
       if (url is null)
         continue;
 
-      images.Add(new Image
+      images.Add(new ProductImage
       {
         URL = url,
         IsPrimary = i == draft.PrimaryImageIndex

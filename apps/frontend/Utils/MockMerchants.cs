@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using frontend.Models.Storefront;
 
 namespace frontend.Models;
 
@@ -13,9 +14,9 @@ public static class MockData
             LogoUrl = "green_valley_logo.jpg",
             Rating = 4.7,
             TotalProducts = 3,
-            Products = new List<ProductX>
+            Products = new List<Product>
             {
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -35,7 +36,7 @@ public static class MockData
                         new Variant { Id = Guid.NewGuid(), SKU = "APP-LG-001", Price = 1.80, Stock = 80, ImageUrl = "apple_large.jpg", Options = new Dictionary<string,string>{{"Size","Large"}} },
                     }
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -47,7 +48,7 @@ public static class MockData
                     Price = 0.80,
                     Stock = 300
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -69,9 +70,9 @@ public static class MockData
             LogoUrl = "sunrise_logo.jpg",
             Rating = 4.5,
             TotalProducts = 2,
-            Products = new List<ProductX>
+            Products = new List<Product>
             {
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -90,7 +91,7 @@ public static class MockData
                         new Variant { Id = Guid.NewGuid(), SKU = "ORG-TG-101", Price = 1.00, Stock = 150, ImageUrl = "orange_tangy.jpg", Options = new Dictionary<string,string>{{"Type","Tangy"}} },
                     }
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -112,9 +113,9 @@ public static class MockData
             LogoUrl = "highland_logo.jpg",
             Rating = 4.6,
             TotalProducts = 2,
-            Products = new List<ProductX>
+            Products = new List<Product>
             {
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -126,7 +127,7 @@ public static class MockData
                     Price = 3.50,
                     Stock = 60
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -148,9 +149,9 @@ public static class MockData
             LogoUrl = "coastal_logo.jpg",
             Rating = 4.8,
             TotalProducts = 3,
-            Products = new List<ProductX>
+            Products = new List<Product>
             {
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -162,7 +163,7 @@ public static class MockData
                     Price = 0.60,
                     Stock = 250
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -174,7 +175,7 @@ public static class MockData
                     Price = 1.20,
                     Stock = 180
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -196,9 +197,9 @@ public static class MockData
             LogoUrl = "happy_harvest.jpg",
             Rating = 4.3,
             TotalProducts = 2,
-            Products = new List<ProductX>
+            Products = new List<Product>
             {
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -210,7 +211,7 @@ public static class MockData
                     Price = 2.80,
                     Stock = 90
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -232,9 +233,9 @@ public static class MockData
             LogoUrl = "farm_direct.jpg",
             Rating = 4.6,
             TotalProducts = 2,
-            Products = new List<ProductX>
+            Products = new List<Product>
             {
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -253,7 +254,7 @@ public static class MockData
                         new Variant { Id = Guid.NewGuid(), SKU = "GRP-GR-501", Price = 2.30, Stock = 95, Options = new Dictionary<string,string>{{"Color","Green"}} },
                     }
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -275,9 +276,9 @@ public static class MockData
             LogoUrl = "tropical_delight.jpg",
             Rating = 4.9,
             TotalProducts = 2,
-            Products = new List<ProductX>
+            Products = new List<Product>
             {
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -289,7 +290,7 @@ public static class MockData
                     Price = 1.90,
                     Stock = 200
                 },
-                new ProductX
+                new Product
                 {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
@@ -311,8 +312,8 @@ public static class MockData
             LogoUrl = "techworld.jpg",
             Rating = 4.4,
             TotalProducts = 3,
-            Products = new List<ProductX> {
-                new ProductX {
+            Products = new List<Product> {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Wireless Headphones",
@@ -328,7 +329,7 @@ public static class MockData
                         new Variant { Id = Guid.NewGuid(), SKU = "HD-WHT-701", Price = 59.99, Stock = 30, Options = new Dictionary<string,string>{{"Color","White"}} }
                     }
                 },
-                new ProductX {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Smartphone Charger",
@@ -339,7 +340,7 @@ public static class MockData
                     Price = 15.99,
                     Stock = 120
                 },
-                new ProductX {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "4K LED TV",
@@ -360,8 +361,8 @@ public static class MockData
             LogoUrl = "urbanstyle.jpg",
             Rating = 4.2,
             TotalProducts = 2,
-            Products = new List<ProductX> {
-                new ProductX {
+            Products = new List<Product> {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Men's T-Shirts",
@@ -378,7 +379,7 @@ public static class MockData
                         new Variant { Id = Guid.NewGuid(), SKU="TS-L-GRY", Price=12.99, Stock=80, Options = new(){{"Size","L"},{"Color","Gray"}}}
                     }
                 },
-                new ProductX {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Women's Jeans",
@@ -399,8 +400,8 @@ public static class MockData
             LogoUrl = "homeliving.jpg",
             Rating = 4.7,
             TotalProducts = 2,
-            Products = new List<ProductX>{
-                new ProductX {
+            Products = new List<Product>{
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Wooden Coffee Table",
@@ -411,7 +412,7 @@ public static class MockData
                     Price = 130.00,
                     Stock = 20
                 },
-                new ProductX {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Office Chair",
@@ -437,8 +438,8 @@ public static class MockData
             LogoUrl = "glowbeauty.jpg",
             Rating = 4.5,
             TotalProducts = 3,
-            Products = new List<ProductX>{
-                new ProductX {
+            Products = new List<Product>{
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Face Serum",
@@ -449,7 +450,7 @@ public static class MockData
                     Price = 18.99,
                     Stock = 150
                 },
-                new ProductX {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Lipstick",
@@ -465,7 +466,7 @@ public static class MockData
                         new Variant{ Id=Guid.NewGuid(), SKU="LS-NUD-01", Price=7.99, Stock=70, Options=new(){{"Shade","Nude"}}}
                     }
                 },
-                new ProductX {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Face Cleanser",
@@ -486,8 +487,8 @@ public static class MockData
             LogoUrl = "powerfit.jpg",
             Rating = 4.6,
             TotalProducts = 2,
-            Products = new List<ProductX>{
-                new ProductX {
+            Products = new List<Product>{
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Yoga Mat",
@@ -501,7 +502,7 @@ public static class MockData
                         new Variant{ Id=Guid.NewGuid(), SKU="YM-BLU-01", Price=22.99, Stock=90, Options=new(){{"Color","Blue"}}}
                     }
                 },
-                new ProductX {
+                new Product {
                     Id = Guid.NewGuid(),
                     StoreId = Guid.NewGuid(),
                     Name = "Dumbbell Set",
@@ -522,8 +523,8 @@ public static class MockData
             LogoUrl = "petcare.jpg",
             Rating = 4.4,
             TotalProducts = 2,
-            Products = new List<ProductX>{
-                new ProductX{
+            Products = new List<Product>{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Dog Food - Chicken Flavor",
@@ -534,7 +535,7 @@ public static class MockData
                     Price=24.50,
                     Stock=90
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Cat Toy Set",
@@ -556,7 +557,7 @@ public static class MockData
             Rating=4.3,
             TotalProducts=2,
             Products=new(){
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Car Vacuum Cleaner",
@@ -567,7 +568,7 @@ public static class MockData
                     Price=35.99,
                     Stock=60
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Car Seat Covers",
@@ -592,7 +593,7 @@ public static class MockData
             Rating=4.8,
             TotalProducts=2,
             Products=new(){
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Mystery Novel",
@@ -603,7 +604,7 @@ public static class MockData
                     Price=14.99,
                     Stock=150
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Notebook Set",
@@ -625,7 +626,7 @@ public static class MockData
             Rating=4.7,
             TotalProducts=2,
             Products=new(){
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Organic Honey",
@@ -636,7 +637,7 @@ public static class MockData
                     Price=12.00,
                     Stock=80
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Herbal Tea Mix",
@@ -658,7 +659,7 @@ public static class MockData
             Rating=4.4,
             TotalProducts=2,
             Products=new(){
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Stainless Steel Knife Set",
@@ -669,7 +670,7 @@ public static class MockData
                     Price=39.99,
                     Stock=50
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Cutting Board",
@@ -691,7 +692,7 @@ public static class MockData
             Rating=4.5,
             TotalProducts=2,
             Products=new(){
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Electric Drill",
@@ -702,7 +703,7 @@ public static class MockData
                     Price=49.99,
                     Stock=40
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Hammer",
@@ -724,7 +725,7 @@ public static class MockData
             Rating=4.3,
             TotalProducts=2,
             Products=new(){
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Remote Control Car",
@@ -735,7 +736,7 @@ public static class MockData
                     Price=29.99,
                     Stock=70
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Puzzle Set",
@@ -757,7 +758,7 @@ public static class MockData
             Rating=4.9,
             TotalProducts=2,
             Products=new(){
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Cupcake Box",
@@ -768,7 +769,7 @@ public static class MockData
                     Price=15.00,
                     Stock=60
                 },
-                new ProductX{
+                new Product{
                     Id=Guid.NewGuid(),
                     StoreId=Guid.NewGuid(),
                     Name="Chocolate Cake",

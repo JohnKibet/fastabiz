@@ -1,4 +1,5 @@
 @namespace frontend.Pages.Shared.Components.Storefront
+@using frontend.Models.Storefront
 
 <button 
     class="@ButtonClass"
@@ -16,7 +17,7 @@
 </button>
 
 @code {
-    [Parameter] public ProductX? Product { get; set; }
+    [Parameter] public Product? Product { get; set; }
     [Parameter] public Variant? SelectedVariant { get; set; }
     [Parameter] public int Quantity { get; set; } = 1;
 

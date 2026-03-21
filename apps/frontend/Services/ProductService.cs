@@ -38,8 +38,8 @@ public class ProductService
     public Task<ApiResult<ProductMapper.ProductDto>> GetProductById(Guid productId)
         => _api.GetAsync<ProductMapper.ProductDto>($"products/by-id/{productId}");
 
-    public Task<ApiResult<ApiMessageResponse>> UpdateProductDetails(UpdateProductDetailsRequest req)
-        => _api.PostAsync<UpdateProductDetailsRequest, ApiMessageResponse>(
+    public Task<ApiResult<ProductMapper.ProductDto>> UpdateProductDetails(UpdateProductDetailsRequest req)
+        => _api.PostAsync<UpdateProductDetailsRequest, ProductMapper.ProductDto>(
                $"products/{req.ProductId}/product_details", req);
 
     public Task<ApiResult<ApiMessageResponse>> UpdateProductInventory(UpdateProductInventoryRequest req)
