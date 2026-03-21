@@ -57,11 +57,6 @@
 @inject CartService CartService
 @implements IDisposable
 
-@* AppTheme replaces the inline MudTheme object — one theme for the whole app *@
-<AppTheme />
-<MudSnackbarProvider />
-<MudDialogProvider />
-
 @if (!IsReady)
 {
     @* Waiting for localStorage JS interop to resolve auth.

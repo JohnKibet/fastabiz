@@ -1,6 +1,34 @@
 ﻿@namespace frontend
 @using frontend.Pages.Shared.Sidebars
 @using frontend.Pages.Shared.Components
+@using MudBlazor
+
+@*
+    ── WHY PROVIDERS LIVE HERE ────────────────────────────────────────
+    MudPopoverProvider, MudSnackbarProvider, and MudDialogProvider must
+    be at the true DOM root — outside every layout and every MudLayout.
+
+    If mounted inside a layout, popovers (MudMenu, MudSelect, MudTooltip
+    etc.) are children of MudLayout's flex container. MudBlazor positions
+    them with position:fixed relative to the viewport, but any ancestor
+    with a CSS transform or overflow:hidden creates a new stacking context
+    that breaks that calculation. The result: the popover mounts (you can
+    see mud-popover-cascading-value in DevTools) but renders off-screen.
+
+    Placing them here means their DOM nodes are direct children of
+    <div id="app"> with no layout ancestors that could clip or offset them.
+
+    AppTheme (MudThemeProvider) is also here so both PublicLayout and
+    AuthorizedLayout share a single theme without needing their own copy.
+
+    Order: Theme → Popover → Snackbar → Dialog.
+    ───────────────────────────────────────────────────────────────────
+*@
+
+<AppTheme />
+<MudPopoverProvider />
+<MudSnackbarProvider />
+<MudDialogProvider />
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">

@@ -8,18 +8,38 @@
 @inject CustomAuthStateProvider AuthProvider
 @inject NavigationManager Navigation
 
+@*
+    NOTIFICATION MENU
+    ─────────────────────────────────────────────────────────────────
+    ActivatorContent must use a MudBlazor interactive component.
+    The original implementation used a plain <div> wrapping a MudIcon
+    and a MudBadge. Plain <div>s do not forward pointer events to
+    MudMenu's internal toggle — the menu never opened.
+
+    Fix: MudIconButton as the activator. The badge is positioned
+    absolutely over the button using a wrapper div, which is fine
+    because the wrapper is purely visual and the button still receives
+    the click. Alternatively MudBadge can wrap MudIconButton directly.
+    ─────────────────────────────────────────────────────────────────
+*@
+
 <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="mx-1">
     <ActivatorContent>
-        <!-- Bell button with badge -->
-        <div style="position:relative; cursor:pointer; padding:6px;">
-            <MudIcon Icon="@MudIcons.Material.Filled.Notifications"
-                     Style="@($"color:{(UnreadCount > 0 ? "#f97316" : "#6b7280")}; font-size:1.5rem;")" />
-            @if (UnreadCount > 0)
-            {
-                <MudBadge Content="@UnreadCount" Color="Color.Error" Overlap="true" Bordered="true"
-                          Style="position:absolute; top:-2px; right:-2px;" />
-            }
-        </div>
+        @*
+            MudBadge wrapping MudIconButton:
+            MudBadge is a layout wrapper — it does not block pointer events.
+            The click hits MudIconButton first, which MudMenu knows to listen
+            to, so the menu opens correctly.
+        *@
+        <MudBadge Content="@(UnreadCount > 0 ? UnreadCount.ToString() : null)"
+                  Color="Color.Error"
+                  Overlap="true"
+                  Bordered="true"
+                  Visible="@(UnreadCount > 0)">
+            <MudIconButton Icon="@MudIcons.Material.Filled.Notifications"
+                           Color="@(UnreadCount > 0 ? Color.Warning : Color.Default)"
+                           Size="Size.Medium" />
+        </MudBadge>
     </ActivatorContent>
 
     <ChildContent>
@@ -50,7 +70,7 @@
                         </MudAvatar>
                         <div>
                             <MudText Typo="Typo.body2"
-                                     Style="@($"color:#374151; font-weight:{( note.Status != NotificationStatus.Read ? "600" : "400")}; line-height:1.4; white-space:normal;")">
+                                     Style="@($"color:#374151; font-weight:{(note.Status != NotificationStatus.Read ? "600" : "400")}; line-height:1.4; white-space:normal;")">
                                 @note.Message
                             </MudText>
                             <MudText Typo="Typo.caption" Style="color:#9ca3af;">
@@ -65,7 +85,8 @@
         else
         {
             <div class="d-flex flex-column align-center py-6 px-4">
-                <MudIcon Icon="@MudIcons.Material.Outlined.NotificationsNone" Style="font-size:2.5rem; color:#d1d5db;" Class="mb-2" />
+                <MudIcon Icon="@MudIcons.Material.Outlined.NotificationsNone"
+                         Style="font-size:2.5rem; color:#d1d5db;" Class="mb-2" />
                 <MudText Typo="Typo.body2" Style="color:#9ca3af;">No notifications yet</MudText>
             </div>
         }

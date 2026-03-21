@@ -14,20 +14,15 @@
 
     <!-- Search -->
     <div style="position:relative; width:280px; flex-shrink:0;">
-        <MudTextField @bind-Value="SearchQuery"
-                      Placeholder="Search tools, pages, settings..."
-                      Variant="MudVariant.Outlined"
-                      Adornment="Adornment.Start"
-                      AdornmentIcon="@MudIcons.Material.Filled.Search"
-                      Margin="Margin.Dense"
-                      FullWidth="true"
-                      Style="background:#f9fafb;"
-                      @onfocus="ShowResults"
+        <MudTextField @bind-Value="SearchQuery"                      Placeholder="Search tools, pages, settings..."
+                      Variant="MudVariant.Outlined"                      Adornment="Adornment.Start"                      AdornmentIcon="@MudIcons.Material.Filled.Search"
+                      Margin="Margin.Dense"                      FullWidth="true"                      Style="background:#f9fafb;"                      @onfocus="ShowResults"
                       @onblur="HideResults" />
 
         @if (ShowDropdown && FilteredResults.Any())
         {
-            <MudPaper Elevation="6" Style="position:absolute; top:44px; left:0; width:100%; z-index:200; border-radius:10px; overflow:hidden; max-height:320px; overflow-y:auto;">
+            <MudPaper Elevation="6"
+                      Style="position:absolute; top:44px; left:0; width:100%; z-index:200; border-radius:10px; overflow:hidden; max-height:320px; overflow-y:auto;">
                 @foreach (var item in FilteredResults)
                 {
                     <div class="search-result-item" @onmousedown="@(() => NavigateTo(item.Link))">
@@ -44,8 +39,7 @@
     <!-- Role-specific menu buttons -->
     @foreach (var item in MenuItems.Where(m => m.Visible?.Invoke() ?? true))
     {
-        <MudButton Variant="MudVariant.Outlined" Size="Size.Small" Class="mx-1"
-                   StartIcon="@ResolveMenuIcon(item.Icon)"
+        <MudButton Variant="MudVariant.Outlined" Size="Size.Small" Class="mx-1"                   StartIcon="@ResolveMenuIcon(item.Icon)"
                    OnClick="@(() => item.OnClick?.Invoke())"
                    Style="border-radius:8px; font-weight:600; color:#374151; border-color:#e5e7eb;">
             @item.Text
@@ -55,65 +49,66 @@
     <!-- Notifications -->
     <NotificationDropdown />
 
-    <!-- User menu -->
-    <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight"
-             Class="ml-2">
+    @*
+        USER MENU
+        ─────────────────────────────────────────────────────────────────
+        The ActivatorContent must contain a MudBlazor component (MudButton,
+        MudIconButton, etc.) — NOT a plain <div>. A plain <div> intercepts
+        the pointer event and MudMenu never receives it, so the menu never
+        opens. MudButton with Variant.Text gives a transparent button that
+        looks identical to the old <div> but correctly forwards the click
+        to MudMenu's internal toggle handler.
+        ─────────────────────────────────────────────────────────────────
+    *@
+    <MudMenu AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight" Class="ml-2">
         <ActivatorContent>
-            <div class="d-flex align-center gap-2" style="cursor:pointer; padding:4px 8px; border-radius:10px; transition:background 0.15s;"
-                 @onmouseover="@(() => {})" @onmouseout="@(() => {})">
-                <MudAvatar Style="background:#f97316; color:white; width:34px; height:34px; font-size:0.85rem; font-weight:700;">
-                    @(UserName?.Length > 0 ? UserName[0].ToString().ToUpper() : "U")
-                </MudAvatar>
-                <MudText Typo="Typo.body2" Style="font-weight:600; color:#111827;" Class="d-none d-sm-block">
-                    @UserName
-                </MudText>
-                <MudIcon Icon="@MudIcons.Material.Filled.KeyboardArrowDown" Size="Size.Small" Style="color:#6b7280;" />
-            </div>
+            <MudButton Variant="MudVariant.Text"
+                       Style="border-radius:10px; padding:4px 8px; text-transform:none; min-width:unset;">
+                <div class="d-flex align-center gap-2">
+                    <MudAvatar
+                        Style="background:#f97316; color:white; width:34px; height:34px; font-size:0.85rem; font-weight:700;">
+                        @(UserName?.Length > 0 ? UserName[0].ToString().ToUpper() : "U")
+                    </MudAvatar>
+                    <MudText Typo="Typo.body2" Style="font-weight:600; color:#111827;" Class="d-none d-sm-block">
+                        @UserName
+                    </MudText>
+                    <MudIcon Icon="@MudIcons.Material.Filled.KeyboardArrowDown" Size="Size.Small"
+                             Style="color:#6b7280;" />
+                </div>
+            </MudButton>
         </ActivatorContent>
         <ChildContent>
-            <MudMenuItem Icon="@MudIcons.Material.Filled.Person"   Href="/merchant/profile">View Profile</MudMenuItem>
+            <MudMenuItem Icon="@MudIcons.Material.Filled.Person" Href="/merchant/profile">View Profile</MudMenuItem>
             <MudMenuItem Icon="@MudIcons.Material.Filled.Settings" Href="/merchant/settings">Settings</MudMenuItem>
             <MudDivider />
-            <MudMenuItem Icon="@MudIcons.Material.Filled.Logout"   OnClick="Logout"
-                         Style="color:#dc2626;">Logout</MudMenuItem>
+            <MudMenuItem Icon="@MudIcons.Material.Filled.Logout" OnClick="Logout"                         Style="color:#dc2626;">Logout
+            </MudMenuItem>
         </ChildContent>
     </MudMenu>
 </MudAppBar>
 
-<style>
-    .search-result-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        cursor: pointer;
-        transition: background 0.12s;
-    }
-    .search-result-item:hover { background: #f0fdf4; }
-</style>
-
 @code {
-    [Parameter] public string? UserName  { get; set; }
+    [Parameter] public string? UserName { get; set; }
     [CascadingParameter] public string? UserRole { get; set; }
 
     private string SearchQuery { get; set; } = string.Empty;
-    private bool ShowDropdown  { get; set; } = false;
+    private bool ShowDropdown { get; set; } = false;
     private List<NavbarMenuItem> MenuItems = new();
 
     private record SearchItem(string Title, string Link, string Icon);
 
     private List<SearchItem> SearchItems = new()
     {
-        new("Dashboard",        "/merchant/dashboard",        "layout-dashboard"),
-        new("Orders",           "/merchant/orders",           "file-stack"),
-        new("Create Order",     "/merchant/createorder",      "file-plus"),
-        new("Inventories",      "/merchant/inventories",      "box-open"),
-        new("Create Inventory", "/merchant/createinventory",  "folder-plus"),
-        new("Users",            "/merchant/users",            "users"),
-        new("Settings",         "/merchant/settings",         "settings"),
-        new("Notifications",    "/merchant/notifications",    "bell"),
-        new("Profile",          "/merchant/profile",          "user"),
-        new("Map",              "/merchant/map",              "map"),
+        new("Dashboard", "/merchant/dashboard", "layout-dashboard"),
+        new("Orders", "/merchant/orders", "file-stack"),
+        new("Create Order", "/merchant/createorder", "file-plus"),
+        new("Inventories", "/merchant/inventories", "box-open"),
+        new("Create Inventory", "/merchant/createinventory", "folder-plus"),
+        new("Users", "/merchant/users", "users"),
+        new("Settings", "/merchant/settings", "settings"),
+        new("Notifications", "/merchant/notifications", "bell"),
+        new("Profile", "/merchant/profile", "user"),
+        new("Map", "/merchant/map", "map"),
     };
 
     private IEnumerable<SearchItem> FilteredResults =>
@@ -150,17 +145,22 @@
         MenuItems.Clear();
         if (UserRole == "customer")
         {
-            MenuItems.Add(new NavbarMenuItem { Text = CartService.Count > 0 ? "Shop More" : "Shop", Icon = "shopping-basket", OnClick = () => Navigation.NavigateTo("/storefront") });
-            MenuItems.Add(new NavbarMenuItem { Text = "Stores",              Icon = "store",           OnClick = () => Navigation.NavigateTo("/stores") });
-            MenuItems.Add(new NavbarMenuItem { Text = $"Cart ({CartService.Count})", Icon = "cart",   OnClick = null });
+            MenuItems.Add(new NavbarMenuItem
+            {
+                Text = CartService.Count > 0 ? "Shop More" : "Shop",
+                Icon = "shopping-basket",
+                OnClick = () => Navigation.NavigateTo("/storefront")
+            });
+            MenuItems.Add(new NavbarMenuItem { Text = "Stores", Icon = "store", OnClick = () => Navigation.NavigateTo("/stores") });
+            MenuItems.Add(new NavbarMenuItem { Text = $"Cart ({CartService.Count})", Icon = "cart", OnClick = null });
         }
     }
 
     private string ResolveMenuIcon(string? icon) => icon switch
     {
         "shopping-basket" => MudIcons.Material.Filled.ShoppingBasket,
-        "store"           => MudIcons.Material.Filled.Store,
-        "cart"            => MudIcons.Material.Filled.ShoppingCart,
-        _                 => MudIcons.Material.Filled.Circle,
+        "store" => MudIcons.Material.Filled.Store,
+        "cart" => MudIcons.Material.Filled.ShoppingCart,
+        _ => MudIcons.Material.Filled.Circle,
     };
 }
