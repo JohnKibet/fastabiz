@@ -2,160 +2,169 @@
 @layout CustomerLayout
 @using frontend.Models
 @using frontend.Models.Storefront
-@using frontend.Pages.Shared.Components.Icons
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 @inject CartService CartService
+@inject OrderService OrderService
 @inject NavigationManager Navigation
 
-@if (ShowWelcome)
+<!-- ── Welcome banner ── -->
+@if (_showWelcome)
 {
-    <h1 class="text-2xl font-bold mb-6">Welcome back, @SecondName!</h1>
+    <MudAlert Severity="Severity.Success" Class="mb-6" Dense="true" ShowCloseIcon="true"
+              CloseIconClicked="@(() => _showWelcome = false)">
+        Welcome back, <strong>@_firstName</strong>! Here's your activity at a glance.
+    </MudAlert>
 }
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-    <!-- Quick Stats Cards -->
-    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
-        <div>
-            <h2 class="text-sm font-medium text-gray-500">Total Orders</h2>
-            <p class="text-2xl font-bold">@RecentOrders.Count()</p>
-        </div>
-        <LucideIcon Name="file-text" Size="8" class="text-stoneblue mt-2" />
-    </div>
+<!-- ── Metric cards ── -->
+<MudGrid Spacing="4" Class="mb-8">
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Total Orders"    Value="@_orders.Count.ToString()"
+                    Icon="box" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Items in Cart"   Value="@CartService.Count.ToString()"
+                    Icon="cart" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Pending Orders"  Value="@_orders.Count(o => o.Status == OrderStatus.Pending).ToString()"
+                    Icon="clock"        Highlight="warning" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Delivered"       Value="@_orders.Count(o => o.Status == OrderStatus.Delivered).ToString()"
+                    Icon="truck"        Highlight="success" />
+    </MudItem>
+</MudGrid>
 
-    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
-        <div>
-            <h2 class="text-sm font-medium text-gray-500">Items in Cart</h2>
-            <p class="text-2xl font-bold">@CartService.Count</p>
-        </div>
-        <LucideIcon Name="cart" Size="8" class="text-stoneblue mt-2" />
-    </div>
-
-    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
-        <div>
-            <h2 class="text-sm font-medium text-gray-500">Pending Orders</h2>
-            <p class="text-2xl font-bold">@RecentOrders.Count(o => o.Status == OrderStatus.Pending)</p>
-        </div>
-        <LucideIcon Name="clock" Size="8" class="text-stoneblue mt-2" />
-    </div>
-
-    <div class="bg-white shadow rounded-lg p-4 flex flex-col justify-between">
-        <div>
-            <h2 class="text-sm font-medium text-gray-500">Delivered Orders</h2>
-            <p class="text-2xl font-bold">@RecentOrders.Count(o => o.Status == OrderStatus.Delivered)</p>
-        </div>
-        <LucideIcon Name="package-check" Size="8" class="text-stoneblue mt-2" />
-    </div>
-</div>
-
-<!-- Quick Actions -->
-<div class="mt-8 flex flex-wrap gap-4">
-    <button class="px-6 py-3 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
-        @onclick='() => Navigation.NavigateTo("/storefront")'>
-        Shop More
-    </button>
-    <button class="px-6 py-3 bg-green-600 text-white rounded shadow hover:bg-green-700"
-        @onclick='() => Navigation.NavigateTo("/customer/myorders")'>
-        View Orders
-    </button>
-    <button class="px-6 py-3 bg-orange-500 text-white rounded shadow hover:bg-orange-600"
-        @onclick='() => Navigation.NavigateTo("/customer/trackorder")'>
-        Track Order
-    </button>
-    <button class="px-6 py-3 bg-gray-700 text-white rounded shadow hover:bg-gray-800"
-        @onclick='() => Navigation.NavigateTo("/customer/feedback")'>
-        Give Feedback
-    </button>
-</div>
-
-<!-- Recent Orders Table -->
-<div class="mt-8 bg-white shadow rounded-lg p-4">
-    <h2 class="text-xl font-bold mb-4">Recent Orders</h2>
-    @if (!RecentOrders.Any())
+<!-- ── Quick actions ── -->
+<MudGrid Spacing="3" Class="mb-8">
+    @foreach (var action in _actions)
     {
-        <p class="text-gray-500">You haven't placed any orders yet.</p>
+        <MudItem xs="6" sm="3">
+            <MudButton Variant="MudVariant.Filled" Color="@action.Color" FullWidth="true"
+                       StartIcon="@action.Icon" OnClick="@(() => Navigation.NavigateTo(action.Href))"
+                       Style="border-radius:10px; font-weight:700; padding:14px 8px; height:64px;">
+                @action.Label
+            </MudButton>
+        </MudItem>
     }
-    else
-    {
-        <table class="w-full text-left border-collapse">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-2">Order ID</th>
-                    <th class="px-4 py-2">Quantity</th>
-                    <th class="px-4 py-2">Status</th>
-                    <th class="px-4 py-2">Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var order in RecentOrders.OrderByDescending(o => o.CreatedAt).Take(5))
-                {
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="px-4 py-2">@order.Id.ToString().Substring(0, 8)</td>
-                        <td class="px-4 py-2">@order.Quantity</td>
-                        <td class="px-4 py-2">@order.Status</td>
-                        <td class="px-4 py-2">@order.CreatedAt.ToString("MMM dd, yyyy")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-</div>
+</MudGrid>
 
-<!-- Featured Products -->
-<div class="mt-8">
-    <h2 class="text-xl font-bold mb-4">Recommended Products</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        @foreach (var product in FeaturedProducts)
+<!-- ── Recent orders ── -->
+<MudPaper Elevation="2" Class="pa-6 rounded-xl mb-8">
+    <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Recent Orders</MudText>
+
+    <AppGrid TItem="Order"
+             Items="@_orders.OrderByDescending(o => o.CreatedAt).Take(5)"
+             Loading="@_loading"
+             Dense="true"
+             EmptyText="You haven't placed any orders yet."
+             OnRowClick="@(o => Navigation.NavigateTo($"/customer/myorders"))">
+        <ColDefs>
+            <MudTh>Order ID</MudTh>
+            <MudTh>Qty</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Date</MudTh>
+        </ColDefs>
+        <RowTemplate Context="order">
+            <MudTd>
+                <MudText Typo="Typo.body2" Style="font-family:monospace; font-weight:600;">
+                    #@order.Id.ToString()[..8]
+                </MudText>
+            </MudTd>
+            <MudTd>@order.Quantity</MudTd>
+            <MudTd>
+                <MudChip T="string" Size="Size.Small" Variant="MudVariant.Filled" Label="true"
+                         Color="@GetStatusColor(order.Status)">
+                    @order.Status
+                </MudChip>
+            </MudTd>
+            <MudTd>
+                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                    @order.CreatedAt.ToString("MMM dd, yyyy")
+                </MudText>
+            </MudTd>
+        </RowTemplate>
+    </AppGrid>
+</MudPaper>
+
+<!-- ── Recommended products ── -->
+@if (_products.Any())
+{
+    <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Recommended Products</MudText>
+    <MudGrid Spacing="4">
+        @foreach (var product in _products)
         {
-            <div class="bg-white rounded-lg shadow p-4 flex flex-col">
-                <img src="@product.ImageUrl" class="w-full h-48 object-cover rounded-md mb-3" />
-                <h3 class="font-semibold text-lg">@product.Name</h3>
-                @* <p class="text-gray-500 text-sm mb-2">@product.StoreName</p> *@
-                <p class="font-bold text-stoneblue">@((product.HasVariants ? product.MinPrice :
-                                    product.Price)?.ToString("C"))</p>
-                <button class="mt-auto px-4 py-2 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90"
-                    @onclick='() => Navigation.NavigateTo($"/product/{product.Id}")'>
-                    View
-                </button>
-            </div>
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Elevation="2" Class="rounded-xl store-card" Style="height:100%;">
+                    <MudCardMedia Image="@product.ImageUrl" Height="160" />
+                    <MudCardContent>
+                        <MudText Typo="Typo.subtitle2" Style="font-weight:700;">@product.Name</MudText>
+                        <MudText Typo="Typo.h6" Style="font-weight:800; color:#16a34a;">
+                            @((product.HasVariants ? product.MinPrice : product.Price)?.ToString("C"))
+                        </MudText>
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="MudVariant.Filled" Color="Color.Primary" FullWidth="true"
+                                   OnClick="@(() => Navigation.NavigateTo($"/product/{product.Id}"))"
+                                   Style="border-radius:0 0 12px 12px; font-weight:700;">
+                            View
+                        </MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
         }
-    </div>
-</div>
+    </MudGrid>
+}
 
 @code {
-    [CascadingParameter] public string UserName { get; set; } = "Guest";
-    private string SecondName => GetSecondName(UserName);
-    private bool ShowWelcome = true;
-    private List<Order> RecentOrders { get; set; } = new();
-    private List<ProductListItem> FeaturedProducts { get; set; } = new();
+    [CascadingParameter] public Guid?   UserId   { get; set; }
+    [CascadingParameter] public string? UserName { get; set; }
+
+    private string _firstName => string.IsNullOrWhiteSpace(UserName) ? "there"
+        : UserName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "there";
+
+    private bool                  _showWelcome = true;
+    private bool                  _loading     = true;
+    private List<Order>           _orders      = new();
+    private List<ProductListItem> _products    = new();
+
+    private record QuickAction(string Label, string Href, string Icon, Color Color);
+    private readonly QuickAction[] _actions = new[]
+    {
+        new QuickAction("Shop",          "/storefront",          Icons.Material.Filled.ShoppingBag,    Color.Primary),
+        new QuickAction("My Orders",     "/customer/myorders",   Icons.Material.Filled.ListAlt,        Color.Secondary),
+        new QuickAction("Track Order",   "/customer/trackorder", Icons.Material.Filled.LocationOn,     Color.Warning),
+        new QuickAction("Feedback",      "/customer/feedback",   Icons.Material.Filled.StarRate,       Color.Default),
+    };
 
     protected override async Task OnInitializedAsync()
     {
-        // Hide welcome message after 5 seconds
-        await Task.Delay(5000);
-        ShowWelcome = false;
-        StateHasChanged();
+        // Auto-dismiss welcome after 5 s
+        _ = Task.Delay(5000).ContinueWith(_ =>
+        {
+            _showWelcome = false;
+            InvokeAsync(StateHasChanged);
+        });
 
-        // TODO: Load orders & products from API
-        // Example placeholders
-        RecentOrders = await LoadRecentOrdersAsync();
-        FeaturedProducts = await LoadFeaturedProductsAsync();
+        if (UserId.HasValue)
+        {
+            var result = await OrderService.GetOrdersByCustomer(UserId.Value);
+            if (result.Success && result.Data != null)
+                _orders = result.Data;
+        }
+
+        // TODO: replace with real featured-products endpoint
+        _loading = false;
     }
 
-    private string GetSecondName(string fullName)
+    private static Color GetStatusColor(OrderStatus status) => status switch
     {
-        if (string.IsNullOrWhiteSpace(fullName)) return "Guest";
-        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length > 1 ? parts[1] : parts[0];
-    }
-
-    private Task<List<Order>> LoadRecentOrdersAsync()
-    {
-        // Fetch last 10 orders for the user
-        return Task.FromResult(new List<Order>());
-    }
-
-    private Task<List<ProductListItem>> LoadFeaturedProductsAsync()
-    {
-        // Fetch featured products for the dashboard
-        return Task.FromResult(new List<ProductListItem>());
-    }
+        OrderStatus.Delivered  => Color.Success,
+        OrderStatus.Pending    => Color.Warning,
+        OrderStatus.Cancelled  => Color.Error,
+        _                      => Color.Default,
+    };
 }

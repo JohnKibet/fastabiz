@@ -1,6 +1,5 @@
 @inherits LayoutComponentBase
 @namespace frontend.Pages.Customer
-@using frontend.Models.Storefront
 @using frontend.Pages.Shared.Layout
 @using frontend.Services
 @using Microsoft.AspNetCore.Components.Authorization
@@ -8,14 +7,14 @@
 
 @*
     CustomerLayout sits between LayoutComponentBase and AuthorizedLayout.
-    Its only job is seeding the cart for development/demo purposes and
-    cascading the username if needed by customer-specific child components.
 
-    AppTheme, MudSnackbarProvider, MudDialogProvider are all provided by
+    Responsibilities:
+      1. Rehydrate the cart from localStorage on first load so items
+         persist across page navigations and browser refreshes.
+      2. Any customer-specific cascading values go here.
+
+    AppTheme, MudSnackbarProvider, MudDialogProvider are provided by
     AuthorizedLayout — do not add them here.
-
-    NOTE: The cart seed block below is development scaffolding.
-    Remove or replace it with real cart-restore logic before going to prod.
 *@
 
 <AuthorizedLayout>
@@ -27,35 +26,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Guard: confirm auth before doing anything user-specific
         if (AuthenticationStateTask == null) return;
+
         var authState = await AuthenticationStateTask;
         if (authState.User.Identity?.IsAuthenticated != true) return;
 
-        // Dev/demo: seed cart if empty
-        // TODO: replace with CartService.RestoreFromServer() or similar
-        if (!CartService.Items.Any())
-        {
-            var appleProduct = new ProductMapper.ProductDto
-            {
-                Id = Guid.Parse("162b61d3-0be7-43df-bb38-736592822090"),
-                Name = "Fresh Apples",
-                Description = "Crisp, sweet organic apples harvested this season.",
-                StoreId = Guid.Parse("2843abef-4b21-4c2b-91d5-e1c6bfcd5f0c"),
-                HasVariants = true,
-                Images = new List<string> { "apple_small.jpg" }
-            };
-
-            var appleVariant = new ProductMapper.VariantDto
-            {
-                Id = Guid.Parse("72331251-b031-46b0-8998-4117aeb3a072"),
-                Price = 1.2,
-                ImageUrl = "apple_small.jpg",
-                Sku = "APP-SM-001",
-                Options = new Dictionary<string, string> { { "size", "small" } }
-            };
-
-            await CartService.AddItem(appleProduct, appleVariant, qty: 2);
-        }
+        // Rehydrate cart from localStorage on every layout mount.
+        // CartService is a Singleton — LoadCartAsync is idempotent
+        // (re-deserialises the same data) so calling it here is safe
+        // even if the user navigates between customer pages.
+        await CartService.LoadCartAsync();
     }
 }

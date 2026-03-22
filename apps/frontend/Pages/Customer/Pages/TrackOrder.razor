@@ -1,52 +1,172 @@
 @page "/customer/trackorder"
 @layout CustomerLayout
-@inject AuthenticationStateProvider AuthProvider
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@inject OrderService OrderService
 @inject NavigationManager Navigation
 @attribute [Authorize(Roles = "customer")]
 
-<div class="max-w-3xl mx-auto">
-    <!-- Page Heading -->
-    <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center gap-2">
-        📍 Track Your Order
-    </h2>
+<MudText Typo="Typo.h5" Style="font-weight:800;" Class="mb-6">Track Your Order</MudText>
 
-    <!-- Order Details Card -->
-    <div class="bg-white shadow-sm rounded-xl border p-6 space-y-4">
-        <!-- Order ID + Status -->
-        <div class="flex items-center justify-between">
-            <p class="text-gray-700 text-lg font-medium">
-                Order ID: <span class="font-semibold text-gray-900">ORD102</span>
-            </p>
-            <span class="px-3 py-1 text-sm font-semibold rounded-full bg-blue-100 text-blue-600">
-                In Transit
-            </span>
-        </div>
-
-        <!-- Driver Info -->
-        <div class="flex items-center justify-between border-t pt-4">
-            <p class="text-gray-600">Driver</p>
-            <p class="font-medium text-gray-900">Jane Doe</p>
-        </div>
-
-        <!-- ETA -->
-        <div class="flex items-center justify-between border-t pt-4">
-            <p class="text-gray-600">Estimated Arrival</p>
-            <p class="font-medium text-gray-900">3:00 PM</p>
-        </div>
-
-        <!-- Location -->
-        <div class="flex items-center justify-between border-t pt-4">
-            <p class="text-gray-600">Current Location</p>
-            <p class="font-medium text-gray-900">West Industrial Zone</p>
-        </div>
+<!-- ── Order ID input ── -->
+<MudPaper Elevation="2" Class="pa-6 rounded-xl mb-6" Style="max-width:520px;">
+    <MudText Typo="Typo.subtitle2" Style="font-weight:700;" Class="mb-3">Enter Order ID</MudText>
+    <div class="d-flex gap-3">
+        <MudTextField @bind-Value="_orderIdText"
+                      Placeholder="Paste your order UUID..."
+                      Variant="MudVariant.Outlined"
+                      Margin="Margin.Dense"
+                      FullWidth="true"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Receipt" />
+        <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                   OnClick="LookupOrder" Disabled="@_loading"
+                   Style="border-radius:8px; font-weight:700; white-space:nowrap;">
+            @if (_loading) { <MudProgressCircular Size="Size.Small" Indeterminate="true" /> }
+            else { <span>Track</span> }
+        </MudButton>
     </div>
+    @if (_error is not null)
+    {
+        <MudAlert Severity="Severity.Error" Dense="true" Class="mt-3">@_error</MudAlert>
+    }
+</MudPaper>
 
-    <!-- Map Placeholder -->
-    <div class="mt-6 bg-gray-50 border border-dashed rounded-xl p-6 text-center text-gray-500">
-        📌 Map integration coming soon (live GPS tracking)
-    </div>
-</div>
+@if (_order is not null)
+{
+    <MudGrid Spacing="5">
+
+        <!-- Order details card -->
+        <MudItem xs="12" md="5">
+            <MudPaper Elevation="2" Class="pa-6 rounded-xl">
+                <div class="d-flex align-center justify-space-between mb-4">
+                    <MudText Typo="Typo.h6" Style="font-weight:700;">
+                        #@_order.Id.ToString()[..8]
+                    </MudText>
+                    <MudChip T="string" Size="Size.Medium" Variant="MudVariant.Filled" Label="true"
+                             Color="@GetStatusColor(_order.Status)">
+                        @_order.Status
+                    </MudChip>
+                </div>
+
+                <MudList T="string" Dense="true">
+                    <MudListItem Icon="@Icons.Material.Filled.LocalShipping">
+                        <MudText Typo="Typo.body2"><strong>Delivery:</strong> @_order.DeliveryAddress</MudText>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.Store">
+                        <MudText Typo="Typo.body2"><strong>Pickup:</strong> @_order.PickupAddress</MudText>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Filled.DateRange">
+                        <MudText Typo="Typo.body2">
+                            <strong>Placed:</strong> @_order.CreatedAt.ToString("MMM d, yyyy HH:mm")
+                        </MudText>
+                    </MudListItem>
+                </MudList>
+
+                <!-- Status timeline -->
+                <MudDivider Class="my-4" />
+                <MudText Typo="Typo.subtitle2" Style="font-weight:700;" Class="mb-3">Progress</MudText>
+                <MudTimeline TimelineOrientation="TimelineOrientation.Vertical"
+                             TimelinePosition="TimelinePosition.Start">
+                    @foreach (var step in _timeline)
+                    {
+                        <MudTimelineItem Color="@step.Color" Variant="MudVariant.Filled" Size="Size.Small">
+                            <ItemContent>
+                                <MudText Typo="Typo.body2"
+                                         Style="@(step.Done ? "font-weight:600;" : "color:#9ca3af;")">
+                                    @step.Label
+                                </MudText>
+                            </ItemContent>
+                        </MudTimelineItem>
+                    }
+                </MudTimeline>
+            </MudPaper>
+        </MudItem>
+
+        <!-- Map -->
+        <MudItem xs="12" md="7">
+            <MudPaper Elevation="2" Class="pa-0 rounded-xl" Style="overflow:hidden; height:100%; min-height:360px;">
+                @* Replace with <CustomerMap /> when live tracking is ready *@
+                <div class="d-flex flex-column align-center justify-center"
+                     style="height:360px; background:#f9fafb; border:2px dashed #e5e7eb; border-radius:12px;">
+                    <MudIcon Icon="@Icons.Material.Filled.Map" Style="font-size:3.5rem; color:#d1d5db;" Class="mb-3" />
+                    <MudText Typo="Typo.body1" Style="color:#9ca3af; font-weight:600;">
+                        Live GPS tracking coming soon
+                    </MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary mt-1">
+                        Driver location will appear here in real time
+                    </MudText>
+                </div>
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
+}
 
 @code {
-    // Later you'll fetch order details dynamically via OrderService
+    private string  _orderIdText = string.Empty;
+    private Order?  _order;
+    private bool    _loading     = false;
+    private string? _error;
+
+    private record TimelineStep(string Label, Color Color, bool Done);
+    private TimelineStep[] _timeline = Array.Empty<TimelineStep>();
+
+    private async Task LookupOrder()
+    {
+        _error = null;
+        _order = null;
+
+        if (!Guid.TryParse(_orderIdText, out var id))
+        {
+            _error = "Invalid Order ID — paste the full UUID from your order confirmation.";
+            return;
+        }
+
+        _loading = true;
+        var result = await OrderService.GetOrderByID(id);
+        _loading = false;
+
+        if (!result.Success || result.Data is null)
+        {
+            _error = result.Error?.Message ?? "Order not found.";
+            return;
+        }
+
+        _order    = result.Data;
+        _timeline = BuildTimeline(_order.Status);
+    }
+
+    private static TimelineStep[] BuildTimeline(OrderStatus current)
+    {
+        // Ordered stages — each step is "done" if the current status is at or past it
+        var stages = new[]
+        {
+            OrderStatus.Pending,
+            OrderStatus.Delivered,
+            OrderStatus.InTransit,
+            OrderStatus.Delivered,
+        };
+
+        var currentIndex = Array.IndexOf(stages, current);
+
+        return stages.Select((s, i) =>
+        {
+            bool done  = i <= currentIndex;
+            var  color = done
+                ? (s == OrderStatus.Delivered ? Color.Success : Color.Primary)
+                : Color.Default;
+            return new TimelineStep(s.ToString(), color, done);
+        }).ToArray();
+    }
+
+    private static Color GetStatusColor(OrderStatus status) => status switch
+    {
+        OrderStatus.Delivered  => Color.Success,
+        OrderStatus.Pending    => Color.Warning,
+        OrderStatus.Cancelled  => Color.Error,
+        OrderStatus.InTransit  => Color.Primary,
+        _                      => Color.Default,
+    };
 }

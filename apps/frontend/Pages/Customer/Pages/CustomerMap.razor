@@ -1,37 +1,44 @@
-@using System.Runtime.CompilerServices
-@using frontend.Pages.Shared.Components
+@using MudBlazor
 @inject MapService MapService
 @inject GeoService GeoService
 @inject IJSRuntime JS
+@implements IDisposable
 
-<div @ref="mapContainer" style="height:500px; width:100%">
-    <RealTimeMap 
-        @ref="realTimeMap"
-        Parameters="parameters"
-        OnClickMap="HandleMapClick"
-        height="500px"
-        width="100%" 
-    />
+@*
+    CustomerMap — wraps RealTimeMap and fires address callbacks on pin drop.
+
+    USAGE:
+        <CustomerMap CurrentMode="@_mode"
+                     OnDeliverySelected="@(addr => _deliveryAddress = addr)"
+                     OnPickupSelected="@(addr => _pickupAddress = addr)" />
+*@
+
+<div @ref="_container" style="height:500px; width:100%; border-radius:12px; overflow:hidden;">
+    <RealTimeMap @ref="_map"
+                 Parameters="_params"
+                 OnClickMap="HandleMapClick"
+                 height="500px"
+                 width="100%" />
 </div>
 
 @code {
-    [Parameter] public EventCallback<string> OnDeliverySelected { get; set; }
-    [Parameter] public EventCallback<string> OnPickupSelected { get; set; }
-
-    private ElementReference mapContainer; 
-    private RealTimeMap? realTimeMap;
-    private RealTimeMap.LoadParameters? parameters;
-    private DotNetObjectReference<CustomerMap>? dotNetRef; 
+    [Parameter] public MapClickMode                 CurrentMode         { get; set; } = MapClickMode.Delivery;
+    [Parameter] public EventCallback<string>        OnDeliverySelected  { get; set; }
+    [Parameter] public EventCallback<string>        OnPickupSelected    { get; set; }
 
     public enum MapClickMode { Delivery, Pickup }
-    [Parameter] public MapClickMode CurrentMode { get; set; } = MapClickMode.Delivery;
 
-    public double? SelectedLatitude { get; private set; }
+    private ElementReference         _container;
+    private RealTimeMap?             _map;
+    private RealTimeMap.LoadParameters? _params;
+    private DotNetObjectReference<CustomerMap>? _dotNetRef;
+
+    public double? SelectedLatitude  { get; private set; }
     public double? SelectedLongitude { get; private set; }
 
     protected override void OnInitialized()
     {
-        parameters = new RealTimeMap.LoadParameters
+        _params = new RealTimeMap.LoadParameters
         {
             basemap = new RealTimeMap.Basemap
             {
@@ -39,41 +46,35 @@
             },
             location = new RealTimeMap.Location
             {
-                latitude = -1.29207,
+                latitude  = -1.29207,
                 longitude = 36.82195
             },
             zoomLevel = 14
         };
     }
 
-    private async Task HandleMapClick(RealTimeMap.ClicksMapArgs value)
+    private async Task HandleMapClick(RealTimeMap.ClicksMapArgs args)
     {
-        var lat = value.location.latitude;
-        var lng = value.location.longitude;
+        var lat = args.location.latitude;
+        var lng = args.location.longitude;
 
-        Console.WriteLine($"Selected lat: {value.location.latitude}, lng: {value.location.longitude}");
+        SelectedLatitude  = lat;
+        SelectedLongitude = lng;
+
         var address = await GeoService.GetAddressAsync(lat, lng) ?? "Unknown location";
 
-        Console.WriteLine($"Selected: {address ?? "Unknown location"}");
+        await JS.InvokeVoidAsync("addAwesomeMarker", _container, lat, lng, new
+        {
+            icon        = "map-pin",
+            markerColor = CurrentMode == MapClickMode.Delivery ? "blue" : "green",
+            prefix      = "fa"
+        });
 
-        // Place marker (optional)
-        await JS.InvokeVoidAsync(
-            "addAwesomeMarker",
-            mapContainer,
-            lat,
-            lng,
-            new { icon = "map-pin", markerColor = CurrentMode == MapClickMode.Delivery ? "blue" : "green", prefix = "fa" }
-        );
-
-        // Fire the proper callback
         if (CurrentMode == MapClickMode.Delivery)
             await OnDeliverySelected.InvokeAsync(address);
         else
             await OnPickupSelected.InvokeAsync(address);
     }
 
-    public void Dispose()
-    {
-        dotNetRef?.Dispose(); // important to avoid memory leaks
-    }
+    public void Dispose() => _dotNetRef?.Dispose();
 }

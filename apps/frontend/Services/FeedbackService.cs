@@ -1,35 +1,26 @@
-using System.Net.Http.Json;
 using frontend.Models;
+using frontend.Models.Storefront;
+
+namespace frontend.Services;
 
 public class FeedbackService
 {
-    private readonly HttpClient _http;
-    public FeedbackService(IHttpClientFactory httpClientFactory)
+    private readonly ApiService _api;
+
+    public FeedbackService(ApiService api)
     {
-        _http = httpClientFactory.CreateClient("AuthenticatedApi");
+        _api = api;
     }
 
-    public async Task CreateFeedback(CreateFeedbackRequest feedback)
-    {
-        var response = await _http.PostAsJsonAsync("feedbacks/create", feedback);
-        response.EnsureSuccessStatusCode();
-    }
+    public Task<ApiResult<ApiMessageResponse>> CreateFeedback(CreateFeedbackRequest req)
+        => _api.PostAsync<CreateFeedbackRequest, ApiMessageResponse>("feedbacks/create", req);
 
-    public async Task<Feedback> GetFeedbackById(Guid feedbackId)
-    {
-        var feedback = await _http.GetFromJsonAsync<Feedback>($"feedbacks/{feedbackId}");
-        return feedback ?? throw new Exception("Payment not found");
-    }
+    public Task<ApiResult<Feedback>> GetFeedbackById(Guid feedbackId)
+        => _api.GetAsync<Feedback>($"feedbacks/{feedbackId}");
 
-    // public async Task<List<Feedback>> GetFeedbacksByOrderId(Guid orderId)
-    // {
-    //     var feedbacks = await _http.GetFromJsonAsync<List<Feedback>>($"feedbacks/order_id/{orderId}");
-    //     return feedbacks ?? new List<Feedback>();
-    // }
+    public Task<ApiResult<List<Feedback>>> GetAllFeedbacks()
+        => _api.GetAsync<List<Feedback>>("feedbacks/all_feedbacks");
 
-    public async Task<List<Feedback>> GetAllFeedbacks()
-    {
-        var feedbacks = await _http.GetFromJsonAsync<List<Feedback>>("feedbacks/all_feedbacks");
-        return feedbacks ?? new List<Feedback>();
-    }
+    // public Task<ApiResult<List<Feedback>>> GetFeedbacksByOrderId(Guid orderId)
+    //     => _api.GetAsync<List<Feedback>>($"feedbacks/order_id/{orderId}");
 }

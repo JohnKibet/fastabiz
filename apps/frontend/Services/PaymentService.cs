@@ -1,63 +1,22 @@
-// using System.Net.Http.Json;
-// using frontend.Models;
+using frontend.Models;
 
-// public class PaymentService
-// {
-//   private readonly HttpClient _http;
+namespace frontend.Services;
 
-//   public PaymentService(IHttpClientFactory httpClientFactory)
-//   {
-//     _http = httpClientFactory.CreateClient("AuthenticatedApi");
-//   }
+public class PaymentService
+{
+    private readonly ApiService _api;
 
-//   public async Task<ServiceResult<MpesaExpressResponse>> StartMpesaExpressAsync(string phone, string amount)
-//   {
-//     try
-//     {
-//       var payload = new MpesaExpressRequest
-//       {
-//         Phone = phone,
-//         Amount = amount
-//       };
+    public PaymentService(ApiService api)
+    {
+        _api = api;
+    }
 
-//       var response = await _http.PostAsJsonAsync("payments/mpesa-express", payload);
-
-//       if (!response.IsSuccessStatusCode)
-//       {
-//         var error = await response.Content.ReadAsStringAsync();
-//         return ServiceResult<MpesaExpressResponse>.Fail(
-//             string.IsNullOrWhiteSpace(error)
-//                 ? "Failed to initiate MPesa payment"
-//                 : error
-//         );
-//       }
-
-//       // SAFE JSON read
-//       var data = await response.Content
-//           .ReadFromJsonAsync<MpesaExpressResponse>();
-
-//       if (data is null)
-//       {
-//         return ServiceResult<MpesaExpressResponse>.Fail(
-//             "Invalid server response"
-//         );
-//       }
-
-//       return ServiceResult<MpesaExpressResponse>.Ok(data);
-//     }
-//     catch (HttpRequestException ex)
-//     {
-//       // Browser / CORS / network issues
-//       return ServiceResult<MpesaExpressResponse>.Fail(
-//           $"Network error: {ex.Message}"
-//       );
-//     }
-//     catch (Exception ex)
-//     {
-//       return ServiceResult<MpesaExpressResponse>.Fail(
-//           $"Unexpected error: {ex.Message}"
-//       );
-//     }
-//   }
-
-// }
+    /// <summary>
+    /// Initiates an M-Pesa STK push (Daraja Express).
+    /// Returns the CheckoutRequestID and other metadata on success.
+    /// </summary>
+    public Task<ApiResult<MpesaExpressResponse>> StartMpesaExpressAsync(string phone, string amount)
+        => _api.PostAsync<MpesaExpressRequest, MpesaExpressResponse>(
+               "payments/mpesa-express",
+               new MpesaExpressRequest { Phone = phone, Amount = amount });
+}

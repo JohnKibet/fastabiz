@@ -1,35 +1,26 @@
-using System.Net.Http.Json;
 using frontend.Models;
+using frontend.Models.Storefront;
+
+namespace frontend.Services;
 
 public class DriverService
 {
-    private readonly HttpClient _http;
-    public DriverService(IHttpClientFactory httpClientFactory)
+    private readonly ApiService _api;
+
+    public DriverService(ApiService api)
     {
-        _http = httpClientFactory.CreateClient("AuthenticatedApi");
+        _api = api;
     }
 
-    public async Task RegisterDriver(CreateDriverRequest driver)
-    {
-        var response = await _http.PostAsJsonAsync("drivers/create", driver);
-        response.EnsureSuccessStatusCode();
-    }
+    public Task<ApiResult<ApiMessageResponse>> RegisterDriver(CreateDriverRequest req)
+        => _api.PostAsync<CreateDriverRequest, ApiMessageResponse>("drivers/create", req);
 
-    public async Task<Driver> GetDriverById(Guid driverId)
-    {
-        var driver = await _http.GetFromJsonAsync<Driver>($"drivers/{driverId}");
-        return driver ?? throw new Exception("No driver found");
-    }
+    public Task<ApiResult<Driver>> GetDriverById(Guid driverId)
+        => _api.GetAsync<Driver>($"drivers/{driverId}");
 
-    public async Task<Driver> GetDriverByEmail(string email)
-    {
-        var driver = await _http.GetFromJsonAsync<Driver>($"drivers/{email}");
-        return driver ?? throw new Exception("No driver found");
-    }
+    public Task<ApiResult<Driver>> GetDriverByEmail(string email)
+        => _api.GetAsync<Driver>($"drivers/{email}");
 
-    public async Task<List<Driver>> GetAllDrivers()
-    {
-        var drivers = await _http.GetFromJsonAsync<List<Driver>>("drivers/all_drivers");
-        return drivers ?? new List<Driver>();
-    }
+    public Task<ApiResult<List<Driver>>> GetAllDrivers()
+        => _api.GetAsync<List<Driver>>("drivers/all_drivers");
 }

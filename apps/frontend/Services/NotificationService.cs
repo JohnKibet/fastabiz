@@ -1,51 +1,42 @@
-using System.Net.Http.Json;
 using frontend.Models;
+using frontend.Models.Storefront;
+
+namespace frontend.Services;
 
 public class NotificationService
 {
-    private readonly HttpClient _http;
-    private readonly ToastService _toastService;
-    public NotificationService(IHttpClientFactory httpClientFactory, ToastService toastService)
+    private readonly ApiService   _api;
+    private readonly ToastService _toast;
+
+    public NotificationService(ApiService api, ToastService toast)
     {
-        _http = httpClientFactory.CreateClient("AuthenticatedApi");
-        _toastService = toastService;
+        _api   = api;
+        _toast = toast;
     }
 
-    // User-triggered notifications (send feedback, message another user, etc.)
-    public async Task CreateNotification(CreateNotificationRequest notification)
-    {
-        var response = await _http.PostAsJsonAsync("notifications/create", notification);
-        response.EnsureSuccessStatusCode();
-    }
+    /// <summary>Send a notification (user-triggered: feedback, message, etc.)</summary>
+    public Task<ApiResult<ApiMessageResponse>> CreateNotification(CreateNotificationRequest req)
+        => _api.PostAsync<CreateNotificationRequest, ApiMessageResponse>("notifications/create", req);
 
-    public async Task<List<Notification>> GetNotificationByUser(Guid userId)
-    {
-        var notifications = await _http.GetFromJsonAsync<List<Notification>>($"notifications/all_my_notifications/{userId}");
-        return notifications ?? new List<Notification>();
-    }
+    /// <summary>Fetch all notifications for a given user.</summary>
+    public Task<ApiResult<List<Notification>>> GetNotificationByUser(Guid userId)
+        => _api.GetAsync<List<Notification>>($"notifications/all_my_notifications/{userId}");
 
-    // mark single read
-    public async Task<Notification> UpdateNotificationStatus(Guid id, NotificationStatus status)
-    {
-        var response = await _http.PutAsJsonAsync($"notifications/{id}/status", status);
-        if (response.IsSuccessStatusCode)
-        {
-            return await response.Content.ReadFromJsonAsync<Notification>() ?? new Notification();
-        }
+    /// <summary>Mark a single notification as read/unread.</summary>
+    public Task<ApiResult<Notification>> UpdateNotificationStatus(Guid id, NotificationStatus status)
+        => _api.PutAsync<NotificationStatus, Notification>($"notifications/{id}/status", status);
 
-        return null;
-    }
-
-    public async Task MarkAllAsRead(Guid userId)
+    /// <summary>Mark all notifications for a user as read.</summary>
+    public async Task<ApiResult<ApiMessageResponse>> MarkAllAsRead(Guid userId)
     {
-        var response = await _http.PatchAsync($"notifications/mark_all_as_read/{userId}", null);
-        if (response.IsSuccessStatusCode)
-        {
-            _toastService.ShowToast("Marked Read !", string.Empty, ToastService.ToastLevel.Success);
-        }
+        var result = await _api.PatchAsync<object, ApiMessageResponse>(
+            $"notifications/mark_all_as_read/{userId}", new { });
+
+        if (result.Success)
+            _toast.ShowToast("All notifications marked as read.", string.Empty, ToastService.ToastLevel.Success);
         else
-        {
-            _toastService.ShowToast("Mark All Read Failed !", string.Empty, ToastService.ToastLevel.Error);
-        }
+            _toast.ShowToast(result.Error?.Message ?? "Failed to mark notifications as read.", string.Empty, ToastService.ToastLevel.Error);
+
+        return result;
     }
 }

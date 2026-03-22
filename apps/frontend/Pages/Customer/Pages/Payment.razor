@@ -2,133 +2,190 @@
 @layout CustomerLayout
 @using frontend.Models
 @using Microsoft.AspNetCore.WebUtilities
-@using System.Text.Json
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @inject CartService CartService
 @inject OrderService OrderService
+@inject PaymentService PaymentService
 @inject ToastService ToastService
-@* @inject PaymentService PaymentService *@
 @inject NavigationManager Navigation
 
-<h1 class="text-2xl font-bold mb-6">Payment</h1>
+<!-- ── Page header ── -->
+<MudText Typo="Typo.h5" Style="font-weight:800;" Class="mb-6">Payment</MudText>
 
-@if (CartItems == null || !CartItems.Any())
+@if (!CartService.Items.Any())
 {
-    <p class="text-gray-500">
-        Your cart is empty.
-        <button class="text-stoneblue font-medium" @onclick="GoShop">Shop Now</button>
-    </p>
+    <MudPaper Elevation="2" Class="pa-10 rounded-xl d-flex flex-column align-center">
+        <MudIcon Icon="@Icons.Material.Filled.ShoppingCart"
+                 Style="font-size:4rem; color:#d1d5db;" Class="mb-4" />
+        <MudText Typo="Typo.h6" Class="mb-3" Style="color:#374151;">Your cart is empty</MudText>
+        <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                   OnClick="@(() => Navigation.NavigateTo("/storefront"))"
+                   Style="border-radius:8px; font-weight:700;">
+            Shop Now
+        </MudButton>
+    </MudPaper>
 }
 else
 {
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <MudGrid Spacing="5">
 
-        <!-- Order Summary -->
-        <div class="bg-white shadow rounded-lg p-6">
-            <h2 class="font-semibold text-lg mb-4">Order Summary</h2>
-            @foreach (var item in CartItems)
-            {
-                <div class="flex items-center justify-between py-3 border-b">
-                    <div>
-                        <p class="font-medium">@item.Name</p>
-                        @if (!string.IsNullOrEmpty(item.VariantName))
-                        {
-                            <p class="text-gray-500 text-sm">@item.VariantName</p>
-                        }
-                        <p class="text-gray-500 text-sm">x @item.Quantity</p>
-                    </div>
-                    <p class="font-semibold">@((item.Price * item.Quantity).ToString("0.00"))</p>
-                </div>
-            }
-            <div class="mt-4 flex justify-between font-bold text-lg border-t pt-2">
-                <span>Total:</span>
-                <span>@CartItems.Sum(i => i.Price * i.Quantity).ToString("0.00")</span>
-            </div>
-        </div>
+        <!-- Order summary -->
+        <MudItem xs="12" lg="6">
+            <MudPaper Elevation="2" Class="pa-6 rounded-xl">
+                <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Order Summary</MudText>
 
-        <!-- Payment Methods -->
-        <div class="bg-white shadow rounded-lg p-6">
-            <h2 class="font-semibold text-lg mb-4">Payment Method</h2>
-
-            <div class="space-y-4">
-
-                <!-- Cash on Delivery -->
-                <div class="border rounded-lg p-4 hover:border-orange-500 transition cursor-pointer"
-                    @onclick='() => SelectedMethod = "cod"'>
-                    <input type="radio" id="cod" name="payment" class="mr-2" checked="@((SelectedMethod == "cod"))" />
-                    <label for="cod" class="font-medium text-gray-800">Cash on Delivery</label>
-                    @if (SelectedMethod == "cod")
-                    {
-                        <p class="mt-2 text-gray-500 text-sm">You will pay the delivery person when you receive your order.</p>
-                    }
-                </div>
-
-                <!-- MPesa Express -->
-                <div class="border rounded-lg p-4 hover:border-orange-500 transition cursor-pointer"
-                    @onclick='() => SelectedMethod = "mpesa-express"'>
-                    <input type="radio" id="mpesa-express" name="payment" class="mr-2"
-                        checked="@((SelectedMethod == "mpesa-express"))" />
-                    <label for="mpesa-express" class="font-medium text-gray-800">
-                        M-Pesa Express (Paybill)
-                    </label>
-
-                    @if (SelectedMethod == "mpesa-express")
-                    {
-                        <div class="mt-3 space-y-3">
-                            <input type="text" placeholder="Phone Number (+2547...)" @bind="MpesaPhone"
-                                class="w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm" />
-                            <input type="text" placeholder="Amount" @bind="MpesaAmount"
-                                class="w-full px-3 py-2 border rounded-lg shadow-sm focus:ring-2 focus:ring-orange-500 focus:outline-none text-sm" />
-                            <p class="text-gray-500 text-xs mt-1">
-                                You will be prompted to enter your M-Pesa PIN to complete the payment.
-                            </p>
+                @foreach (var item in CartService.Items)
+                {
+                    <div class="d-flex align-center justify-space-between py-3"
+                         style="border-bottom:1px solid #f3f4f6;">
+                        <div class="d-flex align-center gap-3">
+                            <MudAvatar Rounded="true" Style="width:40px; height:40px; background:#f3f4f6;">
+                                @if (!string.IsNullOrEmpty(item.Thumbnail))
+                                {
+                                    <MudImage Src="@item.Thumbnail" Alt="@item.Name"
+                                              Style="width:40px; height:40px; object-fit:cover;" />
+                                }
+                                else
+                                {
+                                    <MudIcon Icon="@Icons.Material.Filled.Inventory2" Style="color:#9ca3af;" />
+                                }
+                            </MudAvatar>
+                            <div>
+                                <MudText Typo="Typo.body2" Style="font-weight:600;">@item.Name</MudText>
+                                @if (!string.IsNullOrEmpty(item.VariantName))
+                                {
+                                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@item.VariantName</MudText>
+                                }
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">× @item.Quantity</MudText>
+                            </div>
                         </div>
+                        <MudText Typo="Typo.body2" Style="font-weight:600;">
+                            @((item.Price * item.Quantity).ToString("C"))
+                        </MudText>
+                    </div>
+                }
+
+                <div class="d-flex align-center justify-space-between mt-4 pt-4"
+                     style="border-top:2px solid #e5e7eb;">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight:700;">Total</MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight:800; color:#16a34a;">
+                        @CartService.Total.ToString("C")
+                    </MudText>
+                </div>
+
+                <!-- Delivery summary -->
+                @if (!string.IsNullOrEmpty(_deliveryAddress))
+                {
+                    <MudDivider Class="my-4" />
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary mb-1">Delivery to</MudText>
+                    <MudText Typo="Typo.body2">@_deliveryAddress</MudText>
+                }
+            </MudPaper>
+        </MudItem>
+
+        <!-- Payment methods -->
+        <MudItem xs="12" lg="6">
+            <MudPaper Elevation="2" Class="pa-6 rounded-xl">
+                <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Payment Method</MudText>
+
+                <!-- Cash on delivery -->
+                <MudPaper @onclick='() => _method = "cod"'
+                          Elevation="@(_method == "cod" ? 3 : 1)"
+                          Class="pa-4 rounded-xl mb-3 cursor-pointer"
+                          Style="@($"border:2px solid {(_method == "cod" ? "var(--mud-palette-primary)" : "transparent")}; transition:all 0.15s;")">
+                    <div class="d-flex align-center gap-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Payments" Color="Color.Default" />
+                        <div>
+                            <MudText Typo="Typo.subtitle2" Style="font-weight:700;">Cash on Delivery</MudText>
+                            @if (_method == "cod")
+                            {
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                                    Pay the delivery person when you receive your order.
+                                </MudText>
+                            }
+                        </div>
+                        @if (_method == "cod")
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                                     Color="Color.Primary" Class="ml-auto" />
+                        }
+                    </div>
+                </MudPaper>
+
+                <!-- M-Pesa Express -->
+                <MudPaper @onclick='() => _method = "mpesa-express"'
+                          Elevation="@(_method == "mpesa-express" ? 3 : 1)"
+                          Class="pa-4 rounded-xl mb-4 cursor-pointer"
+                          Style="@($"border:2px solid {(_method == "mpesa-express" ? "var(--mud-palette-primary)" : "transparent")}; transition:all 0.15s;")">
+                    <div class="d-flex align-center gap-3 mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.PhoneAndroid" Color="Color.Default" />
+                        <MudText Typo="Typo.subtitle2" Style="font-weight:700;">M-Pesa Express</MudText>
+                        @if (_method == "mpesa-express")
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.CheckCircle"
+                                     Color="Color.Primary" Class="ml-auto" />
+                        }
+                    </div>
+
+                    @if (_method == "mpesa-express")
+                    {
+                        <MudTextField @bind-Value="_mpesaPhone"
+                                      Label="Phone Number"
+                                      Placeholder="+2547XXXXXXXX"
+                                      Variant="MudVariant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      Class="mb-3"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Phone" />
+                        <MudTextField @bind-Value="_mpesaAmount"
+                                      Label="Amount"
+                                      Variant="MudVariant.Outlined"
+                                      Margin="Margin.Dense"
+                                      FullWidth="true"
+                                      Adornment="Adornment.Start"
+                                      AdornmentText="KES" />
+                        <MudText Typo="Typo.caption" Class="mud-text-secondary mt-2">
+                            You will receive an M-Pesa prompt on your phone.
+                        </MudText>
                     }
-                </div>
+                </MudPaper>
 
-                <!-- Other methods can be added here -->
-            </div>
+                <MudButton Variant="MudVariant.Filled" Color="Color.Secondary"
+                           FullWidth="true" Size="Size.Large"
+                           OnClick="ConfirmPayment"
+                           Disabled="@_paying"
+                           Style="border-radius:10px; font-weight:700;">
+                    @if (_paying)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        <span>Processing…</span>
+                    }
+                    else
+                    {
+                        <span>Pay @CartService.Total.ToString("C")</span>
+                    }
+                </MudButton>
 
-            <button
-                class="mt-6 w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-4 rounded-lg shadow-sm transition"
-                @onclick="ConfirmPayment">
-                Pay Now
-            </button>
+            </MudPaper>
+        </MudItem>
 
-            @if (!string.IsNullOrEmpty(SuccessMessage))
-            {
-                <div class="mt-6 text-green-600 bg-green-50 border border-green-200 rounded-lg p-4 text-sm">
-                    ✅ @SuccessMessage
-                </div>
-            }
-            @if (!string.IsNullOrEmpty(ErrorMessage))
-            {
-                <div class="mt-6 text-red-600 bg-red-50 border border-red-200 rounded-lg p-4 text-sm">
-                    ⚠️ @ErrorMessage
-                </div>
-            }
-        </div>
-    </div>
+    </MudGrid>
 }
 
 @code {
     [CascadingParameter] public Guid? UserId { get; set; }
 
-    private string SelectedMethod { get; set; } = "cod";
-    private string? SuccessMessage { get; set; }
-    private string? ErrorMessage { get; set; }
+    private string _method        = "cod";
+    private string _mpesaPhone    = string.Empty;
+    private string _mpesaAmount   = string.Empty;
+    private bool   _paying        = false;
 
-    private List<CartItem>? CartItems { get; set; }
-
-    private string DeliveryAddress { get; set; } = "";
-    private string PickupAddress { get; set; } = "";
-    private double DeliveryLat { get; set; }
-    private double DeliveryLng { get; set; }
-    private double PickupLat { get; set; }
-    private double PickupLng { get; set; }
-
-    // MPesa Express fields
-    private string MpesaPhone { get; set; } = "";
-    private string MpesaAmount { get; set; } = "";
+    private string _deliveryAddress = string.Empty;
+    private string _pickupAddress   = string.Empty;
+    private double _deliveryLat, _deliveryLng;
+    private double _pickupLat,   _pickupLng;
 
     protected override void OnInitialized()
     {
@@ -138,100 +195,99 @@ else
             return;
         }
 
-        CartItems = CartService.Items.ToList();
+        var query = QueryHelpers.ParseQuery(
+            Navigation.ToAbsoluteUri(Navigation.Uri).Query);
 
-        // Parse query params for delivery/pickup
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var query = QueryHelpers.ParseQuery(uri.Query);
-        DeliveryAddress = query["delivery"].ToString() ?? "";
-        PickupAddress = query["pickup"].ToString() ?? "";
-        double.TryParse(query["delLat"], out var delLat);
-        double.TryParse(query["delLng"], out var delLng);
-        double.TryParse(query["pickLat"], out var pickLat);
-        double.TryParse(query["pickLng"], out var pickLng);
-        DeliveryLat = delLat;
-        DeliveryLng = delLng;
-        PickupLat = pickLat;
-        PickupLng = pickLng;
+        _deliveryAddress = query["delivery"].ToString();
+        _pickupAddress   = query["pickup"].ToString();
+        double.TryParse(query["delLat"],  out _deliveryLat);
+        double.TryParse(query["delLng"],  out _deliveryLng);
+        double.TryParse(query["pickLat"], out _pickupLat);
+        double.TryParse(query["pickLng"], out _pickupLng);
+
+        // Pre-fill MPesa amount from cart total
+        _mpesaAmount = CartService.Total.ToString("F0");
     }
-
-    private void GoShop() => Navigation.NavigateTo("/storefront");
 
     private async Task ConfirmPayment()
     {
-        if (CartItems == null || !CartItems.Any())
+        if (!CartService.Items.Any())
         {
-            ErrorMessage = "Your cart is empty.";
+            ToastService.ShowToast("Your cart is empty.", string.Empty, ToastService.ToastLevel.Warning);
             return;
         }
 
-        var items = CartItems.Select(i => new CreateOrderItemDto
+        _paying = true;
+
+        try
         {
-            ProductId = i.ProductId,
-            VariantId = i.VariantId == Guid.Empty ? null : i.VariantId,
-            Quantity = i.Quantity
-        }).ToList();
-
-        var request = new CreateOrderRequest
-        {
-            StoreId = CartItems.First().StoreId,
-            CustomerId = UserId!.Value,
-            PaymentMethod = SelectedMethod,
-            Delivery = new LocationDto
+            // ── M-Pesa STK push ───────────────────────────────────────
+            if (_method == "mpesa-express")
             {
-                Address = DeliveryAddress,
-                Lat = DeliveryLat,
-                Lng = DeliveryLng
-            },
-            Pickup = new LocationDto
-            {
-                Address = PickupAddress,
-                Lat = PickupLat,
-                Lng = PickupLng
-            },
-            Items = items
-        };
+                if (string.IsNullOrWhiteSpace(_mpesaPhone) || string.IsNullOrWhiteSpace(_mpesaAmount))
+                {
+                    ToastService.ShowToast("Phone number and amount are required.", string.Empty, ToastService.ToastLevel.Warning);
+                    return;
+                }
 
-        if (SelectedMethod == "mpesa-express")
-        {
-            if (string.IsNullOrWhiteSpace(MpesaPhone) || string.IsNullOrWhiteSpace(MpesaAmount))
-            {
-                ErrorMessage = "Phone number and amount are required.";
-                return;
-            }
+                var mpesaResult = await PaymentService.StartMpesaExpressAsync(_mpesaPhone, _mpesaAmount);
 
-            @* var res = await PaymentService.StartMpesaExpressAsync(MpesaPhone, MpesaAmount); *@
+                if (!mpesaResult.Success)
+                {
+                    ToastService.ShowToast(
+                        mpesaResult.Error?.Message ?? "Failed to initiate M-Pesa payment.",
+                        string.Empty, ToastService.ToastLevel.Error);
+                    return;
+                }
 
-            @* if (!res.Success)
-            {
                 ToastService.ShowToast(
-                "Failed to initiate MPesa payment.",
-                "",
-                ToastService.ToastLevel.Error
-                );
+                    mpesaResult.Data?.CustomerMessage ?? "M-Pesa prompt sent — check your phone.",
+                    string.Empty, ToastService.ToastLevel.Info);
+            }
+
+            // ── Create order ──────────────────────────────────────────
+            var request = new CreateOrderRequest
+            {
+                StoreId       = CartService.Items.First().StoreId,
+                CustomerId    = UserId!.Value,
+                PaymentMethod = _method,
+                Delivery = new LocationDto
+                {
+                    Address = _deliveryAddress,
+                    Lat     = _deliveryLat,
+                    Lng     = _deliveryLng
+                },
+                Pickup = new LocationDto
+                {
+                    Address = _pickupAddress,
+                    Lat     = _pickupLat,
+                    Lng     = _pickupLng
+                },
+                Items = CartService.Items.Select(i => new CreateOrderItemDto
+                {
+                    ProductId = i.ProductId,
+                    VariantId = i.VariantId == Guid.Empty ? null : i.VariantId,
+                    Quantity  = i.Quantity
+                }).ToList()
+            };
+
+            var result = await OrderService.AddOrder(request);
+
+            if (result.Success)
+            {
+                ToastService.ShowToast("Order placed successfully!", string.Empty, ToastService.ToastLevel.Success);
+                CartService.ClearCart();
+                Navigation.NavigateTo("/customer/myorders");
                 return;
             }
 
-            SuccessMessage = res.Data?.CustomerMessage ??
-            "MPesa prompt sent. Please check your phone.";
             ToastService.ShowToast(
-            SuccessMessage,
-            "",
-            ToastService.ToastLevel.Success
-            ); *@
+                result.Error?.Message ?? "Failed to create order.",
+                string.Empty, ToastService.ToastLevel.Error);
         }
-
-        var result = await OrderService.AddOrder(request);
-
-        if (result.Success)
+        finally
         {
-            SuccessMessage = "Order created successfully!";
-            ToastService.ShowToast(SuccessMessage, string.Empty, ToastService.ToastLevel.Success);
-            CartService.ClearCart();
-            return;
+            _paying = false;
         }
-
-        ErrorMessage = result.Error?.Detail ?? "Failed to create order.";
-        ToastService.ShowToast(ErrorMessage, string.Empty, ToastService.ToastLevel.Error);
     }
 }

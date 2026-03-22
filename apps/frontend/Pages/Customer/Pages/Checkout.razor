@@ -2,146 +2,181 @@
 @layout CustomerLayout
 @using frontend.Models
 @using frontend.Pages.Shared.Components.Cart
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @inject CartService CartService
 @inject NavigationManager Navigation
 
-<div class="p-6 max-w-5xl mx-auto">
-
-    <h1 class="text-3xl font-bold mb-8">Checkout</h1>
-
-    @if (!CartService.Items.Any())
-    {
-        <p class="text-gray-500 text-lg">
-            Your cart is empty.
-            <button class="text-stoneblue font-medium ml-2" @onclick="GoShop">Shop Now</button>
-        </p>
-    }
-    else
-    {
-        <div class="flex flex-col lg:flex-row gap-8">
-
-            <!-- Cart Section -->
-            <div class="lg:w-1/2 bg-white shadow rounded-lg p-6">
-                <h2 class="font-semibold text-xl mb-4">Your Cart</h2>
-                <CartCard />
-            </div>
-
-            <!-- Delivery / Map Section -->
-            <div class="flex flex-col gap-6">
-
-                <!-- Top Buttons Row -->
-                <div class="flex justify-between items-center mb-4">
-                    <button class="px-4 py-2 rounded bg-stoneblue text-white text-sm" @onclick="UseUsualAddresses">
-                        Use usual addresses
-                    </button>
-
-                    <button class="px-4 py-2 rounded bg-gray-300 text-gray-700 text-sm" @onclick="() => ShowMap = !ShowMap">
-                        @(ShowMap ? "Hide Map" : "Show Map")
-                    </button>
-                </div>
-
-                <!-- Delivery / Pickup Inputs -->
-                <div class="flex flex-col gap-3">
-                    <div class="flex items-center gap-2">
-                        <button class="px-3 py-1 rounded text-white text-sm @DeliveryBtnClass"
-                            @onclick="() => SetMode(CustomerMap.MapClickMode.Delivery)" disabled="@(!ShowMap)">
-                            Delivery
-                        </button>
-                        <input type="text" class="border rounded px-2 py-1 flex-1" placeholder="Delivery address"
-                            @bind="DeliveryAddress" disabled="@(!IsDeliveryMode || !ShowMap)" />
-                    </div>
-
-                    <div class="flex items-center gap-2">
-                        <button class="px-3 py-1 rounded text-white text-sm @PickupBtnClass"
-                            @onclick="() => SetMode(CustomerMap.MapClickMode.Pickup)" disabled="@(!ShowMap)">
-                            Pickup
-                        </button>
-                        <input type="text" class="border rounded px-2 py-1 flex-1" placeholder="Pickup location"
-                            @bind="PickupAddress" disabled="@(!IsPickupMode || !ShowMap)" />
-                    </div>
-                </div>
-
-                @if (ShowMap)
-                {
-                    <div class="border rounded p-4 bg-gray-100 text-gray-600 text-center"
-                        style="height:300px; display:flex; align-items:center; justify-content:center;">
-                        Map would appear here
-                    </div>
-                }
-
-                <!-- Centered Proceed Button -->
-                <div class="flex justify-center mt-4">
-                    <button class="px-6 py-2 bg-stoneblue text-white rounded shadow hover:bg-stoneblue/90 text-sm"
-                        @onclick="GoToPayment">
-                        Proceed to Payment
-                    </button>
-                </div>
-
-            </div>
-
-        </div>
-    }
+<!-- ── Page header ── -->
+<div class="d-flex align-center justify-space-between mb-6">
+    <MudText Typo="Typo.h5" Style="font-weight:800;">Checkout</MudText>
+    <MudChip T="string" Size="Size.Small" Variant="MudVariant.Filled" Color="Color.Primary" Label="true">
+        @CartService.TotalQuantity item@(CartService.TotalQuantity == 1 ? "" : "s")
+    </MudChip>
 </div>
 
+@if (!CartService.Items.Any())
+{
+    <!-- Empty state -->
+    <MudPaper Elevation="2" Class="pa-10 rounded-xl d-flex flex-column align-center">
+        <MudIcon Icon="@Icons.Material.Filled.ShoppingCartCheckout"
+                 Style="font-size:4rem; color:#d1d5db;" Class="mb-4" />
+        <MudText Typo="Typo.h6" Style="color:#374151;" Class="mb-2">Your cart is empty</MudText>
+        <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                   OnClick="@(() => Navigation.NavigateTo("/storefront"))"
+                   Style="border-radius:8px; font-weight:700;">
+            Shop Now
+        </MudButton>
+    </MudPaper>
+}
+else
+{
+    <MudGrid Spacing="5">
+
+        <!-- Cart items -->
+        <MudItem xs="12" lg="5">
+            <MudPaper Elevation="2" Class="pa-6 rounded-xl">
+                <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Your Cart</MudText>
+                <CartCard />
+            </MudPaper>
+        </MudItem>
+
+        <!-- Delivery / map section -->
+        <MudItem xs="12" lg="7">
+            <MudPaper Elevation="2" Class="pa-6 rounded-xl">
+
+                <!-- Actions row -->
+                <div class="d-flex align-center justify-space-between mb-5 flex-wrap gap-2">
+                    <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                               StartIcon="@Icons.Material.Filled.Home"
+                               OnClick="UseUsualAddresses"
+                               Style="border-radius:8px; font-weight:600;">
+                        Use usual addresses
+                    </MudButton>
+                    <MudButton Variant="MudVariant.Outlined" Color="Color.Default"
+                               StartIcon="@(_showMap ? Icons.Material.Filled.OutlinedFlag : Icons.Material.Filled.Map)"
+                               OnClick="@(() => _showMap = !_showMap)"
+                               Style="border-radius:8px; font-weight:600;">
+                        @(_showMap ? "Hide Map" : "Show Map")
+                    </MudButton>
+                </div>
+
+                <!-- Delivery input -->
+                <div class="d-flex align-center gap-3 mb-4">
+                    <MudButton Variant="@(_isDeliveryMode ? MudVariant.Filled : MudVariant.Outlined)"
+                               Color="Color.Secondary" Size="Size.Small"
+                               OnClick="@(() => SetMode(DeliveryMode.Delivery))"
+                               Disabled="@(!_showMap)"
+                               Style="border-radius:6px; font-weight:600; min-width:80px;">
+                        Delivery
+                    </MudButton>
+                    <MudTextField @bind-Value="_deliveryAddress"
+                                  Placeholder="Delivery address"
+                                  Variant="MudVariant.Outlined"
+                                  Margin="Margin.Dense"
+                                  FullWidth="true"
+                                  Disabled="@(!_isDeliveryMode || !_showMap)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.LocalShipping" />
+                </div>
+
+                <!-- Pickup input -->
+                <div class="d-flex align-center gap-3 mb-5">
+                    <MudButton Variant="@(_isPickupMode ? MudVariant.Filled : MudVariant.Outlined)"
+                               Color="Color.Primary" Size="Size.Small"
+                               OnClick="@(() => SetMode(DeliveryMode.Pickup))"
+                               Disabled="@(!_showMap)"
+                               Style="border-radius:6px; font-weight:600; min-width:80px;">
+                        Pickup
+                    </MudButton>
+                    <MudTextField @bind-Value="_pickupAddress"
+                                  Placeholder="Pickup location"
+                                  Variant="MudVariant.Outlined"
+                                  Margin="Margin.Dense"
+                                  FullWidth="true"
+                                  Disabled="@(!_isPickupMode || !_showMap)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Store" />
+                </div>
+
+                @if (_showMap)
+                {
+                    <!-- Map placeholder — swap for <CustomerMap /> when ready -->
+                    <MudPaper Elevation="0" Class="rounded-xl d-flex align-center justify-center"
+                              Style="height:260px; background:#f9fafb; border:2px dashed #e5e7eb;">
+                        <div class="d-flex flex-column align-center gap-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Map" Style="font-size:3rem; color:#d1d5db;" />
+                            <MudText Typo="Typo.body2" Style="color:#9ca3af;">Map will appear here</MudText>
+                        </div>
+                    </MudPaper>
+                }
+
+                <!-- Order total + proceed -->
+                <MudDivider Class="my-5" />
+                <div class="d-flex align-center justify-space-between mb-4">
+                    <MudText Typo="Typo.subtitle1" Style="font-weight:700;">
+                        Total (@CartService.TotalQuantity item@(CartService.TotalQuantity == 1 ? "" : "s"))
+                    </MudText>
+                    <MudText Typo="Typo.h6" Style="font-weight:800; color:#16a34a;">
+                        @CartService.Total.ToString("C")
+                    </MudText>
+                </div>
+
+                <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                           FullWidth="true" Size="Size.Large"
+                           OnClick="GoToPayment"
+                           EndIcon="@Icons.Material.Filled.ArrowForward"
+                           Style="border-radius:10px; font-weight:700;">
+                    Proceed to Payment
+                </MudButton>
+
+            </MudPaper>
+        </MudItem>
+
+    </MudGrid>
+}
+
 @code {
-    private CustomerMap.MapClickMode mapClickMode = CustomerMap.MapClickMode.Delivery;
-    private string DeliveryAddress { get; set; } = "";
-    private string PickupAddress { get; set; } = "";
+    private enum DeliveryMode { Delivery, Pickup }
 
-    private bool ShowMap { get; set; } = true;
+    private DeliveryMode _mode = DeliveryMode.Delivery;
+    private string _deliveryAddress = string.Empty;
+    private string _pickupAddress   = string.Empty;
+    private bool   _showMap         = true;
 
-    private CustomerAddress UsualAddresses { get; set; } = new()
-    {
-        Delivery = "Kenyatta Avenue, CBD, Nairobi",
-        Pickup = "Accra Road, CBD, Nairobi"
-    };
+    // Hardcoded MVP defaults — replace with user profile addresses
+    private const string DefaultDelivery = "Kenyatta Avenue, CBD, Nairobi";
+    private const string DefaultPickup   = "Accra Road, CBD, Nairobi";
 
-    private bool IsDeliveryMode => mapClickMode == CustomerMap.MapClickMode.Delivery;
-    private bool IsPickupMode => mapClickMode == CustomerMap.MapClickMode.Pickup;
+    private bool _isDeliveryMode => _mode == DeliveryMode.Delivery;
+    private bool _isPickupMode   => _mode == DeliveryMode.Pickup;
 
-    private string DeliveryBtnClass => IsDeliveryMode ? "bg-blue-600 opacity-100" : "bg-blue-400 opacity-60 hover:opacity-90";
-    private string PickupBtnClass => IsPickupMode ? "bg-green-600 opacity-100" : "bg-green-400 opacity-60 hover:opacity-90";
-
-    private void SetMode(CustomerMap.MapClickMode mode) => mapClickMode = mode;
+    private void SetMode(DeliveryMode mode) => _mode = mode;
 
     private void UseUsualAddresses()
     {
-        DeliveryAddress = UsualAddresses.Delivery;
-        PickupAddress = UsualAddresses.Pickup;
-        ShowMap = false;
+        _deliveryAddress = DefaultDelivery;
+        _pickupAddress   = DefaultPickup;
+        _showMap         = false;
     }
-
-    private void GoShop() => Navigation.NavigateTo("/storefront");
 
     private void GoToPayment()
     {
-        if (string.IsNullOrWhiteSpace(DeliveryAddress) && string.IsNullOrWhiteSpace(PickupAddress))
-        {
-            DeliveryAddress = UsualAddresses.Delivery;
-            PickupAddress = UsualAddresses.Pickup;
-        }
+        // Fall back to defaults if the user skipped address entry
+        if (string.IsNullOrWhiteSpace(_deliveryAddress)) _deliveryAddress = DefaultDelivery;
+        if (string.IsNullOrWhiteSpace(_pickupAddress))   _pickupAddress   = DefaultPickup;
 
-        // Using hardcoded coordinates for MVP
-        var delLat = "-1.2848242046310998";
-        var delLng = "36.82204128701168";
-        var pickLat = "-1.2829256773845723";
-        var pickLng = "36.827309307951396";
-
-        // Serialize cart items to query param
-        var cartJson = System.Text.Json.JsonSerializer.Serialize(CartService.Items);
+        // Hardcoded coordinates for MVP — replace with map pin values
+        const string delLat  = "-1.2848242046310998";
+        const string delLng  = "36.82204128701168";
+        const string pickLat = "-1.2829256773845723";
+        const string pickLng = "36.827309307951396";
 
         Navigation.NavigateTo(
-        $"/customer/payment" +
-        $"?delivery={Uri.EscapeDataString(DeliveryAddress)}" +
-        $"&pickup={Uri.EscapeDataString(PickupAddress)}" +
-        $"&delLat={delLat}&delLng={delLng}&pickLat={pickLat}&pickLng={pickLng}" +
-        $"&cart={Uri.EscapeDataString(cartJson)}"
-        );
-    }
-
-    public class CustomerAddress
-    {
-        public string Delivery { get; set; } = string.Empty;
-        public string Pickup { get; set; } = string.Empty;
+            $"/customer/payment" +
+            $"?delivery={Uri.EscapeDataString(_deliveryAddress)}" +
+            $"&pickup={Uri.EscapeDataString(_pickupAddress)}" +
+            $"&delLat={delLat}&delLng={delLng}" +
+            $"&pickLat={pickLat}&pickLng={pickLng}");
     }
 }
