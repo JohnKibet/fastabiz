@@ -1,165 +1,205 @@
 @page "/driver/dashboard"
 @layout DriverLayout
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @attribute [Authorize(Roles = "driver")]
 
-<div class="p-6 space-y-6">
-
-    <!-- Accept Deliveries Banner -->
-    @if (hasNewAssignments)
-    {
-        <div class="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-            <h3 class="text-lg font-semibold text-yellow-800">New Deliveries Assigned</h3>
-            <p class="text-sm text-gray-600 mb-4">
-                You’ve been assigned @newDeliveries.Count deliveries. Accept them to add to today’s route.
-            </p>
-            <button class="bg-green-600 text-white px-4 py-2 rounded mr-2" @onclick="AcceptDeliveries">Accept</button>
-            <button class="bg-red-500 text-white px-4 py-2 rounded" @onclick="DeclineDeliveries">Decline</button>
-        </div>
-    }
-
-    <!-- Header -->
+<!-- ── Page header ── -->
+<div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-3">
     <div>
-        <h2 class="text-2xl font-semibold">🚚  Dashboard</h2>
-        <p class="text-gray-600">Welcome back! Here’s your overview for today.</p>
+        <MudText Typo="Typo.h5" Style="font-weight:800;">Driver Dashboard</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">Here's your overview for today.</MudText>
     </div>
-
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white rounded-xl shadow p-4">
-            <h3 class="text-sm text-gray-500">Assigned Deliveries</h3>
-            <p class="text-2xl font-bold">@assignedCount</p>
-        </div>
-        <div class="bg-white rounded-xl shadow p-4">
-            <h3 class="text-sm text-gray-500">Completed</h3>
-            <p class="text-2xl font-bold text-green-600">@completedCount</p>
-        </div>
-        <div class="bg-white rounded-xl shadow p-4">
-            <h3 class="text-sm text-gray-500">Pending</h3>
-            <p class="text-2xl font-bold text-yellow-600">@pendingCount</p>
-        </div>
-    </div>
-
-    <!-- Route & Deliveries -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Today's Route Map -->
-        <div class="lg:col-span-2 bg-white rounded-xl shadow p-4">
-            <h3 class="text-lg font-medium mb-3">Today’s Route</h3>
-            <RealTimeMap @ref="realTimeMap" Parameters="parameters" height="400px" width="100%" />
-        </div>
-
-        <!-- Delivery List -->
-        <div class="bg-white rounded-xl shadow p-4">
-            <h3 class="text-lg font-medium mb-3">Deliveries</h3>
-            <ul class="divide-y divide-gray-200">
-                @foreach (var stop in deliveryStops)
-                {
-                    <li class="py-3">
-                        <div class="flex justify-between">
-                            <span class="font-medium">@stop.Name</span>
-                            <span class="text-sm text-gray-500">@stop.Status</span>
-                        </div>
-                        <p class="text-xs text-gray-500">@stop.Address</p>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div>
+    <MudChip T="string" Icon="@Icons.Material.Filled.Circle" Color="Color.Success"
+             Variant="MudVariant.Filled" Size="Size.Small" Label="true" Style="font-weight:600;">
+        On Duty
+    </MudChip>
 </div>
 
-@code {
-    private RealTimeMap realTimeMap;
+<!-- ── New assignments banner ── -->
+@if (_hasNewAssignments)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-6" Dense="false" NoIcon="false">
+        <MudText Typo="Typo.subtitle2" Style="font-weight:700;">
+            @_newDeliveries.Count new deliver@(_newDeliveries.Count == 1 ? "y" : "ies") assigned
+        </MudText>
+        <MudText Typo="Typo.body2" Class="mt-1 mb-3">
+            Accept them to add to today's route and update the map.
+        </MudText>
+        <div class="d-flex gap-3">
+            <MudButton Variant="MudVariant.Filled" Color="Color.Success" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.CheckCircle"
+                       OnClick="AcceptDeliveries"
+                       Style="border-radius:8px; font-weight:700;">
+                Accept
+            </MudButton>
+            <MudButton Variant="MudVariant.Filled" Color="Color.Error" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.Cancel"
+                       OnClick="DeclineDeliveries"
+                       Style="border-radius:8px; font-weight:700;">
+                Decline
+            </MudButton>
+        </div>
+    </MudAlert>
+}
 
-    // Simulated backend state
-    private bool hasNewAssignments = true;
-    private List<DeliveryStop> newDeliveries = new()
+<!-- ── Metric cards ── -->
+<MudGrid Spacing="4" Class="mb-6">
+    <MudItem xs="12" sm="4">
+        <MetricCard Title="Assigned"  Value="@_assignedCount.ToString()"
+                    Icon="truck" />
+    </MudItem>
+    <MudItem xs="12" sm="4">
+        <MetricCard Title="Completed" Value="@_completedCount.ToString()"
+                    Icon="box"    Highlight="success" />
+    </MudItem>
+    <MudItem xs="12" sm="4">
+        <MetricCard Title="Pending"   Value="@_pendingCount.ToString()"
+                    Icon="clock"  Highlight="warning" />
+    </MudItem>
+</MudGrid>
+
+<!-- ── Route map + delivery list ── -->
+<MudGrid Spacing="4">
+
+    <!-- Map -->
+    <MudItem xs="12" lg="8">
+        <DashboardPanel Title="Today's Route" Icon="@Icons.Material.Filled.Map">
+            <div style="height:400px; width:100%; border-radius:10px; overflow:hidden;">
+                <RealTimeMap @ref="_map" Parameters="_mapParams" height="400px" width="100%" />
+            </div>
+        </DashboardPanel>
+    </MudItem>
+
+    <!-- Stop list -->
+    <MudItem xs="12" lg="4">
+        <DashboardPanel Title="Stops" Icon="@Icons.Material.Filled.Pin">
+            @if (!_deliveryStops.Any())
+            {
+                <div class="d-flex flex-column align-center py-6">
+                    <MudIcon Icon="@Icons.Material.Filled.Route"
+                             Style="font-size:2.5rem; color:#d1d5db;" Class="mb-2" />
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">No stops yet</MudText>
+                </div>
+            }
+            else
+            {
+                <MudList T="string" Dense="true" Style="padding:0;">
+                    @foreach (var (stop, i) in _deliveryStops.Select((s, i) => (s, i + 1)))
+                    {
+                        <MudListItem>
+                            <div class="d-flex align-center gap-3">
+                                <MudAvatar Size="Size.Small"
+                                           Style="@($"background:{StopColor(stop.Status)}; color:white; font-size:0.75rem; font-weight:700; width:28px; height:28px;")">
+                                    @i
+                                </MudAvatar>
+                                <div>
+                                    <MudText Typo="Typo.body2" Style="font-weight:600;">@stop.Name</MudText>
+                                    <MudText Typo="Typo.caption" Class="mud-text-secondary">@stop.Address</MudText>
+                                </div>
+                                <MudChip T="string" Size="Size.Small" Variant="MudVariant.Outlined"
+                                         Color="@GetStopColor(stop.Status)" Label="true" Class="ml-auto">
+                                    @stop.Status
+                                </MudChip>
+                            </div>
+                        </MudListItem>
+                        <MudDivider />
+                    }
+                </MudList>
+            }
+        </DashboardPanel>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private RealTimeMap? _map;
+    private bool _hasNewAssignments = true;
+
+    private List<DeliveryStop> _newDeliveries = new()
     {
-        new DeliveryStop { Name = "Stop 1", Address = "Customer A", Lat = -1.2925, Lng = 36.8220, Status = "Pending" },
-        new DeliveryStop { Name = "Stop 2", Address = "Customer B", Lat = -1.2980, Lng = 36.8290, Status = "Pending" }
+        new("Stop 1", "Customer A", -1.2925, 36.8220, "Pending"),
+        new("Stop 2", "Customer B", -1.2980, 36.8290, "Pending"),
     };
 
-    private int assignedCount => deliveryStops.Count;
-    private int completedCount => deliveryStops.Count(x => x.Status == "Completed");
-    private int pendingCount => deliveryStops.Count(x => x.Status == "Pending");
+    private List<DeliveryStop> _deliveryStops = new();
 
-    private List<DeliveryStop> deliveryStops = new();
+    private int _assignedCount  => _deliveryStops.Count;
+    private int _completedCount => _deliveryStops.Count(x => x.Status == "Completed");
+    private int _pendingCount   => _deliveryStops.Count(x => x.Status == "Pending");
 
-    RealTimeMap.LoadParameters parameters = new RealTimeMap.LoadParameters()
+    private readonly RealTimeMap.LoadParameters _mapParams = new()
     {
-        basemap = new RealTimeMap.Basemap()
+        basemap = new RealTimeMap.Basemap
         {
-            basemapLayers = new List<RealTimeMap.BasemapLayer>()
+            basemapLayers = new List<RealTimeMap.BasemapLayer>
             {
-                new RealTimeMap.BasemapLayer()
-                {
-                    url = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    attribution = "©Open Street Map",
-                    title = "Open Street Map",
+                new() {
+                    url          = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    attribution  = "©OpenStreetMap",
+                    title        = "OpenStreetMap",
                     detectRetina = true
                 }
             }
         },
-        location = new RealTimeMap.Location()
-        {
-            latitude = -1.29207,
-            longitude = 36.82195,
-        },
+        location = new RealTimeMap.Location { latitude = -1.29207, longitude = 36.82195 },
         zoomLevel = 13
     };
 
-    private async void AcceptDeliveries()
+    private async Task AcceptDeliveries()
     {
-        deliveryStops.AddRange(newDeliveries);
-        hasNewAssignments = false;
-
+        _deliveryStops.AddRange(_newDeliveries);
+        _hasNewAssignments = false;
         StateHasChanged();
 
-        if (realTimeMap != null)
+        if (_map is null) return;
+
+        var points = new List<RealTimeMap.StreamPoint>
         {
-            // Update map points after accepting
-            var points = new List<RealTimeMap.StreamPoint>();
-
-            var driverPoint = new RealTimeMap.StreamPoint
-            {
-                guid = Guid.NewGuid(),
+            new() {
+                guid      = Guid.NewGuid(),
                 timestamp = DateTime.UtcNow,
-                latitude = -1.2921,
+                latitude  = -1.2921,
                 longitude = 36.8219,
-                type = "driver",
-                value = "You"
-            };
-            points.Add(driverPoint);
-
-            foreach (var stop in deliveryStops)
-            {
-                points.Add(new RealTimeMap.StreamPoint
-                {
-                    guid = Guid.NewGuid(),
-                    timestamp = DateTime.UtcNow,
-                    latitude = stop.Lat,
-                    longitude = stop.Lng,
-                    type = "destination",
-                    value = stop.Name
-                });
+                type      = "driver",
+                value     = "You"
             }
+        };
 
-            await realTimeMap.Geometric.Points.upload(points, true);
-        }
+        points.AddRange(_deliveryStops.Select(s => new RealTimeMap.StreamPoint
+        {
+            guid      = Guid.NewGuid(),
+            timestamp = DateTime.UtcNow,
+            latitude  = s.Lat,
+            longitude = s.Lng,
+            type      = "destination",
+            value     = s.Name ?? string.Empty
+        }));
+
+        await _map.Geometric.Points.upload(points, true);
     }
 
     private void DeclineDeliveries()
     {
-        hasNewAssignments = false;
-        newDeliveries.Clear();
-        // TODO: notify backend so dispatcher can reassign
+        _hasNewAssignments = false;
+        _newDeliveries.Clear();
+        // TODO: notify backend for reassignment
         StateHasChanged();
     }
 
-    private class DeliveryStop
+    private static string StopColor(string? status) => status switch
     {
-        public string? Name { get; set; }
-        public string? Address { get; set; }
-        public double Lat { get; set; }
-        public double Lng { get; set; }
-        public string? Status { get; set; }
-    }
+        "Completed" => "#16a34a",
+        "Pending"   => "#d97706",
+        _           => "#6b7280"
+    };
+
+    private static Color GetStopColor(string? status) => status switch
+    {
+        "Completed" => Color.Success,
+        "Pending"   => Color.Warning,
+        _           => Color.Default
+    };
+
+    private record DeliveryStop(string? Name, string? Address, double Lat, double Lng, string Status);
 }

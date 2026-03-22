@@ -113,7 +113,8 @@
     private async Task LoadNotifications()
     {
         if (!UserId.HasValue) return;
-        notifications = await NotificationService.GetNotificationByUser(UserId.Value);
+        var result = await NotificationService.GetNotificationByUser(UserId.Value);
+        notifications = result.Data ?? [];
         UnreadCount   = notifications.Count(n => n.Status != NotificationStatus.Read);
     }
 

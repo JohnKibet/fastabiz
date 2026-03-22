@@ -31,7 +31,8 @@ else
     {
         if (UserId.HasValue)
         {
-            notifications = await NotificationService.GetNotificationByUser(UserId.Value);
+            var result = await NotificationService.GetNotificationByUser(UserId.Value);
+            notifications = result.Data ?? [];
         }
         else
         {

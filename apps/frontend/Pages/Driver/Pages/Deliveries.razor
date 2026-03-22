@@ -1,280 +1,280 @@
 @page "/driver/deliveries"
 @layout DriverLayout
-@inject AuthenticationStateProvider AuthProvider 
-
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 @inject DeliveryService DeliveryService
 @inject ToastService ToastService
 @inject NavigationManager Navigation
-@inject DeliveryService DeliveryService
 @attribute [Authorize(Roles = "driver")]
 
-<h2 class="text-2xl font-semibold text-gray-800 mb-6">All Deliveries</h2>
-
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <input
-        @bind="searchTerm"
-        type="text"
-        placeholder="Search by customer, pickup, or delivery..."
-        class="w-full pl-8 pr-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-    />
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-search absolute text-gray-400"
-    >
-        <path d="m21 21-4.34-4.34" />
-        <circle cx="11" cy="11" r="8" />
-    </svg>
-
-    <!-- Status Filter -->
-    <select 
-    @bind="statusFilter"
-            class="w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700">
-        <option value="">All Statuses</option>
-        <option value="Assigned">Assigned</option>
-        <option value="PickedUp">PickedUp</option>
-        <option value="Delivered">Delivered</option>
-        <option value="Failed">Failed</option>
-    </select>
-
-    <!-- Start Date -->
-    <input
-        @bind="startDate"
-        type="date"
-        class="w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700"
-    />
-
-    <!-- End Date -->
-    <input
-        @bind="endDate"
-        type="date"
-        class="w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700"
-    />
+<!-- ── Page header ── -->
+<div class="d-flex align-center justify-space-between mb-6">
+    <MudText Typo="Typo.h5" Style="font-weight:800;">My Deliveries</MudText>
 </div>
 
-@if (deliveries == null)
-{
-    <div class="text-gray-500">Loading deliveries...</div>
-}
-else if (deliveries.Count == 0)
-{
-    <div class="text-gray-600">No deliveries found.</div>
-}
-else
-{
-    <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
-        <!-- Deliveries Table -->
-        <DeliveriesTable
-            PagedDeliveries="FilteredDeliveries.ToList()"
-            CurrentPage="currentPage"
-            PageSize="pageSize"
-            OnView="ViewDelivery"
-            OnEdit="EditDelivery"
-            OnDelete="ConfirmDelete"
-            GetStatusClass="GetStatusClass" 
-        />
+<!-- ── Filters ── -->
+<MudGrid Spacing="3" Class="mb-6">
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField @bind-Value="_search"
+                      Placeholder="Search by customer, pickup, delivery..."
+                      Variant="MudVariant.Outlined"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Margin="Margin.Dense"
+                      FullWidth="true"
+                      Immediate="true" />
+    </MudItem>
+    <MudItem xs="12" sm="3" md="2">
+        <SelectField TValue="string" TItem="string"
+                     Label="Status"
+                     Options="@_statusOptions"
+                     @bind-Value="_statusFilter" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker @bind-Date="_startDate" Label="From"
+                       Variant="MudVariant.Outlined" Margin="Margin.Dense" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker @bind-Date="_endDate" Label="To"
+                       Variant="MudVariant.Outlined" Margin="Margin.Dense" />
+    </MudItem>
+</MudGrid>
 
-        <!-- View & Edit Modal -->
-        <TableRowModal TModel="Delivery"
-            IsOpen="isEditModalOpen"
-            Model="editableDelivery"
-            IsEditMode="isEditMode"
-            Close="CloseModal"
-            EnableEdit="@(() => isEditMode = true)"
-            
-            Fields="deliveryFields"
-            
-        />
+<!-- ── Grid ── -->
+<AppGrid TItem="Delivery"
+         Items="@FilteredDeliveries"
+         Loading="@_loading"
+         EmptyText="No deliveries found.">
+    <ColDefs>
+        <MudTh>Delivery</MudTh>
+        <MudTh>Pickup</MudTh>
+        <MudTh>Destination</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Assigned</MudTh>
+        <MudTh></MudTh>
+    </ColDefs>
+    <RowTemplate Context="delivery">
+        <MudTd>
+            <MudText Typo="Typo.body2" Style="font-family:monospace; font-weight:600;">
+                #@delivery.ID.ToString()[..8]
+            </MudText>
+        </MudTd>
+        <MudTd>
+            <MudText Typo="Typo.body2">@delivery.PickupAddress</MudText>
+        </MudTd>
+        <MudTd>
+            <MudText Typo="Typo.body2">@delivery.DeliveryAddress</MudText>
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small" Variant="MudVariant.Filled" Label="true"
+                     Color="@GetStatusColor(delivery.Status)">
+                @delivery.Status
+            </MudChip>
+        </MudTd>
+        <MudTd>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                @delivery.AssignedAt.ToString("MMM d, yyyy")
+            </MudText>
+        </MudTd>
+        <MudTd>
+            <span @onclick:stopPropagation="true" class="d-inline-flex gap-1">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small"
+                               Color="Color.Default"
+                               OnClick="@(() => OpenModal(delivery, editMode: false))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                               Color="Color.Primary"
+                               OnClick="@(() => OpenModal(delivery, editMode: true))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                               Color="Color.Error"
+                               OnClick="@(() => ConfirmDelete(delivery))" />
+            </span>
+        </MudTd>
+    </RowTemplate>
+</AppGrid>
 
-        <!-- Delete Modal -->
-        <DeleteConfirmationModal 
-            IsVisible="isDeleteModalOpen"
-            IsVisibleChanged="@((bool value) => isDeleteModalOpen = value)"
-            Message="Delete this delivery?"
-            OnConfirm="DeleteDelivery"
-        />
-    </div>
+<!-- ── View / Edit dialog ── -->
+<MudDialog @bind-IsVisible="_modalOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Color="Color.Primary" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">
+                Delivery #@(_selected?.ID.ToString()[..8])
+            </MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        @if (_editMode)
+        {
+            <SelectField TValue="string" TItem="string"
+                         Label="Status"
+                         Options="@_statusOptions"
+                         @bind-Value="_editStatus" />
+        }
+        else
+        {
+            <MudList T="string" Dense="true">
+                <MudListItem Icon="@Icons.Material.Filled.Store">
+                    <MudText Typo="Typo.body2"><strong>Pickup:</strong> @_selected?.PickupAddress</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.LocationOn">
+                    <MudText Typo="Typo.body2"><strong>Delivery:</strong> @_selected?.DeliveryAddress</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Circle">
+                    <MudText Typo="Typo.body2"><strong>Status:</strong> @_selected?.Status</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Schedule">
+                    <MudText Typo="Typo.body2">
+                        <strong>Assigned:</strong> @_selected?.AssignedAt.ToString("MMM d, yyyy HH:mm")
+                    </MudText>
+                </MudListItem>
+            </MudList>
+        }
+    </DialogContent>
+    <DialogActions>
+        @if (!_editMode)
+        {
+            <MudButton Variant="MudVariant.Outlined" StartIcon="@Icons.Material.Filled.Edit"
+                       OnClick="@(() => _editMode = true)">Edit</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+                       OnClick="SaveChanges" Disabled="@_saving">
+                @if (_saving) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                Save
+            </MudButton>
+        }
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _modalOpen = false)">Close</MudButton>
+    </DialogActions>
+</MudDialog>
 
-    <!-- Pagination -->
-    <PaginationControls 
-        CurrentPage="@currentPage"
-        TotalPages="@TotalPages"
-        OnNextPage="NextPage"
-        OnPreviousPage="PrevPage"
-    />
-}
-
+<!-- ── Delete confirm dialog ── -->
+<MudDialog @bind-IsVisible="_deleteOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">Delete Delivery</MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Are you sure you want to delete delivery <strong>#@_deleteTargetId.ToString()[..8]</strong>?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="MudVariant.Filled" Color="Color.Error"
+                   OnClick="DeleteDelivery" Disabled="@_saving">Delete</MudButton>
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _deleteOpen = false)">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
-    private List<Delivery> deliveries = new();
-    private string searchTerm = "";
-    private string statusFilter = "";
-    private int currentPage = 1;
-    private int pageSize = 10;
-    private DateTime? startDate;
-    private DateTime? endDate;
+    private List<Delivery> _deliveries = new();
+    private bool     _loading      = true;
+    private string   _search       = string.Empty;
+    private string   _statusFilter = string.Empty;
+    private DateTime? _startDate;
+    private DateTime? _endDate;
 
-    private bool CanGoPrev => currentPage > 1;
-    private bool CanGoNext => currentPage < TotalPages;
-    private Delivery? selectedDelivery;
-    private Delivery editableDelivery = new();
-    private bool isEditModalOpen = false;
-    private bool isEditMode = false;
-    private bool isDeleteModalOpen = false;
-    private Guid deliveryToDeleteId;
-    private List<IFieldDefinitionBase> deliveryFields = new();
+    // Modal
+    private bool      _modalOpen = false;
+    private bool      _editMode  = false;
+    private bool      _saving    = false;
+    private Delivery? _selected;
+    private string    _editStatus = string.Empty;
+
+    // Delete
+    private bool _deleteOpen     = false;
+    private Guid _deleteTargetId;
+
+    private static readonly List<string> _statusOptions =
+        new[] { "" }.Concat(Enum.GetNames<DeliveryStatus>()).ToList();
+
+    private IEnumerable<Delivery> FilteredDeliveries =>
+        _deliveries.Where(d =>
+            // Bug fix: original had (string.IsNullOrWhiteSpace(searchTerm)) — always true,
+            // so search never actually filtered. Fixed to check field contents.
+            (string.IsNullOrWhiteSpace(_search) ||
+             d.PickupAddress.Contains(_search,   StringComparison.OrdinalIgnoreCase) ||
+             d.DeliveryAddress.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(_statusFilter) ||
+             d.Status.ToString().Equals(_statusFilter, StringComparison.OrdinalIgnoreCase)) &&
+            (!_startDate.HasValue || d.AssignedAt.Date >= _startDate.Value.Date) &&
+            (!_endDate.HasValue   || d.AssignedAt.Date <= _endDate.Value.Date)
+        );
 
     protected override async Task OnInitializedAsync()
     {
         var result = await DeliveryService.GetDeliveries();
-        if (result.Success && result.Data != null)
+        _deliveries = result.Success && result.Data != null ? result.Data : new();
+        _loading = false;
+    }
+
+    private async Task Reload()
+    {
+        var result = await DeliveryService.GetDeliveries();
+        if (result.Success && result.Data != null) _deliveries = result.Data;
+    }
+
+    private void OpenModal(Delivery delivery, bool editMode)
+    {
+        _selected   = delivery;
+        _editStatus = delivery.Status.ToString();
+        _editMode   = editMode;
+        _modalOpen  = true;
+    }
+
+    private async Task SaveChanges()
+    {
+        if (_selected is null) return;
+        _saving = true;
+
+        if (Enum.TryParse<DeliveryStatus>(_editStatus, out var newStatus) &&
+            newStatus != _selected.Status)
         {
-            deliveries = result.Data;
+            await DeliveryService.UpdateDeliveryStatus(_selected.ID, newStatus);
+            await Reload();
+            ToastService.ShowToast("Delivery status updated.", string.Empty, ToastService.ToastLevel.Success);
         }
-    }
-
-    private IEnumerable<Delivery>FilteredDeliveries => 
-        deliveries?
-        .Where(d =>
-            (string.IsNullOrWhiteSpace(searchTerm)) &&
-            (string.IsNullOrWhiteSpace(statusFilter) || 
-            d.Status.ToString().Contains(statusFilter, StringComparison.OrdinalIgnoreCase)) &&
-            (!startDate.HasValue || d.AssignedAt.Date >= startDate.Value.Date) &&
-            (!endDate.HasValue || d.AssignedAt.Date <= endDate.Value.Date)
-        ) ?? Enumerable.Empty<Delivery>();
-    private int TotalPages => (int)Math.Ceiling((double)FilteredDeliveries.Count() / pageSize);
-
-    private void NextPage()
-    {
-        if (currentPage < TotalPages)
-            currentPage++;
-    }
-    private void PrevPage()
-    {
-        if (currentPage > 1)
-            currentPage--;
-    }
-
-    private void BuildDeliveryFields(Delivery delivery)
-    {
-        deliveryFields = new List<IFieldDefinitionBase>
+        else
         {
-            new FieldDefinition<string>
-            {
-                Label = "DeliveryStatus",
-                Type = "text",
-                Value = delivery.Status.ToString(),
-                Options =  Enum.GetNames(typeof(DeliveryStatus)).ToList(),
-                ValueChanged = EventCallback.Factory.Create<string>(this, val => 
-                {
-                    if (Enum.TryParse<DeliveryStatus>(val, out var status))
-                    delivery.Status = status;
-                })
-            },
-        };
-    }
-
-    private void ViewDelivery(Guid id)
-    {
-        selectedDelivery = deliveries?.FirstOrDefault(o => o.ID == id);
-        if (selectedDelivery is not null)
-        {
-            editableDelivery = new Delivery
-            {
-                ID = selectedDelivery.ID,
-                Status = selectedDelivery.Status
-                // other fields
-            };
-            BuildDeliveryFields(editableDelivery);
-
-            isEditMode = false;
-            isEditModalOpen = true;
+            ToastService.ShowToast("No changes were made.", string.Empty, ToastService.ToastLevel.Warning);
         }
+
+        _saving    = false;
+        _modalOpen = false;
     }
 
-    private void EditDelivery(Guid id)
+    private void ConfirmDelete(Delivery delivery)
     {
-        selectedDelivery = deliveries?.FirstOrDefault(o => o.ID == id);
-        if (selectedDelivery is not null)
-        {
-            editableDelivery = new Delivery
-            {
-                ID = selectedDelivery.ID,
-                Status = selectedDelivery.Status
-                // other fields
-            };
-            BuildDeliveryFields(editableDelivery);
-
-            isEditMode = true;
-            isEditModalOpen = true;
-        }
-    }
-
-    private void CloseModal()
-    {
-        isEditModalOpen = false;
-        selectedDelivery = null;
-    }
-
-    private void OpenEditModal(Delivery delivery)
-    {
-        selectedDelivery = delivery;
-        editableDelivery = new Delivery
-        {
-            ID = delivery.ID,
-            Status = delivery.Status,
-            // Add other properties you want editable
-        };
-        BuildDeliveryFields(editableDelivery);
-
-        isEditModalOpen = true;
-    }
-
-    private void ConfirmDelete(Guid id)
-    {
-        deliveryToDeleteId = id;
-        isDeleteModalOpen = true;   
-    }
-
-    private void CancelDelete()
-    {
-        isDeleteModalOpen = false;
-        deliveryToDeleteId = Guid.Empty;
+        _deleteTargetId = delivery.ID;
+        _deleteOpen     = true;
     }
 
     private async Task DeleteDelivery()
     {
-        if (deliveryToDeleteId != Guid.Empty)
+        _saving = true;
+        var result = await DeliveryService.DeleteDelivery(_deleteTargetId);
+        _saving     = false;
+        _deleteOpen = false;
+
+        if (result.Success)
         {
-            var success = await DeliveryService.DeleteDelivery(deliveryToDeleteId);
-
-            if (true)
-            {
-                var result = await DeliveryService.GetDeliveries();
-                if (result.Success && result.Data != null)
-                {
-                    deliveries = result.Data;
-                    ToastService.ShowToast("Delivery deleted successfully", string.Empty, ToastService.ToastLevel.Success);
-                }
-            }
+            await Reload();
+            ToastService.ShowToast("Delivery deleted.", string.Empty, ToastService.ToastLevel.Success);
         }
-
-        isDeleteModalOpen = false;
-        deliveryToDeleteId = Guid.Empty;
+        else
+        {
+            ToastService.ShowToast(result.Error?.Message ?? "Failed to delete delivery.", string.Empty, ToastService.ToastLevel.Error);
+        }
     }
 
-    private string GetStatusClass(string status) => status.ToLower() switch
+    private static Color GetStatusColor(DeliveryStatus status) => status switch
     {
-        "assigned" => "text-yellow-600 bg-yellow-100 px-2 py-1 rounded text-xs font-medium",
-        "pickedup" => "text-orange-600 bg-orange-100 px-2 py-1 rounded text-xs font-medium",
-        "delivered" => "text-green-600 bg-green-100 px-2 py-1 rounded text-xs font-medium",
-        "failed" => "text-red-600 bg-red-100 px-2 py-1 rounded text-xs font-medium",
-        _ => "text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium"
+        DeliveryStatus.Delivered => Color.Success,
+        DeliveryStatus.Assigned  => Color.Warning,
+        DeliveryStatus.PickedUp  => Color.Info,
+        DeliveryStatus.Failed    => Color.Error,
+        _                        => Color.Default
     };
 }

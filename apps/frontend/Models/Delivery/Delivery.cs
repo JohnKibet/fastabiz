@@ -26,6 +26,12 @@ public class Delivery
     [JsonPropertyName("status")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public DeliveryStatus Status { get; set; }
+
+    [JsonPropertyName("pickup_address")]
+    public string PickupAddress { get; set; } = string.Empty;
+
+    [JsonPropertyName("delivery_address")]
+    public string DeliveryAddress { get; set; } = string.Empty;
 }
 
 public class CreateDeliveryRequest
@@ -39,7 +45,7 @@ public class CreateDeliveryRequest
 
 public class CreateDeliveryResponse
 {
-    
+
 }
 
 public enum DeliveryStatus
@@ -48,5 +54,5 @@ public enum DeliveryStatus
     PickedUp,
     Delivered,
     Failed
-        
+
 }

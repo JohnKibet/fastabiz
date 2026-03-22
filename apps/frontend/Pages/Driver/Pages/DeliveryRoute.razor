@@ -1,108 +1,179 @@
 @page "/driver/route"
 @layout DriverLayout
-@inject AuthenticationStateProvider AuthProvider
-@inject NavigationManager Navigation 
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @attribute [Authorize(Roles = "driver")]
 
-<div class="flex flex-col h-[calc(100vh-4rem)]">
-    <div class="p-4 border-b">
-        <h2 class="text-xl font-semibold">Today's Route</h2>
-        <p class="text-gray-600">Your assigned deliveries and optimized path</p>
-    </div>
-
-    <div class="flex flex-1 overflow-hidden">
-        <!-- Map -->
-        <div class="flex-1">
-            <RealTimeMap @ref="realTimeMap" Parameters="parameters" 
-                height="calc(100vh - 8rem)" width="100%" />
-        </div>
-
-        <!-- Sidebar with stops -->
-        <div class="w-64 bg-white border-l overflow-y-auto p-4">
-            <h3 class="font-medium mb-3">Stops</h3>
-            <ol class="list-decimal list-inside space-y-2 text-sm text-gray-700">
-                @foreach (var stop in deliveryStops)
-                {
-                    <li>@stop.Name <br /><span class="text-xs text-gray-500">@stop.Address</span></li>
-                }
-            </ol>
-        </div>
+<div class="d-flex align-center justify-space-between mb-4">
+    <div>
+        <MudText Typo="Typo.h5" Style="font-weight:800;">Today's Route</MudText>
+        <MudText Typo="Typo.body2" Class="mud-text-secondary">
+            @_stops.Count stop@(_stops.Count == 1 ? "" : "s") · @_stops.Count(s => s.Done) completed
+        </MudText>
     </div>
 </div>
 
-@code {
-    private RealTimeMap realTimeMap;
+<MudGrid Spacing="4" Style="height:calc(100vh - 180px);">
 
-    // TODO: replace with real assignments from backend
-    private List<DeliveryStop> deliveryStops = new()
+    <!-- Map -->
+    <MudItem xs="12" lg="8" Style="height:100%;">
+        <MudPaper Elevation="2" Class="rounded-xl pa-0" Style="overflow:hidden; height:100%;">
+            <RealTimeMap @ref="_map"
+                         Parameters="_mapParams"
+                         height="100%"
+                         width="100%" />
+        </MudPaper>
+    </MudItem>
+
+    <!-- Stop list -->
+    <MudItem xs="12" lg="4" Style="height:100%;">
+        <MudPaper Elevation="2" Class="pa-4 rounded-xl d-flex flex-column" Style="height:100%;">
+            <MudText Typo="Typo.subtitle1" Style="font-weight:700;" Class="mb-3">Stops</MudText>
+
+            <div style="flex:1; overflow-y:auto;">
+                @if (!_stops.Any())
+                {
+                    <div class="d-flex flex-column align-center py-8">
+                        <MudIcon Icon="@Icons.Material.Filled.Route"
+                                 Style="font-size:2.5rem; color:#d1d5db;" Class="mb-2" />
+                        <MudText Typo="Typo.body2" Class="mud-text-secondary">No stops assigned</MudText>
+                    </div>
+                }
+                else
+                {
+                    <MudList T="string" Dense="true" Style="padding:0;">
+                        @foreach (var (stop, i) in _stops.Select((s, i) => (s, i + 1)))
+                        {
+                            <MudListItem>
+                                <div class="d-flex align-center gap-3">
+                                    <MudAvatar Size="Size.Small"
+                                               Color="@(stop.Done ? Color.Success : Color.Default)"
+                                               Variant="MudVariant.Filled"
+                                               Style="width:28px; height:28px; font-size:0.75rem; font-weight:700;">
+                                        @if (stop.Done)
+                                        {
+                                            <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Small" />
+                                        }
+                                        else
+                                        {
+                                            @i.ToString()
+                                        }
+                                    </MudAvatar>
+                                    <div style="flex:1; min-width:0;">
+                                        <MudText Typo="Typo.body2"
+                                                 Style="@($"font-weight:600; {(stop.Done ? "text-decoration:line-through; color:#9ca3af;" : "")}")">
+                                            @stop.Name
+                                        </MudText>
+                                        <MudText Typo="Typo.caption" Class="mud-text-secondary"
+                                                 Style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                            @stop.Address
+                                        </MudText>
+                                    </div>
+                                    <MudIconButton Icon="@(stop.Done ? Icons.Material.Filled.Undo : Icons.Material.Filled.CheckCircle)"
+                                                   Size="Size.Small"
+                                                   Color="@(stop.Done ? Color.Default : Color.Success)"
+                                                   OnClick="@(() => ToggleStop(stop))" />
+                                </div>
+                            </MudListItem>
+                            @if (i < _stops.Count) { <MudDivider /> }
+                        }
+                    </MudList>
+                }
+            </div>
+
+            <!-- Navigate button -->
+            @if (_stops.Any(s => !s.Done))
+            {
+                <MudDivider Class="my-3" />
+                <MudButton Variant="MudVariant.Filled" Color="Color.Primary" FullWidth="true"
+                           StartIcon="@Icons.Material.Filled.Navigation"
+                           Style="border-radius:8px; font-weight:700;">
+                    Navigate to Next Stop
+                </MudButton>
+            }
+        </MudPaper>
+    </MudItem>
+
+</MudGrid>
+
+@code {
+    private RealTimeMap? _map;
+
+    // TODO: replace with real assignments from DeliveryService
+    private List<RouteStop> _stops = new()
     {
-        new DeliveryStop { Name = "Stop 1", Address = "Customer A", Lat = -1.2925, Lng = 36.8220 },
-        new DeliveryStop { Name = "Stop 2", Address = "Customer B", Lat = -1.2980, Lng = 36.8290 },
-        new DeliveryStop { Name = "Stop 3", Address = "Customer C", Lat = -1.3050, Lng = 36.8350 }
+        new("Stop 1", "Customer A, Westlands",  -1.2925, 36.8220),
+        new("Stop 2", "Customer B, Kilimani",   -1.2980, 36.8290),
+        new("Stop 3", "Customer C, Langata",    -1.3050, 36.8350),
     };
 
-    RealTimeMap.LoadParameters parameters = new RealTimeMap.LoadParameters()
+    private readonly RealTimeMap.LoadParameters _mapParams = new()
     {
-        basemap = new RealTimeMap.Basemap()
+        basemap = new RealTimeMap.Basemap
         {
-            basemapLayers = new List<RealTimeMap.BasemapLayer>()
+            basemapLayers = new List<RealTimeMap.BasemapLayer>
             {
-                new RealTimeMap.BasemapLayer()
-                {
-                    url = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    attribution = "©Open Street Map",
-                    title = "Open Street Map",
+                new() {
+                    url          = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    attribution  = "©OpenStreetMap",
+                    title        = "OpenStreetMap",
                     detectRetina = true
                 }
             }
         },
-        location = new RealTimeMap.Location()
-        {
-            latitude = -1.29207,
-            longitude = 36.82195,
-        },
+        location  = new RealTimeMap.Location { latitude = -1.29207, longitude = 36.82195 },
         zoomLevel = 13
     };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && realTimeMap != null)
+        if (!firstRender || _map is null) return;
+
+        var points = new List<RealTimeMap.StreamPoint>
         {
-            var driverPoint = new RealTimeMap.StreamPoint
-            {
-                guid = Guid.NewGuid(),
+            // Driver's current position
+            new() {
+                guid      = Guid.NewGuid(),
                 timestamp = DateTime.UtcNow,
-                latitude = -1.2921,
+                latitude  = -1.2921,
                 longitude = 36.8219,
-                type = "driver",
-                value = "You"
-            };
-
-            var points = new List<RealTimeMap.StreamPoint> { driverPoint };
-
-            // Add delivery stops
-            foreach (var stop in deliveryStops)
-            {
-                points.Add(new RealTimeMap.StreamPoint
-                {
-                    guid = Guid.NewGuid(),
-                    timestamp = DateTime.UtcNow,
-                    latitude = stop.Lat,
-                    longitude = stop.Lng,
-                    type = "destination",
-                    value = stop.Name
-                });
+                type      = "driver",
+                value     = "You"
             }
+        };
 
-            await realTimeMap.Geometric.Points.upload(points, true);
-        }
+        points.AddRange(_stops.Select(s => new RealTimeMap.StreamPoint
+        {
+            guid      = Guid.NewGuid(),
+            timestamp = DateTime.UtcNow,
+            latitude  = s.Lat,
+            longitude = s.Lng,
+            type      = "destination",
+            value     = s.Name
+        }));
+
+        await _map.Geometric.Points.upload(points, true);
     }
 
-    private class DeliveryStop
+    private void ToggleStop(RouteStop stop)
     {
-        public string Name { get; set; }
-        public string Address { get; set; }
-        public double Lat { get; set; }
-        public double Lng { get; set; }
+        stop.Done = !stop.Done;
+        StateHasChanged();
+    }
+
+    // Mutable record for stop state
+    private sealed class RouteStop
+    {
+        public string Name    { get; init; }
+        public string Address { get; init; }
+        public double Lat     { get; init; }
+        public double Lng     { get; init; }
+        public bool   Done    { get; set; } = false;
+
+        public RouteStop(string name, string address, double lat, double lng)
+        {
+            Name = name; Address = address; Lat = lat; Lng = lng;
+        }
     }
 }

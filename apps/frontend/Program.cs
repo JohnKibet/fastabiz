@@ -23,7 +23,7 @@ using var settingsResponse = await tempHttpClient.GetAsync("appsettings.json");
 if (!settingsResponse.IsSuccessStatusCode)
     throw new Exception("Failed to load appsettings.json");
 
-var json   = await settingsResponse.Content.ReadAsStringAsync();
+var json = await settingsResponse.Content.ReadAsStringAsync();
 var config = JsonSerializer.Deserialize<Dictionary<string, string>>(json)
              ?? throw new Exception("Failed to parse appsettings.json");
 
@@ -104,11 +104,10 @@ builder.Services.AddScoped<DriverService>();
 builder.Services.AddScoped<FeedbackService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<OrderService>();
-// builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<ProductService>();
 builder.Services.AddScoped<StoreService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<UserSessionService>();
 
 builder.Services.AddSingleton<CartService>();
 builder.Services.AddSingleton<GeoService>();

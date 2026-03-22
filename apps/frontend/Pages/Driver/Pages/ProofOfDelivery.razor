@@ -1,44 +1,123 @@
-@page "/driver/proof/{stopId:guid}"
+@page "/driver/proof/{StopId:guid}"
 @layout DriverLayout
-@inject AuthenticationStateProvider AuthProvider
-@inject NavigationManager Navigation 
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@inject DeliveryService DeliveryService
+@inject ToastService ToastService
+@inject NavigationManager Navigation
 @attribute [Authorize(Roles = "driver")]
 
-<div class="p-6">
-    <h2 class="text-lg font-semibold">Proof of Delivery</h2>
+<MudText Typo="Typo.h5" Style="font-weight:800;" Class="mb-2">Proof of Delivery</MudText>
+<MudText Typo="Typo.body2" Class="mud-text-secondary mb-6">
+    Stop ID: <span style="font-family:monospace;">@StopId.ToString()[..8]…</span>
+</MudText>
 
-    <p class="mt-2">Enter OTP or delivery code for this stop:</p>
-    <input @bind="ProofCode" class="border rounded p-2 w-full mt-2" placeholder="Enter code" />
+<div style="max-width:480px;">
 
-    <button class="mt-4 bg-green-600 text-white px-4 py-2 rounded" 
-            @onclick="SubmitProof">Complete Delivery</button>
+    <!-- Arrival status -->
+    <MudAlert Severity="@(_hasArrived ? Severity.Success : Severity.Info)"
+              Class="mb-6" Dense="true">
+        @if (_hasArrived)
+        {
+            <span>📍 You are at the destination — ready to confirm.</span>
+        }
+        else
+        {
+            <span>Checking your location… confirm when you arrive.</span>
+        }
+    </MudAlert>
 
-    @if (HasArrived)
-    {
-        <p class="mt-4 text-green-600 text-sm">📍 You are at the destination. Ready to confirm.</p>
-    }
-    else
-    {
-        <p class="mt-4 text-gray-500 text-sm">Waiting for arrival…</p>
-    }
+    <!-- OTP / code input -->
+    <MudPaper Elevation="2" Class="pa-6 rounded-xl">
+        <MudText Typo="Typo.subtitle2" Style="font-weight:700;" Class="mb-4">
+            Enter the delivery code provided by the customer
+        </MudText>
+
+        <MudTextField @bind-Value="_code"
+                      Label="Delivery Code / OTP"
+                      Placeholder="e.g. 4829"
+                      Variant="MudVariant.Outlined"
+                      FullWidth="true"
+                      Class="mb-2"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Pin"
+                      InputType="InputType.Number"
+                      For="@(() => _code)" />
+
+        @if (_error is not null)
+        {
+            <MudAlert Severity="Severity.Error" Dense="true" Class="mb-4">@_error</MudAlert>
+        }
+
+        <MudButton Variant="MudVariant.Filled" Color="Color.Success"
+                   FullWidth="true" Size="Size.Large"
+                   OnClick="SubmitProof"
+                   Disabled="@(_saving || string.IsNullOrWhiteSpace(_code))"
+                   StartIcon="@Icons.Material.Filled.CheckCircle"
+                   Style="border-radius:10px; font-weight:700;">
+            @if (_saving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                <span>Confirming…</span>
+            }
+            else
+            {
+                <span>Complete Delivery</span>
+            }
+        </MudButton>
+    </MudPaper>
+
+    <!-- Navigation back -->
+    <MudButton Variant="MudVariant.Text" Color="Color.Default" Class="mt-4"
+               StartIcon="@Icons.Material.Filled.ArrowBack"
+               OnClick="@(() => Navigation.NavigateTo("/driver/deliveries"))">
+        Back to Deliveries
+    </MudButton>
+
 </div>
 
 @code {
-    [Parameter] public Guid stopId { get; set; }
-    private string? ProofCode;
-    private bool HasArrived = false;
+    [Parameter] public Guid StopId { get; set; }
 
-    private void SubmitProof()
-    {
-        Console.WriteLine($"Proof submitted for stop {stopId}: {ProofCode}");
-        // TODO: call backend to confirm delivery
-    }
+    private string? _code;
+    private bool    _hasArrived = false;
+    private bool    _saving     = false;
+    private string? _error;
 
     protected override async Task OnInitializedAsync()
     {
-        // Later: Poll or subscribe to driver’s current GPS
-        // Example: If within 50m radius of stop coordinates -> HasArrived = true
-        await Task.Delay(1000);
-        HasArrived = false; // Set true when matched
+        // TODO: poll GPS and compare with stop coordinates
+        // For now simulate a short check then mark arrived
+        await Task.Delay(1200);
+        _hasArrived = false; // flip to true when within radius
+        StateHasChanged();
+    }
+
+    private async Task SubmitProof()
+    {
+        _error  = null;
+        _saving = true;
+
+        try
+        {
+            // TODO: replace with DeliveryService.ConfirmDelivery(StopId, _code)
+            await Task.Delay(800); // simulate network call
+
+            ToastService.ShowToast(
+                "Delivery confirmed successfully!",
+                string.Empty,
+                ToastService.ToastLevel.Success);
+
+            Navigation.NavigateTo("/driver/deliveries");
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to confirm delivery: {ex.Message}";
+        }
+        finally
+        {
+            _saving = false;
+        }
     }
 }
