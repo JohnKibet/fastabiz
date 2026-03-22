@@ -1,114 +1,116 @@
 @page "/merchant/reports"
 @layout MerchantLayout
-@inject AuthenticationStateProvider AuthProvider
-@inject NavigationManager Navigation
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
+
 @attribute [Authorize(Roles = "merchant")]
-<div class="space-y-8">
-    <!-- Header -->
-    <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-gray-800">📊 Delivery & Revenue Reports</h2>
-        <button class="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg shadow hover:bg-blue-700">
-            Export PDF
-        </button>
-    </div>
 
-    <!-- Time Filter -->
-    <div class="flex gap-4 items-center">
-        <label class="text-sm font-medium text-gray-600">Filter by:</label>
-        <select class="border rounded px-3 py-1 text-sm">
-            <option>This Week</option>
-            <option>This Month</option>
-            <option>Last 3 Months</option>
-            <option>Year to Date</option>
-        </select>
-    </div>
-
-    <!-- Delivery Performance Breakdown -->
-    <div class="bg-white rounded-2xl shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Delivery Performance</h3>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-                <p class="text-sm text-gray-500">Completed Deliveries</p>
-                <p class="text-2xl font-bold text-green-600">110</p>
-                <p class="text-xs text-gray-400">+8% vs last week</p>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">In Transit</p>
-                <p class="text-2xl font-bold text-blue-600">7</p>
-                <p class="text-xs text-gray-400">Stable</p>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">Delayed</p>
-                <p class="text-2xl font-bold text-red-600">3</p>
-                <p class="text-xs text-gray-400">-2 vs last week</p>
-            </div>
-        </div>
-
-        <div class="mt-6">
-            <!-- Chart placeholder -->
-            <div class="h-56 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                Delivery trend chart (coming soon)
-            </div>
-        </div>
-    </div>
-
-    <!-- Revenue Section -->
-    <div class="bg-white rounded-2xl shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Revenue Analysis</h3>
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm text-gray-500">Total Revenue (This Month)</p>
-                <p class="text-2xl font-bold text-gray-800">$4,200</p>
-                <p class="text-xs text-gray-400">+12% vs last month</p>
-            </div>
-            <div>
-                <p class="text-sm text-gray-500">Average Order Value</p>
-                <p class="text-2xl font-bold text-gray-800">$120</p>
-            </div>
-        </div>
-        <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                Revenue by week chart
-            </div>
-            <div class="h-48 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-                Revenue by category chart
-            </div>
-        </div>
-    </div>
-
-    <!-- Detailed Table -->
-    <div class="bg-white rounded-2xl shadow p-6">
-        <h3 class="text-lg font-semibold text-gray-700 mb-4">Recent Deliveries & Payments</h3>
-        <table class="w-full text-sm text-left border-collapse">
-            <thead>
-                <tr class="bg-gray-50">
-                    <th class="px-4 py-2 border">Order ID</th>
-                    <th class="px-4 py-2 border">Customer</th>
-                    <th class="px-4 py-2 border">Status</th>
-                    <th class="px-4 py-2 border">Amount</th>
-                    <th class="px-4 py-2 border">Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td class="px-4 py-2 border">ORD102</td>
-                    <td class="px-4 py-2 border">Jane Smith</td>
-                    <td class="px-4 py-2 border text-green-600">Completed</td>
-                    <td class="px-4 py-2 border">$150</td>
-                    <td class="px-4 py-2 border">Sep 10, 2025</td>
-                </tr>
-                <tr>
-                    <td class="px-4 py-2 border">ORD103</td>
-                    <td class="px-4 py-2 border">John Doe</td>
-                    <td class="px-4 py-2 border text-blue-600">In Transit</td>
-                    <td class="px-4 py-2 border">$200</td>
-                    <td class="px-4 py-2 border">Sep 11, 2025</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<div class="d-flex align-center justify-space-between mb-6">
+    <MudText Typo="Typo.h5" Style="font-weight:800;">Delivery and Revenue Reports</MudText>
+    <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.PictureAsPdf"
+               Style="border-radius:8px; font-weight:700;">
+        Export PDF
+    </MudButton>
 </div>
 
+<!-- Time filter -->
+<MudPaper Elevation="0" Class="pa-0 mb-6 d-flex align-center gap-3">
+    <MudText Typo="Typo.body2" Class="mud-text-secondary">Filter by:</MudText>
+    <SelectField TValue="string" TItem="string"
+                 Label="Period"
+                 Options="@_periods"
+                 @bind-Value="_period"
+                 Class="mb-0" />
+</MudPaper>
+
+<!-- Delivery performance -->
+<MudPaper Elevation="2" Class="pa-6 rounded-xl mb-6">
+    <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Delivery Performance</MudText>
+    <MudGrid Spacing="4" Class="mb-6">
+        <MudItem xs="12" sm="4">
+            <MetricCard Title="Completed"  Value="110" Icon="box"   Highlight="success" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MetricCard Title="In Transit" Value="7"   Icon="truck" />
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MetricCard Title="Delayed"    Value="3"   Icon="clock" Highlight="danger" />
+        </MudItem>
+    </MudGrid>
+    <MudPaper Elevation="0" Class="d-flex align-center justify-center rounded-xl"
+              Style="height:220px; background:#f9fafb; border:2px dashed #e5e7eb;">
+        <div class="d-flex flex-column align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.BarChart" Style="font-size:3rem; color:#d1d5db;" />
+            <MudText Typo="Typo.body2" Style="color:#9ca3af;">Delivery trend chart — coming soon</MudText>
+        </div>
+    </MudPaper>
+</MudPaper>
+
+<!-- Revenue -->
+<MudPaper Elevation="2" Class="pa-6 rounded-xl mb-6">
+    <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Revenue Analysis</MudText>
+    <MudGrid Spacing="4" Class="mb-4">
+        <MudItem xs="12" sm="6">
+            <MetricCard Title="Total Revenue (This Month)" Value="$4,200" Icon="dollar-sign" Highlight="success" />
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MetricCard Title="Avg Order Value" Value="$120" Icon="dollar-sign" />
+        </MudItem>
+    </MudGrid>
+    <MudGrid Spacing="4">
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="0" Class="d-flex align-center justify-center rounded-xl"
+                      Style="height:180px; background:#f9fafb; border:2px dashed #e5e7eb;">
+                <MudText Typo="Typo.body2" Style="color:#9ca3af;">Revenue by week</MudText>
+            </MudPaper>
+        </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudPaper Elevation="0" Class="d-flex align-center justify-center rounded-xl"
+                      Style="height:180px; background:#f9fafb; border:2px dashed #e5e7eb;">
+                <MudText Typo="Typo.body2" Style="color:#9ca3af;">Revenue by category</MudText>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+<!-- Recent table -->
+<MudPaper Elevation="2" Class="pa-6 rounded-xl">
+    <MudText Typo="Typo.h6" Style="font-weight:700;" Class="mb-4">Recent Deliveries and Payments</MudText>
+    <AppGrid TItem="ReportRow" Items="@_rows" Dense="true" EmptyText="No data.">
+        <ColDefs>
+            <MudTh>Order ID</MudTh>
+            <MudTh>Customer</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Amount</MudTh>
+            <MudTh>Date</MudTh>
+        </ColDefs>
+        <RowTemplate Context="row">
+            <MudTd><MudText Typo="Typo.body2" Style="font-family:monospace;">@row.OrderId</MudText></MudTd>
+            <MudTd>@row.Customer</MudTd>
+            <MudTd>
+                <MudChip T="string" Size="Size.Small" Variant="MudVariant.Filled" Label="true"
+                         Color="@(row.Status == "Completed" ? Color.Success : Color.Info)">
+                    @row.Status
+                </MudChip>
+            </MudTd>
+            <MudTd><MudText Typo="Typo.body2" Style="font-weight:600;">@row.Amount</MudText></MudTd>
+            <MudTd><MudText Typo="Typo.caption" Class="mud-text-secondary">@row.Date</MudText></MudTd>
+        </RowTemplate>
+    </AppGrid>
+</MudPaper>
+
 @code {
-    // TODO: Wire these with real service data
+    private string _period = "This Month";
+    private static readonly List<string> _periods = new() { "This Week", "This Month", "Last 3 Months", "Year to Date" };
+
+    private record ReportRow(string OrderId, string Customer, string Status, string Amount, string Date);
+
+    // TODO: replace with real API data from OrderService/ReportService
+    private readonly List<ReportRow> _rows = new()
+    {
+        new("ORD102", "Jane Smith", "Completed",  "$150", "Sep 10, 2025"),
+        new("ORD103", "John Doe",   "In Transit", "$200", "Sep 11, 2025"),
+    };
 }

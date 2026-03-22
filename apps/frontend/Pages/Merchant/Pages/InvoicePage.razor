@@ -1,51 +1,150 @@
 @page "/merchant/invoices"
 @layout MerchantLayout
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 
-@* @inject InvoiceService InvoiceService *@
+@* TODO: wire InvoiceService when backend endpoint is ready *@
 
-<PageTitle>Invoices</PageTitle>
-
-<div class="p-6 space-y-6 bg-gray-50">
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <SummaryCard Title="Total Invoices" Value="@Summary.Total" />
-        <SummaryCard Title="Pending" Value="@Summary.Pending" />
-        <SummaryCard Title="Paid" Value="@Summary.Paid" />
-        <SummaryCard Title="Overdue" Value="@Summary.Overdue" />
-    </div>
-
-    <!-- Filters -->
-    <InvoiceFilters OnFilterChanged="LoadInvoices" />
-
-    <!-- Table -->
-    <InvoiceTable Invoices="@Invoices" OnViewClicked="ViewInvoice" />
-
-    <!-- Side Panel for Invoice Details -->
-    @if (SelectedInvoice is not null)
-    {
-        <InvoiceDetails Invoice="@SelectedInvoice" OnClose="() => SelectedInvoice = null" />
-    }
+<div class="d-flex align-center justify-space-between mb-6">
+    <MudText Typo="Typo.h5" Style="font-weight:800;">Invoices</MudText>
+    <MudButton Variant="MudVariant.Filled" Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Add"
+               Style="border-radius:8px; font-weight:700;">
+        New Invoice
+    </MudButton>
 </div>
 
+<!-- Summary cards -->
+<MudGrid Spacing="4" Class="mb-6">
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Total"   Value="@_summary.Total.ToString()"   Icon="box" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Pending" Value="@_summary.Pending.ToString()" Icon="clock"  Highlight="warning" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Paid"    Value="@_summary.Paid.ToString()"    Icon="dollar-sign" Highlight="success" />
+    </MudItem>
+    <MudItem xs="12" sm="6" lg="3">
+        <MetricCard Title="Overdue" Value="@_summary.Overdue.ToString()" Icon="clock"  Highlight="danger" />
+    </MudItem>
+</MudGrid>
+
+<!-- Filters -->
+<MudGrid Spacing="3" Class="mb-5">
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField @bind-Value="_search" Placeholder="Search invoices..."
+                      Variant="MudVariant.Outlined" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Margin="Margin.Dense" FullWidth="true" Immediate="true" />
+    </MudItem>
+    <MudItem xs="12" sm="3" md="2">
+        <SelectField TValue="string" TItem="string" Label="Status"
+                     Options="@_statusOptions" @bind-Value="_statusFilter" />
+    </MudItem>
+</MudGrid>
+
+<!-- Invoice table -->
+<AppGrid TItem="Invoice" Items="@FilteredInvoices" Loading="@_loading" EmptyText="No invoices yet.">
+    <ColDefs>
+        <MudTh>Invoice</MudTh>
+        <MudTh>Customer</MudTh>
+        <MudTh>Amount</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Due Date</MudTh>
+        <MudTh></MudTh>
+    </ColDefs>
+    <RowTemplate Context="inv">
+        <MudTd>
+            <MudText Typo="Typo.body2" Style="font-family:monospace; font-weight:600;">
+                #@inv.Id.ToString()[..8]
+            </MudText>
+        </MudTd>
+        <MudTd><MudText Typo="Typo.body2">@inv.CustomerName</MudText></MudTd>
+        <MudTd><MudText Typo="Typo.body2" Style="font-weight:600;">@inv.Amount.ToString("C")</MudText></MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small" Variant="MudVariant.Filled" Label="true"
+                     Color="@GetInvoiceColor(inv.Status)">@inv.Status</MudChip>
+        </MudTd>
+        <MudTd><MudText Typo="Typo.caption" Class="mud-text-secondary">@inv.DueDate.ToString("MMM d, yyyy")</MudText></MudTd>
+        <MudTd>
+            <span @onclick:stopPropagation="true" class="d-inline-flex gap-1">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Default"
+                               OnClick="@(() => _selectedInvoice = inv)" />
+                <MudIconButton Icon="@Icons.Material.Filled.Download" Size="Size.Small" Color="Color.Primary" />
+            </span>
+        </MudTd>
+    </RowTemplate>
+</AppGrid>
+
+<!-- Invoice detail panel -->
+@if (_selectedInvoice is not null)
+{
+    <MudDialog @bind-IsVisible="_detailOpen">
+        <TitleContent>
+            <div class="d-flex align-center gap-2">
+                <MudIcon Icon="@Icons.Material.Filled.Receipt" Color="Color.Primary" />
+                <MudText Typo="Typo.h6" Style="font-weight:700;">Invoice #@_selectedInvoice.Id.ToString()[..8]</MudText>
+            </div>
+        </TitleContent>
+        <DialogContent>
+            <MudList T="string" Dense="true">
+                <MudListItem Icon="@Icons.Material.Filled.Person">
+                    <MudText Typo="Typo.body2"><strong>Customer:</strong> @_selectedInvoice.CustomerName</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.AttachMoney">
+                    <MudText Typo="Typo.body2"><strong>Amount:</strong> @_selectedInvoice.Amount.ToString("C")</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Circle">
+                    <MudText Typo="Typo.body2"><strong>Status:</strong> @_selectedInvoice.Status</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.DateRange">
+                    <MudText Typo="Typo.body2"><strong>Due:</strong> @_selectedInvoice.DueDate.ToString("MMM d, yyyy")</MudText>
+                </MudListItem>
+            </MudList>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="MudVariant.Text" OnClick="@(() => { _selectedInvoice = null; _detailOpen = false; })">Close</MudButton>
+        </DialogActions>
+    </MudDialog>
+}
+
 @code {
-    private List<Invoice> Invoices = new List<Invoice>();
-    private Invoice? SelectedInvoice;
-    private InvoiceSummary Summary = new InvoiceSummary();
+    private List<Invoice> _invoices = new();
+    private bool     _loading      = false;
+    private string   _search       = string.Empty;
+    private string   _statusFilter = string.Empty;
+    private Invoice? _selectedInvoice;
+    private bool     _detailOpen   = false;
+
+    private static readonly List<string> _statusOptions = new() { "", "Pending", "Paid", "Overdue" };
+
+    private InvoiceSummary _summary = new();
+
+    private IEnumerable<Invoice> FilteredInvoices =>
+        _invoices.Where(i =>
+            (string.IsNullOrWhiteSpace(_search) ||
+             i.CustomerName.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(_statusFilter) ||
+             i.Status.Equals(_statusFilter, StringComparison.OrdinalIgnoreCase)));
 
     protected override async Task OnInitializedAsync()
     {
-        @* await LoadInvoices();
-        Summary = await InvoiceService.GetSummaryAsync(); *@
+        // TODO: var result = await InvoiceService.GetAllAsync();
+        // _invoices = result.Data ?? new();
+        // _summary  = await InvoiceService.GetSummaryAsync();
+        await Task.CompletedTask;
     }
 
-    private async Task LoadInvoices()
+    private void SelectInvoice(Invoice inv) { _selectedInvoice = inv; _detailOpen = true; }
+
+    private static Color GetInvoiceColor(string status) => status.ToLower() switch
     {
-        @* Invoices = await InvoiceService.GetAllAsync(); *@
-    }
-
-    private void ViewInvoice(Invoice invoice)
-    {
-        SelectedInvoice = invoice;
-    }
-
+        "paid"    => Color.Success,
+        "pending" => Color.Warning,
+        "overdue" => Color.Error,
+        _         => Color.Default,
+    };
 }

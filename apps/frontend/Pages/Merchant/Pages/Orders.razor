@@ -1,393 +1,237 @@
 @page "/merchant/orders"
 @layout MerchantLayout
-@using System.Text.Json
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 @inject OrderService OrderService
 @inject ToastService ToastService
-@inject UserService UserService
-@inject AuthenticationStateProvider AuthProvider
-@inject NavigationManager Navigation
-@inject IJSRuntime JS
 @attribute [Authorize(Roles = "merchant")]
-<h2 class="text-2xl font-semibold text-gray-800 mb-6">All Orders</h2>
 
-<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-    <input
-        @bind="searchTerm"
-        type="text"
-        placeholder="Search by customer, pickup, or delivery..."
-        class="w-full pl-8 pr-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
-    />
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="20"
-        height="20"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-search absolute text-gray-400"
-    >
-        <path d="m21 21-4.34-4.34" />
-        <circle cx="11" cy="11" r="8" />
-    </svg>
-
-    <!-- Status Filter -->
-    <select @bind="statusFilter"
-            class="w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700">
-        <option value="">All Statuses</option>
-        <option value="Pending">Pending</option>
-        <option value="Assigned">Assigned</option>
-        <option value="InTransit">InTransit</option>
-        <option value="Delivered">Delivered</option>
-        <option value="Cancelled">Cancelled</option>
-    </select>
-
-    <!-- Start Date -->
-    <input
-        @bind="startDate"
-        type="date"
-        class="w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700"
-    />
-
-    <!-- End Date -->
-    <input
-        @bind="endDate"
-        type="date"
-        class="w-full md:w-48 px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 text-sm text-gray-700"
-    />
+<div class="d-flex align-center justify-space-between mb-6">
+    <MudText Typo="Typo.h5" Style="font-weight:800;">All Orders</MudText>
 </div>
-@* <SearchFilters
-    @bind-SearchTerm="searchTerm"
-    @bind-StatusFilter="statusFilter"
-    @bind-StartDate="startDate"
-    @bind-EndDate="endDate" 
-/> *@
 
-@if (orders == null)
-{
-    <div class="text-gray-500">Loading orders...</div>
-}
-else if (orders.Count == 0)
-{
-    <div class="text-gray-600">No orders found.</div>
-}
-else
-{
-    <div class="overflow-x-auto bg-white shadow-sm border rounded-lg">
-        <!-- Orders Table -->
-        <OrderTable
-            PagedOrders="FilteredOrders.ToList()"
-            CustomerNames="customerNames"
-            InventoryCategories="inventoryCategories"
-            CurrentPage="currentPage"
-            PageSize="pageSize"
-            OnView="ViewOrder"
-            OnEdit="EditOrder"
-            OnDelete="ConfirmDelete"
-            GetStatusClass="GetStatusClass"
-        />
+<MudGrid Spacing="3" Class="mb-6">
+    <MudItem xs="12" sm="6" md="4">
+        <MudTextField @bind-Value="_search" Placeholder="Search by customer, pickup, delivery..."
+                      Variant="MudVariant.Outlined" Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" Margin="Margin.Dense"
+                      FullWidth="true" Immediate="true" />
+    </MudItem>
+    <MudItem xs="12" sm="3" md="2">
+        <SelectField TValue="string" TItem="string" Label="Status"
+                     Options="@_statusOptions" @bind-Value="_statusFilter" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker @bind-Date="_startDate" Label="From" Variant="MudVariant.Outlined" Margin="Margin.Dense" />
+    </MudItem>
+    <MudItem xs="6" sm="3" md="2">
+        <MudDatePicker @bind-Date="_endDate" Label="To" Variant="MudVariant.Outlined" Margin="Margin.Dense" />
+    </MudItem>
+</MudGrid>
 
-        <!-- View & Edit Modal -->
-        <TableRowModal TModel="Order"
-            IsOpen="isEditModalOpen"
-            Model="editableOrder"
-            IsEditMode="isEditMode"
-            Close="CloseModal"
-            EnableEdit="@(() => isEditMode = true)"
-            Save="SaveChanges"
-            Fields="orderFields"
-            
-        />
+<AppGrid TItem="Order" Items="@FilteredOrders" Loading="@_loading" EmptyText="No orders found.">
+    <ColDefs>
+        <MudTh>Order</MudTh>
+        <MudTh>Customer</MudTh>
+        <MudTh>Delivery</MudTh>
+        <MudTh>Status</MudTh>
+        <MudTh>Date</MudTh>
+        <MudTh></MudTh>
+    </ColDefs>
+    <RowTemplate Context="order">
+        <MudTd>
+            <MudText Typo="Typo.body2" Style="font-family:monospace; font-weight:600;">#@order.Id.ToString()[..8]</MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">Qty: @order.Quantity</MudText>
+        </MudTd>
+        <MudTd><MudText Typo="Typo.body2">@(_customerNames.GetValueOrDefault(order.CustomerId, "—"))</MudText></MudTd>
+        <MudTd>
+            <MudText Typo="Typo.body2">@order.DeliveryAddress</MudText>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">@order.PickupAddress</MudText>
+        </MudTd>
+        <MudTd>
+            <MudChip T="string" Size="Size.Small" Variant="MudVariant.Filled" Label="true"
+                     Color="@GetStatusColor(order.Status)">@order.Status</MudChip>
+        </MudTd>
+        <MudTd><MudText Typo="Typo.caption" Class="mud-text-secondary">@order.CreatedAt.ToString("MMM d, yyyy")</MudText></MudTd>
+        <MudTd>
+            <span @onclick:stopPropagation="true" class="d-inline-flex gap-1">
+                <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Default" OnClick="@(() => OpenModal(order, false))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary" OnClick="@(() => OpenModal(order, true))" />
+                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" OnClick="@(() => ConfirmDelete(order))" />
+            </span>
+        </MudTd>
+    </RowTemplate>
+</AppGrid>
 
-        <!-- Delete Modal -->
-        <DeleteConfirmationModal 
-            IsVisible="isDeleteModalOpen"
-            IsVisibleChanged="@((bool value) => isDeleteModalOpen = value)"
-            Message="Delete this order?"
-            OnConfirm="DeleteOrder"
-        />
-    </div>
-
-    <!-- Pagination -->
-    <PaginationControls 
-        CurrentPage="@currentPage"
-        TotalPages="@TotalPages"
-        OnNextPage="NextPage"
-        OnPreviousPage="PrevPage"
-    />
-
-}
-
-@code {
-    private List<Order>? orders;
-    private Dictionary<Guid, string> customerNames = new();
-    private Dictionary<Guid, string> inventoryCategories = new();
-    private string searchTerm = "";
-    private string statusFilter = "";
-    private int currentPage = 1;
-    private int pageSize = 10;
-    private DateTime? startDate;
-    private DateTime? endDate;
-
-    private bool CanGoPrev => currentPage > 1;
-    private bool CanGoNext => currentPage < TotalPages;
-    private Order? selectedOrder;
-    private Order editableOrder = new();
-    private bool isEditModalOpen = false;
-    private bool isEditMode = false;
-    private bool isDeleteModalOpen = false;
-    private Guid orderToDeleteId;
-    private List<IFieldDefinitionBase> orderFields = new();
-
-    private IEnumerable<Order> FilteredOrders =>
-    orders?
-    .Where(o =>
-        (string.IsNullOrWhiteSpace(searchTerm) ||
-         customerNames.GetValueOrDefault(o.CustomerId, "").Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-         o.PickupAddress.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-         o.DeliveryAddress.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
-        (string.IsNullOrWhiteSpace(statusFilter) ||
-         o.Status.ToString().Equals(statusFilter, StringComparison.OrdinalIgnoreCase)) &&
-        (!startDate.HasValue || o.CreatedAt.Date >= startDate.Value.Date) &&
-        (!endDate.HasValue || o.CreatedAt.Date <= endDate.Value.Date)
-    ) ?? Enumerable.Empty<Order>();
-
-    private void BuildOrderFields(Order order)
-    {
-        orderFields = new List<IFieldDefinitionBase>
+<MudDialog @bind-IsVisible="_modalOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Receipt" Color="Color.Primary" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">Order #@(_selected?.Id.ToString()[..8])</MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        @if (_editMode)
         {
-            new FieldDefinition<string>
-            {
-                Label = "PickupLocation",
-                Type = "text",
-                Value = order.PickupAddress,
-                ValueChanged = EventCallback.Factory.Create<string>(this, val => 
-                {
-                    order.PickupAddress = val;
-                })
-            },
-
-            new FieldDefinition<string>
-            {
-                Label = "DeliveryLocation",
-                Type = "text",
-                Value = order.DeliveryAddress,
-                ValueChanged = EventCallback.Factory.Create<string>(this, val => 
-                {
-                    order.DeliveryAddress = val;
-                })  
-            }, 
-
-            new FieldDefinition<string>
-            {
-                Label = "OrderStatus",
-                Type = "select",
-                Value = order.Status.ToString(),
-                Options =  Enum.GetNames(typeof(OrderStatus)).ToList(),
-                ValueChanged = EventCallback.Factory.Create<string>(this, val => 
-                {
-                    if (Enum.TryParse<OrderStatus>(val, out var status))
-                    {
-                        order.Status = status;
-                    }
-                })
-            }
-        };
-    }
-
-    private int TotalPages => (int)Math.Ceiling((double)FilteredOrders.Count() / pageSize);
-    private void NextPage()
-    {
-        if (currentPage < TotalPages)
-            currentPage++;
-    }
-    private void PrevPage()
-    {
-        if (currentPage > 1)
-            currentPage--;
-    }
-    @* protected override async Task OnInitializedAsync()
-    {
-        // Get orders
-        var orderResult = await OrderService.GetAllCachedOrders();
-        if (orderResult.Success && orderResult.Data != null)
-        {
-            orders = orderResult.Data;
-            Console.WriteLine(JsonSerializer.Serialize(orders, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            }));
+            <MudTextField @bind-Value="_editDelivery" Label="Delivery Address" Variant="MudVariant.Outlined" FullWidth="true" Class="mb-4" />
+            <MudTextField @bind-Value="_editPickup" Label="Pickup Address" Variant="MudVariant.Outlined" FullWidth="true" Class="mb-4" />
+            <SelectField TValue="string" TItem="string" Label="Status" Options="@_statusOptions" @bind-Value="_editStatus" />
         }
         else
         {
-            orders = new List<Order>();
+            <MudList T="string" Dense="true">
+                <MudListItem Icon="@Icons.Material.Filled.LocalShipping">
+                    <MudText Typo="Typo.body2"><strong>Delivery:</strong> @_selected?.DeliveryAddress</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Store">
+                    <MudText Typo="Typo.body2"><strong>Pickup:</strong> @_selected?.PickupAddress</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.Circle">
+                    <MudText Typo="Typo.body2"><strong>Status:</strong> @_selected?.Status</MudText>
+                </MudListItem>
+                <MudListItem Icon="@Icons.Material.Filled.DateRange">
+                    <MudText Typo="Typo.body2"><strong>Placed:</strong> @_selected?.CreatedAt.ToString("MMM d, yyyy HH:mm")</MudText>
+                </MudListItem>
+            </MudList>
         }
-    } *@
-
-    private void ViewOrder(Guid id)
-    {
-        selectedOrder = orders?.FirstOrDefault(o => o.Id == id);
-        if (selectedOrder is not null)
+    </DialogContent>
+    <DialogActions>
+        @if (!_editMode)
         {
-            editableOrder = new Order
-            {
-                Id = selectedOrder.Id,
-                PickupAddress = selectedOrder.PickupAddress,
-                DeliveryAddress = selectedOrder.DeliveryAddress,
-                Status = selectedOrder.Status
-                // other fields
-            };
-            BuildOrderFields(editableOrder);
-
-            isEditMode = false;
-            isEditModalOpen = true;
+            <MudButton Variant="MudVariant.Outlined" StartIcon="@Icons.Material.Filled.Edit" OnClick="@(() => _editMode = true)">Edit</MudButton>
         }
+        else
+        {
+            <MudButton Variant="MudVariant.Filled" Color="Color.Primary" OnClick="SaveChanges" Disabled="@_saving">
+                @if (_saving) { <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" /> }
+                Save
+            </MudButton>
+        }
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _modalOpen = false)">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<MudDialog @bind-IsVisible="_deleteOpen">
+    <TitleContent>
+        <div class="d-flex align-center gap-2">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Error" />
+            <MudText Typo="Typo.h6" Style="font-weight:700;">Delete Order</MudText>
+        </div>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Delete order <strong>#@_deleteTargetId.ToString()[..8]</strong>?</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="MudVariant.Filled" Color="Color.Error" OnClick="DeleteOrder" Disabled="@_saving">Delete</MudButton>
+        <MudButton Variant="MudVariant.Text" OnClick="@(() => _deleteOpen = false)">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private List<Order>? _orders;
+    private bool _loading = true;
+    private string _search = string.Empty;
+    private string _statusFilter = string.Empty;
+    private DateTime? _startDate;
+    private DateTime? _endDate;
+    private Dictionary<Guid, string> _customerNames = new();
+
+    private bool _modalOpen = false;
+    private bool _editMode = false;
+    private bool _saving = false;
+    private Order? _selected;
+    private string _editDelivery = string.Empty;
+    private string _editPickup = string.Empty;
+    private string _editStatus = string.Empty;
+
+    private bool _deleteOpen = false;
+    private Guid _deleteTargetId;
+
+    private static readonly List<string> _statusOptions =
+        new[] { "" }.Concat(Enum.GetNames<OrderStatus>()).ToList();
+
+    private IEnumerable<Order> FilteredOrders =>
+        _orders?.Where(o =>
+            (string.IsNullOrWhiteSpace(_search) ||
+             _customerNames.GetValueOrDefault(o.CustomerId, "").Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+             o.PickupAddress.Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+             o.DeliveryAddress.Contains(_search, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(_statusFilter) ||
+             o.Status.ToString().Equals(_statusFilter, StringComparison.OrdinalIgnoreCase)) &&
+            (!_startDate.HasValue || o.CreatedAt.Date >= _startDate.Value.Date) &&
+            (!_endDate.HasValue || o.CreatedAt.Date <= _endDate.Value.Date)
+        ) ?? Enumerable.Empty<Order>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await OrderService.GetAllCachedOrders();
+        _orders = result.Success && result.Data != null ? result.Data : new();
+        _loading = false;
     }
 
-    private void EditOrder(Guid id)
+    private async Task Reload()
     {
-        selectedOrder = orders?.FirstOrDefault(o => o.Id == id);
-        if (selectedOrder is not null)
-        {
-            editableOrder = new Order
-            {
-                Id = selectedOrder.Id,
-                PickupAddress = selectedOrder.PickupAddress,
-                DeliveryAddress = selectedOrder.DeliveryAddress,
-                Status = selectedOrder.Status
-                // other fields
-            };
-            BuildOrderFields(editableOrder);
-
-            isEditMode = true;
-            isEditModalOpen = true;
-        }
+        var result = await OrderService.GetAllOrders();
+        if (result.Success && result.Data != null) _orders = result.Data;
     }
 
-    private void CloseModal()
+    private void OpenModal(Order order, bool editMode)
     {
-        isEditModalOpen = false;
-        selectedOrder = null;
-    }
-
-    private void OpenEditModal(Order order)
-    {
-        selectedOrder = order;
-        editableOrder = new Order
-        {
-            Id = order.Id,
-            PickupAddress = order.PickupAddress,
-            DeliveryAddress = order.DeliveryAddress,
-            Status = order.Status,
-            // Add other properties you want editable
-        };
-        BuildOrderFields(editableOrder);
-
-        isEditModalOpen = true;
+        _selected = order;
+        _editDelivery = order.DeliveryAddress;
+        _editPickup = order.PickupAddress;
+        _editStatus = order.Status.ToString();
+        _editMode = editMode;
+        _modalOpen = true;
     }
 
     private async Task SaveChanges()
     {
-        if (selectedOrder == null || editableOrder == null)
-        return;
+        if (_selected is null) return;
+        _saving = true;
+        bool changed = false;
 
-        bool updated = false;
-
-        if (editableOrder.PickupAddress != selectedOrder.PickupAddress)
+        if (_editDelivery != _selected.DeliveryAddress)
         {
-            var body = new UpdateOrderRequest {
-                Column = "PickupLocation",
-                Value = editableOrder.PickupAddress,
-            };
-            await OrderService.UpdateOrder(selectedOrder.Id, body);
-            updated = true;
+            await OrderService.UpdateOrder(_selected.Id, new UpdateOrderRequest { Column = "DeliveryLocation", Value = _editDelivery });
+            changed = true;
+        }
+        if (_editPickup != _selected.PickupAddress)
+        {
+            await OrderService.UpdateOrder(_selected.Id, new UpdateOrderRequest { Column = "PickupLocation", Value = _editPickup });
+            changed = true;
+        }
+        if (_editStatus != _selected.Status.ToString())
+        {
+            await OrderService.UpdateOrder(_selected.Id, new UpdateOrderRequest { Column = "OrderStatus", Value = _editStatus });
+            changed = true;
         }
 
-        if (editableOrder.DeliveryAddress != selectedOrder.DeliveryAddress)
-        {
-            var body = new UpdateOrderRequest {
-                Column = "DeliveryLocation",
-                Value = editableOrder.DeliveryAddress,
-            };
-            await OrderService.UpdateOrder(selectedOrder.Id, body);
-            updated = true;
-        }
-
-        if (editableOrder.Status != selectedOrder.Status)
-        {
-            var body = new UpdateOrderRequest {
-                Column = "OrderStatus",
-                Value = editableOrder.Status,
-            };
-            await OrderService.UpdateOrder(selectedOrder.Id, body);
-            updated = true;
-        }
-        if (updated)
-        {
-            var result = await OrderService.GetAllOrders();
-            if (result.Success && result.Data != null)
-            {
-                orders = result.Data;
-                ToastService.ShowToast("Order updated successfully", string.Empty, ToastService.ToastLevel.Success);
-            }
-            else
-            {
-                ToastService.ShowToast("Failed to update order.", string.Empty, ToastService.ToastLevel.Error);
-            }
-        }
-        else
-        {
-            ToastService.ShowToast("No changes were made", string.Empty, ToastService.ToastLevel.Warning);
-        }
-
-        CloseModal();
+        _saving = false;
+        if (changed) { await Reload(); ToastService.ShowToast("Order updated.", string.Empty, ToastService.ToastLevel.Success); }
+        else ToastService.ShowToast("No changes.", string.Empty, ToastService.ToastLevel.Warning);
+        _modalOpen = false;
     }
 
-    private void ConfirmDelete(Guid id)
-    {
-        orderToDeleteId = id;
-        isDeleteModalOpen = true;   
-    }
-
-    private void CancelDelete()
-    {
-        isDeleteModalOpen = false;
-        orderToDeleteId = Guid.Empty;
-    }
+    private void ConfirmDelete(Order order) { _deleteTargetId = order.Id; _deleteOpen = true; }
 
     private async Task DeleteOrder()
     {
-        if (orderToDeleteId != Guid.Empty)
-        {
-            var success = await OrderService.DeleteOrder(orderToDeleteId);
-
-            if (true)
-            {
-                var result = await OrderService.GetAllOrders();
-                if (result.Success && result.Data != null)
-                {
-                    orders = result.Data;
-                    ToastService.ShowToast("Order deleted successfully", string.Empty, ToastService.ToastLevel.Success);
-                }
-            }
-        }
-
-        isDeleteModalOpen = false;
-        orderToDeleteId = Guid.Empty;
+        _saving = true;
+        var result = await OrderService.DeleteOrder(_deleteTargetId);
+        _saving = false; _deleteOpen = false;
+        if (result.Success) { await Reload(); ToastService.ShowToast("Order deleted.", string.Empty, ToastService.ToastLevel.Success); }
+        else ToastService.ShowToast(result.Error?.Message ?? "Failed.", string.Empty, ToastService.ToastLevel.Error);
     }
 
-    @* private void ApplyFilters()
+    private static Color GetStatusColor(OrderStatus status) => status switch
     {
-        IEnumerable<Order> filtered = orders;
-    } *@
-
-
-    private string GetStatusClass(string status) => status.ToLower() switch
-    {
-        "pending" => "text-yellow-600 bg-yellow-100 px-2 py-1 rounded text-xs font-medium",
-        "completed" => "text-green-600 bg-green-100 px-2 py-1 rounded text-xs font-medium",
-        "cancelled" => "text-red-600 bg-red-100 px-2 py-1 rounded text-xs font-medium",
-        _ => "text-gray-600 bg-gray-100 px-2 py-1 rounded text-xs font-medium"
+        OrderStatus.Delivered => Color.Success,
+        OrderStatus.Pending => Color.Warning,
+        OrderStatus.Cancelled => Color.Error,
+        OrderStatus.InTransit => Color.Info,
+        _ => Color.Default,
     };
 }

@@ -1,82 +1,49 @@
 @page "/merchant/map"
-@layout MerchantLayout
 @namespace frontend.Pages.Merchant.LiveMap
+@layout MerchantLayout
+@using MudBlazor
 
-<div class="flex-1 overflow-hidden" style="height:calc(100vh - 4rem);">
-    <RealTimeMap @ref="realTimeMap" Parameters="parameters" 
-        height="calc(100vh - 6rem)" width="calc(100vw - 18rem)"
-    />
-</div>
+<MudText Typo="Typo.h5" Style="font-weight:800;" Class="mb-4">Live Driver Map</MudText>
+
+<MudPaper Elevation="2" Class="pa-0 rounded-xl" Style="overflow:hidden; height:calc(100vh - 180px);">
+    <RealTimeMap @ref="_map"
+                 Parameters="_params"
+                 height="100%"
+                 width="100%" />
+</MudPaper>
 
 @code {
-    static string openCycleMapAPIKey = "";
-    private RealTimeMap realTimeMap;
-    RealTimeMap.LoadParameters parameters = new RealTimeMap.LoadParameters()
+    private RealTimeMap? _map;
+
+    private static readonly string _openCycleKey = "";  // set via appsettings or env
+
+    private readonly RealTimeMap.LoadParameters _params = new()
     {
-        basemap = new RealTimeMap.Basemap()
+        basemap = new RealTimeMap.Basemap
         {
-            basemapLayers = new List<RealTimeMap.BasemapLayer>()
+            basemapLayers = new List<RealTimeMap.BasemapLayer>
             {
-                new RealTimeMap.BasemapLayer()
-                {
-                    url = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    attribution = "©Open Street Map",
-                    title = "Open Street Map",
-                    detectRetina = true
-                },
-                new RealTimeMap.BasemapLayer()
-                {
-                    url = "https://tile.opentopomap.org/{z}/{x}/{y}.png",
-                    attribution = "Open Topo",
-                    title = "Open Topo",
-                    detectRetina = true
-                },
-                new RealTimeMap.BasemapLayer()
-                {
-                    url = "https://tile.thunderforest.com/cycle/{z}/{x}/{y}.png?apikey=" + openCycleMapAPIKey,
-                    attribution = "©Open Cycle Map",
-                    title = "Open Cycle Map"
-                },
+                new() { url = "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",       attribution = "©OpenStreetMap",  title = "OpenStreetMap",  detectRetina = true },
+                new() { url = "https://tile.opentopomap.org/{z}/{x}/{y}.png",            attribution = "OpenTopo",        title = "Open Topo",      detectRetina = true },
+                new() { url = $"https://tile.thunderforest.com/cycle/{{z}}/{{x}}/{{y}}.png?apikey={_openCycleKey}",
+                        attribution = "©OpenCycleMap", title = "Cycle Map" },
             }
         },
-
-        location = new RealTimeMap.Location()
-        {
-            latitude = -1.29207,   
-            longitude = 36.82195,
-        },
+        location  = new RealTimeMap.Location { latitude = -1.29207, longitude = 36.82195 },
         zoomLevel = 14
     };
 
-    protected override async Task OnAfterRenderAsync (bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && realTimeMap != null)
+        if (!firstRender || _map is null) return;
+
+        // TODO: replace with real driver positions from DeliveryService
+        var points = new List<RealTimeMap.StreamPoint>
         {
-            // Create two points (driver + destination)
-            var driverPoint = new RealTimeMap.StreamPoint
-            {
-                guid = Guid.NewGuid(),
-                timestamp = DateTime.UtcNow,
-                latitude = -1.2921,
-                longitude = 36.8219,
-                type = "driver",
-                value = "Driver A"
-            };
+            new() { guid = Guid.NewGuid(), timestamp = DateTime.UtcNow, latitude = -1.2921, longitude = 36.8219, type = "driver",      value = "Driver A" },
+            new() { guid = Guid.NewGuid(), timestamp = DateTime.UtcNow, latitude = -1.3000, longitude = 36.8300, type = "destination", value = "Drop-off" },
+        };
 
-            var destPoint = new RealTimeMap.StreamPoint
-            {
-                guid = Guid.NewGuid(),
-                timestamp = DateTime.UtcNow,
-                latitude = -1.3000,
-                longitude = 36.8300,
-                type = "destination",
-                value = "Drop-off"
-            };
-
-            var points = new List<RealTimeMap.StreamPoint> { driverPoint, destPoint };
-
-            // Upload points to map
-            await realTimeMap.Geometric.Points.upload(points, true);
-        }
+        await _map.Geometric.Points.upload(points, true);
     }
 }

@@ -1,132 +1,187 @@
 @page "/merchant/products/{ProductId:guid}"
 @layout MerchantLayout
-@namespace frontend.Pages.Shared.Components.Merchant
-@using System.Text.Json
 @using frontend.Models
 @using frontend.Models.Storefront
-@using frontend.Pages.Merchant
-@inject ToastService ToastService
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @inject ProductService ProductService
+@inject ToastService ToastService
 @inject NavigationManager Navigation
 
-<div class="min-h-screen bg-bgSoft p-6">
-  <h1 class="text-2xl font-poppins font-semibold text-textDark mb-2">Manage Product</h1>
-  <p class="text-textLight mb-6">Add a variants, price, stock and more to your product</p>
-
-  @if (isLoading)
-  {
-    <p>Loading product...</p>
-  }
-  else if (product != null)
-  {
-    <div class="bg-white rounded-xl shadow p-6 mb-6">
-      <h2 class="text-xl font-semibold">@product.Name</h2>
-      <p class="text-sm text-gray-500">@product.Category</p>
-      <p class="mt-2 text-gray-600">@product.Description</p>
-
-      <div class="mt-4 text-sm text-gray-500">
-        Created @product.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")
-      </div>
+@if (_loading)
+{
+    <div class="d-flex align-center justify-center" style="min-height:300px;">
+        <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    </div>
+}
+else if (_product is null)
+{
+    <MudAlert Severity="Severity.Error">Product not found.</MudAlert>
+}
+else
+{
+    <!-- Page header -->
+    <div class="d-flex align-center justify-space-between mb-6 flex-wrap gap-3">
+        <div>
+            <MudText Typo="Typo.h5" Style="font-weight:800;">@_product.Name</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">
+                @_product.Category · Created @_product.CreatedAt.ToLocalTime().ToString("MMM d, yyyy")
+            </MudText>
+        </div>
+        <div class="d-flex gap-2">
+            <MudButton Variant="@(_isEditMode ? MudVariant.Filled : MudVariant.Outlined)"
+                       Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.Edit"
+                       OnClick="@(() => _isEditMode = !_isEditMode)"
+                       Style="border-radius:8px; font-weight:700;">
+                @(_isEditMode ? "Cancel Edit" : "Edit Details")
+            </MudButton>
+            <MudButton Variant="MudVariant.Outlined" Color="Color.Default"
+                       StartIcon="@Icons.Material.Filled.ArrowBack"
+                       OnClick="@(() => Navigation.NavigateTo("/merchant/products"))"
+                       Style="border-radius:8px;">
+                Back
+            </MudButton>
+        </div>
     </div>
 
-    @if (isEditMode)
-    {
-      <div class="bg-white rounded-xl shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">Edit Details</h3>
-        <EditForm Model="updateModel" OnValidSubmit="UpdateDetails">
-          <DataAnnotationsValidator />
+    <MudGrid Spacing="5">
 
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium">Name</label>
-              <InputText class="input" @bind-Value="updateModel.Name" />
-            </div>
+        <!-- Product info / edit card -->
+        <MudItem xs="12" md="5">
+            <MudPaper Elevation="2" Class="pa-6 rounded-xl">
+                @if (_isEditMode)
+                {
+                    <!-- Edit form — uses _updateModel which is separate from _product
+                         so user edits are preserved until Save is clicked -->
+                    <AppForm Title="Edit Product Details"
+                             Model="@_updateModel"
+                             OnValidSubmit="UpdateDetails"
+                             SubmitLabel="Save Changes"
+                             Loading="@_saving"
+                             Error="@_saveError">
 
-            <div>
-              <label class="block text-sm font-medium">Description</label>
-              <InputTextArea class="input" rows="3" @bind-Value="updateModel.Description" />
-            </div>
+                        <MudTextField @bind-Value="_updateModel.Name"
+                                      Label="Name" Variant="MudVariant.Outlined"
+                                      FullWidth="true" Class="mb-4"
+                                      For="@(() => _updateModel.Name)" />
+                        <MudTextField @bind-Value="_updateModel.Description"
+                                      Label="Description" Variant="MudVariant.Outlined"
+                                      FullWidth="true" Lines="3" Class="mb-4"
+                                      For="@(() => _updateModel.Description)" />
+                        <MudTextField @bind-Value="_updateModel.Category"
+                                      Label="Category" Variant="MudVariant.Outlined"
+                                      FullWidth="true" Class="mb-4"
+                                      For="@(() => _updateModel.Category)" />
 
-            <div>
-              <label class="block text-sm font-medium">Category</label>
-              <InputText class="input" @bind-Value="updateModel.Category" />
-            </div>
+                    </AppForm>
+                }
+                else
+                {
+                    <MudText Typo="Typo.subtitle2" Style="font-weight:700;" Class="mb-1">Description</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary mb-4">@_product.Description</MudText>
 
-            <button type="submit" disabled="@isSubmitting" class="btn-primary">
-              Save Changes
-            </button>
-          </div>
-        </EditForm>
-      </div>
-    }
-  }
-</div>
+                    <MudDivider Class="mb-4" />
+
+                    @if (_product.HasVariants)
+                    {
+                        <MudChip T="string" Color="Color.Primary" Variant="MudVariant.Outlined" Size="Size.Small" Label="true">
+                            Has Variants (@_product.Variants.Count)
+                        </MudChip>
+                    }
+                    else
+                    {
+                        <div class="d-flex gap-4">
+                            <div>
+                                <MudText Typo="Typo.caption" Class="mud-text-secondary">Price</MudText>
+                                <MudText Typo="Typo.h6" Style="font-weight:800; color:#16a34a;">
+                                    @(_product.Variants.FirstOrDefault()?.Price.ToString("C") ?? "—")
+                                </MudText>
+                            </div>
+                        </div>
+                    }
+                }
+            </MudPaper>
+        </MudItem>
+
+        <!-- Variant section (existing component) -->
+        @if (_product.HasVariants)
+        {
+            <MudItem xs="12" md="7">
+                <VariantSection ProductId="@ProductId"
+                                OnVariantCreated="@(() => { })" />
+            </MudItem>
+        }
+
+    </MudGrid>
+}
 
 @code {
-  [Parameter] public Guid ProductId { get; set; }
-  private ProductMapper.ProductDto? product;
-  private UpdateProductDetailsRequest updateModel = new();
-  private bool isLoading = true;
-  private bool isSubmitting = false;
-  private bool isEditMode;
+    [Parameter] public Guid ProductId { get; set; }
 
-  protected override async Task OnInitializedAsync()
-  {
-    var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-    var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+    private ProductMapper.ProductDto? _product;
+    private UpdateProductDetailsRequest _updateModel = new();
+    private bool _loading    = true;
+    private bool _saving     = false;
+    private bool _isEditMode = false;
+    private string? _saveError;
 
-    isEditMode = query.Get("mode") == "edit";
-
-    var result = await ProductService.GetProductById(ProductId);
-
-    if (!result.Success || result.Data == null)
+    protected override async Task OnInitializedAsync()
     {
-      ToastService.ShowToast("Failed to load product", string.Empty, ToastService.ToastLevel.Error);
-      Navigation.NavigateTo("/merchant/products");
-      return;
+        var uri   = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        _isEditMode = query.Get("mode") == "edit";
+
+        var result = await ProductService.GetProductById(ProductId);
+
+        if (!result.Success || result.Data is null)
+        {
+            ToastService.ShowToast("Failed to load product.", string.Empty, ToastService.ToastLevel.Error);
+            Navigation.NavigateTo("/merchant/products");
+            return;
+        }
+
+        _product = result.Data;
+
+        // Populate the edit model from the loaded product.
+        // This is intentionally separate from _product — editing _updateModel
+        // does not mutate the displayed product data until Save succeeds.
+        SyncUpdateModel();
+        _loading = false;
     }
 
-    product = result.Data;
-    @* Console.WriteLine(JsonSerializer.Serialize(product, new JsonSerializerOptions
+    private void SyncUpdateModel()
     {
-      WriteIndented = true
-    })); *@
-
-    updateModel = new UpdateProductDetailsRequest
-    {
-      ProductId = product.Id,
-      Name = product.Name,
-      Description = product.Description,
-      Category = product.Category
-    };
-
-    isLoading = false;
-  }
-
-  private async Task UpdateDetails()
-  {
-
-    if (product != null)
-    {
-      updateModel = new UpdateProductDetailsRequest
-      {
-        ProductId = product.Id,
-        Name = product.Name,
-        Description = product.Description,
-        Category = product.Category
-      };
-
-      var res = await ProductService.UpdateProductDetails(updateModel);
-      isSubmitting = true;
-      if (res.Success && res.Data != null)
-      {
-        product = res.Data;
-        ToastService.ShowToast("update successful", string.Empty, ToastService.ToastLevel.Success);
-        return;
-      }
-
-      isSubmitting = false;
+        if (_product is null) return;
+        _updateModel = new UpdateProductDetailsRequest
+        {
+            ProductId   = _product.Id,
+            Name        = _product.Name,
+            Description = _product.Description,
+            Category    = _product.Category,
+        };
     }
-    return;
-  }
+
+    private async Task UpdateDetails()
+    {
+        // BUG FIX from original: the old code overwrote _updateModel with _product values
+        // just before the API call, discarding every field the user edited.
+        // Now we send _updateModel as-is — it contains the user's changes.
+        _saveError = null;
+        _saving    = true;
+
+        var result = await ProductService.UpdateProductDetails(_updateModel);
+        _saving    = false;
+
+        if (result.Success && result.Data != null)
+        {
+            _product    = result.Data;
+            _isEditMode = false;
+            SyncUpdateModel(); // keep edit model in sync for next edit
+            ToastService.ShowToast("Product updated.", string.Empty, ToastService.ToastLevel.Success);
+            return;
+        }
+
+        _saveError = result.Error?.Message ?? "Failed to update product.";
+    }
 }

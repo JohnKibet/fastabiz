@@ -1,54 +1,101 @@
 @page "/merchant/notifications"
 @layout MerchantLayout
+@using frontend.Models
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
 @inject NotificationService NotificationService
 @inject ToastService ToastService
 
-<h2 class="text-xl font-semibold mb-4">All Notifications</h2>
+<div class="d-flex align-center justify-space-between mb-6">
+    <MudText Typo="Typo.h5" Style="font-weight:800;">Notifications</MudText>
+    @if (_notifications.Any(n => n.Status != NotificationStatus.Read))
+    {
+        <MudButton Variant="MudVariant.Outlined" Color="Color.Primary" Size="Size.Small"
+                   StartIcon="@Icons.Material.Filled.DoneAll"
+                   OnClick="MarkAllRead"
+                   Style="border-radius:8px; font-weight:600;">
+            Mark all read
+        </MudButton>
+    }
+</div>
 
-@if (notifications is null)
+@if (_loading)
 {
-    <p>Loading...</p>
+    @for (int i = 0; i < 4; i++)
+    {
+        <MudSkeleton Animation="Animation.Wave" Height="68px" Class="mb-3 rounded-xl" />
+    }
 }
-else if (!notifications.Any())
+else if (!_notifications.Any())
 {
-    <p>No notifications available.</p>
+    <MudPaper Elevation="2" Class="pa-10 rounded-xl d-flex flex-column align-center">
+        <MudIcon Icon="@Icons.Material.Outlined.NotificationsNone" Style="font-size:3.5rem; color:#d1d5db;" Class="mb-3" />
+        <MudText Typo="Typo.body1" Style="color:#9ca3af;">No notifications yet</MudText>
+    </MudPaper>
 }
 else
 {
-    <div class="space-y-2">
-        @foreach (var note in notifications)
-        {
-            <NotificationItem Notification="@note" OnRead="@OnNotificationRead" />
-        }
-    </div>
+    @foreach (var note in _notifications.OrderByDescending(n => n.SentAt))
+    {
+        var isUnread = note.Status != NotificationStatus.Read;
+        <MudPaper Elevation="@(isUnread ? 2 : 1)"
+                  Class="pa-4 rounded-xl mb-3 cursor-pointer"
+                  Style="@($"border-left:3px solid {(isUnread ? "var(--mud-palette-primary)" : "#e5e7eb")}; transition:all 0.15s;")"
+                  @onclick="@(() => MarkRead(note))">
+            <div class="d-flex align-start gap-3">
+                <MudAvatar Color="@(isUnread ? Color.Primary : Color.Default)"
+                           Size="Size.Small"
+                           Style="width:34px; height:34px; flex-shrink:0;">
+                    <MudIcon Icon="@Icons.Material.Filled.NotificationsActive" Size="Size.Small" />
+                </MudAvatar>
+                <div style="flex:1; min-width:0;">
+                    <MudText Typo="Typo.body2"
+                             Style="@($"color:#374151; font-weight:{(isUnread ? "600" : "400")};")">
+                        @note.Message
+                    </MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                        @note.SentAt.ToString("MMM d, yyyy · HH:mm")
+                    </MudText>
+                </div>
+                @if (isUnread)
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.Circle" Color="Color.Primary"
+                             Style="font-size:0.5rem; margin-top:6px; flex-shrink:0;" />
+                }
+            </div>
+        </MudPaper>
+    }
 }
 
 @code {
     [CascadingParameter] public Guid? UserId { get; set; }
-    private List<Notification> notifications = new();
+
+    private List<Notification> _notifications = new();
+    private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        if (UserId.HasValue)
-        {
-            var result = await NotificationService.GetNotificationByUser(UserId.Value);
-            notifications = result.Data ?? [];
-        }
-        else
-        {
-            return;
-        }
+        if (!UserId.HasValue) return;
+
+        var result = await NotificationService.GetNotificationByUser(UserId.Value);
+        _notifications = result.Data ?? new();
+        _loading = false;
     }
 
-    private async Task OnNotificationRead(Guid id)
+    private async Task MarkRead(Notification note)
     {
-        await NotificationService.UpdateNotificationStatus(id, NotificationStatus.Read);
-        var note = notifications.FirstOrDefault(n => n.ID == id);
-        if (note != null)
-        {
-            note.Status = NotificationStatus.Read;
-        }
+        if (note.Status == NotificationStatus.Read) return;
 
-        StateHasChanged(); // graying out or removing the notification 
+        await NotificationService.UpdateNotificationStatus(note.ID, NotificationStatus.Read);
+        note.Status = NotificationStatus.Read;
+        StateHasChanged();
+    }
+
+    private async Task MarkAllRead()
+    {
+        if (!UserId.HasValue) return;
+        await NotificationService.MarkAllAsRead(UserId.Value);
+        foreach (var n in _notifications) n.Status = NotificationStatus.Read;
+        StateHasChanged();
     }
 }

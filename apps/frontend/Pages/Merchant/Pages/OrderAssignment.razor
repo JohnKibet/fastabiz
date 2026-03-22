@@ -1,190 +1,108 @@
 @page "/merchant/operations/assignments"
 @layout MerchantLayout
+@using MudBlazor
+@using MudVariant = MudBlazor.Variant
+@using frontend.Configs
 
-<h1 class="text-2xl font-bold mb-6">Order Assignment</h1>
+<MudText Typo="Typo.h5" Style="font-weight:800;" Class="mb-6">Order Assignment</MudText>
 
-<!-- Auto Assignment Toggle -->
-<div class="bg-white rounded-lg shadow p-4 mb-6">
-    <label class="flex items-center gap-3">
-        <input type="checkbox" @bind="AutoAssignEnabled" />
-        <span class="font-medium">
-            Enable Smart Auto-Assignment
-        </span>
-    </label>
-
-    <p class="text-sm text-gray-500 mt-1">
-        When enabled, the system automatically assigns drivers based on rules.
-    </p>
-</div>
-
-<!-- Auto Assignment Rules -->
-@if (AutoAssignEnabled)
-{
-    <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <h2 class="font-semibold mb-3">Auto-Assignment Rules</h2>
-
-        <div class="space-y-2 text-sm">
-            <label class="flex items-center gap-2">
-                <input type="checkbox" @bind="HighTrafficAutoAssign" />
-                Trigger auto-assignment during high order traffic
-            </label>
-
-            <label class="flex items-center gap-2">
-                <input type="checkbox" @bind="InstantCancelNotify" />
-                Instant notification on delivery cancellation
-            </label>
-
-            <label class="flex items-center gap-2">
-                <input type="checkbox" @bind="ReassignOnDelay" />
-                Auto re-assign driver on delivery delay
-            </label>
+<MudPaper Elevation="2" Class="pa-5 rounded-xl mb-6">
+    <div class="d-flex align-center justify-space-between flex-wrap gap-3">
+        <div>
+            <MudText Typo="Typo.subtitle1" Style="font-weight:700;">Smart Auto-Assignment</MudText>
+            <MudText Typo="Typo.body2" Class="mud-text-secondary">Automatically assign drivers based on proximity and availability.</MudText>
         </div>
+        <MudSwitch @bind-Value="_autoAssign" Color="Color.Primary" Label="@(_autoAssign ? "Enabled" : "Disabled")" />
     </div>
-}
-
-<!-- Orders -->
-<div class="bg-white rounded-lg shadow p-4">
-    <h2 class="font-semibold mb-4">Incoming Orders</h2>
-
-    @foreach (var order in Orders)
+    @if (_autoAssign)
     {
-        <div class="border-b py-4 flex justify-between items-center">
-            <div>
-                <p class="font-medium">@order.Name</p>
-                <p class="text-sm text-gray-500">
-                    @order.Description
-                </p>
-                <p class="text-xs text-gray-400">
-                    Qty: @order.Quantity • SKU: @order.SKU
-                </p>
-            </div>
-
-            <div class="flex items-center gap-3">
-                @if (AutoAssignEnabled)
-                {
-                    <span class="text-green-600 text-sm font-medium">
-                        Auto-assigning…
-                    </span>
-                }
-                else
-                {
-                    <select class="border rounded px-2 py-1 text-sm"
-                            @onchange="e => AssignDriver(order, e.Value?.ToString())">
-                        <option value="">Assign driver</option>
-                        @foreach (var driver in Drivers.Where(d => d.IsOnline))
-                        {
-                            <option value="@driver.DriverId">
-                                @driver.Name (⭐ @driver.Rating)
-                            </option>
-                        }
-                    </select>
-                }
-            </div>
+        <MudDivider Class="my-4" />
+        <MudText Typo="Typo.subtitle2" Style="font-weight:700;" Class="mb-3">Rules</MudText>
+        <div class="d-flex flex-column gap-2">
+            <MudCheckBox @bind-Value="_highTraffic"     Color="Color.Primary" Label="Trigger during high order traffic" />
+            <MudCheckBox @bind-Value="_instantCancel"   Color="Color.Primary" Label="Instant notification on cancellation" />
+            <MudCheckBox @bind-Value="_reassignOnDelay" Color="Color.Primary" Label="Auto re-assign on delivery delay" />
         </div>
     }
-</div>
+</MudPaper>
+
+<MudPaper Elevation="2" Class="pa-5 rounded-xl">
+    <MudText Typo="Typo.subtitle1" Style="font-weight:700;" Class="mb-4">Incoming Orders</MudText>
+    @foreach (var order in _orders)
+    {
+        <MudPaper Elevation="0" Class="pa-4 rounded-xl mb-3" Style="border:1px solid #e5e7eb;">
+            <div class="d-flex align-center justify-space-between flex-wrap gap-3">
+                <div>
+                    <MudText Typo="Typo.subtitle2" Style="font-weight:700;">@order.Name</MudText>
+                    <MudText Typo="Typo.body2" Class="mud-text-secondary">@order.Description</MudText>
+                    <MudText Typo="Typo.caption" Class="mud-text-secondary">Qty: @order.Quantity · SKU: @order.SKU</MudText>
+                </div>
+                <div class="d-flex align-center gap-3">
+                    @if (order.AssignedDriverId.HasValue)
+                    {
+                        var driver = _drivers.FirstOrDefault(d => d.DriverId == order.AssignedDriverId);
+                        <MudChip T="string" Color="Color.Success" Variant="MudVariant.Filled" Size="Size.Small" Icon="@Icons.Material.Filled.CheckCircle" Label="true">@(driver?.Name ?? "Assigned")</MudChip>
+                    }
+                    else if (_autoAssign)
+                    {
+                        <MudChip T="string" Color="Color.Info" Variant="MudVariant.Outlined" Size="Size.Small" Icon="@Icons.Material.Filled.AutoMode" Label="true">Auto-assigning…</MudChip>
+                    }
+                    else
+                    {
+                        <SelectField TValue="Guid?" TItem="MockDriver" Label="Assign driver"
+                                     Items="@_drivers.Where(d => d.IsOnline).ToList()"
+                                     Value="@order.AssignedDriverId"
+                                     ValueChanged="@(id => AssignDriver(order, id))"
+                                     ItemValue="@(d => (Guid?)d.DriverId)"
+                                     ItemText="@(d => $"{d.Name} (⭐ {d.Rating})")" />
+                    }
+                </div>
+            </div>
+        </MudPaper>
+    }
+</MudPaper>
 
 @code {
-    // ===== Feature Flags =====
-    private bool AutoAssignEnabled = true;
-    private bool HighTrafficAutoAssign = true;
-    private bool InstantCancelNotify = true;
-    private bool ReassignOnDelay = true;
+    private bool _autoAssign = true;
+    private bool _highTraffic = true;
+    private bool _instantCancel = true;
+    private bool _reassignOnDelay = true;
 
-    // ===== Mock Models =====
-    class MockOrder
+    private class MockOrder
     {
-        public Guid OrderId { get; set; }
-        public string Name { get; set; } = "";
-        public string Description { get; set; } = "";
+        public Guid OrderId { get; set; } = Guid.NewGuid();
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
         public int Quantity { get; set; }
-        public double Price { get; set; }
-        public string SKU { get; set; } = "";
-        public string VariantName { get; set; } = "";
-        public string Status { get; set; } = "Pending";
+        public string SKU { get; set; } = string.Empty;
         public Guid? AssignedDriverId { get; set; }
     }
 
-    class MockDriver
+    private class MockDriver
     {
-        public Guid DriverId { get; set; }
-        public string Name { get; set; } = "";
-        public int ActiveDeliveries { get; set; }
+        public Guid DriverId { get; set; } = Guid.NewGuid();
+        public string Name { get; set; } = string.Empty;
         public double Rating { get; set; }
         public bool IsOnline { get; set; }
     }
 
-    // ===== Hardcoded Orders =====
-    private List<MockOrder> Orders = new()
+    private List<MockOrder> _orders = new()
     {
-        new MockOrder
-        {
-            OrderId = Guid.NewGuid(),
-            Name = "Fresh Apples",
-            Description = "Crisp, sweet organic apples harvested this season.",
-            Quantity = 2,
-            Price = 1.2,
-            SKU = "APP-SM-001",
-            VariantName = "Small Pack"
-        },
-        new MockOrder
-        {
-            OrderId = Guid.NewGuid(),
-            Name = "Organic Bananas",
-            Description = "Naturally ripened organic bananas.",
-            Quantity = 5,
-            Price = 0.8,
-            SKU = "BAN-YL-002",
-            VariantName = "Bunch"
-        },
-        new MockOrder
-        {
-            OrderId = Guid.NewGuid(),
-            Name = "Fresh Milk",
-            Description = "Locally sourced farm milk.",
-            Quantity = 1,
-            Price = 1.5,
-            SKU = "MLK-FR-003",
-            VariantName = "1 Litre"
-        }
+        new() { Name = "Fresh Apples",    Description = "Crisp organic apples.",      Quantity = 2, SKU = "APP-SM-001" },
+        new() { Name = "Organic Bananas", Description = "Naturally ripened bananas.", Quantity = 5, SKU = "BAN-YL-002" },
+        new() { Name = "Fresh Milk",      Description = "Locally sourced farm milk.", Quantity = 1, SKU = "MLK-FR-003" },
     };
 
-    // ===== Hardcoded Drivers =====
-    private List<MockDriver> Drivers = new()
+    private List<MockDriver> _drivers = new()
     {
-        new MockDriver
-        {
-            DriverId = Guid.NewGuid(),
-            Name = "James Mwangi",
-            ActiveDeliveries = 1,
-            Rating = 4.8,
-            IsOnline = true
-        },
-        new MockDriver
-        {
-            DriverId = Guid.NewGuid(),
-            Name = "Alice Wanjiru",
-            ActiveDeliveries = 0,
-            Rating = 4.9,
-            IsOnline = true
-        },
-        new MockDriver
-        {
-            DriverId = Guid.NewGuid(),
-            Name = "Peter Otieno",
-            ActiveDeliveries = 3,
-            Rating = 4.2,
-            IsOnline = false
-        }
+        new() { Name = "James Mwangi",  Rating = 4.8, IsOnline = true  },
+        new() { Name = "Alice Wanjiru", Rating = 4.9, IsOnline = true  },
+        new() { Name = "Peter Otieno",  Rating = 4.2, IsOnline = false },
     };
 
-    // ===== Manual Assignment =====
-    private void AssignDriver(MockOrder order, string? driverId)
+    private void AssignDriver(MockOrder order, Guid? id)
     {
-        if (Guid.TryParse(driverId, out var id))
-        {
-            order.AssignedDriverId = id;
-            order.Status = "Assigned";
-        }
+        order.AssignedDriverId = id;
+        // TODO: call AssignmentService.AssignDriver(order.OrderId, id)
     }
 }
