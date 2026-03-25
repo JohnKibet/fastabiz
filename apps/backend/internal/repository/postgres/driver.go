@@ -28,45 +28,37 @@ func (r *DriverRepository) execFromCtx(ctx context.Context) sqlx.ExtContext {
 }
 
 func (r *DriverRepository) Create(ctx context.Context, d *driver.Driver) error {
-	//
-	// FIX: Do NOT pass the raw *driver.Driver struct to sqlx.NamedQueryContext when it
-	// contains a postgis.PointS field.
-	//
-	// Root cause of "invalid byte sequence for encoding UTF8: 0x00":
-	//   sqlx.NamedQueryContext binds struct fields by their db tags. When it encounters
-	//   postgis.PointS it calls the Value() method which produces an EWKB binary blob.
-	//   EWKB is a raw binary format — it contains 0x00 null bytes by design.
-	//   Postgres then tries to store that binary string in a geometry column through
-	//   the text protocol, hits the null byte, and rejects it with the UTF-8 error.
-	//
-	// Fix: build the WKT string manually and pass a plain map[string]interface{}.
-	//   WKT (Well-Known Text) is a human-readable ASCII format — no null bytes.
-	//   ST_GeomFromEWKT() on the SQL side parses it back into a proper geometry.
-	//
-	// This is the same pattern already used in UpdateProfile — it was just never
-	// applied to Create.
-	//
-	wkt := fmt.Sprintf(
-		"SRID=%d;POINT(%f %f)",
-		d.CurrentLocation.SRID,
-		d.CurrentLocation.X, // longitude
-		d.CurrentLocation.Y, // latitude
-	)
-
 	query := `
-		INSERT INTO drivers (id, full_name, email, vehicle_info, current_location, available, created_at)
-		VALUES (:id, :full_name, :email, :vehicle_info, ST_GeomFromEWKT(:current_location), :available, :created_at)
+		INSERT INTO drivers (
+			id,
+			full_name,
+			email,
+			vehicle_info,
+			current_location,
+			available,
+			created_at
+		)
+		VALUES (
+			:id,
+			:full_name,
+			:email,
+			:vehicle_info,
+			ST_SetSRID(ST_Point(:lng, :lat), 4326),
+			:available,
+			:created_at
+		)
 		RETURNING id
 	`
 
 	args := map[string]interface{}{
-		"id":               d.ID,
-		"full_name":        d.FullName,
-		"email":            d.Email,
-		"vehicle_info":     d.VehicleInfo,
-		"current_location": wkt, // plain ASCII string — no binary, no null bytes
-		"available":        d.Available,
-		"created_at":       d.CreatedAt,
+		"id": d.ID,
+		"full_name": d.FullName,
+		"email": d.Email,
+		"vehicle_info": d.VehicleInfo,
+		"lng": d.CurrentLocation.X,
+		"lat": d.CurrentLocation.Y,
+		"available": d.Available,
+		"created_at": d.CreatedAt,
 	}
 
 	rows, err := sqlx.NamedQueryContext(ctx, r.execFromCtx(ctx), query, args)
@@ -99,7 +91,7 @@ func (r *DriverRepository) Create(ctx context.Context, d *driver.Driver) error {
 // UpdateProfile — already uses WKT correctly, no changes needed.
 func (r *DriverRepository) UpdateProfile(ctx context.Context, driverID uuid.UUID, vehicleInfo string, currentLocation postgis.PointS) error {
 	query := `
-		UPDATE drivers 
+		UPDATE drivers
 		SET vehicle_info = :vehicle, current_location = ST_GeomFromEWKT(:location)
 		WHERE id = :id
 	`
@@ -140,7 +132,7 @@ func (r *DriverRepository) UpdateColumn(ctx context.Context, driverID uuid.UUID,
 	}
 
 	query := fmt.Sprintf(`
-		UPDATE drivers SET %s = $1, updated_at = NOW() 
+		UPDATE drivers SET %s = $1, updated_at = NOW()
 		WHERE id = $2
 	`, column)
 
@@ -161,8 +153,8 @@ func (r *DriverRepository) UpdateColumn(ctx context.Context, driverID uuid.UUID,
 
 func (r *DriverRepository) GetByID(ctx context.Context, id uuid.UUID) (*driver.Driver, error) {
 	query := `
-		SELECT id, full_name, email, vehicle_info, current_location, available, created_at 
-		FROM drivers 
+		SELECT id, full_name, email, vehicle_info, current_location, available, created_at
+		FROM drivers
 		WHERE id = $1
 	`
 	var d driver.Driver
@@ -172,8 +164,8 @@ func (r *DriverRepository) GetByID(ctx context.Context, id uuid.UUID) (*driver.D
 
 func (r *DriverRepository) GetByEmail(ctx context.Context, email string) (*driver.Driver, error) {
 	query := `
-		SELECT id, full_name, email, vehicle_info, current_location, available, created_at 
-		FROM drivers 
+		SELECT id, full_name, email, vehicle_info, current_location, available, created_at
+		FROM drivers
 		WHERE email = $1
 	`
 	var d driver.Driver
@@ -183,7 +175,7 @@ func (r *DriverRepository) GetByEmail(ctx context.Context, email string) (*drive
 
 func (r *DriverRepository) List(ctx context.Context) ([]*driver.Driver, error) {
 	query := `
-		SELECT id, full_name, email, vehicle_info, current_location, available, created_at 
+		SELECT id, full_name, email, vehicle_info, current_location, available, created_at
 		FROM drivers
 	`
 	var drivers []*driver.Driver
@@ -193,7 +185,7 @@ func (r *DriverRepository) List(ctx context.Context) ([]*driver.Driver, error) {
 
 func (r *DriverRepository) ListAvailableDrivers(ctx context.Context, available bool) ([]*driver.Driver, error) {
 	query := `
-		SELECT id, full_name, email, vehicle_info, current_location, available, created_at 
+		SELECT id, full_name, email, vehicle_info, current_location, available, created_at
 		FROM drivers
 		WHERE available = $1
 	`
